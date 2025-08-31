@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Hide shadcn dialog close button globally */
+[data-slot="dialog-close"] {
+  display: none !important;
+}
+/* Add blur effect to shadcn dialog overlay */
+[data-slot="dialog-overlay"] {
+  backdrop-filter: blur(8px);
+  background: rgba(0,0,0,0.2);
+}
+
 @layer base {
   :root {
     --background: 0 0% 3.9%;

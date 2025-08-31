@@ -10,6 +10,7 @@ interface Profile {
   avatar_url?: string;
   created_at: string;
   updated_at: string;
+  onboarding_completed: boolean;
 }
 
 interface AuthState {
@@ -30,7 +31,8 @@ async function fetchProfile(
     .select("*")
     .eq("id", userId)
     .single();
-  if (!error) set({ profile });
+  if (!error)
+    set({ profile }); // onboarding_completed will be included automatically
   else set({ profile: null });
 }
 

@@ -34,7 +34,7 @@ export function AuthButton() {
           </div>
         </Link>
         <span className="text-base font-medium">
-          Hey, {profile?.first_name || user.email}!
+          Hey, {profile?.first_name || "User"}!
         </span>
       </div>
       <div>
