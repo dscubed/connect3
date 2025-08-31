@@ -6,7 +6,7 @@ import { LogoutButton } from "./logout-button";
 import { useAuthStore } from "@/stores/authStore";
 
 export function AuthButton() {
-  const { user, loading } = useAuthStore();
+  const { user, profile, loading } = useAuthStore();
 
   if (loading) {
     return <div>Loading...</div>;
@@ -15,7 +15,7 @@ export function AuthButton() {
   return user ? (
     <div>
       <div className="flex flex-col gap-4">
-        Hey, {user.email}!
+        Hey, {profile?.first_name ? profile.first_name : user.email}!
         <LogoutButton />
       </div>
     </div>
