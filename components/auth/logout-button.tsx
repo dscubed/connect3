@@ -1,15 +1,22 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/stores/authStore";
 
 export function LogoutButton() {
   const router = useRouter();
+  const signOut = useAuthStore((state) => state.signOut);
 
   const logout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/auth/login");
+    console.log("Logout button clicked");
+    try {
+      await signOut();
+      console.log("signOut called successfully");
+      router.push("/");
+      console.log("Router pushed to /");
+    } catch (err) {
+      console.error("Error during logout:", err);
+    }
   };
 
   return (

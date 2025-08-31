@@ -2,20 +2,42 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { LogoutButton } from "./logout-button";
 import { useAuthStore } from "@/stores/authStore";
 
 export function AuthButton() {
-  const { user, loading } = useAuthStore();
+  const { user, profile, loading } = useAuthStore();
 
   if (loading) {
     return <div>Loading...</div>;
   }
 
   return user ? (
-    <div>
-      <div className="flex flex-col gap-4">
-        Hey, {user.email}!
+    <div className="mb-4">
+      <div className="flex items-center gap-3 mb-4">
+        <Link href="/profile" className="flex-shrink-0">
+          <div className="relative w-10 h-10 rounded-full overflow-hidden ring-2 ring-white/20 hover:ring-white/40 transition-all hover:scale-105">
+            {profile?.avatar_url ? (
+              <Image
+                src={profile.avatar_url}
+                alt={`${profile.first_name || "User"}'s avatar`}
+                fill
+                className="object-cover"
+                sizes="40px"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                {profile?.first_name?.[0] || "User"}
+              </div>
+            )}
+          </div>
+        </Link>
+        <span className="text-base font-medium">
+          Hey, {profile?.first_name || user.email}!
+        </span>
+      </div>
+      <div>
         <LogoutButton />
       </div>
     </div>
