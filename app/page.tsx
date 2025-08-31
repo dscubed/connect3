@@ -1,51 +1,99 @@
-import { DeployButton } from "@/components/deploy-button";
-import { EnvVarWarning } from "@/components/env-var-warning";
-import { AuthButton } from "@/components/auth-button";
-import { Hero } from "@/components/hero";
-import { ThemeSwitcher } from "@/components/theme-switcher";
-import { ConnectSupabaseSteps } from "@/components/tutorial/connect-supabase-steps";
-import { SignUpUserSteps } from "@/components/tutorial/sign-up-user-steps";
-import { hasEnvVars } from "@/lib/utils";
-import Link from "next/link";
+"use client";
+import Sidebar from "@/components/Sidebar";
+import HeroSection from "@/components/HeroSection";
+import PeopleSection from "@/components/PeopleSection";
+import React, { useState } from "react";
+import AnimatedParticles from "@/components/AnimatedParticles";
+import SearchSection from "@/components/SearchBar";
+
+// --- Demo data (replace with your API results) ---
+const SAMPLE_PEOPLE = [
+  {
+    id: "1",
+    name: "Ava Patel",
+    role: "AI researcher → creative coder",
+    avatar: "https://i.pravatar.cc/120?img=1",
+    tags: ["foundation models", "music", "gen art"],
+    blurb:
+      "Prototyping LLM-driven synths. Looking for a frontend partner who vibes with audio UX.",
+  },
+  {
+    id: "2",
+    name: "Noah Kim",
+    role: "Product designer",
+    avatar: "https://i.pravatar.cc/120?img=3",
+    tags: ["design systems", "ai tooling", "prototyping"],
+    blurb:
+      "Designing interfaces for AI copilots. Love motion, micro-interactions, and clarity.",
+  },
+  {
+    id: "3",
+    name: "Maya López",
+    role: "Founder, climate tech",
+    avatar: "https://i.pravatar.cc/120?img=10",
+    tags: ["sustainability", "nlp", "policy"],
+    blurb:
+      "Using NLP to summarize impact reports. Seeking civic partners + data folks.",
+  },
+  {
+    id: "4",
+    name: "Leo Zhang",
+    role: "Full‑stack + infra",
+    avatar: "https://i.pravatar.cc/120?img=12",
+    tags: ["rust", "vector DBs", "retrieval"],
+    blurb:
+      "Obsessed with fast embeddings. Building a semantic search layer for teams.",
+  },
+  {
+    id: "5",
+    name: "Imani Wright",
+    role: "Creative producer",
+    avatar: "https://i.pravatar.cc/120?img=15",
+    tags: ["short form", "growth", "community"],
+    blurb:
+      "Making technical founders camera‑confident. Can help script, shoot, and ship.",
+  },
+  {
+    id: "6",
+    name: "Arjun Rao",
+    role: "Applied ML",
+    avatar: "https://i.pravatar.cc/120?img=16",
+    tags: ["RAG", "safety", "evals"],
+    blurb:
+      "Shipping pragmatic evals for small teams. Happy to pair on your eval suite.",
+  },
+];
+
+const SUGGESTED_QUERIES = [
+  "Who here loves generative art?",
+  "Anyone building with Rust?",
+  "Looking for a climate tech founder?",
+  "Who can help with growth hacking?",
+  "Any experts in retrieval models?",
+  "Who's passionate about community building?",
+  "Seeking AI musicians for a collab!",
+  "Who's prototyping with LLMs?",
+  "Any creative coders around?",
+  "Who's into design systems?",
+];
 
 export default function Home() {
+  const [query, setQuery] = useState("");
   return (
-    <main className="min-h-screen flex flex-col items-center">
-      <div className="flex-1 w-full flex flex-col gap-20 items-center">
-        <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
-          <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
-            <div className="flex gap-5 items-center font-semibold">
-              <Link href={"/"}>Next.js Supabase Starter</Link>
-              <div className="flex items-center gap-2">
-                <DeployButton />
-              </div>
-            </div>
-            {!hasEnvVars ? <EnvVarWarning /> : <AuthButton />}
-          </div>
-        </nav>
-        <div className="flex-1 flex flex-col gap-20 max-w-5xl p-5">
-          <Hero />
-          <main className="flex-1 flex flex-col gap-6 px-4">
-            <h2 className="font-medium text-xl mb-4">Next steps</h2>
-            {hasEnvVars ? <SignUpUserSteps /> : <ConnectSupabaseSteps />}
-          </main>
-        </div>
-
-        <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
-          <p>
-            Powered by{" "}
-            <a
-              href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
-              target="_blank"
-              className="font-bold hover:underline"
-              rel="noreferrer"
-            >
-              Supabase
-            </a>
-          </p>
-          <ThemeSwitcher />
-        </footer>
+    <div className="min-h-screen bg-[#0B0B0C] text-white relative overflow-hidden">
+      <div className="grid max-w-7xl grid-cols-12 gap-6 px-4 md:px-8 relative z-10">
+        <Sidebar />
+        <main className="col-span-12 md:col-span-9 lg:col-span-10 pt-16 md:pt-0 relative">
+          <AnimatedParticles />
+          <HeroSection />
+          <SearchSection
+            query={query}
+            setQuery={setQuery}
+            suggestedQueries={SUGGESTED_QUERIES}
+          />
+          <PeopleSection people={SAMPLE_PEOPLE} />
+        </main>
       </div>
-    </main>
+    </div>
   );
 }
