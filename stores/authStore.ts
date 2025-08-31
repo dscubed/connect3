@@ -1,8 +1,7 @@
 import { create } from "zustand";
 import { createClient } from "@/lib/supabase/client";
-import type { User, AuthChangeEvent, Session } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 
-// Define the profile type
 interface Profile {
   id: string;
   email: string;
@@ -19,15 +18,23 @@ interface AuthState {
   loading: boolean;
   initialize: () => Promise<void>;
   signOut: () => Promise<void>;
-  updateProfile: (
-    updates: Partial<Omit<Profile, "id" | "created_at" | "updated_at">>
-  ) => Promise<void>;
-  refreshProfile: () => Promise<void>;
 }
 
-let authListenerUnsubscribe: (() => void) | null = null;
+async function fetchProfile(
+  userId: string,
+  set: (state: Partial<AuthState>) => void
+) {
+  const supabase = createClient();
+  const { data: profile, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)
+    .single();
+  if (!error) set({ profile });
+  else set({ profile: null });
+}
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   profile: null,
   loading: true,
@@ -35,100 +42,31 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   initialize: async () => {
     const supabase = createClient();
 
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+    // Get initial user
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    set({ user, loading: false });
+    if (user) {
+      fetchProfile(user.id, set);
+    } else {
+      set({ profile: null });
+    }
 
-      if (user) {
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .single();
-
-        if (profileError) {
-          console.error("Profile fetch error:", profileError);
-        }
-
-        set({ user, profile, loading: false });
+    // Listen for changes
+    supabase.auth.onAuthStateChange((event, session) => {
+      set({ user: session?.user ?? null, loading: false });
+      if (session?.user) {
+        fetchProfile(session.user.id, set);
       } else {
-        set({ user: null, profile: null, loading: false });
+        set({ profile: null });
       }
-    } catch (error) {
-      console.error("Initialize error:", error);
-      set({ user: null, profile: null, loading: false });
-    }
-
-    // Clean up previous listener before adding a new one
-    if (authListenerUnsubscribe) {
-      authListenerUnsubscribe();
-    }
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      async (event: AuthChangeEvent, session: Session | null) => {
-        const newUser = session?.user ?? null;
-
-        if (newUser) {
-          const { data: profile, error: profileError } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("id", newUser.id)
-            .single();
-
-          if (profileError) {
-            console.error(
-              "Profile fetch error (onAuthStateChange):",
-              profileError
-            );
-          }
-
-          set({ user: newUser, profile, loading: false });
-        } else {
-          set({ user: null, profile: null, loading: false });
-        }
-      }
-    );
-    authListenerUnsubscribe = listener?.unsubscribe;
+    });
   },
 
   signOut: async () => {
-    console.log("signOut called!");
     const supabase = createClient();
-    console.log("client created!");
-
     await supabase.auth.signOut();
     set({ user: null, profile: null });
-  },
-
-  updateProfile: async (updates) => {
-    const { user } = get();
-    if (!user) throw new Error("No authenticated user");
-
-    const supabase = createClient();
-    const { data, error } = await supabase
-      .from("profiles")
-      .update(updates)
-      .eq("id", user.id)
-      .select()
-      .single();
-
-    if (error) throw error;
-    if (data) {
-      set({ profile: data });
-    }
-  },
-
-  refreshProfile: async () => {
-    const { user } = get();
-    if (!user) return;
-
-    const supabase = createClient();
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single();
-
-    set({ profile });
   },
 }));
