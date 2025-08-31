@@ -17,13 +17,20 @@ export default function Page() {
   const loading = useAuthStore((state) => state.loading);
   const router = useRouter();
   useEffect(() => {
-    if (!user) {
-      router.replace("/auth/login");
-    } else if (profile) {
-      if (!profile.onboarding_completed) {
-        router.replace("/onboarding");
-      } else {
+    if (user && profile) {
+      if (!user) {
+        router.replace("/auth/login");
+      }
+      if (
+        (user.email_confirmed_at || user.confirmed_at) &&
+        profile.onboarding_completed
+      ) {
         router.replace("/");
+      } else if (
+        (user.email_confirmed_at || user.confirmed_at) &&
+        !profile.onboarding_completed
+      ) {
+        router.replace("/onboarding");
       }
     }
   }, [user, profile, router]);
