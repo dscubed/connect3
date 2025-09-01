@@ -14,8 +14,10 @@ import AnimatedParticles from "@/components/AnimatedParticles";
 import FileUploadSection from "@/components/onboarding/file-upload/FileUploadSection";
 import DescriptionSection from "@/components/onboarding/description/DescriptionSection";
 import ProfilePictureSection from "@/components/onboarding/profile-picture/ProfilePictureSection";
+import { useRouter } from "next/navigation";
 
 export default function OnboardingPage() {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [description, setDescription] = useState("");
@@ -32,6 +34,7 @@ export default function OnboardingPage() {
     }
   }, []);
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   // Get user from auth store
   const user = useAuthStore((state) => state.user);
@@ -47,6 +50,12 @@ export default function OnboardingPage() {
       profile.name_provided === false
     ) {
       setShowNameModal(true);
+    }
+    if (
+      profile?.onboarding_completed === true
+    ) {
+      router.push("/");
+      toast.error("Onboarding already completed!");
     }
   }, [user, profile]);
 
@@ -67,12 +76,23 @@ export default function OnboardingPage() {
   };
 
   const handleImageUpload = (file: File) => {
-    const url = URL.createObjectURL(file);
-    setProfileImage(url);
+    // Create local preview URL for immediate display
+    const previewUrl = URL.createObjectURL(file);
+    setProfileImage(previewUrl);
+    
+    // Store the file for later upload when onboarding completes
+    setSelectedFile(file);
   };
 
   const handleImageRemove = () => {
+    // Clear local preview and selected file
     setProfileImage(null);
+    setSelectedFile(null);
+    
+    // Clean up the object URL to prevent memory leaks
+    if (profileImage && profileImage.startsWith('blob:')) {
+      URL.revokeObjectURL(profileImage);
+    }
   };
 
   const canContinue = () => {
@@ -115,6 +135,44 @@ export default function OnboardingPage() {
 
   const skipStep = () => {
     nextStep();
+    if (currentStep == 2) {
+      onboardingCompleted();
+    }
+  };
+
+  const onboardingCompleted = async () => {
+    try {
+      let avatarUrl = undefined;
+      
+      // Upload avatar to Supabase if a file was selected
+      if (selectedFile && user?.id) {
+        const { uploadAvatar } = await import("@/lib/supabase/storage");
+        const result = await uploadAvatar(selectedFile, user.id);
+        
+        if (result.success) {
+          avatarUrl = result.url;
+          // Clean up the local preview URL
+          if (profileImage && profileImage.startsWith('blob:')) {
+            URL.revokeObjectURL(profileImage);
+          }
+        } else {
+          toast.error(result.error || "Failed to upload profile picture");
+          return;
+        }
+      }
+      
+      // Update profile with onboarding completion and avatar URL
+      await updateProfile({
+        onboarding_completed: true,
+        avatar_url: avatarUrl,
+      });
+      
+      toast.success("Welcome to connect³! Onboarding completed successfully");
+      router.push("/");
+    } catch (error) {
+      toast.error("Failed to complete onboarding");
+      console.error("Onboarding completion error:", error);
+    }
   };
 
   const steps = [
@@ -284,9 +342,7 @@ export default function OnboardingPage() {
             <button
               onClick={() => {
                 // Handle final submission - no validation needed since profile pic is optional
-                toast.success(
-                  "Welcome to connect³! Profile created successfully"
-                );
+                onboardingCompleted();
               }}
               className="px-8 py-3 rounded-xl bg-white text-black font-medium hover:bg-white/90 transition-all hover:scale-105 shadow-lg flex items-center gap-2"
             >
