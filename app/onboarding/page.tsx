@@ -2,9 +2,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Upload,
-  FileText,
-  User,
   ArrowRight,
   ChevronsRightIcon as Skip,
   Check,
@@ -14,210 +11,26 @@ import { useAuthStore } from "@/stores/authStore";
 import NameModal from "@/components/auth/NameModal";
 import { toast } from "sonner";
 import AnimatedParticles from "@/components/AnimatedParticles";
-import FileUploadCube from "@/components/onboarding/cube/FileUploadCube";
-
-const InteractiveTextArea = ({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-}) => {
-  const [isFocused, setIsFocused] = useState(false);
-  const [wordCount, setWordCount] = useState(0);
-
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const text = e.target.value;
-    onChange(text);
-    setWordCount(
-      text
-        .trim()
-        .split(/\s+/)
-        .filter((word) => word.length > 0).length
-    );
-  };
-
-  return (
-    <motion.div
-      className="relative max-w-2xl mx-auto"
-      animate={{ scale: isFocused ? 1.02 : 1 }}
-      transition={{ duration: 0.2 }}
-    >
-      <div
-        className={`relative rounded-3xl border-2 transition-all duration-300 ${
-          isFocused
-            ? "border-white/40 bg-white/8"
-            : "border-white/20 bg-white/5"
-        } backdrop-blur-md overflow-hidden`}
-      >
-        <motion.div
-          className="absolute inset-0 rounded-3xl"
-          animate={{
-            boxShadow: isFocused
-              ? "0 0 40px 2px rgba(255,255,255,0.1) inset"
-              : "0 0 20px 1px rgba(255,255,255,0.05) inset",
-          }}
-          transition={{ duration: 0.3 }}
-        />
-
-        <div className="relative p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <motion.div
-              animate={{ rotate: isFocused ? 360 : 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <FileText className="h-6 w-6 text-white/60" />
-            </motion.div>
-            <h3 className="text-white font-semibold">Tell us about yourself</h3>
-          </div>
-
-          <textarea
-            value={value}
-            onChange={handleChange}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            placeholder="Write naturally about your experiences, projects, or what you're passionate about... No pressure to be formal - just be yourself! ✨"
-            className="w-full h-40 bg-transparent text-white placeholder:text-white/40 resize-none outline-none leading-relaxed"
-            style={{ fontSize: "16px" }}
-          />
-
-          <div className="flex justify-between items-center mt-4 pt-4 border-t border-white/10">
-            <p className="text-white/50 text-sm">
-              Write as much or as little as you&nbsp;d like
-            </p>
-            <motion.div
-              animate={{ opacity: wordCount > 0 ? 1 : 0.5 }}
-              className="text-white/60 text-sm"
-            >
-              {wordCount} words
-            </motion.div>
-          </div>
-        </div>
-      </div>
-
-      <AnimatePresence>
-        {isFocused && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute -inset-4 pointer-events-none"
-          >
-            {Array.from({ length: 6 }).map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-1 h-1 bg-white/30 rounded-full"
-                style={{
-                  left: `${10 + i * 15}%`,
-                  top: `${5 + i * 10}%`,
-                }}
-                animate={{
-                  y: [0, -15, 0],
-                  opacity: [0, 0.8, 0],
-                }}
-                transition={{
-                  duration: 3,
-                  delay: i * 0.2,
-                  repeat: Number.POSITIVE_INFINITY,
-                }}
-              />
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
-  );
-};
-
-const ProfilePicUpload = ({
-  onImageUpload,
-  imageUrl,
-}: {
-  onImageUpload: (file: File) => void;
-  imageUrl: string | null;
-}) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      onImageUpload(files[0]);
-    }
-  };
-
-  return (
-    <motion.div
-      className="relative mx-auto w-48 h-48"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <motion.div
-        className="relative w-full h-full cursor-pointer"
-        animate={{ scale: isHovered ? 1.05 : 1 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => fileInputRef.current?.click()}
-      >
-        <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white/20 bg-white/5 backdrop-blur-md">
-          {imageUrl ? (
-            <img
-              src={imageUrl || "/placeholder.svg"}
-              alt="Profile"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full gap-3">
-              <motion.div
-                animate={{ rotate: isHovered ? 360 : 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                <User className="h-16 w-16 text-white/40" />
-              </motion.div>
-              <p className="text-white/60 text-sm text-center px-4">
-                Add your photo
-              </p>
-            </div>
-          )}
-        </div>
-
-        <motion.div
-          className="absolute inset-0 rounded-full border-2 border-white/30"
-          animate={{
-            scale: isHovered ? 1.1 : 1,
-            opacity: isHovered ? 0.8 : 0.3,
-          }}
-          transition={{ duration: 0.3 }}
-        />
-
-        <AnimatePresence>
-          {isHovered && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm"
-            >
-              <Upload className="h-8 w-8 text-white" />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileSelect}
-        className="hidden"
-      />
-    </motion.div>
-  );
-};
+import FileUploadSection from "@/components/onboarding/file-upload/FileUploadSection";
+import DescriptionSection from "@/components/onboarding/description/DescriptionSection";
+import ProfilePictureSection from "@/components/onboarding/profile-picture/ProfilePictureSection";
 
 export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [description, setDescription] = useState("");
+  const [descriptionWordCount, setDescriptionWordCount] = useState(0);
+
+  // Initialize word count when description already has content
+  useEffect(() => {
+    if (description) {
+      const count = description
+        .trim()
+        .split(/\s+/)
+        .filter((word) => word.length > 0).length;
+      setDescriptionWordCount(count);
+    }
+  }, []);
   const [profileImage, setProfileImage] = useState<string | null>(null);
 
   // Get user from auth store
@@ -258,6 +71,36 @@ export default function OnboardingPage() {
     setProfileImage(url);
   };
 
+  const handleImageRemove = () => {
+    setProfileImage(null);
+  };
+
+  const canContinue = () => {
+    switch (currentStep) {
+      case 0: // File upload step
+        return uploadedFiles.length > 0;
+      case 1: // Description step
+        return descriptionWordCount >= 10;
+      case 2: // Profile picture step
+        return true; // Always allow continue
+      default:
+        return true;
+    }
+  };
+
+  const canSkip = () => {
+    switch (currentStep) {
+      case 0: // File upload step - can skip
+        return true;
+      case 1: // Description step - no skipping
+        return false;
+      case 2: // Profile picture step - can skip
+        return true;
+      default:
+        return true;
+    }
+  };
+
   const nextStep = () => {
     if (currentStep < 2) {
       setCurrentStep(currentStep + 1);
@@ -279,57 +122,33 @@ export default function OnboardingPage() {
       title: "welcome to connect³",
       subtitle: "let's get you set up in just a few steps",
       content: (
-        <div className="space-y-8">
-          <FileUploadCube
-            onFileUpload={handleFileUpload}
-            files={uploadedFiles}
-            onFileRemove={handleFileRemove}
-          />
-          <div className="text-center space-y-2">
-            <p className="text-white/80">
-              share your resume/portfolio to quickstart your profile
-            </p>
-            <p className="text-white/50 text-sm max-w-md mx-auto">
-              Upload up to 2 files. Not up to date? No worries! You can always
-              update them later.
-            </p>
-          </div>
-        </div>
+        <FileUploadSection
+          onFileUpload={handleFileUpload}
+          files={uploadedFiles}
+          onFileRemove={handleFileRemove}
+        />
       ),
     },
     {
       title: "tell your story",
       subtitle: "help others understand what makes you unique",
       content: (
-        <div className="space-y-6">
-          <InteractiveTextArea value={description} onChange={setDescription} />
-          <div className="text-center">
-            <p className="text-white/50 text-sm max-w-lg mx-auto">
-              Expand on what you uploaded, share your passions, or describe what
-              you&nbsp;re working on. Write naturally - like you&nbsp;re talking
-              to a friend!
-            </p>
-          </div>
-        </div>
+        <DescriptionSection 
+          value={description} 
+          onChange={setDescription}
+          onWordCountChange={setDescriptionWordCount}
+        />
       ),
     },
     {
       title: "nearly there!",
       subtitle: "add a photo so people can recognize you",
       content: (
-        <div className="space-y-8">
-          <ProfilePicUpload
-            onImageUpload={handleImageUpload}
-            imageUrl={profileImage}
-          />
-          <div className="text-center space-y-2">
-            <p className="text-white/80">Upload your profile picture</p>
-            <p className="text-white/50 text-sm max-w-md mx-auto">
-              A friendly photo helps build trust and makes connections more
-              personal.
-            </p>
-          </div>
-        </div>
+        <ProfilePictureSection
+          onImageUpload={handleImageUpload}
+          onImageRemove={handleImageRemove}
+          imageUrl={profileImage}
+        />
       ),
     },
   ];
@@ -438,18 +257,25 @@ export default function OnboardingPage() {
             )}
           </AnimatePresence>
 
-          <button
-            onClick={skipStep}
-            className="px-6 py-3 rounded-xl border border-white/20 text-white/70 hover:border-white/30 hover:text-white hover:bg-white/5 transition-all hover:scale-105 flex items-center gap-2"
-          >
-            Skip for now
-            <Skip className="h-4 w-4" />
-          </button>
+          {canSkip() && (
+            <button
+              onClick={skipStep}
+              className="px-6 py-3 rounded-xl border border-white/20 text-white/70 hover:border-white/30 hover:text-white hover:bg-white/5 transition-all hover:scale-105 flex items-center gap-2"
+            >
+              Skip for now
+              <Skip className="h-4 w-4" />
+            </button>
+          )}
 
           {currentStep < 2 ? (
             <button
               onClick={nextStep}
-              className="px-8 py-3 rounded-xl bg-white text-black font-medium hover:bg-white/90 transition-all hover:scale-105 shadow-lg flex items-center gap-2"
+              disabled={!canContinue()}
+              className={`px-8 py-3 rounded-xl font-medium transition-all hover:scale-105 shadow-lg flex items-center gap-2 ${
+                canContinue()
+                  ? "bg-white text-black hover:bg-white/90"
+                  : "bg-white/20 text-white/40 cursor-not-allowed"
+              }`}
             >
               Continue
               <ArrowRight className="h-4 w-4" />
@@ -457,15 +283,7 @@ export default function OnboardingPage() {
           ) : (
             <button
               onClick={() => {
-                // Handle final submission
-                if (!description.trim()) {
-                  toast.error("Please tell us about yourself.");
-                  return;
-                }
-                if (!profileImage) {
-                  toast.error("Please upload a profile picture.");
-                  return;
-                }
+                // Handle final submission - no validation needed since profile pic is optional
                 toast.success(
                   "Welcome to connect³! Profile created successfully"
                 );
@@ -483,20 +301,7 @@ export default function OnboardingPage() {
         <div className="fixed inset-0 flex items-end justify-center z-50 pointer-events-auto">
           <NameModal
             open={showNameModal}
-            firstName={profile?.first_name ?? ""}
-            lastName={profile?.last_name ?? ""}
             onClose={() => setShowNameModal(false)}
-            onSubmit={async (firstName, lastName) => {
-              await updateProfile({
-                first_name: firstName,
-                last_name: lastName,
-                name_provided: true,
-              });
-              setShowNameModal(false);
-              toast.success(
-                `Welcome, ${firstName} ${lastName}! Your name was successfully updated.`
-              );
-            }}
           />
         </div>
       )}

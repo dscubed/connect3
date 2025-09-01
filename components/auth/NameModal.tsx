@@ -8,31 +8,33 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuthStore } from "@/stores/authStore";
+import { toast } from "sonner";
 
 interface NameModalProps {
   open: boolean;
-  onSubmit: (firstName: string, lastName: string) => void;
   onClose: () => void;
-  firstName?: string;
-  lastName?: string;
+  onSuccess?: (firstName: string, lastName: string) => void;
 }
 
 export default function NameModal({
   open,
-  onSubmit,
   onClose,
-  firstName: initialFirstName = "",
-  lastName: initialLastName = "",
+  onSuccess,
 }: NameModalProps) {
-  const [firstName, setFirstName] = useState(initialFirstName);
-  const [lastName, setLastName] = useState(initialLastName);
+  const profile = useAuthStore((state) => state.profile);
+  const { updateProfile } = useAuthStore.getState();
+  
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (open) {
-      setFirstName(initialFirstName);
-      setLastName(initialLastName);
+    if (open && profile) {
+      setFirstName(profile.first_name ?? "");
+      setLastName(profile.last_name ?? "");
     }
-  }, [open, initialFirstName, initialLastName]);
+  }, [open, profile]);
 
   return (
     <Dialog open={open} onOpenChange={(val) => !val && onClose()}>
@@ -41,9 +43,29 @@ export default function NameModal({
           <DialogTitle>Please confirm your name</DialogTitle>
         </DialogHeader>
         <form
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
-            onSubmit(firstName, lastName);
+            if (!firstName.trim() || !lastName.trim()) return;
+            
+            setIsLoading(true);
+            try {
+              await updateProfile({
+                first_name: firstName,
+                last_name: lastName,
+                name_provided: true,
+              });
+              
+              toast.success(
+                `Welcome, ${firstName} ${lastName}! Your name was successfully updated.`
+              );
+              
+              onSuccess?.(firstName, lastName);
+              onClose();
+            } catch (error) {
+              toast.error("Failed to update your name. Please try again.");
+            } finally {
+              setIsLoading(false);
+            }
           }}
           className="flex flex-col gap-4"
         >
@@ -53,6 +75,7 @@ export default function NameModal({
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
             required
+            disabled={isLoading}
           />
           <Input
             type="text"
@@ -60,16 +83,22 @@ export default function NameModal({
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
             required
+            disabled={isLoading}
           />
           <DialogFooter className="flex gap-2 mt-4">
-            <Button type="submit" className="flex-1">
-              Submit
+            <Button 
+              type="submit" 
+              className="flex-1"
+              disabled={isLoading || !firstName.trim() || !lastName.trim()}
+            >
+              {isLoading ? "Updating..." : "Submit"}
             </Button>
             <Button
               type="button"
               variant="outline"
               className="flex-1"
               onClick={onClose}
+              disabled={isLoading}
             >
               Cancel
             </Button>
