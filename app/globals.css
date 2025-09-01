@@ -11,6 +11,9 @@
   backdrop-filter: blur(8px);
   background: rgba(0,0,0,0.2);
 }
+[data-sonner-toast] {
+  background: #222 !important; /* or any solid color you prefer */
+}
 
 @layer base {
   :root {

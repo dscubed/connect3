@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
+import { toast } from "sonner";
 
 export function SignUpForm({
   className,
@@ -31,18 +32,17 @@ export function SignUpForm({
   const [repeatPassword, setRepeatPassword] = useState("");
   const [firstName, setfirstName] = useState("");
   const [lastName, setlastName] = useState("");
-  const [error, setError] = useState<string | null>(null);
   // Remove local isLoading
   const router = useRouter();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     const supabase = createClient();
-    setError(null);
+    // No local error state
     if (onSigningUpChange) onSigningUpChange(true);
 
     if (password !== repeatPassword) {
-      setError("Passwords do not match");
+      toast.error("Passwords do not match");
       if (onSigningUpChange) onSigningUpChange(false);
       return;
     }
@@ -56,24 +56,27 @@ export function SignUpForm({
           data: {
             first_name: firstName,
             last_name: lastName,
+            name_provided: true,
           },
         },
       });
       if (error) {
-        throw error;
+        toast.error(error.message || "An error occurred");
+        if (onSigningUpChange) onSigningUpChange(false);
+        return;
       }
       if (
         data?.user &&
         Array.isArray(data.user.identities) &&
         data.user.identities.length === 0
       ) {
-        setError("Account already exists.");
+        toast.error("Account already exists.");
         if (onSigningUpChange) onSigningUpChange(false);
         return;
       }
       router.push("/auth/sign-up-success");
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+      toast.error(error instanceof Error ? error.message : "An error occurred");
     } finally {
       if (onSigningUpChange) onSigningUpChange(false);
     }
@@ -81,7 +84,7 @@ export function SignUpForm({
 
   const handleGoogleSignUp = async () => {
     const supabase = createClient();
-    setError(null);
+    // No local error state
     if (onSigningUpChange) onSigningUpChange(true);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -92,7 +95,7 @@ export function SignUpForm({
       });
       if (error) throw error;
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+      toast.error(error instanceof Error ? error.message : "An error occurred");
     } finally {
       if (onSigningUpChange) onSigningUpChange(false);
     }
@@ -168,7 +171,6 @@ export function SignUpForm({
                 />
               </div>
               <div className="flex flex-col gap-2">
-                {error && <p className="text-sm text-red-500">{error}</p>}
                 <Button type="submit" className="w-full" disabled={isSigningUp}>
                   {isSigningUp ? "Creating an account..." : "Sign up"}
                 </Button>

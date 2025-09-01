@@ -1,23 +1,15 @@
 "use client";
 import { SignUpForm } from "@/components/auth/sign-up-form";
 import LoadingIndicator from "@/components/ui/LoadingSpinner";
-import { useEffect } from "react";
 import { useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import AlreadyAuthenticatedDialog from "@/components/auth/AlreadyAuthenticatedDialog";
 
 export default function Page() {
   const user = useAuthStore((state) => state.user);
+  const profile = useAuthStore((state) => state.profile);
   const loading = useAuthStore((state) => state.loading);
   const [isSigningUp, setIsSigningUp] = useState(false);
-  const [showDialog, setShowDialog] = useState(false);
-  useEffect(() => {
-    if (user && !isSigningUp) {
-      setShowDialog(true);
-    } else {
-      setShowDialog(false);
-    }
-  }, [user, isSigningUp]);
   return (
     <>
       <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
@@ -32,7 +24,11 @@ export default function Page() {
           )}
         </div>
       </div>
-      {!isSigningUp && <AlreadyAuthenticatedDialog open={showDialog} />}
+      {!isSigningUp && user && (
+        <AlreadyAuthenticatedDialog
+          onboardingCompleted={profile?.onboarding_completed}
+        />
+      )}
     </>
   );
 }

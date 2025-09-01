@@ -11,6 +11,7 @@ interface Profile {
   created_at: string;
   updated_at: string;
   onboarding_completed: boolean;
+  name_provided: boolean;
 }
 
 interface AuthState {
@@ -19,6 +20,7 @@ interface AuthState {
   loading: boolean;
   initialize: () => Promise<void>;
   signOut: () => Promise<void>;
+  updateProfile: (fields: Partial<Profile>) => Promise<void>; // Add this
 }
 
 async function fetchProfile(
@@ -36,7 +38,7 @@ async function fetchProfile(
   else set({ profile: null });
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   profile: null,
   loading: true,
@@ -70,5 +72,19 @@ export const useAuthStore = create<AuthState>((set) => ({
     const supabase = createClient();
     await supabase.auth.signOut();
     set({ user: null, profile: null });
+  },
+
+  updateProfile: async (fields) => {
+    const supabase = createClient();
+    const userId = get().user?.id;
+    if (!userId) return;
+    const { error } = await supabase
+      .from("profiles")
+      .update(fields)
+      .eq("id", userId);
+    if (!error) {
+      // Update local profile state
+      set({ profile: { ...get().profile!, ...fields } });
+    }
   },
 }));
