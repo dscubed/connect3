@@ -121,7 +121,28 @@ export default function OnboardingPage() {
     }
   };
 
-  const nextStep = () => {
+  const nextStep = async () => {
+    // Handle file uploads when moving from step 0 (file upload step)
+    if (currentStep === 0 && uploadedFiles.length > 0) {
+      try {
+        const { handleFileUpload: processFiles } = await import("@/lib/documentParser");
+        const result = await processFiles(uploadedFiles);
+        
+        if (!result.success) {
+          toast.error("Failed to process uploaded files");
+          return;
+        } else {
+          // Files parsed successfully
+          toast.success(`Successfully processed ${result.parsedFiles.length} file(s)`);
+          setCurrentStep(1);
+        }
+      } catch (error) {
+        console.error("Error processing files:", error);
+        toast.error("Failed to process uploaded files");
+        return; // Don't proceed to next step if processing fails
+      }
+    }
+    
     if (currentStep < 2) {
       setCurrentStep(currentStep + 1);
     }
