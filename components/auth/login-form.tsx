@@ -45,7 +45,8 @@ export function LoginForm({
         if (onLoggingInChange) onLoggingInChange(false);
         return;
       }
-      router.push("/");
+
+      router.push("/auth/callback");
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : "An error occurred");
       if (onLoggingInChange) onLoggingInChange(false);
