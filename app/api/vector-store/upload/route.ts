@@ -14,23 +14,75 @@ export async function POST(req: Request) {
       );
     }
 
-    // Use the utils function to handle both vector store and database
-    const result = await uploadToVectorStoreAndDatabase(userId, summaryText);
-
-    if (!result.success) {
-      return NextResponse.json(
-        { success: false, error: result.error },
-        { status: 500 }
-      );
+    const chunks = await semanticChunkText(summaryText, userId);
+    const uploadResults = [];
+    
+    for (const chunk of chunks) {
+      const result = await uploadToVectorStoreAndDatabase(userId, chunk.content);
+      if (!result.success) {
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: result.error,
+            uploadedChunks: uploadResults.length
+          },
+          { status: 500 }
+        );
+      }
+      uploadResults.push(result);
     }
 
-    return NextResponse.json(result);
+    return NextResponse.json({
+      success: true,
+      totalChunks: uploadResults.length,
+      firstFileId: uploadResults[0]?.uploadedFileId,
+    });
   } catch (err: unknown) {
-    console.error("API route error:", err);
-    const errorMessage = err instanceof Error ? err.message : "Upload failed";
+    const message = err instanceof Error ? err.message : "Upload failed";
     return NextResponse.json(
-      { success: false, error: errorMessage },
+      { success: false, error: message },
       { status: 500 }
     );
   }
+}
+
+import OpenAI from "openai";
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+/**
+ * Use GPT to semantically chunk text before uploading.
+ */
+export async function semanticChunkText(text: string, fileId: string) {
+  const response = await client.responses.create({
+    model: "gpt-4.1-mini", // lightweight + good at structuring
+    input: [
+      {
+        role: "system",
+        content: `
+You are a semantic chunker. 
+Split the given document into logical, coherent chunks.
+Rules:
+- Each chunk should be 300–800 tokens long.
+- Do not cut sentences in half.
+- Group sentences by topic or section (paragraphs, bullet lists, headings).
+- Return JSON only in this format:
+[
+  { "chunk_index": 0, "file_id": "FILE_ID", "content": "..." },
+  { "chunk_index": 1, "file_id": "FILE_ID", "content": "..." }
+]
+        `,
+      },
+      { role: "user", content: text },
+    ],
+  });
+
+  // LLM returns structured JSON text
+  const raw = response.output_text;
+  const chunks = JSON.parse(raw) as {
+    chunk_index: number;
+    file_id: string;
+    content: string;
+  }[];
+
+  return chunks;
 }

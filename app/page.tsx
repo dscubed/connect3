@@ -79,6 +79,22 @@ const SUGGESTED_QUERIES = [
 
 export default function Home() {
   const [query, setQuery] = useState("");
+  
+  const handleSearch = async (searchQuery: string) => {
+    try {
+      const res = await fetch("/api/vector-store/query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: searchQuery }),
+      });
+  
+      const data = await res.json();
+      console.log("Search results:", data);
+    } catch (err) {
+      console.error("Search error:", err);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0B0B0C] text-white relative overflow-hidden">
       <div className="grid max-w-7xl grid-cols-12 gap-6 px-4 md:px-8 relative z-10">
@@ -90,6 +106,7 @@ export default function Home() {
             query={query}
             setQuery={setQuery}
             suggestedQueries={SUGGESTED_QUERIES}
+            onSearch={handleSearch}
           />
           <PeopleSection people={SAMPLE_PEOPLE} />
         </main>

@@ -1,7 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 
-// Use the Secret API key instead of Service Role key
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SECRET_KEY!
@@ -35,7 +34,7 @@ export async function uploadToVectorStoreAndDatabase(
     // Step 1: Upload to OpenAI Vector Store
     console.log("Uploading to vector store...");
 
-    const fileObj = new File([summaryText], "summary.txt", {
+    const fileObj = new File([summaryText], `${userId}_${Date.now()}.txt`, {
       type: "text/plain",
     });
     const file = await openai.files.create({
@@ -58,11 +57,6 @@ export async function uploadToVectorStoreAndDatabase(
       );
     }
 
-    console.log("Vector store upload successful:", file.id);
-
-    // Step 2: Save to Supabase (without vector_store_id column)
-    console.log("Saving to Supabase...");
-
     const { data, error } = await supabase
       .from("user_files")
       .insert({
@@ -79,8 +73,6 @@ export async function uploadToVectorStoreAndDatabase(
       console.error("Supabase error:", error);
       throw new Error(`Database error: ${error.message}`);
     }
-
-    console.log("Supabase save successful:", data.id);
 
     return {
       success: true,
