@@ -35,6 +35,7 @@ IMPORTANT:
 - Do NOT include any sensitive personal information like phone numbers, email addresses, or physical addresses (only general location like city/country)
 - Focus on professional and relevant personal details only 
 - Remove any personally identifiable information (PII) from the summary
+- VERY IMPORTANT: DO NOT GENERATE ANY HARMFUL, NSFW, DISALLOWED, CONTENT.
         `,
         },
         {

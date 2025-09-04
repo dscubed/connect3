@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,103 +12,41 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
-import { toast } from "sonner";
+import { useSignUp } from "./hooks/useSignup";
 
 export function SignUpForm({
   className,
-  onSigningUpChange,
-  isSigningUp = false,
-  ...props
-}: React.ComponentPropsWithoutRef<"div"> & {
-  onSigningUpChange?: (signingUp: boolean) => void;
-  isSigningUp?: boolean;
-}) {
+}: React.ComponentPropsWithoutRef<"div">) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
-  const [firstName, setfirstName] = useState("");
-  const [lastName, setlastName] = useState("");
-  // Remove local isLoading
-  const router = useRouter();
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const { isSigningUp, handleEmailSignUp, handleGoogleSignUp } = useSignUp();
+
+  const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const supabase = createClient();
-    // No local error state
-    if (onSigningUpChange) onSigningUpChange(true);
-
-    if (password !== repeatPassword) {
-      toast.error("Passwords do not match");
-      if (onSigningUpChange) onSigningUpChange(false);
-      return;
-    }
-
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-          data: {
-            first_name: firstName,
-            last_name: lastName,
-            name_provided: true,
-          },
-        },
-      });
-      if (error) {
-        toast.error(error.message || "An error occurred");
-        if (onSigningUpChange) onSigningUpChange(false);
-        return;
-      }
-      if (
-        data?.user &&
-        Array.isArray(data.user.identities) &&
-        data.user.identities.length === 0
-      ) {
-        toast.error("Account already exists.");
-        if (onSigningUpChange) onSigningUpChange(false);
-        return;
-      }
-      router.push("/auth/sign-up-success");
-    } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "An error occurred");
-    } finally {
-      if (onSigningUpChange) onSigningUpChange(false);
-    }
-  };
-
-  const handleGoogleSignUp = async () => {
-    const supabase = createClient();
-    // No local error state
-    if (onSigningUpChange) onSigningUpChange(true);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
-      if (error) throw error;
-    } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "An error occurred");
-    } finally {
-      if (onSigningUpChange) onSigningUpChange(false);
-    }
+    handleEmailSignUp({
+      email,
+      password,
+      repeatPassword,
+      firstName,
+      lastName,
+    });
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn("flex flex-col gap-6", className)}>
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">Sign up</CardTitle>
           <CardDescription>Create a new account</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSignUp}>
+          <form onSubmit={onSubmit}>
             <div className="flex flex-col gap-6">
               <div className="flex gap-2">
                 <div className="flex-1 grid gap-2">
@@ -120,7 +57,7 @@ export function SignUpForm({
                     placeholder="First Name"
                     required
                     value={firstName}
-                    onChange={(e) => setfirstName(e.target.value)}
+                    onChange={(e) => setFirstName(e.target.value)}
                   />
                 </div>
                 <div className="flex-1 grid gap-2">
@@ -131,7 +68,7 @@ export function SignUpForm({
                     placeholder="Last Name"
                     required
                     value={lastName}
-                    onChange={(e) => setlastName(e.target.value)}
+                    onChange={(e) => setLastName(e.target.value)}
                   />
                 </div>
               </div>
@@ -147,9 +84,7 @@ export function SignUpForm({
                 />
               </div>
               <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                </div>
+                <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
                   type="password"
@@ -159,9 +94,7 @@ export function SignUpForm({
                 />
               </div>
               <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="repeat-password">Repeat Password</Label>
-                </div>
+                <Label htmlFor="repeat-password">Repeat Password</Label>
                 <Input
                   id="repeat-password"
                   type="password"

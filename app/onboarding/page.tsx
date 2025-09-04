@@ -383,7 +383,7 @@ export default function OnboardingPage() {
           transition={{ delay: 0.6 }}
         >
           <AnimatePresence>
-            {currentStep > 0 && (
+            {currentStep == 1 && (
               <motion.button
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}

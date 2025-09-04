@@ -103,30 +103,7 @@ const Sidebar: React.FC = () => {
         </div>
 
         <div className="flex flex-col gap-4 pb-6 px-4 md:px-0">
-          {/* Replace with logged in as email and logout button isntead of this */}
           <AuthButton />
-          {/* <div className="text-white/60 text-sm leading-relaxed">
-            welcome to{" "}
-            <span className="text-white font-semibold">
-              connect<sup className="pl-0.5">3</sup>
-            </span>
-            , a place to find the people your ideas need. powered by nlp
-            discovery.
-          </div>
-          <div className="mt-4 flex gap-2">
-            <a
-              href="/signup"
-              className="px-4 py-2 rounded-xl bg-white text-black font-medium hover:bg-white/90 transition-all hover:scale-105 shadow-lg"
-            >
-              sign up
-            </a>
-            <a
-              href="/login"
-              className="px-4 py-2 rounded-xl border border-white/20 hover:border-white/30 hover:bg-white/5 transition-all hover:scale-105"
-            >
-              log in
-            </a>
-          </div> */}
         </div>
       </motion.aside>
     </>

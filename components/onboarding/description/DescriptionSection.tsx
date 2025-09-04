@@ -69,7 +69,9 @@ export default function DescriptionSection({
               >
                 <FileText className="h-6 w-6 text-white/60" />
               </motion.div>
-              <h3 className="text-white font-semibold">Tell us about yourself</h3>
+              <h3 className="text-white font-semibold">
+                Tell us about yourself
+              </h3>
             </div>
 
             <textarea
@@ -84,7 +86,7 @@ export default function DescriptionSection({
 
             <div className="flex justify-between items-center mt-4 pt-4 border-t border-white/10">
               <p className="text-white/50 text-sm">
-                Write as much or as little as you'd like ( {'>'} 10 words)
+                Write as much or as little as you&nbsp;d like ( {">"} 10 words)
               </p>
               <motion.div
                 animate={{ opacity: wordCount > 0 ? 1 : 0.5 }}
@@ -127,11 +129,11 @@ export default function DescriptionSection({
           )}
         </AnimatePresence>
       </motion.div>
-      
+
       <div className="text-center">
         <p className="text-white/50 text-sm max-w-lg mx-auto">
           Expand on what you uploaded, share your passions, or describe what
-          you're working on. Write as naturally as you would like.
+          you&nbsp;re working on. Write as naturally as you would like.
         </p>
       </div>
     </div>

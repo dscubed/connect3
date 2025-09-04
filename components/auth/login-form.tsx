@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,12 +9,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { FcGoogle } from "react-icons/fc";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useLogin } from "@/components/auth/hooks/useLogin";
 import { useState } from "react";
-import { toast } from "sonner";
 
 export function LoginForm({
   className,
@@ -28,29 +27,11 @@ export function LoginForm({
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const router = useRouter();
+  const { isLoggingIn, handleEmailLogin, handleGoogleLogin } = useLogin(onLoggingInChange);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const supabase = createClient();
-    // No local error state
-    if (onLoggingInChange) onLoggingInChange(true);
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) {
-        toast.error(error.message || "An error occurred");
-        if (onLoggingInChange) onLoggingInChange(false);
-        return;
-      }
-
-      router.push("/auth/callback");
-    } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "An error occurred");
-      if (onLoggingInChange) onLoggingInChange(false);
-    }
+    await handleEmailLogin({ email, password });
   };
 
   return (
@@ -63,7 +44,7 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin}>
+          <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
@@ -94,12 +75,35 @@ export function LoginForm({
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Login"}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading || isLoggingIn}
+              >
+                {isLoading || isLoggingIn ? "Logging in..." : "Login"}
+              </Button>
+              <div className="relative my-2 flex items-center">
+                <span className="w-full border-t border-gray-300" />
+                <span className="mx-2 text-xs text-gray-500">or</span>
+                <span className="w-full border-t border-gray-300" />
+              </div>
+              <Button
+                type="button"
+                className="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 hover:bg-gray-100 text-gray-700"
+                onClick={handleGoogleLogin}
+                disabled={isLoading || isLoggingIn}
+                aria-label="Login with Google"
+                variant="outline"
+              >
+                <span>Login with</span>
+                <FcGoogle size={20} />
+                {(isLoading || isLoggingIn) && (
+                  <span className="ml-2">Redirecting...</span>
+                )}
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
+              Don&apos;t have an account?{' '}
               <Link
                 href="/auth/sign-up"
                 className="underline underline-offset-4"
