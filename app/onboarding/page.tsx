@@ -1,12 +1,11 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
   ChevronsRightIcon as Skip,
   Check,
   Box,
-  Loader2,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import NameModal from "@/components/auth/NameModal";
@@ -16,9 +15,13 @@ import FileUploadSection from "@/components/onboarding/file-upload/FileUploadSec
 import DescriptionSection from "@/components/onboarding/description/DescriptionSection";
 import ProfilePictureSection from "@/components/onboarding/profile-picture/ProfilePictureSection";
 import { useRouter } from "next/navigation";
-import { processingActions, useProcessingStore } from '@/stores/processingStore';
-import { generateProfileSummary } from '@/lib/generateSummary/generateProfileSummary';
-import { BackWarningModal } from '@/components/onboarding/description/BackWarningModal';
+import {
+  processingActions,
+  useProcessingStore,
+} from "@/stores/processingStore";
+import { generateProfileSummary } from "@/lib/generateSummary/generateProfileSummary";
+import { BackWarningModal } from "@/components/onboarding/description/BackWarningModal";
+import { ProcessingStatusIndicator } from "@/components/onboarding/file-upload/ProcessingStatusIndicator";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -56,9 +59,7 @@ export default function OnboardingPage() {
     ) {
       setShowNameModal(true);
     }
-    if (
-      profile?.onboarding_completed === true
-    ) {
+    if (profile?.onboarding_completed === true) {
       router.push("/");
       toast.error("Onboarding already completed!");
     }
@@ -84,7 +85,7 @@ export default function OnboardingPage() {
     // Create local preview URL for immediate display
     const previewUrl = URL.createObjectURL(file);
     setProfileImage(previewUrl);
-    
+
     // Store the file for later upload when onboarding completes
     setSelectedFile(file);
   };
@@ -93,30 +94,43 @@ export default function OnboardingPage() {
     // Clear local preview and selected file
     setProfileImage(null);
     setSelectedFile(null);
-    
+
     // Clean up the object URL to prevent memory leaks
-    if (profileImage && profileImage.startsWith('blob:')) {
+    if (profileImage && profileImage.startsWith("blob:")) {
       URL.revokeObjectURL(profileImage);
     }
   };
 
   const canContinue = () => {
-    if (state === 'parsing' || state === 'validating' || state === 'summarizing') return false;
-    
+    if (
+      state === "parsing" ||
+      state === "validating" ||
+      state === "summarizing"
+    )
+      return false;
+
     switch (currentStep) {
-      case 0: return uploadedFiles.length > 0;
-      case 1: return descriptionWordCount >= 10;
-      case 2: return true; // Profile picture is optional
-      default: return false;
+      case 0:
+        return uploadedFiles.length > 0;
+      case 1:
+        return descriptionWordCount >= 10;
+      case 2:
+        return true; // Profile picture is optional
+      default:
+        return false;
     }
   };
 
   const canSkip = () => {
     switch (currentStep) {
-      case 0: return true; // can skip file upload
-      case 1: return false; // cannot skip description
-      case 2: return true; // can skip profile picture
-      default: return true;
+      case 0:
+        return true; // can skip file upload
+      case 1:
+        return false; // cannot skip description
+      case 2:
+        return true; // can skip profile picture
+      default:
+        return true;
     }
   };
 
@@ -126,21 +140,26 @@ export default function OnboardingPage() {
       try {
         const { processFiles } = await import("@/lib/documentProcessor");
         const result = await processFiles(uploadedFiles);
-        
+
         if (!result.success) {
           return;
         } else {
           // Files parsed successfully
-          toast.success(`Successfully processed ${result.parsedFiles.length} file(s)`);
+          toast.success(
+            `Successfully processed ${result.parsedFiles.length} file(s)`
+          );
           processingActions.setSummarizing();
-          const { success, text } = await generateProfileSummary(result.parsedFiles);
+          const { success, text } = await generateProfileSummary(
+            result.parsedFiles
+          );
           if (success && text) {
             processingActions.setSuccess();
             setDescription(text);
-          }
-          else {
+          } else {
             processingActions.setError();
-            toast.error("Failed to generate profile summary. Please try again.")
+            toast.error(
+              "Failed to generate profile summary. Please try again."
+            );
             return;
           }
           setCurrentStep(1);
@@ -148,28 +167,28 @@ export default function OnboardingPage() {
       } catch (error) {
         console.error("Error processing files:", error);
         toast.error("Failed to process uploaded files");
-        return; 
+        return;
       }
     }
-    
-    if (currentStep < 2) {
-      setCurrentStep(currentStep + 1);
+
+    if (currentStep === 1 && descriptionWordCount >= 10) {
+      // Call API
     }
   };
 
   const prevStep = () => {
-    if (currentStep === 1 && description.trim() !== '') {
+    if (currentStep === 1 && description.trim() !== "") {
       setShowBackWarning(true);
       return;
     }
-    
+
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
     }
   };
 
   const handleConfirmBack = () => {
-    setDescription('');
+    setDescription("");
     setCurrentStep(0);
     setShowBackWarning(false);
   };
@@ -184,16 +203,16 @@ export default function OnboardingPage() {
   const onboardingCompleted = async () => {
     try {
       let avatarUrl = undefined;
-      
+
       // Upload avatar to Supabase if a file was selected
       if (selectedFile && user?.id) {
         const { uploadAvatar } = await import("@/lib/supabase/storage");
         const result = await uploadAvatar(selectedFile, user.id);
-        
+
         if (result.success) {
           avatarUrl = result.url;
           // Clean up the local preview URL
-          if (profileImage && profileImage.startsWith('blob:')) {
+          if (profileImage && profileImage.startsWith("blob:")) {
             URL.revokeObjectURL(profileImage);
           }
         } else {
@@ -201,13 +220,13 @@ export default function OnboardingPage() {
           return;
         }
       }
-      
+
       // Update profile with onboarding completion and avatar URL
       await updateProfile({
         onboarding_completed: true,
         avatar_url: avatarUrl,
       });
-      
+
       toast.success("Welcome to connect³! Onboarding completed successfully");
       router.push("/");
     } catch (error) {
@@ -217,22 +236,6 @@ export default function OnboardingPage() {
   };
 
   const { state, currentFile } = useProcessingStore();
-  const stateHistory = useRef<Array<{state: string, timestamp: string, file?: string}>>([]);
-
-  useEffect(() => {
-    // Track state history
-    stateHistory.current = [
-      ...stateHistory.current,
-      {state, timestamp: new Date().toISOString(), file: currentFile}
-    ].slice(-10); // Keep last 10 states
-    
-    console.groupCollapsed(`State changed to: ${state}`);
-    console.log('Timestamp:', new Date().toISOString());
-    console.log('Current file:', currentFile);
-    console.log('State history:', [...stateHistory.current]);
-    console.groupEnd();
-    
-  }, [state, currentFile]);
 
   const steps = [
     {
@@ -250,8 +253,8 @@ export default function OnboardingPage() {
       title: "tell your story",
       subtitle: "help others understand what makes you unique",
       content: (
-        <DescriptionSection 
-          value={description} 
+        <DescriptionSection
+          value={description}
           onChange={setDescription}
           onWordCountChange={setDescriptionWordCount}
         />
@@ -385,7 +388,7 @@ export default function OnboardingPage() {
           )}
 
           {currentStep < 2 ? (
-            <button 
+            <button
               onClick={nextStep}
               disabled={!canContinue()}
               className={`px-8 py-3 rounded-xl font-medium transition-all hover:scale-105 shadow-lg flex items-center gap-2 ${
@@ -394,7 +397,11 @@ export default function OnboardingPage() {
                   : "bg-white/20 text-white/40 cursor-not-allowed"
               }`}
             >
-              {state === 'parsing' || state === 'validating' || state === 'summarizing' ? 'Processing...' : 'Continue'}
+              {state === "parsing" ||
+              state === "validating" ||
+              state === "summarizing"
+                ? "Processing..."
+                : "Continue"}
               <ArrowRight className="h-4 w-4" />
             </button>
           ) : (
@@ -412,20 +419,7 @@ export default function OnboardingPage() {
         </motion.div>
       </div>
 
-      {state !== 'idle' && (
-        <div className="fixed bottom-4 right-4 p-4 bg-background border rounded-lg shadow-lg">
-          <div className="flex items-center gap-2">
-            <Loader2 className="animate-spin h-4 w-4" />
-            <span>
-              {state === 'parsing' && `Processing ${currentFile}`}
-              {state === 'validating' && 'Validating content'}
-              {state === 'summarizing' && 'Generating profile summary'}
-              {state === 'success' && 'Processing complete'}
-              {state === 'error' && 'Processing failed'}
-            </span>
-          </div>
-        </div>
-      )}
+      <ProcessingStatusIndicator state={state} currentFile={currentFile} />
 
       {showNameModal && (
         <div className="fixed inset-0 flex items-end justify-center z-50 pointer-events-auto">
@@ -437,7 +431,7 @@ export default function OnboardingPage() {
       )}
       {showBackWarning && (
         <div className="fixed inset-0 flex items-end justify-center z-50 pointer-events-auto">
-          <BackWarningModal 
+          <BackWarningModal
             open={showBackWarning}
             onConfirm={handleConfirmBack}
             onCancel={() => setShowBackWarning(false)}
