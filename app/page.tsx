@@ -1,10 +1,10 @@
 "use client";
 import Sidebar from "@/components/Sidebar";
-import HeroSection from "@/components/HeroSection";
-import PeopleSection from "@/components/PeopleSection";
+import HeroSection from "@/components/home/HeroSection";
+import PeopleSection from "@/components/home/PeopleSection";
 import React, { useState } from "react";
 import AnimatedParticles from "@/components/AnimatedParticles";
-import SearchSection from "@/components/SearchBar";
+import SearchSection from "@/components/home/SearchSection";
 
 // --- Demo data (replace with your API results) ---
 const SAMPLE_PEOPLE = [

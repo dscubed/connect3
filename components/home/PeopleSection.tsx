@@ -1,7 +1,7 @@
 import React from "react";
-import Card from "@/components/Card";
+import ProfileCard from "@/components/home/ProfileCard";
 import { ArrowDown } from "lucide-react";
-import { Person } from "@/components/Card";
+import { Person } from "@/components/home/ProfileCard";
 
 export interface PeopleSectionProps {
   people: Person[];
@@ -15,7 +15,7 @@ const PeopleSection: React.FC<PeopleSectionProps> = ({ people }) => (
     </h2>
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {people.map((p: Person) => (
-        <Card key={p.id} person={p} />
+        <ProfileCard key={p.id} person={p} />
       ))}
       {people.length === 0 && (
         <div className="col-span-full text-center text-white/60 py-12">

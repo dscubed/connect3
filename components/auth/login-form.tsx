@@ -89,11 +89,9 @@ export function LoginForm({
               </div>
               <Button
                 type="button"
-                className="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 hover:bg-gray-100 text-gray-700"
                 onClick={handleGoogleLogin}
                 disabled={isLoading || isLoggingIn}
                 aria-label="Login with Google"
-                variant="outline"
               >
                 <span>Login with</span>
                 <FcGoogle size={20} />

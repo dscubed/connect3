@@ -1,5 +1,5 @@
 import React from "react";
-import AnimatedConnect from "@/components/AnimatedConnect";
+import AnimatedConnect from "@/components/home/AnimatedConnect";
 
 const HeroSection: React.FC = () => (
   <div className="mt-12 text-center py-8">

@@ -12,7 +12,7 @@ export type Person = {
   blurb: string;
 };
 
-const Card = ({ person }: { person: Person }) => {
+const ProfileCard = ({ person }: { person: Person }) => {
   const [hovered, setHovered] = useState(false);
   return (
     <motion.div
@@ -71,4 +71,4 @@ const Card = ({ person }: { person: Person }) => {
   );
 };
 
-export default Card;
+export default ProfileCard;
