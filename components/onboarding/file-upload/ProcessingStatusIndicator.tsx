@@ -22,6 +22,9 @@ export const ProcessingStatusIndicator: React.FC<
     case "summarizing":
       statusText = "Generating profile summary";
       break;
+    case "uploading":
+      statusText = "Uploading your profile";
+      break;
     case "success":
       statusText = "Processing complete";
       break;

@@ -7,7 +7,7 @@ const client = new OpenAI({
 
 export async function POST(req: Request) {
   try {
-    const { parsedFiles } = await req.json(); 
+    const { parsedFiles } = await req.json();
     if (!parsedFiles || parsedFiles.length === 0) {
       return NextResponse.json(
         { error: "No parsed files provided" },
@@ -16,7 +16,9 @@ export async function POST(req: Request) {
     }
 
     // Combine all parsed text into a single string
-    const combinedText = parsedFiles.map((f: { text: string; }) => f.text).join("\n\n");
+    const combinedText = parsedFiles
+      .map((f: { text: string }) => f.text)
+      .join("\n\n");
 
     // Call OpenAI to generate a profile summary
     const response = await client.responses.create({
@@ -26,8 +28,8 @@ export async function POST(req: Request) {
           role: "system",
           content: `
 You are an assistant that creates a detailed user profile summary.
-The user has uploaded multiple documents containing their resume, work history, skills, education, or personal background.
-Generate a clear, structured, and detailed summary of the user which captures all the details of the user.
+The user has uploaded document(s) containing their resume, work history, skills, education, or personal background.
+Write a narrative, story-like summary of the user, weaving together their professional and personal experiences into a flowing text. The summary should read naturally, as if introducing the user in a biography or feature article, not as a bullet-point resume.
 
 IMPORTANT:
 - Do NOT include any sensitive personal information like phone numbers, email addresses, or physical addresses (only general location like city/country)
@@ -46,10 +48,9 @@ IMPORTANT:
     const summary = response.output_text;
 
     return NextResponse.json({ summary });
-  } catch (err: any) {
-    return NextResponse.json(
-      { error: err.message || "AI processing failed" },
-      { status: 500 }
-    );
+  } catch (err: unknown) {
+    const errorMessage =
+      err instanceof Error ? err.message : "AI processing failed";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

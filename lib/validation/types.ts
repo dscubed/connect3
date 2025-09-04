@@ -4,13 +4,14 @@ export interface ValidationResult {
   reason?: string;
 }
 
-export type ProcessingState = 
-  | 'idle'
-  | 'parsing'
-  | 'validating'
-  | 'summarizing'
-  | 'success'
-  | 'error';
+type ProcessingState =
+  | "idle"
+  | "parsing"
+  | "validating"
+  | "summarizing"
+  | "success"
+  | "error"
+  | "uploading";
 
 export interface ProcessingStatus {
   state: ProcessingState;

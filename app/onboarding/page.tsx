@@ -22,6 +22,7 @@ import {
 import { generateProfileSummary } from "@/lib/generateSummary/generateProfileSummary";
 import { BackWarningModal } from "@/components/onboarding/description/BackWarningModal";
 import { ProcessingStatusIndicator } from "@/components/onboarding/file-upload/ProcessingStatusIndicator";
+import { uploadToVectorStore } from "@/lib/vector-store/uploadToVectorStore";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -40,6 +41,7 @@ export default function OnboardingPage() {
       setDescriptionWordCount(count);
     }
   }, []);
+
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -105,7 +107,8 @@ export default function OnboardingPage() {
     if (
       state === "parsing" ||
       state === "validating" ||
-      state === "summarizing"
+      state === "summarizing" ||
+      state === "uploading"
     )
       return false;
 
@@ -172,7 +175,23 @@ export default function OnboardingPage() {
     }
 
     if (currentStep === 1 && descriptionWordCount >= 10) {
-      // Call API
+      try {
+        processingActions.setUploading();
+        // Call API to upload to vector store
+        if (!user || !description) {
+          return;
+        } else {
+          const result = await uploadToVectorStore(user?.id, description);
+          console.log("Upload successful:", result);
+        }
+      } catch (error) {
+        console.error("Upload failed:", error);
+        processingActions.setError();
+        toast.error("Upload failed. Please try again.");
+      } finally {
+        setCurrentStep(currentStep + 1);
+        processingActions.setSuccess();
+      }
     }
   };
 
@@ -194,9 +213,10 @@ export default function OnboardingPage() {
   };
 
   const skipStep = () => {
-    nextStep();
     if (currentStep == 2) {
       onboardingCompleted();
+    } else {
+      setCurrentStep(currentStep + 1);
     }
   };
 
@@ -401,6 +421,8 @@ export default function OnboardingPage() {
               state === "validating" ||
               state === "summarizing"
                 ? "Processing..."
+                : state === "uploading"
+                ? "Uploading..."
                 : "Continue"}
               <ArrowRight className="h-4 w-4" />
             </button>
