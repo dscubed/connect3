@@ -12,6 +12,7 @@ export const processingActions = {
     currentFile: file,
   }),
   setValidating: () => useProcessingStore.setState({ state: 'validating' }),
+  setSummarizing: () => useProcessingStore.setState({ state: 'summarizing' }),
   setSuccess: () => {
     useProcessingStore.setState({ state: 'success' });
     setTimeout(() => processingActions.reset(), 2000);

@@ -8,6 +8,7 @@ export type ProcessingState =
   | 'idle'
   | 'parsing'
   | 'validating'
+  | 'summarizing'
   | 'success'
   | 'error';
 

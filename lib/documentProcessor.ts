@@ -3,7 +3,7 @@ import { validateFiles } from './validation';
 import { processingActions } from '@/stores/processingStore';
 import { parseDocument } from './parsers/documentParser';
 
-export async function handleFileUpload(files: File[]): Promise<{ success: boolean; parsedFiles: Array<{ file: File; text: string }> }> {
+export async function processFiles(files: File[]): Promise<{ success: boolean; parsedFiles: Array<{ file: File; text: string }> }> {
   let parsedFiles: Array<{ file: File; text: string }> = [];
   let hasErrors = false;
   

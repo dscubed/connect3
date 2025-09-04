@@ -17,6 +17,8 @@ import DescriptionSection from "@/components/onboarding/description/DescriptionS
 import ProfilePictureSection from "@/components/onboarding/profile-picture/ProfilePictureSection";
 import { useRouter } from "next/navigation";
 import { useProcessingStore } from '@/stores/processingStore';
+import { generateProfileSummary } from '@/lib/generateSummary/generateProfileSummary';
+import { BackWarningModal } from '@/components/onboarding/description/BackWarningModal';
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -44,6 +46,7 @@ export default function OnboardingPage() {
   const { updateProfile } = useAuthStore.getState();
 
   const [showNameModal, setShowNameModal] = useState(false);
+  const [showBackWarning, setShowBackWarning] = useState(false);
 
   useEffect(() => {
     if (
@@ -110,14 +113,10 @@ export default function OnboardingPage() {
 
   const canSkip = () => {
     switch (currentStep) {
-      case 0: // File upload step - can skip
-        return true;
-      case 1: // Description step - no skipping
-        return false;
-      case 2: // Profile picture step - can skip
-        return true;
-      default:
-        return true;
+      case 0: return true; // can skip file upload
+      case 1: return false; // cannot skip description
+      case 2: return true; // can skip profile picture
+      default: return true;
     }
   };
 
@@ -125,7 +124,7 @@ export default function OnboardingPage() {
     // Handle file uploads when moving from step 0 (file upload step)
     if (currentStep === 0 && uploadedFiles.length > 0) {
       try {
-        const { handleFileUpload: processFiles } = await import("@/lib/documentProcessor");
+        const { processFiles } = await import("@/lib/documentProcessor");
         const result = await processFiles(uploadedFiles);
         
         if (!result.success) {
@@ -133,6 +132,15 @@ export default function OnboardingPage() {
         } else {
           // Files parsed successfully
           toast.success(`Successfully processed ${result.parsedFiles.length} file(s)`);
+          
+          const { success, text } = await generateProfileSummary(result.parsedFiles);
+          if (success && text) {
+            setDescription(text);
+          }
+          else {
+            toast.error("Failed to generate profile summary. Please try again.")
+            return;
+          }
           setCurrentStep(1);
         }
       } catch (error) {
@@ -148,9 +156,20 @@ export default function OnboardingPage() {
   };
 
   const prevStep = () => {
+    if (currentStep === 1 && description.trim() !== '') {
+      setShowBackWarning(true);
+      return;
+    }
+    
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
     }
+  };
+
+  const handleConfirmBack = () => {
+    setDescription('');
+    setCurrentStep(0);
+    setShowBackWarning(false);
   };
 
   const skipStep = () => {
@@ -357,7 +376,7 @@ export default function OnboardingPage() {
                   : "bg-white/20 text-white/40 cursor-not-allowed"
               }`}
             >
-              {state === 'parsing' || state === 'validating' ? 'Processing...' : 'Continue'}
+              {state === 'parsing' || state === 'validating' || state === 'summarizing' ? 'Processing...' : 'Continue'}
               <ArrowRight className="h-4 w-4" />
             </button>
           ) : (
@@ -382,6 +401,7 @@ export default function OnboardingPage() {
             <span>
               {state === 'parsing' && `Processing ${currentFile}`}
               {state === 'validating' && 'Validating content'}
+              {state === 'summarizing' && 'Generating profile summary'}
               {state === 'success' && 'Processing complete'}
               {state === 'error' && 'Processing failed'}
             </span>
@@ -394,6 +414,15 @@ export default function OnboardingPage() {
           <NameModal
             open={showNameModal}
             onClose={() => setShowNameModal(false)}
+          />
+        </div>
+      )}
+      {showBackWarning && (
+        <div className="fixed inset-0 flex items-end justify-center z-50 pointer-events-auto">
+          <BackWarningModal 
+            open={showBackWarning}
+            onConfirm={handleConfirmBack}
+            onCancel={() => setShowBackWarning(false)}
           />
         </div>
       )}
