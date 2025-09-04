@@ -29,10 +29,8 @@ export async function processFiles(files: File[]): Promise<{ success: boolean; p
     hasErrors = true;
     parsedFiles = [];
     processingActions.setError();
-  } else {
-    processingActions.setSuccess();
   }
-
+  
   return {
     success: !hasErrors && parsedFiles.length > 0,
     parsedFiles

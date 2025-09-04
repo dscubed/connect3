@@ -16,7 +16,7 @@ import FileUploadSection from "@/components/onboarding/file-upload/FileUploadSec
 import DescriptionSection from "@/components/onboarding/description/DescriptionSection";
 import ProfilePictureSection from "@/components/onboarding/profile-picture/ProfilePictureSection";
 import { useRouter } from "next/navigation";
-import { useProcessingStore } from '@/stores/processingStore';
+import { processingActions, useProcessingStore } from '@/stores/processingStore';
 import { generateProfileSummary } from '@/lib/generateSummary/generateProfileSummary';
 import { BackWarningModal } from '@/components/onboarding/description/BackWarningModal';
 
@@ -101,7 +101,7 @@ export default function OnboardingPage() {
   };
 
   const canContinue = () => {
-    if (state === 'parsing' || state === 'validating') return false;
+    if (state === 'parsing' || state === 'validating' || state === 'summarizing') return false;
     
     switch (currentStep) {
       case 0: return uploadedFiles.length > 0;
@@ -132,12 +132,14 @@ export default function OnboardingPage() {
         } else {
           // Files parsed successfully
           toast.success(`Successfully processed ${result.parsedFiles.length} file(s)`);
-          
+          processingActions.setSummarizing();
           const { success, text } = await generateProfileSummary(result.parsedFiles);
           if (success && text) {
+            processingActions.setSuccess();
             setDescription(text);
           }
           else {
+            processingActions.setError();
             toast.error("Failed to generate profile summary. Please try again.")
             return;
           }
@@ -215,6 +217,22 @@ export default function OnboardingPage() {
   };
 
   const { state, currentFile } = useProcessingStore();
+  const stateHistory = useRef<Array<{state: string, timestamp: string, file?: string}>>([]);
+
+  useEffect(() => {
+    // Track state history
+    stateHistory.current = [
+      ...stateHistory.current,
+      {state, timestamp: new Date().toISOString(), file: currentFile}
+    ].slice(-10); // Keep last 10 states
+    
+    console.groupCollapsed(`State changed to: ${state}`);
+    console.log('Timestamp:', new Date().toISOString());
+    console.log('Current file:', currentFile);
+    console.log('State history:', [...stateHistory.current]);
+    console.groupEnd();
+    
+  }, [state, currentFile]);
 
   const steps = [
     {

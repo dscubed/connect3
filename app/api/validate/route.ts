@@ -19,7 +19,7 @@ const ValidationSchema = z.object({
 
 export async function POST(req: Request) {
   console.log('Validation API called');
-  const { text } = await req.json();
+  const { text, fullName } = await req.json();
   console.log('Received text length:', text?.length);
   console.log(text);  
   try {
@@ -31,9 +31,14 @@ export async function POST(req: Request) {
           role: "system",
           content: `
 You are a validation engine for a profile-building app. 
+You are validating documents for user ${fullName}.
 Given user-uploaded text, you must determine:
-1. Is it SAFE (no harmful, illegal, NSFW, or disallowed content)?
-2. Is it RELEVANT (does it contain information that could help describe a user's professional or personal profile, like work experience, education, skills, or bio)?
+1. Is it SAFE 
+- no harmful, illegal, NSFW, or disallowed content)?
+2. Is it RELEVANT 
+- does it contain information that could help describe a user's professional or personal profile?
+e.g. (contains work experience, education, skills, interests, or bio)
+- iS that document is for user: "${fullName}"? NOT ANOTHER USER?
 
 Respond only in the structured format defined. Reason should just be one sentence only justifying why the text was safe, relevant, or both.
           `,

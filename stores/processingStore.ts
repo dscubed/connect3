@@ -7,12 +7,14 @@ export const useProcessingStore = create<ProcessingStatus>(() => ({
 }));
 
 export const processingActions = {
-  setParsing: (file: string) => useProcessingStore.setState({
-    state: 'parsing',
-    currentFile: file,
-  }),
-  setValidating: () => useProcessingStore.setState({ state: 'validating' }),
-  setSummarizing: () => useProcessingStore.setState({ state: 'summarizing' }),
+  setParsing: (file: string) => {
+    useProcessingStore.setState({
+      state: 'parsing',
+      currentFile: file,
+    });
+  },
+  setValidating: () => {useProcessingStore.setState({ state: 'validating' });},
+  setSummarizing: () => {useProcessingStore.setState({ state: 'summarizing' });},
   setSuccess: () => {
     useProcessingStore.setState({ state: 'success' });
     setTimeout(() => processingActions.reset(), 2000);

@@ -5,11 +5,9 @@ export interface GenerateSummaryResponse {
   text: string | null;
   error?: string;
 }
-
 export async function generateProfileSummary(parsedFiles: Array<{ file: File; text: string }>): Promise<GenerateSummaryResponse> {
   try {
-    processingActions.setSummarizing();
-    
+
     const res = await fetch('/api/summariseFiles', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -17,7 +15,6 @@ export async function generateProfileSummary(parsedFiles: Array<{ file: File; te
     });
 
     if (!res.ok) {
-      processingActions.setError();
       return {
         success: false,
         text: null,
@@ -28,13 +25,11 @@ export async function generateProfileSummary(parsedFiles: Array<{ file: File; te
     const data = await res.json();
 
     if (data.summary) {
-      processingActions.setSuccess();
       return {
         success: true,
         text: data.summary
       };
     } else {
-      processingActions.setError();
       return {
         success: false,
         text: null,
@@ -42,7 +37,6 @@ export async function generateProfileSummary(parsedFiles: Array<{ file: File; te
       };
     }
   } catch (error) {
-    processingActions.setError();
     return {
       success: false,
       text: null,
