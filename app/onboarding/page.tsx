@@ -6,6 +6,7 @@ import {
   ChevronsRightIcon as Skip,
   Check,
   Box,
+  Loader2,
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import NameModal from "@/components/auth/NameModal";
@@ -15,6 +16,7 @@ import FileUploadSection from "@/components/onboarding/file-upload/FileUploadSec
 import DescriptionSection from "@/components/onboarding/description/DescriptionSection";
 import ProfilePictureSection from "@/components/onboarding/profile-picture/ProfilePictureSection";
 import { useRouter } from "next/navigation";
+import { useProcessingStore } from '@/stores/processingStore';
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -96,15 +98,13 @@ export default function OnboardingPage() {
   };
 
   const canContinue = () => {
+    if (state === 'parsing' || state === 'validating') return false;
+    
     switch (currentStep) {
-      case 0: // File upload step
-        return uploadedFiles.length > 0;
-      case 1: // Description step
-        return descriptionWordCount >= 10;
-      case 2: // Profile picture step
-        return true; // Always allow continue
-      default:
-        return true;
+      case 0: return uploadedFiles.length > 0;
+      case 1: return descriptionWordCount >= 10;
+      case 2: return true; // Profile picture is optional
+      default: return false;
     }
   };
 
@@ -125,11 +125,10 @@ export default function OnboardingPage() {
     // Handle file uploads when moving from step 0 (file upload step)
     if (currentStep === 0 && uploadedFiles.length > 0) {
       try {
-        const { handleFileUpload: processFiles } = await import("@/lib/documentParser");
+        const { handleFileUpload: processFiles } = await import("@/lib/documentProcessor");
         const result = await processFiles(uploadedFiles);
         
         if (!result.success) {
-          toast.error("Failed to process uploaded files");
           return;
         } else {
           // Files parsed successfully
@@ -139,7 +138,7 @@ export default function OnboardingPage() {
       } catch (error) {
         console.error("Error processing files:", error);
         toast.error("Failed to process uploaded files");
-        return; // Don't proceed to next step if processing fails
+        return; 
       }
     }
     
@@ -195,6 +194,8 @@ export default function OnboardingPage() {
       console.error("Onboarding completion error:", error);
     }
   };
+
+  const { state, currentFile } = useProcessingStore();
 
   const steps = [
     {
@@ -347,7 +348,7 @@ export default function OnboardingPage() {
           )}
 
           {currentStep < 2 ? (
-            <button
+            <button 
               onClick={nextStep}
               disabled={!canContinue()}
               className={`px-8 py-3 rounded-xl font-medium transition-all hover:scale-105 shadow-lg flex items-center gap-2 ${
@@ -356,7 +357,7 @@ export default function OnboardingPage() {
                   : "bg-white/20 text-white/40 cursor-not-allowed"
               }`}
             >
-              Continue
+              {state === 'parsing' || state === 'validating' ? 'Processing...' : 'Continue'}
               <ArrowRight className="h-4 w-4" />
             </button>
           ) : (
@@ -373,6 +374,20 @@ export default function OnboardingPage() {
           )}
         </motion.div>
       </div>
+
+      {state !== 'idle' && (
+        <div className="fixed bottom-4 right-4 p-4 bg-background border rounded-lg shadow-lg">
+          <div className="flex items-center gap-2">
+            <Loader2 className="animate-spin h-4 w-4" />
+            <span>
+              {state === 'parsing' && `Processing ${currentFile}`}
+              {state === 'validating' && 'Validating content'}
+              {state === 'success' && 'Processing complete'}
+              {state === 'error' && 'Processing failed'}
+            </span>
+          </div>
+        </div>
+      )}
 
       {showNameModal && (
         <div className="fixed inset-0 flex items-end justify-center z-50 pointer-events-auto">
