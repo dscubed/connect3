@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Box, Compass, Users, Menu, X, Bell, Clock } from "lucide-react";
 import { AuthButton } from "./auth/auth-button";
@@ -27,11 +27,19 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
   </div>
 );
 
-// ...existing code...
+interface SidebarProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
 
-const Sidebar: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+const Sidebar: React.FC<SidebarProps> = ({ open, onOpenChange }) => {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const sidebarRef = useRef<HTMLElement>(null);
+
+  // Use controlled state if provided, otherwise use internal state
+  const sidebarOpen = open !== undefined ? open : internalOpen;
+  const setSidebarOpen = onOpenChange || setInternalOpen;
 
   useEffect(() => {
     const handleResize = () => {
@@ -41,6 +49,21 @@ const Sidebar: React.FC = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!isDesktop && sidebarOpen && sidebarRef.current && 
+          !sidebarRef.current.contains(event.target as Node) &&
+          !(event.target as HTMLElement).closest('[data-menu-button]')) {
+        setSidebarOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [sidebarOpen, isDesktop, setSidebarOpen]);
 
   return (
     <>
@@ -65,6 +88,7 @@ const Sidebar: React.FC = () => {
       )}
 
       <motion.aside
+        ref={sidebarRef}
         initial={false}
         animate={{
           x: isDesktop ? "0%" : sidebarOpen ? "0%" : "-100%",

@@ -26,6 +26,7 @@ export async function POST(req: Request) {
       success: true,
       result: results.result,
       matches: results.matches,
+      followUps: results.followUps,
     });
     }
 

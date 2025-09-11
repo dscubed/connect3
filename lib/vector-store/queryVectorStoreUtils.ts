@@ -10,6 +10,7 @@ export const SearchResultSchema = z.object({
       description: z.string(),
     })
   ),
+  followUps: z.string(), // MUST be a single natural language question
 });
 
 export type SearchResult = z.infer<typeof SearchResultSchema>;
@@ -22,13 +23,18 @@ export async function queryVectorStore(
   const openai = new OpenAI({ apiKey: openaiApiKey });
 
   const response = await openai.responses.parse({
-    model: "o4-mini",
-    input: [
-      {
+    model: "gpt-4o-mini",
+    input: [{
         role: "system",
-        content:
-          "You are a search assistant. Return JSON strictly matching the schema. Don't include filename or file_id in the description.",
-      },
+        content: `You MUST include ALL these fields in your JSON response:
+1. result: Summary text (2-3 sentences)
+2. matches:
+    - file_id: The ID of the file
+    - description: A description of the file (DONT INCLUDE FILE NAMES)
+3. followUps: A SINGLE QUESTION to continue the conversation
+
+Failure to include ALL fields will result in an error.`
+},
       {
         role: "user",
         content: `Query: ${query}`,
@@ -49,5 +55,19 @@ export async function queryVectorStore(
     throw new Error("Failed to parse search results");
   }
 
-  return response.output_parsed;
+  console.log("Raw API response:", JSON.stringify(response.output_parsed, null, 2));
+
+  const resultWithFollowUp = {
+    ...response.output_parsed,
+    followUps: response.output_parsed.followUps || 
+      "Would you like more details about any of these findings?"
+  };
+
+  const parsed = SearchResultSchema.safeParse(resultWithFollowUp);
+  if (!parsed.success) {
+    console.error("Validation failed:", parsed.error.format());
+    throw new Error("Invalid search result format");
+  }
+
+  return parsed.data;
 }
