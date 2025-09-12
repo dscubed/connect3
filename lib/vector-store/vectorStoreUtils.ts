@@ -34,7 +34,7 @@ export async function uploadToVectorStoreAndDatabase(
     // Step 1: Upload to OpenAI Vector Store
     console.log("Uploading to vector store...");
 
-    const fileObj = new File([summaryText], `${userId}_${Date.now()}.txt`, {
+    const fileObj = new File([summaryText], `summary_${Date.now()}.txt`, {
       type: "text/plain",
     });
     const file = await openai.files.create({
@@ -56,6 +56,19 @@ export async function uploadToVectorStoreAndDatabase(
         }`
       );
     }
+
+    if (!file.id) {
+      throw new Error("OpenAI did not return a file ID");
+    }
+
+    // Attach attributes after successful upload
+    await openai.vectorStores.files.update(file.id, {
+      vector_store_id: vectorStoreId,
+      attributes: {
+        userId: userId,
+        uploadedBy: "system",
+      },
+    });
 
     const { data, error } = await supabase
       .from("user_files")

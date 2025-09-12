@@ -80,56 +80,6 @@ export default function SearchResults() {
 
   return (
     <div className="min-h-screen bg-[#0B0B0C] text-white relative overflow-hidden">
-      <div className="pointer-events-none fixed inset-0 -z-10">
-        <motion.div
-          className="absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full blur-3xl opacity-30"
-          style={{
-            background: "radial-gradient(60% 60% at 50% 50%, #7C3AED55 0%, transparent 70%)",
-          }}
-          animate={{
-            scale: [1, 1.1, 1],
-            opacity: [0.3, 0.4, 0.3],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-          }}
-        />
-        <motion.div
-          className="absolute bottom-0 right-16 h-56 w-56 rounded-full blur-3xl opacity-20"
-          style={{
-            background: "radial-gradient(60% 60% at 50% 50%, #06B6D455 0%, transparent 70%)",
-          }}
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.2, 0.3, 0.2],
-          }}
-          transition={{
-            duration: 6,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-            delay: 2,
-          }}
-        />
-        <motion.div
-          className="absolute top-1/2 left-16 h-48 w-48 rounded-full blur-3xl opacity-15"
-          style={{
-            background: "radial-gradient(60% 60% at 50% 50%, #10B98155 0%, transparent 70%)",
-          }}
-          animate={{
-            scale: [1, 1.15, 1],
-            opacity: [0.15, 0.25, 0.15],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "easeInOut",
-            delay: 4,
-          }}
-        />
-      </div>
-
 
       <div className="grid max-w-7xl grid-cols-12 gap-6 px-4 py-6 md:px-8 relative z-10">
         <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
@@ -152,6 +102,7 @@ export default function SearchResults() {
           </motion.div>
 
           <div className="max-w-4xl space-y-8">
+            {/* Query Section */}
             <motion.div
               className="text-right"
               initial={{ opacity: 0, x: 20 }}
@@ -164,19 +115,21 @@ export default function SearchResults() {
               </div>
             </motion.div>
 
+            {/* Search Results */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
               <div className="text-white/60 text-sm mb-2">c3</div>
-
+              {/* Loading State */}
               {isLoading ? (
                 <div className="space-y-4">
                   <p className="text-white/80">searching for the perfect matches...</p>
                   <CubeLoader size={48} />
                 </div>
               ) : (
+                // Results
                 <motion.div
                   className="space-y-4 text-white/80 leading-relaxed"
                   initial={{ opacity: 0 }}
@@ -212,7 +165,8 @@ export default function SearchResults() {
                 </motion.div>
               )}
             </motion.div>
-
+            
+            {/* User Profile Cards */}
             {!isLoading && (
               <motion.div
                 className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8"
@@ -233,58 +187,58 @@ export default function SearchResults() {
           </div>
         </main>
       </div>
-
-      <motion.div
-        className="mt-12 pt-8 border-t border-white/10"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.8 }}
-      >
-        <div className="max-w-2xl mx-auto">
-          <motion.div
-            className="flex items-center gap-2 rounded-2xl bg-white/5 border border-white/10 px-4 py-3 backdrop-blur"
-            whileHover={{ borderColor: "rgba(255,255,255,0.2)" }}
-            transition={{ duration: 0.2 }}
+        <motion.div
+            className="fixed-bottom-0 left-0 right-0 z-50 pt-8 border-t border-white/10"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
           >
-            <Search className="h-5 w-5 text-white/60" />
-            <input
-              className="w-full bg-transparent outline-none placeholder:text-white/40 text-white"
-              placeholder="Ask another question or refine your search..."
-              value={newQuery}
-              onChange={(e) => setNewQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && newQuery.trim()) {
-                  // Handle new search
-                  setNewQuery("")
-                }
-              }}
-            />
-            <motion.button
-              className="rounded-xl px-3 py-1.5 bg-white text-black text-sm font-medium hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={!newQuery.trim()}
-              whileHover={newQuery.trim() ? { scale: 1.05 } : {}}
-              whileTap={newQuery.trim() ? { scale: 0.95 } : {}}
-              onClick={() => {
-                if (newQuery.trim()) {
-                  // Handle new search
-                  setNewQuery("")
-                }
-              }}
-            >
-              Search
-            </motion.button>
-          </motion.div>
+            <div className="max-w-2xl mx-auto">
+              <motion.div
+                className="flex items-center gap-2 rounded-2xl bg-white/5 border border-white/10 px-4 py-3 backdrop-blur"
+                whileHover={{ borderColor: "rgba(255,255,255,0.2)" }}
+                transition={{ duration: 0.2 }}
+              >
+                <Search className="h-5 w-5 text-white/60" />
+                <input
+                  className="w-full bg-transparent outline-none placeholder:text-white/40 text-white"
+                  placeholder="Ask another question or refine your search..."
+                  value={newQuery}
+                  onChange={(e) => setNewQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && newQuery.trim()) {
+                      // Handle new search
+                      setNewQuery("")
+                    }
+                  }}
+                />
+                <motion.button
+                  className="rounded-xl px-3 py-1.5 bg-white text-black text-sm font-medium hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!newQuery.trim()}
+                  whileHover={newQuery.trim() ? { scale: 1.05 } : {}}
+                  whileTap={newQuery.trim() ? { scale: 0.95 } : {}}
+                  onClick={() => {
+                    if (newQuery.trim()) {
+                      // Handle new search
+                      setNewQuery("")
+                    }
+                  }}
+                >
+                  Search
+                </motion.button>
+              </motion.div>
 
-          <motion.p
-            className="text-center text-white/50 text-sm mt-3"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1 }}
-          >
-            Try: "Who else builds with AI?" or "Find designers in crypto"
-          </motion.p>
-        </div>
-      </motion.div>
+              <motion.p
+                className="text-center text-white/50 text-sm mt-3"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1 }}
+              >
+                Try: "Who else builds with AI?" or "Find designers in crypto"
+              </motion.p>
+            </div>
+        </motion.div>
+
 
       <UserProfile 
         user={selectedUser} 

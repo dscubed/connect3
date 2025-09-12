@@ -54,7 +54,7 @@ const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
  */
 export async function semanticChunkText(text: string, fileId: string) {
   const response = await client.responses.create({
-    model: "gpt-4.1-mini", // lightweight + good at structuring
+    model: "gpt-4o-mini", // lightweight + good at structuring
     input: [
       {
         role: "system",

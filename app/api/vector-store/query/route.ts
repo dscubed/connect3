@@ -15,6 +15,8 @@ export async function POST(req: Request) {
 
     const results = await runSearch(query);
 
+    console.log("Search Results:", results);
+
     if (!results) {
       return NextResponse.json(
         { error: "Search failed" },
@@ -29,8 +31,6 @@ export async function POST(req: Request) {
       followUps: results.followUps,
     });
     }
-
-    
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Search failed";
     return NextResponse.json(
