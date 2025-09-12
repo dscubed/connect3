@@ -5,6 +5,7 @@ import PeopleSection from "@/components/home/PeopleSection";
 import React, { useState } from "react";
 import AnimatedParticles from "@/components/AnimatedParticles";
 import SearchSection from "@/components/home/SearchSection";
+import { useRouter } from "next/navigation";
 
 // --- Demo data (replace with your API results) ---
 const SAMPLE_PEOPLE = [
@@ -78,37 +79,38 @@ const SUGGESTED_QUERIES = [
 ];
 
 export default function Home() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [query, setQuery] = useState("");
-  
+  const router = useRouter();
+
   const handleSearch = async (searchQuery: string) => {
-    try {
-      const res = await fetch("/api/vector-store/query", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: searchQuery }),
-      });
-  
-      const data = await res.json();
-      console.log("Search results:", data);
-    } catch (err) {
-      console.error("Search error:", err);
-    }
+    const encodedQuery = encodeURIComponent(searchQuery);
+    router.push(`/search?q=${encodedQuery}`);
   };
 
   return (
     <div className="min-h-screen bg-[#0B0B0C] text-white relative overflow-hidden">
-      <div className="grid max-w-7xl grid-cols-12 gap-6 px-4 md:px-8 relative z-10">
-        <Sidebar />
-        <main className="col-span-12 md:col-span-9 lg:col-span-10 pt-16 md:pt-0 relative">
-          <AnimatedParticles />
-          <HeroSection />
-          <SearchSection
-            query={query}
-            setQuery={setQuery}
-            suggestedQueries={SUGGESTED_QUERIES}
-            onSearch={handleSearch}
-          />
-          <PeopleSection people={SAMPLE_PEOPLE} />
+      <div className="flex relative z-10">
+        <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
+
+        <main className="flex-1 pt-16 md:pt-0 relative">
+          <div
+            className="h-screen overflow-y-auto pr-4"
+            style={{
+              scrollbarWidth: "thin",
+              scrollbarColor: "rgba(255,255,255,0.3) transparent",
+            }}
+          >
+            <AnimatedParticles />
+            <HeroSection />
+            <SearchSection
+              query={query}
+              setQuery={setQuery}
+              suggestedQueries={SUGGESTED_QUERIES}
+              onSearch={handleSearch}
+            />
+            <PeopleSection people={SAMPLE_PEOPLE} />
+          </div>
         </main>
       </div>
     </div>

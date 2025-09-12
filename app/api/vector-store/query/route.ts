@@ -18,18 +18,14 @@ export async function POST(req: Request) {
     console.log("Search Results:", results);
 
     if (!results) {
-      return NextResponse.json(
-        { error: "Search failed" },
-        { status: 500 }
-      );
-    }
-    else {
-    return NextResponse.json({
-      success: true,
-      result: results.result,
-      matches: results.matches,
-      followUps: results.followUps,
-    });
+      return NextResponse.json({ error: "Search failed" }, { status: 500 });
+    } else {
+      return NextResponse.json({
+        success: true,
+        result: results.result,
+        matches: results.matches,
+        followUps: results.followUps,
+      });
     }
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Search failed";

@@ -10,7 +10,7 @@ export const QueryResultSchema = z.object({
       description: z.string(),
     })
   ),
-  followUps: z.string(), 
+  followUps: z.string(),
 });
 
 export const SearchResultSchema = z.object({
@@ -23,7 +23,7 @@ export const SearchResultSchema = z.object({
           file_id: z.string(),
           description: z.string(),
         })
-      )
+      ),
     })
   ),
   followUps: z.string(),
@@ -45,34 +45,37 @@ export async function queryVectorStore(
 ): Promise<SearchResult> {
   const openai = new OpenAI({ apiKey: openaiApiKey });
 
-  const developmentTesting = true;
-  let response : QueryResult;
-  
+  const developmentTesting = false;
+  let response: QueryResult;
+
   if (developmentTesting) {
-    response =
-      {
-        result: "Students at the University of Melbourne, like Tanat Chanwangsa, showcase a strong programming background and interest in Software Engineering (SWE) roles. Tanat, majoring in Computing and Software Systems, is proficient in multiple programming languages and aims to leverage software to solve complex challenges. His experiences in internships further enhance his readiness for SWE positions by developing practical skills.",
-        matches: [
+    response = {
+      result:
+        "Students at the University of Melbourne, like Tanat Chanwangsa, showcase a strong programming background and interest in Software Engineering (SWE) roles. Tanat, majoring in Computing and Software Systems, is proficient in multiple programming languages and aims to leverage software to solve complex challenges. His experiences in internships further enhance his readiness for SWE positions by developing practical skills.",
+      matches: [
         {
           file_id: "file-HQbTtn4Jc84bVNUaCDAhwP",
-          description: "This document highlights Tanat Chanwangsa's role at DSCubed, where he contributes to projects linking data science theory to practical applications, showcasing the skills that are desirable in SWE roles."
+          description:
+            "This document highlights Tanat Chanwangsa's role at DSCubed, where he contributes to projects linking data science theory to practical applications, showcasing the skills that are desirable in SWE roles.",
         },
         {
           file_id: "file-FkeGHrV61WrLFcT5B2ayeb",
-          description: "This document traces Tanat's academic journey, emphasizing his strong performance in STEM subjects and his leadership in tutoring, indicating a solid background for pursuing SWE roles."
+          description:
+            "This document traces Tanat's academic journey, emphasizing his strong performance in STEM subjects and his leadership in tutoring, indicating a solid background for pursuing SWE roles.",
         },
         {
           file_id: "file-MUDBA5QuWuirNVEmgBsmF4",
-          description: "This document discusses Tanat's extensive programming skills and passion for technology, aligning with the qualifications typically sought in Software Engineering candidates."
-        }
+          description:
+            "This document discusses Tanat's extensive programming skills and passion for technology, aligning with the qualifications typically sought in Software Engineering candidates.",
+        },
       ],
       followUps: "Would you like more details about Tanat's background?",
     };
-  }
-  else {
+  } else {
     const apiResponse = await openai.responses.parse({
       model: "gpt-4o-mini",
-      input: [{
+      input: [
+        {
           role: "system",
           content: `You are a vector store assistant. Rules:
   
@@ -80,7 +83,8 @@ export async function queryVectorStore(
      - result: 2-3 sentence summary of relevant content.
      - matches: an array of objects containing:
          * file_id: the actual file_id from the vector store attributes. FORMAT: "file-...", NO .TXT
-         * description: short description of the content and how it relates to the query
+         * description: short description of the content and how it relates to the query and describes the user don't mention document
+         e.g. Has experience in building web applications using React and Node.js., Part of university coding club, developing teamwork skills.
      - followUps: a single natural language question to continue the conversation
   
   2. Ignore file_name. Never generate it.
@@ -97,8 +101,8 @@ export async function queryVectorStore(
   }
   
   5. If you cannot find results, return an empty matches array but still include result and followUps.
-  `
-  },
+  `,
+        },
         {
           role: "user",
           content: `Query: ${query}`,
@@ -120,7 +124,6 @@ export async function queryVectorStore(
     }
 
     response = apiResponse.output_parsed;
-
   }
 
   const parsed = QueryResultSchema.safeParse(response);
@@ -134,30 +137,31 @@ export async function queryVectorStore(
   const userMap = new Map<string, Array<FileInfo>>();
   for (const match of matches) {
     const fileId = match.file_id;
-    const fileInfo = await openai.vectorStores.files.retrieve(
-      fileId, {
-        vector_store_id: vectorStoreId,
-      }
-    );
+    const fileInfo = await openai.vectorStores.files.retrieve(fileId, {
+      vector_store_id: vectorStoreId,
+    });
 
     const userId = String(fileInfo.attributes?.userId);
     if (userId) {
       const existing = userMap.get(userId) || [];
-      userMap.set(userId, [...existing, {description: match.description, file_id: match.file_id }]);
+      userMap.set(userId, [
+        ...existing,
+        { description: match.description, file_id: match.file_id },
+      ]);
     }
   }
-  
+
   const userResults = Array.from(userMap.entries()).map(([userId, files]) => ({
     user_id: userId,
-    files: files.map(file => ({
+    files: files.map((file) => ({
       file_id: file.file_id,
-      description: file.description
-    }))
+      description: file.description,
+    })),
   }));
 
   return {
     result: parsed.data.result,
     matches: userResults,
-    followUps: parsed.data.followUps
+    followUps: parsed.data.followUps,
   };
 }
