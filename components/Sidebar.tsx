@@ -52,16 +52,20 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onOpenChange }) => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (!isDesktop && sidebarOpen && sidebarRef.current && 
-          !sidebarRef.current.contains(event.target as Node) &&
-          !(event.target as HTMLElement).closest('[data-menu-button]')) {
+      if (
+        !isDesktop &&
+        sidebarOpen &&
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target as Node) &&
+        !(event.target as HTMLElement).closest("[data-menu-button]")
+      ) {
         setSidebarOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [sidebarOpen, isDesktop, setSidebarOpen]);
 
@@ -97,7 +101,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onOpenChange }) => {
         className={`z-50 flex flex-col justify-between h-screen bg-[#0B0B0C]/95 backdrop-blur-xl border-r border-white/10 shadow-2xl
           ${
             isDesktop
-              ? "relative md:col-span-3 lg:col-span-2 md:w-auto md:bg-transparent md:border-r-0 md:shadow-none md:backdrop-blur-none md:transform-none"
+              ? "px-8 relative md:col-span-3 lg:col-span-2 md:w-auto md:bg-transparent md:border-r-0 md:shadow-none md:backdrop-blur-none md:transform-none"
               : "fixed top-0 left-0 w-64"
           }
         `}
