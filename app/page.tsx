@@ -6,6 +6,7 @@ import React, { useState } from "react";
 import AnimatedParticles from "@/components/AnimatedParticles";
 import SearchSection from "@/components/home/SearchSection";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/stores/authStore";
 
 // --- Demo data (replace with your API results) ---
 const SAMPLE_PEOPLE = [
@@ -81,11 +82,50 @@ const SUGGESTED_QUERIES = [
 export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [creatingChatroom, setCreatingChatroom] = useState(false);
   const router = useRouter();
 
   const handleSearch = async (searchQuery: string) => {
-    const encodedQuery = encodeURIComponent(searchQuery);
-    router.push(`/search?q=${encodedQuery}`);
+    setCreatingChatroom(true);
+
+    try {
+      console.log("🚀 Creating chatroom for query:", searchQuery);
+
+      const userId = useAuthStore.getState().user?.id;
+      const response = await fetch("/api/chatrooms/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: searchQuery,
+          userId: userId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        console.log(
+          "✅ Chatroom created, routing to search page with chatroom ID:",
+          data.chatroom.id
+        );
+        // Route to search page with chatroom ID as parameter
+        router.push(`/search?chatroom=${data.chatroom.id}`);
+      } else {
+        console.error("❌ Failed to create chatroom:", data.error);
+        // Fallback to search page with query
+        const encodedQuery = encodeURIComponent(searchQuery);
+        router.push(`/search?q=${encodedQuery}`);
+      }
+    } catch (error) {
+      console.error("❌ Error creating chatroom:", error);
+      // Fallback to search page with query
+      const encodedQuery = encodeURIComponent(searchQuery);
+      router.push(`/search?q=${encodedQuery}`);
+    } finally {
+      setCreatingChatroom(false);
+    }
   };
 
   return (
