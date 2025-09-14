@@ -1,5 +1,4 @@
 import { createClient } from "@supabase/supabase-js";
-import { NextRequest, NextResponse } from "next/server";
 import { runSearch } from "@/lib/vector-store/queryVectorStore";
 
 const supabase = createClient(
@@ -7,19 +6,8 @@ const supabase = createClient(
   process.env.SUPABASE_SECRET_KEY!
 );
 
-// In app/api/chatrooms/query/route.ts
-export async function POST(request: NextRequest) {
-  let messageId: string | undefined;
+export async function searchMessage(messageId: string) {
   try {
-    ({ messageId } = await request.json());
-
-    if (!messageId) {
-      return NextResponse.json(
-        { error: "Message ID is required" },
-        { status: 400 }
-      );
-    }
-
     console.log("🔍 Running search for message:", messageId);
 
     // Get the message to find the query
@@ -31,18 +19,18 @@ export async function POST(request: NextRequest) {
 
     if (fetchError || !message) {
       console.error("❌ Message not found:", fetchError);
-      return NextResponse.json({ error: "Message not found" }, { status: 404 });
+      throw new Error("Message not found");
     }
 
     // Check if search already completed
     if (message.status === "completed" && message.content) {
       console.log("✅ Search already completed");
-      return NextResponse.json({
+      return {
         success: true,
         content: message.content,
         status: "completed",
         cached: true,
-      });
+      };
     }
 
     // Update status to processing
@@ -67,41 +55,30 @@ export async function POST(request: NextRequest) {
 
     if (updateError) {
       console.error("❌ Error updating message content:", updateError);
-
-      // Mark as failed
       await supabase
         .from("chatmessages")
         .update({ status: "failed" })
         .eq("id", messageId);
-
-      return NextResponse.json(
-        { error: "Failed to update message content" },
-        { status: 500 }
-      );
+      throw new Error("Failed to update message content");
     }
 
     console.log("✅ Updated message content");
 
-    return NextResponse.json({
+    return {
       success: true,
       content: searchResults,
       status: "completed",
       cached: false,
-    });
+    };
   } catch (error) {
-    console.error("❌ Search API error:", error);
+    console.error("❌ Search error:", error);
 
     // Mark as failed
-    if (messageId) {
-      await supabase
-        .from("chatmessages")
-        .update({ status: "failed" })
-        .eq("id", messageId);
-    }
+    await supabase
+      .from("chatmessages")
+      .update({ status: "failed" })
+      .eq("id", messageId);
 
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    throw error;
   }
 }

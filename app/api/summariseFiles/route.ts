@@ -1,13 +1,27 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { authenticateRequest } from "@/lib/api/auth-middleware";
 import OpenAI from "openai";
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const { parsedFiles } = await req.json();
+    // 1. Authenticate user via Supabase Auth
+    const authResult = await authenticateRequest(req);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Return error response
+    }
+    const { user } = authResult;
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // 2. Parse request body
+    const body = await req.json();
+    const { parsedFiles } = body;
+
     if (!parsedFiles || parsedFiles.length === 0) {
       return NextResponse.json(
         { error: "No parsed files provided" },
@@ -15,14 +29,25 @@ export async function POST(req: Request) {
       );
     }
 
+    // Limit to 2 files max
+    if (parsedFiles.length > 2) {
+      return NextResponse.json(
+        { error: "Maximum 2 files allowed" },
+        { status: 400 }
+      );
+    }
+
     // Combine all parsed text into a single string
     const combinedText = parsedFiles
-      .map((f: { text: string }) => f.text)
-      .join("\n\n");
+      .map(
+        (f: { file: { name: string }; text: string }, index: number) =>
+          `File${index + 1}:\n${f.text}`
+      )
+      .join("\n\n---\n\n");
 
     // Call OpenAI to generate a profile summary
     const response = await client.responses.create({
-      model: "o4-mini",
+      model: "gpt-4o-mini",
       input: [
         {
           role: "system",

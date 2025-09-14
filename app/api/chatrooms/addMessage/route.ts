@@ -1,48 +1,23 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { runSearchInBackground } from "@/lib/chatrooms/runSearchInBackground";
+import { authenticateRequest } from "@/lib/api/auth-middleware";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SECRET_KEY!
 );
 
-// Async function to run search in background
-async function runSearchInBackground(messageId: string) {
-  try {
-    console.log("🔍 Starting background search for message:", messageId);
-
-    // Call your search API endpoint
-    const response = await fetch(
-      `${
-        process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-      }/api/chatrooms/query`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ messageId }),
-      }
-    );
-
-    const result = await response.json();
-
-    if (result.success) {
-      console.log("✅ Background search completed for message:", messageId);
-    } else {
-      console.error(
-        "❌ Background search failed for message:",
-        messageId,
-        result.error
-      );
-    }
-  } catch (error) {
-    console.error("❌ Background search error for message:", messageId, error);
-  }
-}
-
 export async function POST(request: NextRequest) {
   try {
+    // Authenticate user
+    const authResult = await authenticateRequest(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Return error response
+    }
+    const { user } = authResult;
+
+    // Parse request body
     const { chatroomId, query, userId } = await request.json();
 
     if (!chatroomId || !query || !userId) {
@@ -52,32 +27,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log("💬 Adding message to chatroom:", chatroomId, "Query:", query);
+    // Verify the authenticated user matches the userId in request
+    if (user.id !== userId) {
+      return NextResponse.json({ error: "User ID mismatch" }, { status: 403 });
+    }
 
-    // Step 1: Verify chatroom exists and user has access
+    console.log(
+      `💬 User ${user.id} adding message to chatroom:`,
+      chatroomId,
+      "Query:",
+      query
+    );
+    console.log(
+      `💬 User ${user.id} adding message to chatroom:`,
+      chatroomId,
+      "Query:",
+      query
+    );
+
+    // Verify chatroom exists and user has access
     const { data: chatroom, error: chatroomError } = await supabase
       .from("chatrooms")
       .select("id, created_by")
       .eq("id", chatroomId)
+      .eq("created_by", user.id) // Ensure user owns this chatroom
       .single();
 
     if (chatroomError || !chatroom) {
-      console.error("❌ Chatroom not found:", chatroomError);
+      console.error("❌ Chatroom not found or access denied:", chatroomError);
       return NextResponse.json(
-        { error: "Chatroom not found" },
+        { error: "Chatroom not found or access denied" },
         { status: 404 }
       );
     }
 
-    // TODO: Add proper authorization check
-    // if (chatroom.created_by !== userId) {
-    //   return NextResponse.json(
-    //     { error: "Unauthorized" },
-    //     { status: 403 }
-    //   );
-    // }
-
-    // Step 2: Add new message to chatroom
+    // Add new message to chatroom
     const { data: message, error: messageError } = await supabase
       .from("chatmessages")
       .insert({
@@ -100,12 +84,12 @@ export async function POST(request: NextRequest) {
 
     console.log("✅ Created message:", message.id);
 
-    // Step 3: Trigger search in background (don't await!)
+    // Trigger search in background (don't await!)
     runSearchInBackground(message.id).catch((error) => {
       console.error("❌ Background search failed:", error);
     });
 
-    // Step 4: Return immediately
+    // Return immediately
     return NextResponse.json({
       success: true,
       message: {

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { createClient } from "@/lib/supabase/client";
-import type { User } from "@supabase/supabase-js";
+import type { User, Session } from "@supabase/supabase-js";
 
 interface Profile {
   id: string;
@@ -12,15 +12,25 @@ interface Profile {
   updated_at: string;
   onboarding_completed: boolean;
   name_provided: boolean;
+  location?: string;
+  tldr?: string;
+  cover_image_url?: string;
+  status?: string;
+  information?: Record<string, unknown>;
 }
 
 interface AuthState {
   user: User | null;
   profile: Profile | null;
   loading: boolean;
+  session: Session | null;
   initialize: () => Promise<void>;
   signOut: () => Promise<void>;
-  updateProfile: (fields: Partial<Profile>) => Promise<void>; // Add this
+  updateProfile: (fields: Partial<Profile>) => Promise<void>;
+  makeAuthenticatedRequest: (
+    url: string,
+    options?: RequestInit
+  ) => Promise<Response>;
 }
 
 async function fetchProfile(
@@ -33,8 +43,7 @@ async function fetchProfile(
     .select("*")
     .eq("id", userId)
     .single();
-  if (!error)
-    set({ profile }); // onboarding_completed will be included automatically
+  if (!error) set({ profile });
   else set({ profile: null });
 }
 
@@ -42,24 +51,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   profile: null,
   loading: true,
+  session: null,
 
   initialize: async () => {
     const supabase = createClient();
 
-    // Get initial user
+    // Get initial session and user
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    set({ user, loading: false });
-    if (user) {
-      fetchProfile(user.id, set);
+      data: { session },
+    } = await supabase.auth.getSession();
+    set({ user: session?.user ?? null, session, loading: false });
+
+    if (session?.user) {
+      fetchProfile(session.user.id, set);
     } else {
       set({ profile: null });
     }
 
     // Listen for changes
     supabase.auth.onAuthStateChange((event, session) => {
-      set({ user: session?.user ?? null, loading: false });
+      set({ user: session?.user ?? null, session, loading: false });
       if (session?.user) {
         fetchProfile(session.user.id, set);
       } else {
@@ -71,20 +82,50 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   signOut: async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    set({ user: null, profile: null });
+    set({ user: null, profile: null, session: null });
   },
 
   updateProfile: async (fields) => {
     const supabase = createClient();
     const userId = get().user?.id;
     if (!userId) return;
+
+    const updateData = {
+      ...fields,
+      updated_at: new Date().toISOString(),
+    };
+
     const { error } = await supabase
       .from("profiles")
-      .update(fields)
+      .update(updateData)
       .eq("id", userId);
+
     if (!error) {
-      // Update local profile state
-      set({ profile: { ...get().profile!, ...fields } });
+      set({ profile: { ...get().profile!, ...updateData } });
     }
+  },
+
+  makeAuthenticatedRequest: async (url: string, options: RequestInit = {}) => {
+    const { session } = get();
+
+    if (!session?.access_token) {
+      throw new Error("Authentication required. Please log in.");
+    }
+
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+        ...options.headers,
+      },
+    });
+
+    if (response.status === 401) {
+      get().signOut();
+      throw new Error("Authentication failed. Please log in again.");
+    }
+
+    return response;
   },
 }));

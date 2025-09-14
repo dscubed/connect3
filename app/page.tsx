@@ -92,16 +92,17 @@ export default function Home() {
       console.log("🚀 Creating chatroom for query:", searchQuery);
 
       const userId = useAuthStore.getState().user?.id;
-      const response = await fetch("/api/chatrooms/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          query: searchQuery,
-          userId: userId,
-        }),
-      });
+
+      // Use authenticated request from auth store
+      const response = await useAuthStore
+        .getState()
+        .makeAuthenticatedRequest("/api/chatrooms/create", {
+          method: "POST",
+          body: JSON.stringify({
+            query: searchQuery,
+            userId: userId,
+          }),
+        });
 
       const data = await response.json();
 
@@ -148,6 +149,7 @@ export default function Home() {
               setQuery={setQuery}
               suggestedQueries={SUGGESTED_QUERIES}
               onSearch={handleSearch}
+              creatingChatroom={creatingChatroom}
             />
             <PeopleSection people={SAMPLE_PEOPLE} />
           </div>

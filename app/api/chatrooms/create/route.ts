@@ -1,49 +1,29 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { runSearchInBackground } from "@/lib/chatrooms/runSearchInBackground";
+import { authenticateRequest } from "@/lib/api/auth-middleware";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SECRET_KEY!
 );
 
-// Async function to run search in background
-async function runSearchInBackground(messageId: string) {
-  try {
-    console.log("🔍 Starting background search for message:", messageId);
-
-    // Call your search API endpoint
-    const response = await fetch(
-      `${
-        process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-      }/api/chatrooms/query`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ messageId }),
-      }
-    );
-
-    const result = await response.json();
-
-    if (result.success) {
-      console.log("✅ Background search completed for message:", messageId);
-    } else {
-      console.error(
-        "❌ Background search failed for message:",
-        messageId,
-        result.error
-      );
-    }
-  } catch (error) {
-    console.error("❌ Background search error for message:", messageId, error);
-  }
-}
-
 export async function POST(request: NextRequest) {
   try {
+    const authResult = await authenticateRequest(request);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Return error response
+    }
+    const { user } = authResult;
+
     const { query, userId } = await request.json();
+
+    if (user.id !== userId) {
+      return NextResponse.json(
+        { error: "User ID does not match authenticated user" },
+        { status: 403 }
+      );
+    }
 
     if (!query || !userId) {
       return NextResponse.json(
@@ -88,7 +68,6 @@ export async function POST(request: NextRequest) {
         chatroom_id: chatroom.id,
         query: query,
         content: null, // Will be populated later by search
-        status: "pending", // Initial status
         user_id: userId,
       })
       .select()

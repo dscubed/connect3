@@ -7,6 +7,7 @@ interface SearchBarProps {
   setQuery: (q: string) => void;
   placeholder?: string;
   onSubmit?: (query: string) => void;
+  disabled?: boolean;
 }
 
 const SearchBarComponent: React.FC<SearchBarProps> = ({
@@ -14,8 +15,13 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
   setQuery,
   onSubmit,
   placeholder = "Search...",
+  disabled = false,
 }) => {
-  const { query: localQuery, isSearching, handleChange } = useSearch({
+  const {
+    query: localQuery,
+    isSearching,
+    handleChange,
+  } = useSearch({
     initialQuery: query,
     onSearchChange: setQuery,
   });
@@ -36,8 +42,9 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
           value={localQuery}
           onChange={(e) => handleChange(e.target.value)}
         />
-        <button 
+        <button
           type="submit"
+          disabled={disabled || isSearching || localQuery.trim() === ""}
           className="rounded-xl px-3 py-1.5 bg-white text-black text-sm font-medium hover:bg-white/90 transition-all hover:scale-105 shadow-lg"
         >
           Search

@@ -1,9 +1,24 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { authenticateRequest } from "@/lib/api/auth-middleware";
 import { uploadToVectorStoreAndDatabase } from "@/lib/vector-store/vectorStoreUtils";
+import { semanticChunkText } from "@/lib/vector-store/semanticChunking";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    // 1. Authenticate user via Supabase Auth
+    const authResult = await authenticateRequest(req);
+    if (authResult instanceof NextResponse) {
+      return authResult; // Return error response
+    }
+    const { user } = authResult;
+
+    // 2. Parse request body
+
     const { userId, summaryText } = await req.json();
+    // Verify the authenticated user matches the userId in request
+    if (user.id !== userId) {
+      return NextResponse.json({ error: "User ID mismatch" }, { status: 403 });
+    }
 
     if (!userId || !summaryText) {
       return NextResponse.json(
@@ -16,15 +31,18 @@ export async function POST(req: Request) {
 
     const chunks = await semanticChunkText(summaryText, userId);
     const uploadResults = [];
-    
+
     for (const chunk of chunks) {
-      const result = await uploadToVectorStoreAndDatabase(userId, chunk.content);
+      const result = await uploadToVectorStoreAndDatabase(
+        userId,
+        chunk.content
+      );
       if (!result.success) {
         return NextResponse.json(
-          { 
-            success: false, 
+          {
+            success: false,
             error: result.error,
-            uploadedChunks: uploadResults.length
+            uploadedChunks: uploadResults.length,
           },
           { status: 500 }
         );
@@ -44,45 +62,4 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
-}
-
-import OpenAI from "openai";
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-/**
- * Use GPT to semantically chunk text before uploading.
- */
-export async function semanticChunkText(text: string, fileId: string) {
-  const response = await client.responses.create({
-    model: "gpt-4o-mini", // lightweight + good at structuring
-    input: [
-      {
-        role: "system",
-        content: `
-You are a semantic chunker. 
-Split the given document into logical, coherent chunks.
-Rules:
-- Each chunk should be 300–800 tokens long.
-- Do not cut sentences in half.
-- Group sentences by topic or section (paragraphs, bullet lists, headings).
-- Return JSON only in this format:
-[
-  { "chunk_index": 0, "file_id": "FILE_ID", "content": "..." },
-  { "chunk_index": 1, "file_id": "FILE_ID", "content": "..." }
-]
-        `,
-      },
-      { role: "user", content: text },
-    ],
-  });
-
-  // LLM returns structured JSON text
-  const raw = response.output_text;
-  const chunks = JSON.parse(raw) as {
-    chunk_index: number;
-    file_id: string;
-    content: string;
-  }[];
-
-  return chunks;
 }

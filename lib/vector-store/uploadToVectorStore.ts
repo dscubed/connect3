@@ -1,18 +1,19 @@
+import { useAuthStore } from "@/stores/authStore";
+
 export const uploadToVectorStore = async (
   userId: string,
   summaryText: string
 ) => {
   try {
-    const response = await fetch("/api/vector-store/upload", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId,
-        summaryText,
-      }),
-    });
+    const response = await useAuthStore
+      .getState()
+      .makeAuthenticatedRequest("/api/vector-store/upload", {
+        method: "POST",
+        body: JSON.stringify({
+          userId,
+          summaryText,
+        }),
+      });
 
     if (!response.ok) {
       const error = await response.json();

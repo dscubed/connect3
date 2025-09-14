@@ -7,6 +7,7 @@ interface SearchSectionProps {
   setQuery: (q: string) => void;
   suggestedQueries: string[];
   onSearch?: (query: string) => void;
+  creatingChatroom?: boolean;
 }
 
 const SearchSection: React.FC<SearchSectionProps> = ({
@@ -14,15 +15,17 @@ const SearchSection: React.FC<SearchSectionProps> = ({
   setQuery,
   suggestedQueries,
   onSearch,
+  creatingChatroom,
 }) => (
   <div className="mx-auto max-w-2xl">
-    <SearchBar 
+    <SearchBar
       query={query}
       setQuery={setQuery}
       onSubmit={onSearch}
       placeholder="Search by skills, vibes, or ideas (e.g. 'Ex amazon intern')…"
+      disabled={creatingChatroom}
     />
-    <SuggestedQueries 
+    <SuggestedQueries
       suggestedQueries={suggestedQueries}
       onQuerySelect={(q) => {
         setQuery(q);

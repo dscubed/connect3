@@ -93,6 +93,7 @@ export default function SearchResults() {
   const [allMessages, setAllMessages] = useState<ChatMessage[]>([]);
 
   const subscriptionRef = useRef<any>(null);
+  const { user, loading: isAuthLoading } = useAuthStore(); // Add this line
 
   // Get parameters from URL
   const searchParams = useSearchParams();
@@ -180,10 +181,11 @@ export default function SearchResults() {
     try {
       console.log("🔍 Loading chatroom data for:", chatroomId);
 
-      // Use the getMessages endpoint to get all messages
-      const response = await fetch(
-        `/api/chatrooms/getMessages?chatroomId=${chatroomId}`
-      );
+      const response = await useAuthStore
+        .getState()
+        .makeAuthenticatedRequest(
+          `/api/chatrooms/getMessages?chatroomId=${chatroomId}`
+        );
       const data = await response.json();
 
       if (!data.success) {
@@ -192,7 +194,9 @@ export default function SearchResults() {
       }
 
       const { chatroom, messages } = data;
-      console.log(`✅ Loaded ${messages.length} messages from chatroom`);
+      console.log(
+        `✅ Loaded ${messages.length} messages from chatroom ${chatroom.id}`
+      );
 
       // Store all messages
       setAllMessages(messages);
@@ -245,19 +249,18 @@ export default function SearchResults() {
     try {
       console.log("💬 Adding new message to chatroom:", chatroomId);
 
-      const userId = useAuthStore.getState().user?.id;
+      const userId = user?.id;
 
-      const response = await fetch("/api/chatrooms/addMessage", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          chatroomId: chatroomId,
-          query: searchQuery,
-          userId: userId,
-        }),
-      });
+      const response = await useAuthStore
+        .getState()
+        .makeAuthenticatedRequest("/api/chatrooms/addMessage", {
+          method: "POST",
+          body: JSON.stringify({
+            chatroomId: chatroomId,
+            query: searchQuery,
+            userId: userId,
+          }),
+        });
 
       const data = await response.json();
 
@@ -278,6 +281,21 @@ export default function SearchResults() {
   // Main effect to handle URL parameters
   useEffect(() => {
     const initializeSearch = async () => {
+      // Wait for auth to finish loading
+      if (isAuthLoading) {
+        console.log("⏳ Auth still loading...");
+        return;
+      }
+
+      // Check if user exists after loading is done
+      if (!user) {
+        console.log("❌ No user found after auth loaded");
+        setIsLoading(false);
+        return;
+      }
+
+      console.log("✅ User authenticated:", user.id);
+
       if (chatroomParam) {
         console.log("📂 Using chatroom-based search:", chatroomParam);
         setChatroomId(chatroomParam);
@@ -297,7 +315,7 @@ export default function SearchResults() {
         subscriptionRef.current.unsubscribe();
       }
     };
-  }, [chatroomParam]);
+  }, [chatroomParam, user, isAuthLoading]); // Add isAuthLoading as dependency
 
   return (
     <div className="min-h-screen bg-[#0B0B0C] text-white relative overflow-hidden">

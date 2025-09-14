@@ -7,14 +7,14 @@ import { useAuthStore } from "@/stores/authStore";
 export function useSignUp() {
   const [isSigningUp, setIsSigningUp] = useState(false);
   const router = useRouter();
-  
+
   const user = useAuthStore((state) => state.user);
   if (user) {
     toast.error("Already signed in!");
     return {
       isSigningUp: false,
       handleEmailSignUp: async () => {},
-      handleGoogleSignUp: async () => {}
+      handleGoogleSignUp: async () => {},
     };
   }
 
