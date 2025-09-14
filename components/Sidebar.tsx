@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Box, Compass, Users, Menu, X, Bell, Clock } from "lucide-react";
 import { AuthButton } from "./auth/auth-button";
+import Link from "next/link";
 
 interface SidebarLinkProps {
   icon: React.ElementType;
@@ -114,14 +115,17 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onOpenChange }) => {
         </button>
 
         <div className="flex flex-col gap-4 pt-6 px-4 md:px-0">
-          <div className="flex items-center gap-2">
+          <Link
+            href="/"
+            className="flex items-center gap-2 hover:scale-105 transition-transform duration-200 cursor-pointer"
+          >
             <div className="h-7 w-7 rounded-xl bg-white/10 grid place-items-center border border-white/10 shadow-lg shadow-white/5">
               <Box className="h-4 w-4" />
             </div>
             <span className="font-semibold tracking-tight">
               connect<sup className="pl-0.5">3</sup>
             </span>
-          </div>
+          </Link>
           <nav className="mt-2 flex flex-col gap-1.5">
             <SidebarLink icon={Compass} label="Discover" active />
             <SidebarLink icon={Bell} label="Notifications" />

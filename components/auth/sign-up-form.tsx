@@ -16,8 +16,10 @@ import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useSignUp } from "./hooks/useSignup";
 
+// Remove the props interface since useSignUp handles the state
 export function SignUpForm({
   className,
+  ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,6 +27,7 @@ export function SignUpForm({
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
 
+  // Only use the isSigningUp from the hook
   const { isSigningUp, handleEmailSignUp, handleGoogleSignUp } = useSignUp();
 
   const onSubmit = (e: React.FormEvent) => {
@@ -39,7 +42,7 @@ export function SignUpForm({
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)}>
+    <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">Sign up</CardTitle>

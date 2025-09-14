@@ -1,6 +1,5 @@
 "use client";
 import { useState, useRef } from "react";
-import { AnimatePresence } from "framer-motion";
 import { useCubeAnimation } from "./hooks/useCubeAnimation";
 import { useFileHandlers } from "./hooks/useFileHandlers";
 import { getContentColor, CUBE_CONFIG } from "./utils/cubeUtils";
@@ -22,11 +21,8 @@ export const FileUploadCube = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { cubeRotate, cube } = useCubeAnimation(isPaused);
-  const { isEating, isDeleting, handleDrop, handleFileSelect, removeFile } = useFileHandlers(
-    files,
-    onFileUpload,
-    onFileRemove
-  );
+  const { isEating, isDeleting, handleDrop, handleFileSelect, removeFile } =
+    useFileHandlers(files, onFileUpload, onFileRemove);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -47,7 +43,8 @@ export const FileUploadCube = ({
       setIsDragging(false);
       handleDrop(e);
     },
-    onClick: () => files.length < CUBE_CONFIG.MAX_FILES && fileInputRef.current?.click(),
+    onClick: () =>
+      files.length < CUBE_CONFIG.MAX_FILES && fileInputRef.current?.click(),
     onMouseEnter: () => {
       setIsHovered(true);
       setIsPaused(true);
@@ -90,9 +87,7 @@ export const FileUploadCube = ({
           disabled={files.length >= CUBE_CONFIG.MAX_FILES}
         />
 
-        {files.length > 0 && (
-          <FileList files={files} onRemove={removeFile} />
-        )}
+        {files.length > 0 && <FileList files={files} onRemove={removeFile} />}
       </div>
     </div>
   );

@@ -24,7 +24,7 @@ export default function NameModal({
 }: NameModalProps) {
   const profile = useAuthStore((state) => state.profile);
   const { updateProfile } = useAuthStore.getState();
-  
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -46,7 +46,7 @@ export default function NameModal({
           onSubmit={async (e) => {
             e.preventDefault();
             if (!firstName.trim() || !lastName.trim()) return;
-            
+
             setIsLoading(true);
             try {
               await updateProfile({
@@ -54,14 +54,14 @@ export default function NameModal({
                 last_name: lastName,
                 name_provided: true,
               });
-              
+
               toast.success(
                 `Welcome, ${firstName} ${lastName}! Your name was successfully updated.`
               );
-              
+
               onSuccess?.(firstName, lastName);
               onClose();
-            } catch (error) {
+            } catch {
               toast.error("Failed to update your name. Please try again.");
             } finally {
               setIsLoading(false);
@@ -86,8 +86,8 @@ export default function NameModal({
             disabled={isLoading}
           />
           <DialogFooter className="flex gap-2 mt-4">
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="flex-1"
               disabled={isLoading || !firstName.trim() || !lastName.trim()}
             >

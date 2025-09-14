@@ -1,17 +1,15 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
+import Image from "next/image";
 
 export interface UserProfileProps {
   user: {
     id: string;
     name: string;
-    avatar: string;
-    location: string;
-    tldr: string;
-    today: string[];
-    pastVentures: string[];
-    viralSuccess: string[];
-    lookingFor: string[];
+    avatar?: string;
+    status?: string;
+    location?: string;
+    tldr?: string;
   } | null;
   isOpen: boolean;
   onClose: () => void;
@@ -48,73 +46,52 @@ export const UserProfile = ({ user, isOpen, onClose }: UserProfileProps) => {
                     share
                   </button>
                 </div>
-                <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+                <button
+                  onClick={onClose}
+                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                >
                   <X className="h-5 w-5" />
                 </button>
               </div>
 
               <div className="text-center mb-6">
-                <img
-                  src={user.avatar || "/placeholder.svg"}
-                  alt={user.name}
-                  className="h-20 w-20 rounded-full mx-auto mb-4 ring-2 ring-white/10"
-                />
-                <h2 className="text-2xl font-bold text-white mb-1">{user.name}</h2>
-                <p className="text-white/60">{user.location}</p>
+                <div className="w-20 h-20 mx-auto mb-4 relative">
+                  <Image
+                    src={user.avatar || "/placeholder.svg"}
+                    alt={user.name}
+                    fill
+                    className="rounded-full object-cover ring-2 ring-white/10"
+                    sizes="80px"
+                  />
+                </div>
+                <h2 className="text-2xl font-bold text-white mb-1">
+                  {user.name}
+                </h2>
+
+                <p className="text-white/60">
+                  📍{user.location ? user.location : "-"}
+                </p>
               </div>
 
               <div className="space-y-6">
                 <div>
+                  <p className="text-white/80 text-sm leading-relaxed">
+                    {user.status ? user.status : "No status available"}
+                  </p>
+                </div>
+
+                <div>
                   <h3 className="text-white font-semibold mb-2">tldr</h3>
-                  <p className="text-white/80 text-sm leading-relaxed">{user.tldr}</p>
+                  <p className="text-white/80 text-sm leading-relaxed">
+                    {user.tldr}
+                  </p>
                 </div>
 
-                <div>
-                  <h3 className="text-white font-semibold mb-3">today</h3>
-                  <ul className="space-y-2">
-                    {user.today.map((item, index) => (
-                      <li key={index} className="text-white/80 text-sm flex items-start gap-2">
-                        <span className="text-white/40 mt-1">•</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div>
-                  <h3 className="text-white font-semibold mb-3">past ventures</h3>
-                  <ul className="space-y-2">
-                    {user.pastVentures.map((item, index) => (
-                      <li key={index} className="text-white/80 text-sm flex items-start gap-2">
-                        <span className="text-white/40 mt-1">•</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div>
-                  <h3 className="text-white font-semibold mb-3">viral success</h3>
-                  <ul className="space-y-2">
-                    {user.viralSuccess.map((item, index) => (
-                      <li key={index} className="text-white/80 text-sm flex items-start gap-2">
-                        <span className="text-white/40 mt-1">•</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div>
-                  <h3 className="text-white font-semibold mb-3">looking for collaborators</h3>
-                  <ul className="space-y-2">
-                    {user.lookingFor.map((item, index) => (
-                      <li key={index} className="text-white/80 text-sm flex items-start gap-2">
-                        <span className="text-blue-400 mt-1">•</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
+                {/* Information tab placeholder - to be implemented later */}
+                <div className="pt-4 border-t border-white/10">
+                  <div className="text-white/40 text-sm text-center">
+                    More information coming soon...
+                  </div>
                 </div>
               </div>
             </div>

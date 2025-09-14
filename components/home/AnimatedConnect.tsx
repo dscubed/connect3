@@ -27,31 +27,34 @@ const AnimatedConnect = () => {
   // Animate typing/deleting
   useEffect(() => {
     const target = options[index];
-    let i = display.length;
     let timeoutId: ReturnType<typeof setTimeout>;
 
-    const deleteStep = () => {
-      if (i > 0) {
-        i--;
-        setDisplay((prev) => prev.slice(0, -1));
-        timeoutId = setTimeout(deleteStep, 180);
+    const deleteStep = (currentDisplay: string) => {
+      if (currentDisplay.length > 0) {
+        const newDisplay = currentDisplay.slice(0, -1);
+        setDisplay(newDisplay);
+        timeoutId = setTimeout(() => deleteStep(newDisplay), 180);
       } else {
-        timeoutId = setTimeout(typeStep, 350);
+        timeoutId = setTimeout(() => typeStep(""), 350);
       }
     };
 
-    const typeStep = () => {
-      if (i < target.length) {
-        setDisplay(target.slice(0, i + 1));
-        i++;
-        timeoutId = setTimeout(typeStep, 120);
+    const typeStep = (currentDisplay: string) => {
+      if (currentDisplay.length < target.length) {
+        const newDisplay = target.slice(0, currentDisplay.length + 1);
+        setDisplay(newDisplay);
+        timeoutId = setTimeout(() => typeStep(newDisplay), 120);
       }
     };
 
-    deleteStep();
+    // Get current display value using a callback to avoid stale closure
+    setDisplay((currentDisplay) => {
+      deleteStep(currentDisplay);
+      return currentDisplay;
+    });
+
     return () => clearTimeout(timeoutId);
-  }, [index]);
-
+  }, [index]); // Only depend on index
   return (
     <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.1] text-white">
       connect

@@ -1,10 +1,4 @@
-import { useState, useEffect } from 'react';
-
-interface CubePosition {
-  x: number;
-  y: number;
-  z: number;
-}
+import { useState, useEffect } from "react";
 
 export const useCubeAnimation = (isPaused: boolean) => {
   const [cubeRotate, setCubeRotate] = useState({ x: -10, y: -20, z: 0 });
@@ -45,7 +39,7 @@ export const useCubeAnimation = (isPaused: boolean) => {
         frame = requestAnimationFrame(animate);
       }
     };
-    
+
     frame = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(frame);
   }, [isPaused]);

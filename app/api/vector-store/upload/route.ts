@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const chunks = await semanticChunkText(summaryText, userId);
+    const chunks = await semanticChunkText(summaryText);
     const uploadResults = [];
 
     for (const chunk of chunks) {

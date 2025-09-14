@@ -31,16 +31,18 @@ export default function OnboardingPage() {
   const [description, setDescription] = useState("");
   const [descriptionWordCount, setDescriptionWordCount] = useState(0);
 
-  // Initialize word count when description already has content
+  // Initialize word count when description changes
   useEffect(() => {
-    if (description) {
+    if (description && description.trim()) {
       const count = description
         .trim()
         .split(/\s+/)
         .filter((word) => word.length > 0).length;
       setDescriptionWordCount(count);
+    } else {
+      setDescriptionWordCount(0);
     }
-  }, []);
+  }, [description]);
 
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -65,7 +67,7 @@ export default function OnboardingPage() {
       router.push("/");
       toast.error("Onboarding already completed!");
     }
-  }, [user, profile]);
+  }, [user, profile, router]);
 
   useEffect(() => {
     if (profile?.avatar_url) {
@@ -349,7 +351,7 @@ export default function OnboardingPage() {
           >
             <div className="space-y-4">
               <motion.h1
-                className="text-4xl md:text-5xl font-bold tracking-tight font-extrabold"
+                className="text-4xl md:text-5xl tracking-tight font-extrabold"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}

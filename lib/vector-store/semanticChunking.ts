@@ -4,7 +4,7 @@ const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 /**
  * Use GPT to semantically chunk text before uploading.
  */
-export async function semanticChunkText(text: string, fileId: string) {
+export async function semanticChunkText(text: string) {
   const response = await client.responses.create({
     model: "gpt-4o-mini", // lightweight + good at structuring
     input: [

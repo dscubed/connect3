@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, User, X } from "lucide-react";
+import Image from "next/image";
 
 interface ProfilePictureSectionProps {
   onImageUpload: (file: File) => void;
@@ -48,10 +49,13 @@ export default function ProfilePictureSection({
         >
           <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white/20 bg-white/5 backdrop-blur-md">
             {imageUrl ? (
-              <img
-                src={imageUrl || "/placeholder.svg"}
+              <Image
+                src={imageUrl}
                 alt="Profile"
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
+                sizes="192px"
+                priority
               />
             ) : (
               <div className="flex flex-col items-center justify-center h-full gap-3">
@@ -106,13 +110,14 @@ export default function ProfilePictureSection({
 
       <div className="text-center space-y-2">
         <p className="text-white/80">
-          {imageUrl ? "Click to remove your photo" : "Add a photo so people can recognize you"}
+          {imageUrl
+            ? "Click to remove your photo"
+            : "Add a photo so people can recognize you"}
         </p>
         <p className="text-white/50 text-sm max-w-md mx-auto">
-          {imageUrl 
+          {imageUrl
             ? "You can always change or remove your photo later."
-            : "Upload a clear photo of yourself. This helps others connect with you more easily."
-          }
+            : "Upload a clear photo of yourself. This helps others connect with you more easily."}
         </p>
       </div>
     </div>
