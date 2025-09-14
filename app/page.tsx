@@ -8,6 +8,7 @@ import SearchSection from "@/components/home/SearchSection";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { useSuggestedProfiles } from "@/components/home/hooks/useSuggestedProfiles";
+import { toast } from "sonner";
 
 const SUGGESTED_QUERIES = [
   "Who here loves generative art?",
@@ -67,14 +68,14 @@ export default function Home() {
       } else {
         console.error("❌ Failed to create chatroom:", data.error);
         // Fallback to search page with query
-        const encodedQuery = encodeURIComponent(searchQuery);
-        router.push(`/search?q=${encodedQuery}`);
+        toast.error(
+          "Failed to create chatroom: " + data.error || "Unknown error"
+        );
       }
     } catch (error) {
       console.error("❌ Error creating chatroom:", error);
       // Fallback to search page with query
-      const encodedQuery = encodeURIComponent(searchQuery);
-      router.push(`/search?q=${encodedQuery}`);
+      toast.error("Failed to create chatroom: " + error || "Unknown error");
     } finally {
       setCreatingChatroom(false);
     }
