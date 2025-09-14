@@ -19,11 +19,11 @@ export async function loginWithGoogle() {
   return supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${window.location.origin}/auth/callback`,
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
       queryParams: {
-        access_type: 'offline',
-        prompt: 'consent'
-      }
+        access_type: "offline",
+        prompt: "consent",
+      },
     },
   });
 }
