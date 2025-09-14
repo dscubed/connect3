@@ -37,14 +37,12 @@ interface MessageThreadProps {
     tldr?: string;
     avatar?: string;
   }) => void;
-  isLoading?: boolean;
 }
 
 export default function MessageThread({
   message,
   index,
   onUserClick,
-  isLoading = false,
 }: MessageThreadProps) {
   // Extract user IDs from message content for profile fetching
   const userIds = message.content?.matches?.map((match) => match.user_id) || [];

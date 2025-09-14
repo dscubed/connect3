@@ -7,64 +7,7 @@ import AnimatedParticles from "@/components/AnimatedParticles";
 import SearchSection from "@/components/home/SearchSection";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
-
-// --- Demo data (replace with your API results) ---
-const SAMPLE_PEOPLE = [
-  {
-    id: "1",
-    name: "Ava Patel",
-    role: "AI researcher → creative coder",
-    avatar: "https://i.pravatar.cc/120?img=1",
-    tags: ["foundation models", "music", "gen art"],
-    blurb:
-      "Prototyping LLM-driven synths. Looking for a frontend partner who vibes with audio UX.",
-  },
-  {
-    id: "2",
-    name: "Noah Kim",
-    role: "Product designer",
-    avatar: "https://i.pravatar.cc/120?img=3",
-    tags: ["design systems", "ai tooling", "prototyping"],
-    blurb:
-      "Designing interfaces for AI copilots. Love motion, micro-interactions, and clarity.",
-  },
-  {
-    id: "3",
-    name: "Maya López",
-    role: "Founder, climate tech",
-    avatar: "https://i.pravatar.cc/120?img=10",
-    tags: ["sustainability", "nlp", "policy"],
-    blurb:
-      "Using NLP to summarize impact reports. Seeking civic partners + data folks.",
-  },
-  {
-    id: "4",
-    name: "Leo Zhang",
-    role: "Full‑stack + infra",
-    avatar: "https://i.pravatar.cc/120?img=12",
-    tags: ["rust", "vector DBs", "retrieval"],
-    blurb:
-      "Obsessed with fast embeddings. Building a semantic search layer for teams.",
-  },
-  {
-    id: "5",
-    name: "Imani Wright",
-    role: "Creative producer",
-    avatar: "https://i.pravatar.cc/120?img=15",
-    tags: ["short form", "growth", "community"],
-    blurb:
-      "Making technical founders camera‑confident. Can help script, shoot, and ship.",
-  },
-  {
-    id: "6",
-    name: "Arjun Rao",
-    role: "Applied ML",
-    avatar: "https://i.pravatar.cc/120?img=16",
-    tags: ["RAG", "safety", "evals"],
-    blurb:
-      "Shipping pragmatic evals for small teams. Happy to pair on your eval suite.",
-  },
-];
+import { useSuggestedProfiles } from "@/components/home/hooks/useSuggestedProfiles";
 
 const SUGGESTED_QUERIES = [
   "Who here loves generative art?",
@@ -84,6 +27,14 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [creatingChatroom, setCreatingChatroom] = useState(false);
   const router = useRouter();
+
+  // Fetch suggested profiles
+  const {
+    profiles,
+    loading: profilesLoading,
+    error: profilesError,
+    refetch: retryProfiles,
+  } = useSuggestedProfiles();
 
   const handleSearch = async (searchQuery: string) => {
     setCreatingChatroom(true);
@@ -151,7 +102,14 @@ export default function Home() {
               onSearch={handleSearch}
               creatingChatroom={creatingChatroom}
             />
-            <PeopleSection people={SAMPLE_PEOPLE} />
+
+            {/* Profiles Section */}
+            <PeopleSection
+              profiles={profiles}
+              isLoading={profilesLoading}
+              error={profilesError}
+              onRetry={retryProfiles}
+            />
           </div>
         </main>
       </div>

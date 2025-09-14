@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuthStore } from "@/stores/authStore";
 
 interface UserChunk {
@@ -16,8 +16,11 @@ export function useUserChunks(userId?: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchChunks = async () => {
-    if (!userId) return;
+  const fetchChunks = useCallback(async () => {
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
@@ -41,11 +44,11 @@ export function useUserChunks(userId?: string) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]); // Only depends on userId
 
   useEffect(() => {
     fetchChunks();
-  }, [userId]);
+  }, [fetchChunks]); // Now safe to include fetchChunks
 
   return { chunks, loading, error, refetch: fetchChunks };
 }

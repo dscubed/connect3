@@ -38,7 +38,6 @@ interface MessageListProps {
 export default function MessageList({
   messages,
   onUserClick,
-  isLoading,
 }: MessageListProps) {
   if (messages.length === 0) {
     return null;

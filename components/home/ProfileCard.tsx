@@ -1,19 +1,39 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Box } from "lucide-react";
+import { MapPin, Box } from "lucide-react";
 
-export type Person = {
+export type Profile = {
   id: string;
-  name: string;
-  role: string;
-  avatar?: string;
-  tags: string[];
-  blurb: string;
+  first_name: string;
+  last_name: string | null;
+  avatar_url: string | null;
+  location: string | null;
+  tldr: string | null;
+  status: string | null;
 };
 
-const ProfileCard = ({ person }: { person: Person }) => {
+const ProfileCard = ({ profile }: { profile: Profile }) => {
   const [hovered, setHovered] = useState(false);
+
+  // Helper functions
+  const getFullName = () => {
+    return profile.last_name
+      ? `${profile.first_name} ${profile.last_name}`
+      : profile.first_name;
+  };
+
+  const getDisplayTldr = () => {
+    return profile.tldr &&
+      profile.tldr !== "Welcome to Connect3! Tell us about yourself..."
+      ? profile.tldr
+      : "New to Connect3 - getting started!";
+  };
+
+  const getDisplayStatus = () => {
+    return profile.status || "a Connect3 user!";
+  };
+
   return (
     <motion.div
       layout
@@ -24,42 +44,44 @@ const ProfileCard = ({ person }: { person: Person }) => {
     >
       <div className="flex items-start gap-3">
         <Image
-          src={person.avatar || "/placeholder.svg"}
-          alt={person.name}
+          src={profile.avatar_url || "/placeholder.svg"}
+          alt={getFullName()}
           width={48}
           height={48}
           className="h-12 w-12 rounded-full object-cover ring-2 ring-white/10"
           priority
         />
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <h3 className="text-white font-semibold leading-tight truncate">
-              {person.name}
+              {getFullName()}
             </h3>
             <Box className="h-3.5 w-3.5 text-white/60" />
           </div>
-          <p className="text-white/60 text-sm truncate">{person.role}</p>
+          <p className="text-white/60 text-sm truncate">{getDisplayStatus()}</p>
+          <div className="flex items-center gap-1 mt-1">
+            <MapPin className="h-3 w-3 text-white/50" />
+            <span className="text-white/50 text-xs truncate">
+              {profile.location || "Location not set"}
+            </span>
+          </div>
         </div>
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-2">
-        {person.tags.map((t) => (
-          <span
-            key={t}
-            className="px-2.5 py-1 rounded-full bg-white/10 text-white/80 text-xs border border-white/10 hover:bg-white/15 transition-colors"
-          >
-            {t}
-          </span>
-        ))}
-      </div>
-
-      <motion.p
-        initial={{ opacity: 0, height: 3 }}
-        animate={{ opacity: hovered ? 1 : 0.6, height: hovered ? "auto" : 0 }}
-        className="text-white text-sm mt-3"
+      <motion.div
+        initial={{ opacity: 0, height: 0 }}
+        animate={{
+          opacity: hovered ? 1 : 0,
+          height: hovered ? "auto" : 0,
+          marginTop: hovered ? 12 : 0,
+        }}
+        transition={{ duration: 0.2 }}
+        className="overflow-hidden"
       >
-        {person.blurb}
-      </motion.p>
+        <p className="text-white/90 text-sm leading-relaxed">
+          {getDisplayTldr()}
+        </p>
+      </motion.div>
 
       <motion.div
         initial={{ opacity: 0 }}
