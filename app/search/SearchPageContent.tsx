@@ -157,18 +157,19 @@ export default function SearchPageContent() {
       </div>
     );
   }
+
   return (
-    <div className="min-h-screen bg-[#0B0B0C] text-white relative overflow-hidden">
-      <div className="flex relative z-10">
+    <div className="min-h-screen w-full bg-[#0B0B0C] text-white relative overflow-hidden">
+      <div className="flex relative z-10 w-full">
         <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
 
-        <main className="flex-1 pt-16 md:pt-0 relative flex flex-col h-screen">
+        <main className="flex-1 min-w-0 pt-16 md:pt-0 relative flex flex-col h-screen">
           {/* Share button */}
           <ShareButton chatroomId={chatroomId} />
 
           {/* Scrollable content area */}
           <div
-            className="flex-1 overflow-y-auto pr-4 pb-30"
+            className="flex-1 overflow-y-auto px-4 pb-30 w-full"
             style={{
               maxHeight: "calc(100vh)",
               paddingBottom: "140px",
@@ -178,15 +179,19 @@ export default function SearchPageContent() {
           >
             {/* All Messages Thread */}
             {allMessages.length > 0 && (
-              <MessageList
-                messages={allMessages}
-                onUserClick={handleMessageUserClick}
-              />
+              <div className="w-full max-w-none">
+                <MessageList
+                  messages={allMessages}
+                  onUserClick={handleMessageUserClick}
+                />
+              </div>
             )}
           </div>
 
           {/* Fixed search bar at bottom */}
-          <SearchInput onSearch={handleNewSearch} chatroomId={chatroomId} />
+          <div className="w-full px-4">
+            <SearchInput onSearch={handleNewSearch} chatroomId={chatroomId} />
+          </div>
         </main>
       </div>
 
