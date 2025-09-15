@@ -42,6 +42,13 @@ export function useSearch({ chatroomId, user }: UseSearchProps) {
             "✅ New message added (will receive real-time updates):",
             data.message.id
           );
+          // Kick off background search (not awaited)
+          useAuthStore
+            .getState()
+            .makeAuthenticatedRequest("/api/chatrooms/runSearch", {
+              method: "POST",
+              body: JSON.stringify({ messageId: data.message.id }),
+            });
           // Real-time subscription will handle the update!
         } else {
           console.error("❌ Failed to add message:", data.error);

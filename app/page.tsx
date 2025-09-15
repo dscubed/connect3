@@ -63,6 +63,13 @@ export default function Home() {
           "✅ Chatroom created, routing to search page with chatroom ID:",
           data.chatroom.id
         );
+        // Kick off background search (not awaited)
+        useAuthStore
+          .getState()
+          .makeAuthenticatedRequest("/api/chatrooms/runSearch", {
+            method: "POST",
+            body: JSON.stringify({ messageId: data.message.id }),
+          });
         // Route to search page with chatroom ID as parameter
         router.push(`/search?chatroom=${data.chatroom.id}`);
       } else {

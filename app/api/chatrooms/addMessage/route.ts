@@ -1,6 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
-import { runSearchInBackground } from "@/lib/chatrooms/runSearchInBackground";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
 
 const supabase = createClient(
@@ -83,12 +82,6 @@ export async function POST(request: NextRequest) {
     }
 
     console.log("✅ Created message:", message.id);
-
-    // Trigger search in background (don't await!)
-    runSearchInBackground(message.id).catch((error) => {
-      console.error("❌ Background search failed:", error);
-    });
-
     // Return immediately
     return NextResponse.json({
       success: true,
