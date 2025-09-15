@@ -1,37 +1,17 @@
 import { toast } from "sonner";
 import { ValidationResult } from "./types";
 import { useAuthStore } from "@/stores/authStore";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!
-);
 
 export async function validateFiles(
   parsedFiles: Array<{ file: File; text: string }>
 ): Promise<boolean> {
   try {
-    // Get auth token
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session?.access_token) {
-      toast.error("Authentication required. Please log in.");
-      throw new Error("No authentication token");
-    }
-
-    const user = useAuthStore.getState().profile;
+    const { profile: user, makeAuthenticatedRequest } = useAuthStore.getState();
     const fullName = `${user?.first_name} ${user?.last_name}`;
 
     for (const { file, text } of parsedFiles) {
-      const res = await fetch("/api/validate", {
+      const res = await makeAuthenticatedRequest("/api/validate", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`, // Add auth header
-        },
         body: JSON.stringify({ text, fullName }),
       });
 
