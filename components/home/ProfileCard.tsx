@@ -16,18 +16,23 @@ export type Profile = {
 
 const ProfileCard = ({
   profile,
+  expanded,
   onExpandChange,
 }: {
   profile: Profile;
+  expanded?: boolean;
   onExpandChange?: (expanded: boolean) => void;
 }) => {
   const [hovered, setHovered] = useState(false);
 
-  useEffect(() => {
-    if (onExpandChange) onExpandChange(hovered);
-    // Only notify when hovered changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hovered]);
+  // prefer controlled prop; fallback to local hover
+  const isExpanded = expanded ?? hovered;
+
+  // notify parent when local hover/touch changes (so parent can set expandedId)
+  const handleExpandChange = (val: boolean) => {
+    setHovered(val);
+    if (onExpandChange) onExpandChange(val);
+  };
 
   // Helper functions
   const getFullName = () => {
@@ -50,10 +55,11 @@ const ProfileCard = ({
   return (
     <motion.div
       layout
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
-      onTouchStart={() => setHovered(true)}
-      onTouchEnd={() => setHovered(false)}
+      onHoverStart={() => handleExpandChange(true)}
+      onHoverEnd={() => handleExpandChange(false)}
+      onTouchStart={() => handleExpandChange(true)}
+      onTouchEnd={() => handleExpandChange(false)}
+      onTouchCancel={() => handleExpandChange(false)}
       whileHover={{ scale: 1.02, y: -4 }}
       whileTap={{ scale: 0.98 }}
       className="relative rounded-2xl bg-white/5 border border-white/10 p-4 backdrop-blur-md overflow-hidden group transition-all duration-300 touch-manipulation"
@@ -87,14 +93,14 @@ const ProfileCard = ({
       <motion.div
         initial={{ opacity: 0, height: 0 }}
         animate={{
-          opacity: hovered ? 1 : 0,
-          height: hovered ? "auto" : 0,
-          marginTop: hovered ? 12 : 0,
+          opacity: isExpanded ? 1 : 0,
+          height: isExpanded ? "auto" : 0,
+          marginTop: isExpanded ? 12 : 0,
         }}
         transition={{ duration: 0.2 }}
         className="overflow-hidden"
       >
-        <p className="text-white/90 text-sm leading-relaxed">
+        <p className="text-white/90 text-sm leading-relaxed line-clamp-2">
           {getDisplayTldr()}
         </p>
       </motion.div>

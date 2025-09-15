@@ -70,7 +70,10 @@ const PeopleSection: React.FC<PeopleSectionProps> = ({
   error,
   onRetry,
 }) => {
-  const [anyExpanded, setAnyExpanded] = useState(false);
+  // track which card is expanded (by id) on all breakpoints
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const isAnyExpanded = !!expandedId;
 
   return (
     <div className="mt-12">
@@ -81,17 +84,24 @@ const PeopleSection: React.FC<PeopleSectionProps> = ({
       {error && <ErrorState error={error} onRetry={onRetry} />}
 
       {!isLoading && !error && (
-        <div className="px-10">
+        <div className="px-4 sm:px-10">
           <div
-            className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 ${
-              anyExpanded ? "gap-y-0" : "gap-y-4"
-            } auto-rows-fr items-center`}
+            className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 ${
+              isAnyExpanded ? "sm:gap-y-0" : "sm:gap-y-4"
+            } auto-rows-min sm:auto-rows-fr sm:items-center`}
           >
             {profiles.map((profile: Profile) => (
               <div key={profile.id}>
                 <ProfileCard
                   profile={profile}
-                  onExpandChange={setAnyExpanded}
+                  expanded={expandedId === profile.id}
+                  onExpandChange={(expanded) =>
+                    setExpandedId(
+                      expanded
+                        ? profile.id
+                        : (prev) => (prev === profile.id ? null : prev)
+                    )
+                  }
                 />
               </div>
             ))}
