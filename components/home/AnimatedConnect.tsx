@@ -7,14 +7,20 @@ const AnimatedConnect = () => {
   const [index, setIndex] = useState(0);
   const [display, setDisplay] = useState(options[0]);
   const [cursorVisible, setCursorVisible] = useState(true);
+  const [isTyping, setIsTyping] = useState(false);
 
-  // Cursor blink
+  // Cursor blink only when typing/deleting
   useEffect(() => {
+    if (!isTyping) {
+      setCursorVisible(false);
+      return;
+    }
+    setCursorVisible(true);
     const blink = setInterval(() => {
       setCursorVisible((v) => !v);
     }, 500);
     return () => clearInterval(blink);
-  }, []);
+  }, [isTyping]);
 
   // Cycle every 5 seconds
   useEffect(() => {
@@ -28,6 +34,8 @@ const AnimatedConnect = () => {
   useEffect(() => {
     const target = options[index];
     let timeoutId: ReturnType<typeof setTimeout>;
+
+    setIsTyping(true);
 
     const deleteStep = (currentDisplay: string) => {
       if (currentDisplay.length > 0) {
@@ -44,6 +52,8 @@ const AnimatedConnect = () => {
         const newDisplay = target.slice(0, currentDisplay.length + 1);
         setDisplay(newDisplay);
         timeoutId = setTimeout(() => typeStep(newDisplay), 120);
+      } else {
+        setIsTyping(false);
       }
     };
 
@@ -55,6 +65,7 @@ const AnimatedConnect = () => {
 
     return () => clearTimeout(timeoutId);
   }, [index]); // Only depend on index
+
   return (
     <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.1] text-white">
       connect

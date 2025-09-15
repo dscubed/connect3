@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { MapPin, Box } from "lucide-react";
+import { useEffect } from "react";
 
 export type Profile = {
   id: string;
@@ -13,8 +14,20 @@ export type Profile = {
   status: string | null;
 };
 
-const ProfileCard = ({ profile }: { profile: Profile }) => {
+const ProfileCard = ({
+  profile,
+  onExpandChange,
+}: {
+  profile: Profile;
+  onExpandChange?: (expanded: boolean) => void;
+}) => {
   const [hovered, setHovered] = useState(false);
+
+  useEffect(() => {
+    if (onExpandChange) onExpandChange(hovered);
+    // Only notify when hovered changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hovered]);
 
   // Helper functions
   const getFullName = () => {
@@ -39,8 +52,11 @@ const ProfileCard = ({ profile }: { profile: Profile }) => {
       layout
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
+      onTouchStart={() => setHovered(true)}
+      onTouchEnd={() => setHovered(false)}
       whileHover={{ scale: 1.02, y: -4 }}
-      className="relative rounded-2xl bg-white/5 border border-white/10 p-4 backdrop-blur-md overflow-hidden group transition-all duration-300"
+      whileTap={{ scale: 0.98 }}
+      className="relative rounded-2xl bg-white/5 border border-white/10 p-4 backdrop-blur-md overflow-hidden group transition-all duration-300 touch-manipulation"
     >
       <div className="flex items-start gap-3">
         <Image

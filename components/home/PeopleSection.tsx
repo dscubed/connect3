@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import ProfileCard, { Profile } from "@/components/home/ProfileCard";
 import { ArrowDown, RefreshCw } from "lucide-react";
 import { CubeLoader } from "@/components/ui/CubeLoader";
@@ -43,7 +43,7 @@ const ErrorState = ({
       {onRetry && (
         <button
           onClick={onRetry}
-          className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors touch-manipulation"
         >
           <RefreshCw className="h-4 w-4" />
           Try Again
@@ -70,6 +70,8 @@ const PeopleSection: React.FC<PeopleSectionProps> = ({
   error,
   onRetry,
 }) => {
+  const [anyExpanded, setAnyExpanded] = useState(false);
+
   return (
     <div className="mt-12">
       <SectionHeader />
@@ -80,9 +82,18 @@ const PeopleSection: React.FC<PeopleSectionProps> = ({
 
       {!isLoading && !error && (
         <div className="px-10">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div
+            className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 ${
+              anyExpanded ? "gap-y-0" : "gap-y-4"
+            } auto-rows-fr items-center`}
+          >
             {profiles.map((profile: Profile) => (
-              <ProfileCard key={profile.id} profile={profile} />
+              <div key={profile.id}>
+                <ProfileCard
+                  profile={profile}
+                  onExpandChange={setAnyExpanded}
+                />
+              </div>
             ))}
             {profiles.length === 0 && <EmptyState />}
           </div>
