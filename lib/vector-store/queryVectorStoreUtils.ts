@@ -45,39 +45,12 @@ export async function queryVectorStore(
 ): Promise<SearchResult> {
   const openai = new OpenAI({ apiKey: openaiApiKey });
 
-  const developmentTesting = false;
-  let response: QueryResult;
-
-  if (developmentTesting) {
-    response = {
-      result:
-        "Students at the University of Melbourne, like Tanat Chanwangsa, showcase a strong programming background and interest in Software Engineering (SWE) roles. Tanat, majoring in Computing and Software Systems, is proficient in multiple programming languages and aims to leverage software to solve complex challenges. His experiences in internships further enhance his readiness for SWE positions by developing practical skills.",
-      matches: [
-        {
-          file_id: "file-HQbTtn4Jc84bVNUaCDAhwP",
-          description:
-            "This document highlights Tanat Chanwangsa's role at DSCubed, where he contributes to projects linking data science theory to practical applications, showcasing the skills that are desirable in SWE roles.",
-        },
-        {
-          file_id: "file-FkeGHrV61WrLFcT5B2ayeb",
-          description:
-            "This document traces Tanat's academic journey, emphasizing his strong performance in STEM subjects and his leadership in tutoring, indicating a solid background for pursuing SWE roles.",
-        },
-        {
-          file_id: "file-MUDBA5QuWuirNVEmgBsmF4",
-          description:
-            "This document discusses Tanat's extensive programming skills and passion for technology, aligning with the qualifications typically sought in Software Engineering candidates.",
-        },
-      ],
-      followUps: "Would you like more details about Tanat's background?",
-    };
-  } else {
-    const apiResponse = await openai.responses.parse({
-      model: "gpt-4o-mini",
-      input: [
-        {
-          role: "system",
-          content: `You are a vector store assistant. Rules:
+  const apiResponse = await openai.responses.parse({
+    model: "gpt-4o-mini",
+    input: [
+      {
+        role: "system",
+        content: `You are a vector store assistant. Rules:
   
   1. When a user queries, always provide:
      - result: 2-3 sentence summary of relevant content.
@@ -102,29 +75,28 @@ export async function queryVectorStore(
   
   5. If you cannot find results, return an empty matches array but still include result and followUps.
   `,
-        },
-        {
-          role: "user",
-          content: `Query: ${query}`,
-        },
-      ],
-      tools: [
-        {
-          type: "file_search",
-          vector_store_ids: [vectorStoreId],
-        },
-      ],
-      text: {
-        format: zodTextFormat(QueryResultSchema, "search_results"),
       },
-    });
+      {
+        role: "user",
+        content: `Query: ${query}`,
+      },
+    ],
+    tools: [
+      {
+        type: "file_search",
+        vector_store_ids: [vectorStoreId],
+      },
+    ],
+    text: {
+      format: zodTextFormat(QueryResultSchema, "search_results"),
+    },
+  });
 
-    if (!apiResponse.output_parsed) {
-      throw new Error("Failed to parse search results");
-    }
-
-    response = apiResponse.output_parsed;
+  if (!apiResponse.output_parsed) {
+    throw new Error("Failed to parse search results");
   }
+
+  const response = apiResponse.output_parsed;
 
   const parsed = QueryResultSchema.safeParse(response);
   if (!parsed.success) {
