@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { ProcessingStatus } from "@/lib/validation/types";
+import { ProcessingStatus } from "@/lib/onboarding/validation/types";
 
 export const useProcessingStore = create<ProcessingStatus>(() => ({
   state: "idle",
@@ -18,6 +18,9 @@ export const processingActions = {
   },
   setSummarizing: () => {
     useProcessingStore.setState({ state: "summarizing" });
+  },
+  setChunking: () => {
+    useProcessingStore.setState({ state: "chunking" });
   },
   setUploading: () => {
     useProcessingStore.setState({ state: "uploading" });

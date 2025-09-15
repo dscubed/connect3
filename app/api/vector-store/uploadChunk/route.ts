@@ -12,6 +12,10 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+export const config = {
+  runtime: "edge",
+};
+
 export async function POST(request: NextRequest) {
   try {
     // 1. Authenticate user via Supabase Auth

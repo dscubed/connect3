@@ -9,7 +9,7 @@ import ProfilePicture from "@/components/profile/ProfilePicture";
 import UserDetails from "@/components/profile/UserDetails";
 import TLDRSection from "@/components/profile/TLDRSection";
 import ChunksSection from "@/components/profile/chunks/ChunksSection";
-import ProfileModals from "@/components/profile/ProfileModals";
+import ProfileModals from "@/components/profile/edit-modals/ProfileModals";
 import { useProfileModals } from "@/components/profile/hooks/useProfileModals";
 
 export default function ProfilePage() {

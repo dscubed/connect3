@@ -11,7 +11,8 @@ type ProcessingState =
   | "summarizing"
   | "success"
   | "error"
-  | "uploading";
+  | "uploading"
+  | "chunking";
 
 export interface ProcessingStatus {
   state: ProcessingState;

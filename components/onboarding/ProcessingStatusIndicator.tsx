@@ -28,6 +28,9 @@ export const ProcessingStatusIndicator: React.FC<
     case "success":
       statusText = "Processing complete";
       break;
+    case "chunking":
+      statusText = "Chunking content for upload";
+      break;
     case "error":
       statusText = "Processing failed";
       break;

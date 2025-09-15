@@ -21,8 +21,7 @@ import {
 } from "@/stores/processingStore";
 import { generateProfileSummary } from "@/lib/generateSummary/generateProfileSummary";
 import { BackWarningModal } from "@/components/onboarding/description/BackWarningModal";
-import { ProcessingStatusIndicator } from "@/components/onboarding/file-upload/ProcessingStatusIndicator";
-import { uploadToVectorStore } from "@/lib/vector-store/uploadToVectorStore";
+import { ProcessingStatusIndicator } from "@/components/onboarding/ProcessingStatusIndicator";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -30,6 +29,10 @@ export default function OnboardingPage() {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [description, setDescription] = useState("");
   const [descriptionWordCount, setDescriptionWordCount] = useState(0);
+  const [chunkedData, setChunkedData] = useState<{
+    chunks: Array<{ chunk_index: number; content: string }>;
+    userId: string;
+  } | null>(null);
 
   // Initialize word count when description changes
   useEffect(() => {
@@ -178,21 +181,42 @@ export default function OnboardingPage() {
 
     if (currentStep === 1 && descriptionWordCount >= 10) {
       try {
-        processingActions.setUploading();
-        // Call API to upload to vector store
+        processingActions.setChunking();
+
         if (!user || !description) {
           return;
-        } else {
-          const result = await uploadToVectorStore(user?.id, description);
-          console.log("Upload successful:", result);
         }
-      } catch (error) {
-        console.error("Upload failed:", error);
-        processingActions.setError();
-        toast.error("Upload failed. Please try again.");
-      } finally {
-        setCurrentStep(currentStep + 1);
+
+        // Just chunk the data, don't upload yet
+        const chunkResponse = await useAuthStore
+          .getState()
+          .makeAuthenticatedRequest("/api/onboarding/chunkText", {
+            method: "POST",
+            body: JSON.stringify({ text: description }),
+          });
+
+        if (!chunkResponse.ok) {
+          const error = await chunkResponse.json();
+          throw new Error(error.error || "Chunking failed");
+        }
+
+        const chunkData = await chunkResponse.json();
+        if (!chunkData.success) {
+          throw new Error("Chunking failed");
+        }
+
+        // Store chunks locally for later upload
+        setChunkedData({
+          chunks: chunkData.chunks,
+          userId: user.id,
+        });
+
         processingActions.setSuccess();
+        setCurrentStep(2);
+      } catch (error) {
+        console.error("Chunking failed:", error);
+        processingActions.setError();
+        toast.error("Failed to process your description. Please try again.");
       }
     }
   };
@@ -248,6 +272,17 @@ export default function OnboardingPage() {
         onboarding_completed: true,
         avatar_url: avatarUrl,
       });
+
+      // Start server-side background upload (fire and forget)
+      if (chunkedData) {
+        useAuthStore
+          .getState()
+          .makeAuthenticatedRequest("/api/onboarding/upload", {
+            method: "POST",
+            body: JSON.stringify({ chunkedData }),
+          })
+          .catch(console.error);
+      }
 
       toast.success("Welcome to connect³! Onboarding completed successfully");
       router.push("/");
@@ -391,6 +426,7 @@ export default function OnboardingPage() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 onClick={prevStep}
+                disabled={state === "chunking"}
                 className="px-6 py-3 rounded-xl border border-white/20 text-white/70 hover:border-white/30 hover:text-white hover:bg-white/5 transition-all hover:scale-105 flex items-center gap-2"
               >
                 <ArrowRight className="h-4 w-4 rotate-180" />
@@ -402,6 +438,12 @@ export default function OnboardingPage() {
           {canSkip() && (
             <button
               onClick={skipStep}
+              disabled={
+                state === "parsing" ||
+                state === "validating" ||
+                state === "summarizing" ||
+                state === "chunking"
+              }
               className="px-6 py-3 rounded-xl border border-white/20 text-white/70 hover:border-white/30 hover:text-white hover:bg-white/5 transition-all hover:scale-105 flex items-center gap-2"
             >
               Skip for now
@@ -421,10 +463,9 @@ export default function OnboardingPage() {
             >
               {state === "parsing" ||
               state === "validating" ||
-              state === "summarizing"
+              state === "summarizing" ||
+              state === "chunking"
                 ? "Processing..."
-                : state === "uploading"
-                ? "Uploading..."
                 : "Continue"}
               <ArrowRight className="h-4 w-4" />
             </button>

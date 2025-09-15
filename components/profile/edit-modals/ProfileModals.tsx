@@ -1,8 +1,8 @@
 "use client";
-import EditNameModal from "@/components/profile/EditNameModal";
-import EditLocationModal from "@/components/profile/EditLocationModal";
-import EditStatusModal from "@/components/profile/EditStatusModal";
-import EditTLDRModal from "@/components/profile/EditTLDRModal";
+import EditNameModal from "@/components/profile/edit-modals/EditNameModal";
+import EditLocationModal from "@/components/profile/edit-modals/EditLocationModal";
+import EditStatusModal from "@/components/profile/edit-modals/EditStatusModal";
+import EditTLDRModal from "@/components/profile/edit-modals/EditTLDRModal";
 
 interface Profile {
   first_name?: string;
