@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { MapPin, Box } from "lucide-react";
-import { useEffect } from "react";
 
 export type Profile = {
   id: string;
