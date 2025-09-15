@@ -6,8 +6,11 @@ import React, { useState } from "react";
 import AnimatedParticles from "@/components/AnimatedParticles";
 import SearchSection from "@/components/home/SearchSection";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/stores/authStore";
 import { useSuggestedProfiles } from "@/components/home/hooks/useSuggestedProfiles";
+import {
+  createChatroom,
+  triggerBackgroundSearch,
+} from "@/lib/chatrooms/chatroomUtils";
 import { toast } from "sonner";
 
 const SUGGESTED_QUERIES = [
@@ -38,51 +41,25 @@ export default function Home() {
   } = useSuggestedProfiles();
 
   const handleSearch = async (searchQuery: string) => {
-    setCreatingChatroom(true);
+    if (!searchQuery.trim()) {
+      toast.error("Please enter a search query.");
+      return;
+    }
 
+    setCreatingChatroom(true);
     try {
       console.log("🚀 Creating chatroom for query:", searchQuery);
 
-      const userId = useAuthStore.getState().user?.id;
+      const { chatroomId, messageId } = await createChatroom(searchQuery);
 
-      // Use authenticated request from auth store
-      const response = await useAuthStore
-        .getState()
-        .makeAuthenticatedRequest("/api/chatrooms/create", {
-          method: "POST",
-          body: JSON.stringify({
-            query: searchQuery,
-            userId: userId,
-          }),
-        });
+      // Navigate immediately
+      router.push(`/search?chatroom=${chatroomId}`);
 
-      const data = await response.json();
-
-      if (data.success) {
-        console.log(
-          "✅ Chatroom created, routing to search page with chatroom ID:",
-          data.chatroom.id
-        );
-        // Kick off background search (not awaited)
-        useAuthStore
-          .getState()
-          .makeAuthenticatedRequest("/api/chatrooms/runSearch", {
-            method: "POST",
-            body: JSON.stringify({ messageId: data.message.id }),
-          });
-        // Route to search page with chatroom ID as parameter
-        router.push(`/search?chatroom=${data.chatroom.id}`);
-      } else {
-        console.error("❌ Failed to create chatroom:", data.error);
-        // Fallback to search page with query
-        toast.error(
-          "Failed to create chatroom: " + data.error || "Unknown error"
-        );
-      }
+      // Trigger background search (fire and forget)
+      triggerBackgroundSearch(messageId);
     } catch (error) {
       console.error("❌ Error creating chatroom:", error);
-      // Fallback to search page with query
-      toast.error("Failed to create chatroom: " + error || "Unknown error");
+      toast.error("Failed to create chatroom. Please try again.");
     } finally {
       setCreatingChatroom(false);
     }
@@ -93,31 +70,33 @@ export default function Home() {
       <div className="flex relative z-10">
         <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
 
-        <main className="flex-1 pt-16 md:pt-0 relative">
+        <main className="flex-1 relative w-full">
           <div
-            className="h-screen overflow-y-auto pr-4"
+            className="min-h-screen overflow-y-auto overflow-x-hidden px-4 md:px-6 w-full"
             style={{
               scrollbarWidth: "thin",
               scrollbarColor: "rgba(255,255,255,0.3) transparent",
             }}
           >
-            <AnimatedParticles />
-            <HeroSection />
-            <SearchSection
-              query={query}
-              setQuery={setQuery}
-              suggestedQueries={SUGGESTED_QUERIES}
-              onSearch={handleSearch}
-              creatingChatroom={creatingChatroom}
-            />
+            <div className="w-full max-w-none">
+              <AnimatedParticles />
+              <HeroSection />
+              <SearchSection
+                query={query}
+                setQuery={setQuery}
+                suggestedQueries={SUGGESTED_QUERIES}
+                onSearch={handleSearch}
+                creatingChatroom={creatingChatroom}
+              />
 
-            {/* Profiles Section */}
-            <PeopleSection
-              profiles={profiles}
-              isLoading={profilesLoading}
-              error={profilesError}
-              onRetry={retryProfiles}
-            />
+              {/* Profiles Section */}
+              <PeopleSection
+                profiles={profiles}
+                isLoading={profilesLoading}
+                error={profilesError}
+                onRetry={retryProfiles}
+              />
+            </div>
           </div>
         </main>
       </div>

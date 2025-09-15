@@ -41,6 +41,11 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
           placeholder={placeholder}
           value={localQuery}
           onChange={(e) => handleChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleSubmit(e);
+            }
+          }}
         />
         <button
           type="submit"
