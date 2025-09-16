@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { MapPin, Box } from "lucide-react";
@@ -23,6 +23,17 @@ const ProfileCard = ({
   onExpandChange?: (expanded: boolean) => void;
 }) => {
   const [hovered, setHovered] = useState(false);
+  const [isTouch, setIsTouch] = useState(false);
+
+  // detect touch devices / no-hover
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const touchCapable =
+      "ontouchstart" in window ||
+      navigator.maxTouchPoints > 0 ||
+      (window.matchMedia && window.matchMedia("(hover: none)").matches);
+    setIsTouch(Boolean(touchCapable));
+  }, []);
 
   // prefer controlled prop; fallback to local hover
   const isExpanded = expanded ?? hovered;
@@ -31,6 +42,15 @@ const ProfileCard = ({
   const handleExpandChange = (val: boolean) => {
     setHovered(val);
     if (onExpandChange) onExpandChange(val);
+  };
+
+  // toggle on tap for touch devices (so it stays expanded until tapped out or another card)
+  const handleClick = (e: React.MouseEvent) => {
+    if (isTouch) {
+      // toggle expansion
+      handleExpandChange(!isExpanded);
+      e.stopPropagation();
+    }
   };
 
   // Helper functions
@@ -54,14 +74,26 @@ const ProfileCard = ({
   return (
     <motion.div
       layout
-      onHoverStart={() => handleExpandChange(true)}
-      onHoverEnd={() => handleExpandChange(false)}
-      onTouchStart={() => handleExpandChange(true)}
-      onTouchEnd={() => handleExpandChange(false)}
+      onHoverStart={() => !isTouch && handleExpandChange(true)}
+      onHoverEnd={() => !isTouch && handleExpandChange(false)}
+      // remove onTouchEnd collapse to avoid immediate hide on mobile
+      onTouchStart={() => {
+        /* optional press feedback - don't collapse on touchend */
+      }}
       onTouchCancel={() => handleExpandChange(false)}
-      whileHover={{ scale: 1.02, y: -4 }}
+      onClick={handleClick}
+      whileHover={!isTouch ? { scale: 1.02, y: -4 } : undefined}
       whileTap={{ scale: 0.98 }}
+      role="button"
+      tabIndex={0}
       className="relative rounded-2xl bg-white/5 border border-white/10 p-4 backdrop-blur-md overflow-hidden group transition-all duration-300 touch-manipulation"
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          // allow keyboard toggle
+          e.preventDefault();
+          handleExpandChange(!isExpanded);
+        }
+      }}
     >
       <div className="flex items-start gap-3">
         <Image
@@ -106,7 +138,7 @@ const ProfileCard = ({
 
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: hovered ? 1 : 0 }}
+        animate={{ opacity: isExpanded ? 1 : 0 }}
         className="absolute inset-0 pointer-events-none rounded-2xl border border-white/20"
         style={{ boxShadow: "0 0 60px 4px rgba(255,255,255,0.08) inset" }}
       />

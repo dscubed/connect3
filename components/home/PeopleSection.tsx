@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import ProfileCard, { Profile } from "@/components/home/ProfileCard";
 import { ArrowDown, RefreshCw } from "lucide-react";
 import { CubeLoader } from "@/components/ui/CubeLoader";
@@ -70,8 +70,26 @@ const PeopleSection: React.FC<PeopleSectionProps> = ({
   error,
   onRetry,
 }) => {
-  // track which card is expanded (by id) on all breakpoints
+  // track which card is expanded (by id)
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // close expanded card when tapping/clicking outside the grid
+  useEffect(() => {
+    const handleOutside = (e: Event) => {
+      if (!containerRef.current) return;
+      const target = e.target as Node;
+      if (!containerRef.current.contains(target)) {
+        setExpandedId(null);
+      }
+    };
+    document.addEventListener("touchstart", handleOutside);
+    document.addEventListener("mousedown", handleOutside);
+    return () => {
+      document.removeEventListener("touchstart", handleOutside);
+      document.removeEventListener("mousedown", handleOutside);
+    };
+  }, []);
 
   const isAnyExpanded = !!expandedId;
 
@@ -90,21 +108,31 @@ const PeopleSection: React.FC<PeopleSectionProps> = ({
               isAnyExpanded ? "sm:gap-y-0" : "sm:gap-y-4"
             } auto-rows-min sm:auto-rows-fr sm:items-center`}
           >
-            {profiles.map((profile: Profile) => (
-              <div key={profile.id}>
-                <ProfileCard
-                  profile={profile}
-                  expanded={expandedId === profile.id}
-                  onExpandChange={(expanded) =>
-                    setExpandedId(
-                      expanded
-                        ? profile.id
-                        : (prev) => (prev === profile.id ? null : prev)
-                    )
-                  }
-                />
-              </div>
-            ))}
+            {profiles.map((profile: Profile, idx: number) => {
+              const visibilityClass =
+                idx <= 2
+                  ? ""
+                  : idx === 3
+                  ? "hidden sm:block"
+                  : idx === 4 || idx === 5
+                  ? "hidden lg:block"
+                  : "hidden";
+              return (
+                <div key={profile.id} className={visibilityClass}>
+                  <ProfileCard
+                    profile={profile}
+                    expanded={expandedId === profile.id}
+                    onExpandChange={(expanded) =>
+                      setExpandedId(
+                        expanded
+                          ? profile.id
+                          : (prev) => (prev === profile.id ? null : prev)
+                      )
+                    }
+                  />
+                </div>
+              );
+            })}
             {profiles.length === 0 && <EmptyState />}
           </div>
         </div>
