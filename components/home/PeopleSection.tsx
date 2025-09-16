@@ -10,7 +10,7 @@ export interface PeopleSectionProps {
   onRetry?: () => void;
 }
 
-// Header component to avoid repetition
+// Header component
 const SectionHeader = () => (
   <h2 className="text-2xl font-extrabold text-white mb-6 tracking-tight px-10 flex items-center gap-2">
     <span>suggested profiles</span>

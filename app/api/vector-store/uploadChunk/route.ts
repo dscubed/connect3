@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
+import { fetchUserDetails } from "@/lib/users/fetchUserDetails";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -77,12 +78,15 @@ export async function POST(request: NextRequest) {
       throw new Error("OpenAI did not return a file ID");
     }
 
+    const userDetails = await fetchUserDetails(userId);
+    const userName = userDetails?.full_name;
+
     // Attach attributes after successful upload
     await openai.vectorStores.files.update(file.id, {
       vector_store_id: vectorStoreId,
       attributes: {
         userId: userId,
-        uploadedBy: "system",
+        uploadedBy: userName || "",
       },
     });
 
