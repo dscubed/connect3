@@ -102,7 +102,7 @@ const PeopleSection: React.FC<PeopleSectionProps> = ({
       {error && <ErrorState error={error} onRetry={onRetry} />}
 
       {!isLoading && !error && (
-        <div className="px-4 sm:px-10">
+        <div className="px-4 sm:px-10" ref={containerRef}>
           <div
             className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 ${
               isAnyExpanded ? "sm:gap-y-0" : "sm:gap-y-4"
@@ -123,11 +123,7 @@ const PeopleSection: React.FC<PeopleSectionProps> = ({
                     profile={profile}
                     expanded={expandedId === profile.id}
                     onExpandChange={(expanded) =>
-                      setExpandedId(
-                        expanded
-                          ? profile.id
-                          : (prev) => (prev === profile.id ? null : prev)
-                      )
+                      setExpandedId(expanded ? profile.id : null)
                     }
                   />
                 </div>

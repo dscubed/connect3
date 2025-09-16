@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+// ...existing code...
+import React, { useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { MapPin, Box } from "lucide-react";
@@ -22,78 +23,53 @@ const ProfileCard = ({
   expanded?: boolean;
   onExpandChange?: (expanded: boolean) => void;
 }) => {
-  const [hovered, setHovered] = useState(false);
-  const [isTouch, setIsTouch] = useState(false);
+  // local state when uncontrolled
+  const [localExpanded, setLocalExpanded] = useState(false);
+  const isControlled = typeof expanded !== "undefined";
+  const isExpanded = isControlled ? expanded : localExpanded;
 
-  // detect touch devices / no-hover
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const touchCapable =
-      "ontouchstart" in window ||
-      navigator.maxTouchPoints > 0 ||
-      (window.matchMedia && window.matchMedia("(hover: none)").matches);
-    setIsTouch(Boolean(touchCapable));
-  }, []);
-
-  // prefer controlled prop; fallback to local hover
-  const isExpanded = expanded ?? hovered;
-
-  // notify parent when local hover/touch changes (so parent can set expandedId)
-  const handleExpandChange = (val: boolean) => {
-    setHovered(val);
-    if (onExpandChange) onExpandChange(val);
-  };
-
-  // toggle on tap for touch devices (so it stays expanded until tapped out or another card)
-  const handleClick = (e: React.MouseEvent) => {
-    if (isTouch) {
-      // toggle expansion
-      handleExpandChange(!isExpanded);
-      e.stopPropagation();
+  const setExpanded = (val: boolean) => {
+    if (isControlled) {
+      onExpandChange?.(val);
+    } else {
+      setLocalExpanded(val);
+      onExpandChange?.(val);
     }
   };
 
-  // Helper functions
-  const getFullName = () => {
-    return profile.last_name
+  const toggleExpand = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setExpanded(!isExpanded);
+  };
+
+  // helpers
+  const getFullName = () =>
+    profile.last_name
       ? `${profile.first_name} ${profile.last_name}`
       : profile.first_name;
-  };
 
-  const getDisplayTldr = () => {
-    return profile.tldr &&
-      profile.tldr !== "Welcome to Connect3! Tell us about yourself..."
+  const getDisplayTldr = () =>
+    profile.tldr &&
+    profile.tldr !== "Welcome to Connect3! Tell us about yourself..."
       ? profile.tldr
       : "New to Connect3 - getting started!";
-  };
 
-  const getDisplayStatus = () => {
-    return profile.status || "a Connect3 user!";
-  };
+  const getDisplayStatus = () => profile.status || "a Connect3 user!";
 
   return (
     <motion.div
       layout
-      onHoverStart={() => !isTouch && handleExpandChange(true)}
-      onHoverEnd={() => !isTouch && handleExpandChange(false)}
-      // remove onTouchEnd collapse to avoid immediate hide on mobile
-      onTouchStart={() => {
-        /* optional press feedback - don't collapse on touchend */
+      onClick={toggleExpand}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggleExpand();
+        }
       }}
-      onTouchCancel={() => handleExpandChange(false)}
-      onClick={handleClick}
-      whileHover={!isTouch ? { scale: 1.02, y: -4 } : undefined}
       whileTap={{ scale: 0.98 }}
       role="button"
       tabIndex={0}
       className="relative rounded-2xl bg-white/5 border border-white/10 p-4 backdrop-blur-md overflow-hidden group transition-all duration-300 touch-manipulation"
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          // allow keyboard toggle
-          e.preventDefault();
-          handleExpandChange(!isExpanded);
-        }
-      }}
     >
       <div className="flex items-start gap-3">
         <Image
@@ -128,7 +104,7 @@ const ProfileCard = ({
           height: isExpanded ? "auto" : 0,
           marginTop: isExpanded ? 12 : 0,
         }}
-        transition={{ duration: 0.2 }}
+        transition={{ duration: 0.28, ease: "easeOut" }}
         className="overflow-hidden"
       >
         <p className="text-white/90 text-sm leading-relaxed line-clamp-2">
@@ -147,3 +123,4 @@ const ProfileCard = ({
 };
 
 export default ProfileCard;
+// ...existing code...
