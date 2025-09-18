@@ -9,14 +9,10 @@ import ProfilePicture from "@/components/profile/ProfilePicture";
 import UserDetails from "@/components/profile/UserDetails";
 import TLDRSection from "@/components/profile/TLDRSection";
 import ChunksSection from "@/components/profile/chunks/ChunksSection";
-import ProfileModals from "@/components/profile/edit-modals/ProfileModals";
-import { useProfileModals } from "@/components/profile/hooks/useProfileModals";
 
 export default function ProfilePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, profile, loading, initialize } = useAuthStore();
-  const { modals, openModal, closeModal, save, editing, setEditing } =
-    useProfileModals(profile);
 
   useEffect(() => {
     initialize();
@@ -74,33 +70,22 @@ export default function ProfilePage() {
                 <div className="flex flex-col md:flex-row md:items-end gap-6">
                   <ProfilePicture avatar={profile.avatar_url ?? null} />
 
-                  <UserDetails
-                    firstName={profile.first_name || "Unnamed"}
-                    lastName={profile.last_name || "Unnamed"}
-                    status={profile.status || "Add your current status"}
-                    location={profile.location || "Location not set"}
-                    onNameClick={openModal.name}
-                    onStatusClick={openModal.status}
-                    onLocationClick={openModal.location}
-                  />
+                  <UserDetails profile={profile} />
 
                   <div className="flex gap-3 md:pb-4">
-                    <motion.button
+                    {/* <motion.button
                       className="px-6 py-2 rounded-xl border border-white/20 text-white font-medium hover:bg-white/10 transition-colors"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      Share Profile
-                    </motion.button>
+                      Connect
+                    </motion.button> */}
                   </div>
                 </div>
               </motion.div>
 
               {/* TLDR Section */}
-              <TLDRSection
-                tldr={profile.tldr || null}
-                onEdit={openModal.tldr}
-              />
+              <TLDRSection tldr={profile.tldr || null} />
 
               {/* Chunks Section */}
               <ChunksSection userId={user.id} />
@@ -134,16 +119,6 @@ export default function ProfilePage() {
           </div>
         </main>
       </div>
-
-      {/* All Edit Modals */}
-      <ProfileModals
-        profile={profile}
-        modals={modals}
-        closeModal={closeModal}
-        save={save}
-        editing={editing}
-        setEditing={setEditing}
-      />
     </div>
   );
 }

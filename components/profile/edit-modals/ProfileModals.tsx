@@ -1,95 +1,59 @@
-"use client";
 import EditNameModal from "@/components/profile/edit-modals/EditNameModal";
 import EditLocationModal from "@/components/profile/edit-modals/EditLocationModal";
 import EditStatusModal from "@/components/profile/edit-modals/EditStatusModal";
 import EditTLDRModal from "@/components/profile/edit-modals/EditTLDRModal";
-
-interface Profile {
-  first_name?: string;
-  last_name?: string;
-  location?: string;
-  status?: string;
-  tldr?: string;
-}
-
-interface ProfileModalsProps {
-  profile: Profile | null;
-  modals: {
-    showNameModal: boolean;
-    showLocationModal: boolean;
-    showStatusModal: boolean;
-    showTLDRModal: boolean;
-  };
-  closeModal: {
-    name: () => void;
-    location: () => void;
-    status: () => void;
-    tldr: () => void;
-  };
-  save: {
-    name: () => Promise<void>;
-    location: () => Promise<void>;
-    status: () => Promise<void>;
-    tldr: () => Promise<void>;
-  };
-  editing: {
-    firstName: string;
-    lastName: string;
-    location: string;
-    status: string;
-    tldr: string;
-  };
-  setEditing: {
-    firstName: (value: string) => void;
-    lastName: (value: string) => void;
-    location: (value: string) => void;
-    status: (value: string) => void;
-    tldr: (value: string) => void;
-  };
-}
+import {
+  Profile,
+  ModalType,
+} from "@/components/profile/hooks/useProfileModals";
 
 export default function ProfileModals({
-  profile,
-  modals,
-  closeModal,
-  save,
+  modal,
   editing,
-  setEditing,
-}: ProfileModalsProps) {
+  setField,
+  handleClose,
+  handleSave,
+}: {
+  modal: ModalType;
+  editing: Profile;
+  setField: (field: keyof Profile, value: string) => void;
+  handleClose: () => void;
+  handleSave: (type: ModalType) => void;
+}) {
   return (
     <>
       <EditNameModal
-        isOpen={modals.showNameModal}
-        currentFirstName={profile?.first_name || ""}
-        currentLastName={profile?.last_name || ""}
-        onClose={closeModal.name}
-        onSave={save.name}
-        setFirstName={setEditing.firstName}
-        setLastName={setEditing.lastName}
+        isOpen={modal === "name"}
+        currentFirstName={editing.first_name || ""}
+        currentLastName={editing.last_name || ""}
+        onClose={handleClose}
+        onSave={() => handleSave("name")}
+        setFirstName={(v) => setField("first_name", v)}
+        setLastName={(v) => setField("last_name", v)}
       />
 
       <EditLocationModal
-        isOpen={modals.showLocationModal}
-        currentLocation={profile?.location || ""}
-        onClose={closeModal.location}
-        onSave={save.location}
-        setLocation={setEditing.location}
+        isOpen={modal === "location"}
+        currentLocation={editing.location || ""}
+        onClose={handleClose}
+        onSave={() => handleSave("location")}
+        setLocation={(v) => setField("location", v)}
       />
 
       <EditStatusModal
-        isOpen={modals.showStatusModal}
-        currentStatus={profile?.status || ""}
-        onClose={closeModal.status}
-        onSave={save.status}
-        setStatus={setEditing.status}
+        isOpen={modal === "status"}
+        currentStatus={editing.status || ""}
+        onClose={handleClose}
+        onSave={() => handleSave("status")}
+        setStatus={(v) => setField("status", v)}
       />
 
       <EditTLDRModal
-        isOpen={modals.showTLDRModal}
-        value={editing.tldr}
-        onClose={closeModal.tldr}
-        onSave={save.tldr}
-        onChange={setEditing.tldr}
+        isOpen={modal === "tldr"}
+        value={editing.tldr || ""}
+        onClose={handleClose}
+        onSave={() => handleSave("tldr")}
+        onChange={(v) => setField("tldr", v)}
       />
     </>
   );

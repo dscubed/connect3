@@ -1,7 +1,8 @@
+"use client";
 import { useState, useCallback } from "react";
 import { useAuthStore } from "@/stores/authStore";
 
-interface Profile {
+export interface Profile {
   first_name?: string;
   last_name?: string;
   location?: string;
@@ -9,172 +10,94 @@ interface Profile {
   tldr?: string;
 }
 
+export type ModalType = "name" | "location" | "status" | "tldr" | null;
+
 export function useProfileModals(profile: Profile | null) {
   const { updateProfile } = useAuthStore();
 
-  // Modal visibility states
-  const [showNameModal, setShowNameModal] = useState(false);
-  const [showLocationModal, setShowLocationModal] = useState(false);
-  const [showStatusModal, setShowStatusModal] = useState(false);
-  const [showTLDRModal, setShowTLDRModal] = useState(false);
+  // Which modal is open
+  const [openModal, setOpenModal] = useState<ModalType>(null);
 
-  // Editing states
-  const [editingFirstName, setEditingFirstName] = useState(
-    profile?.first_name || ""
-  );
-  const [editingLastName, setEditingLastName] = useState(
-    profile?.last_name || ""
-  );
-  const [editingLocation, setEditingLocation] = useState(
-    profile?.location || ""
-  );
-  const [editingStatus, setEditingStatus] = useState(profile?.status || "");
-  const [editingTLDR, setEditingTLDR] = useState(profile?.tldr || "");
+  // Editing state for all fields
+  const [editing, setEditing] = useState<Profile>({
+    first_name: profile?.first_name || "",
+    last_name: profile?.last_name || "",
+    location: profile?.location || "",
+    status: profile?.status || "",
+    tldr: profile?.tldr || "",
+  });
 
-  // Sync editing states when profile changes
+  // Sync editing state when profile changes
   const syncWithProfile = useCallback((newProfile: Profile | null) => {
-    if (newProfile) {
-      setEditingFirstName(newProfile.first_name || "");
-      setEditingLastName(newProfile.last_name || "");
-      setEditingLocation(newProfile.location || "");
-      setEditingStatus(newProfile.status || "");
-      setEditingTLDR(newProfile.tldr || "");
-    }
+    setEditing({
+      first_name: newProfile?.first_name || "",
+      last_name: newProfile?.last_name || "",
+      location: newProfile?.location || "",
+      status: newProfile?.status || "",
+      tldr: newProfile?.tldr || "",
+    });
   }, []);
 
-  // Modal handlers
-  const handleNameClick = useCallback(() => {
-    if (profile) {
-      setEditingFirstName(profile.first_name || "");
-      setEditingLastName(profile.last_name || "");
-      setShowNameModal(true);
-    }
-  }, [profile]);
+  // Open modal and reset editing state for that field
+  const handleOpen = useCallback(
+    (type: ModalType) => {
+      if (!profile) return;
+      setEditing({
+        first_name: profile.first_name || "",
+        last_name: profile.last_name || "",
+        location: profile.location || "",
+        status: profile.status || "",
+        tldr: profile.tldr || "",
+      });
+      setOpenModal(type);
+    },
+    [profile]
+  );
 
-  const handleLocationClick = useCallback(() => {
-    if (profile) {
-      setEditingLocation(profile.location || "");
-      setShowLocationModal(true);
-    }
-  }, [profile]);
-
-  const handleStatusClick = useCallback(() => {
-    if (profile) {
-      setEditingStatus(profile.status || "");
-      setShowStatusModal(true);
-    }
-  }, [profile]);
-
-  const handleTLDRClick = useCallback(() => {
-    if (profile) {
-      setEditingTLDR(profile.tldr || "");
-      setShowTLDRModal(true);
-    }
-  }, [profile]);
+  // Close modal
+  const handleClose = useCallback(() => {
+    setOpenModal(null);
+  }, []);
 
   // Save handlers
-  const handleSaveName = useCallback(async () => {
-    try {
-      await updateProfile({
-        first_name: editingFirstName.trim(),
-        last_name: editingLastName.trim(),
-      });
-      setShowNameModal(false);
-    } catch (error) {
-      console.error("Failed to update name:", error);
-    }
-  }, [editingFirstName, editingLastName, updateProfile]);
+  const handleSave = useCallback(
+    async (type: ModalType) => {
+      try {
+        if (!type) return;
+        let payload: Partial<Profile> = {};
+        if (type === "name") {
+          payload = {
+            first_name: editing.first_name?.trim(),
+            last_name: editing.last_name?.trim(),
+          };
+        } else if (type === "location") {
+          payload = { location: editing.location?.trim() };
+        } else if (type === "status") {
+          payload = { status: editing.status?.trim() };
+        } else if (type === "tldr") {
+          payload = { tldr: editing.tldr?.trim() };
+        }
+        await updateProfile(payload);
+        setOpenModal(null);
+      } catch (error) {
+        console.error("Failed to update profile:", error);
+      }
+    },
+    [editing, updateProfile]
+  );
 
-  const handleSaveLocation = useCallback(async () => {
-    try {
-      await updateProfile({
-        location: editingLocation.trim(),
-      });
-      setShowLocationModal(false);
-    } catch (error) {
-      console.error("Failed to update location:", error);
-    }
-  }, [editingLocation, updateProfile]);
-
-  const handleSaveStatus = useCallback(async () => {
-    try {
-      await updateProfile({
-        status: editingStatus.trim(),
-      });
-      setShowStatusModal(false);
-    } catch (error) {
-      console.error("Failed to update status:", error);
-    }
-  }, [editingStatus, updateProfile]);
-
-  const handleSaveTLDR = useCallback(async () => {
-    try {
-      await updateProfile({
-        tldr: editingTLDR.trim(),
-      });
-      setShowTLDRModal(false);
-    } catch (error) {
-      console.error("Failed to update TLDR:", error);
-    }
-  }, [editingTLDR, updateProfile]);
-
-  // Cancel handlers
-  const handleTLDRCancel = useCallback(() => {
-    setEditingTLDR(profile?.tldr || "");
-    setShowTLDRModal(false);
-  }, [profile?.tldr]);
+  // Editing setters
+  const setField = (field: keyof Profile, value: string) => {
+    setEditing((prev) => ({ ...prev, [field]: value }));
+  };
 
   return {
-    // Modal states
-    modals: {
-      showNameModal,
-      showLocationModal,
-      showStatusModal,
-      showTLDRModal,
-    },
-
-    // Modal controls
-    openModal: {
-      name: handleNameClick,
-      location: handleLocationClick,
-      status: handleStatusClick,
-      tldr: handleTLDRClick,
-    },
-
-    closeModal: {
-      name: () => setShowNameModal(false),
-      location: () => setShowLocationModal(false),
-      status: () => setShowStatusModal(false),
-      tldr: handleTLDRCancel,
-    },
-
-    // Save handlers
-    save: {
-      name: handleSaveName,
-      location: handleSaveLocation,
-      status: handleSaveStatus,
-      tldr: handleSaveTLDR,
-    },
-
-    // Editing states
-    editing: {
-      firstName: editingFirstName,
-      lastName: editingLastName,
-      location: editingLocation,
-      status: editingStatus,
-      tldr: editingTLDR,
-    },
-
-    // Setters for editing states
-    setEditing: {
-      firstName: setEditingFirstName,
-      lastName: setEditingLastName,
-      location: setEditingLocation,
-      status: setEditingStatus,
-      tldr: setEditingTLDR,
-    },
-
-    // Sync function
+    openModal, // which modal is open
+    handleOpen, // open a modal
+    handleClose, // close modal
+    handleSave, // save changes
+    editing, // editing state
+    setField, // set editing field
     syncWithProfile,
   };
 }

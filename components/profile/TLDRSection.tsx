@@ -1,13 +1,11 @@
 "use client";
 import { motion } from "framer-motion";
-import { Edit3 } from "lucide-react";
 
 interface TLDRSectionProps {
   tldr: string | null;
-  onEdit: () => void;
 }
 
-export default function TLDRSection({ tldr, onEdit }: TLDRSectionProps) {
+export default function TLDRSection({ tldr }: TLDRSectionProps) {
   if (!tldr) return null;
 
   return (
@@ -19,14 +17,6 @@ export default function TLDRSection({ tldr, onEdit }: TLDRSectionProps) {
     >
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold">tldr</h2>
-        <motion.button
-          className="p-2 rounded-xl hover:bg-white/10 transition-colors"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={onEdit}
-        >
-          <Edit3 className="h-4 w-4" />
-        </motion.button>
       </div>
 
       <p className="text-white/80 leading-relaxed text-lg whitespace-pre-wrap">
