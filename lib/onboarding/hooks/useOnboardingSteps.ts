@@ -3,18 +3,13 @@ import {
   processingActions,
   useProcessingStore,
 } from "@/stores/processingStore";
-import { generateProfileSummary } from "@/lib/generateSummary/generateProfileSummary";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 interface Chunk {
-  chunk_index: number;
+  chunk_id: string;
+  category: string;
   content: string;
-}
-
-interface ChunkedData {
-  chunks: Chunk[];
-  userId: string;
 }
 
 interface User {
@@ -25,13 +20,11 @@ interface UseOnboardingStepsParams {
   currentStep: number;
   setCurrentStep: (step: number) => void;
   uploadedFiles: File[];
-  description: string;
-  setDescription: (desc: string) => void;
-  descriptionWordCount: number;
-  chunkedData: ChunkedData | null;
-  setChunkedData: (data: ChunkedData | null) => void;
-  selectedFile: File | null;
   profileImage: string | null;
+  selectedFile: File | null;
+  chunks: Chunk[];
+  setChunks: (chunks: Chunk[]) => void;
+  setIsAIChunked: (value: boolean) => void;
   user: User | null;
   updateProfile: (data: {
     onboarding_completed: boolean;
@@ -43,13 +36,11 @@ export const useOnboardingSteps = ({
   currentStep,
   setCurrentStep,
   uploadedFiles,
-  description,
-  setDescription,
-  descriptionWordCount,
-  chunkedData,
-  setChunkedData,
-  selectedFile,
   profileImage,
+  selectedFile,
+  chunks,
+  setChunks,
+  setIsAIChunked,
   user,
   updateProfile,
 }: UseOnboardingStepsParams) => {
@@ -60,7 +51,7 @@ export const useOnboardingSteps = ({
     if (
       state === "parsing" ||
       state === "validating" ||
-      state === "summarizing" ||
+      state === "chunking" ||
       state === "uploading"
     ) {
       return false;
@@ -70,7 +61,7 @@ export const useOnboardingSteps = ({
       case 0:
         return uploadedFiles.length > 0;
       case 1:
-        return descriptionWordCount >= 10;
+        return chunks.length > 0;
       case 2:
         return true;
       default:
@@ -94,52 +85,31 @@ export const useOnboardingSteps = ({
   const nextStep = async () => {
     if (currentStep === 0 && uploadedFiles.length > 0) {
       await handleFileProcessing();
-    } else if (currentStep === 1 && descriptionWordCount >= 10) {
-      await handleTextChunking();
+    }
+    if (currentStep === 1 && chunks.length > 0) {
+      setCurrentStep(2);
     }
   };
 
+  // Process resume and chunk it
   const handleFileProcessing = async () => {
     try {
       const { processFiles } = await import("@/lib/documentProcessor");
       const result = await processFiles(uploadedFiles);
 
-      if (!result.success) return;
+      if (!result.success || !user) return;
 
       toast.success(
         `Successfully processed ${result.parsedFiles.length} file(s)`
       );
-      processingActions.setSummarizing();
-
-      const { success, text } = await generateProfileSummary(
-        result.parsedFiles
-      );
-
-      if (success && text) {
-        processingActions.setSuccess();
-        setDescription(text);
-        setCurrentStep(1);
-      } else {
-        processingActions.setError();
-        toast.error("Failed to generate profile summary. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error processing files:", error);
-      toast.error("Failed to process uploaded files");
-    }
-  };
-
-  const handleTextChunking = async () => {
-    try {
       processingActions.setChunking();
 
-      if (!user || !description) return;
-
+      const resumeText = result.parsedFiles[0]?.text || "";
       const chunkResponse = await useAuthStore
         .getState()
         .makeAuthenticatedRequest("/api/onboarding/chunkText", {
           method: "POST",
-          body: JSON.stringify({ text: description }),
+          body: JSON.stringify({ text: resumeText }),
         });
 
       if (!chunkResponse.ok) {
@@ -148,21 +118,18 @@ export const useOnboardingSteps = ({
       }
 
       const chunkData = await chunkResponse.json();
-      if (!chunkData.success) {
+      if (!chunkData.success || !Array.isArray(chunkData.chunks)) {
         throw new Error("Chunking failed");
       }
 
-      setChunkedData({
-        chunks: chunkData.chunks,
-        userId: user.id,
-      });
-
+      setChunks(chunkData.chunks);
+      setIsAIChunked(true); // <-- Mark as AI chunked
       processingActions.setSuccess();
-      setCurrentStep(2);
+      setCurrentStep(1);
     } catch (error) {
       console.error("Chunking failed:", error);
       processingActions.setError();
-      toast.error("Failed to process your description. Please try again.");
+      toast.error("Failed to process your resume. Please try again.");
     }
   };
 
@@ -190,12 +157,17 @@ export const useOnboardingSteps = ({
         avatar_url: avatarUrl,
       });
 
-      if (chunkedData) {
+      if (chunks.length > 0 && user?.id) {
+        console.log("Uploading chunks:", chunks);
+        const payload = {
+          chunks,
+          userId: user.id,
+        };
         useAuthStore
           .getState()
           .makeAuthenticatedRequest("/api/onboarding/upload", {
             method: "POST",
-            body: JSON.stringify({ chunkedData }),
+            body: JSON.stringify(payload),
           })
           .catch(console.error);
       }

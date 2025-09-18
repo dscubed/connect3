@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
+import { z } from "zod";
 import OpenAI from "openai";
+
+// Define chunk schema (no chunk_id)
+const ResponseChunkSchema = z.object({
+  category: z.string(),
+  content: z.string(),
+});
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -23,27 +30,51 @@ export async function POST(req: NextRequest) {
         {
           role: "system",
           content: `
-You are a semantic chunker. 
+You are a semantic chunker for resumes.
 Split the given document into logical, coherent chunks.
-Rules:
-- Each chunk should be 300-800 tokens long.
-- Do not cut sentences in half.
-- Group sentences by topic or section (paragraphs, bullet lists, headings).
-- Return JSON only in this format:
+Include as much relevant information as possible in each chunk separate them if necessary.
+Each chunk should have:
+- a "category" (e.g. Experience, Skills, Education, Leadership, Achievements, etc.)
+- a "content" field (the actual text for that chunk, no more than 50 words, do not cut sentences in half)
+- Include the user's name in every chunk and where possible a relevant timeframes (e.g. years, dates) in the content.
+Return ONLY a JSON array in this format:
 [
-  { "chunk_index": 0, "content": "..." },
-  { "chunk_index": 1, "content": "..." }
+  { "category": "Experience", "content": "John Doe has worked at XYZ Corp as a Software Engineer from 2015-2020 achieving ..." },
+  { "category": "Skills", "content": "John is proficient in JavaScript, TypeScript, and React." }
 ]
-          `,
+Do not include any explanation or extra text.
+`,
         },
         { role: "user", content: text },
       ],
     });
 
     const raw = response.output_text;
-    const chunks = JSON.parse(raw);
+    let chunks = [];
+    try {
+      chunks = JSON.parse(raw);
+    } catch {
+      return NextResponse.json(
+        { error: "Failed to parse chunks" },
+        { status: 500 }
+      );
+    }
 
-    return NextResponse.json({ success: true, chunks });
+    // Validate chunks array
+    const chunksResult = z.array(ResponseChunkSchema).safeParse(chunks);
+    if (!chunksResult.success) {
+      return NextResponse.json(
+        { error: "Invalid chunk format", details: chunksResult.error.errors },
+        { status: 400 }
+      );
+    }
+
+    const chunksWithId = chunksResult.data.map((chunk) => ({
+      ...chunk,
+      chunk_id: crypto.randomUUID(),
+    }));
+
+    return NextResponse.json({ success: true, chunks: chunksWithId });
   } catch (error) {
     console.error("Semantic chunking error:", error);
     return NextResponse.json({ error: "Chunking failed" }, { status: 500 });

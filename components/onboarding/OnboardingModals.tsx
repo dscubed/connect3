@@ -1,6 +1,6 @@
 import React from "react";
 import NameModal from "@/components/auth/NameModal";
-import { BackWarningModal } from "@/components/onboarding/description/BackWarningModal";
+import { BackWarningModal } from "@/components/onboarding/chunks/BackWarningModal";
 
 interface OnboardingModalsProps {
   showNameModal: boolean;

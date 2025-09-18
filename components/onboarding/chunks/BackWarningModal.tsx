@@ -1,7 +1,14 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 type BackWarningModalProps = {
   open: boolean;
@@ -9,14 +16,19 @@ type BackWarningModalProps = {
   onCancel: () => void;
 };
 
-export function BackWarningModal({ open, onConfirm, onCancel }: BackWarningModalProps) {
+export function BackWarningModal({
+  open,
+  onConfirm,
+  onCancel,
+}: BackWarningModalProps) {
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onCancel()}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Discard changes?</DialogTitle>
           <DialogDescription>
-            Going back will reset your description. Are you sure you want to continue?
+            Going back will reset your chunks. Are you sure you want to
+            continue?
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

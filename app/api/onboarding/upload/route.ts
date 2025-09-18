@@ -9,7 +9,9 @@ export async function POST(req: NextRequest) {
     }
     const { user } = authResult;
 
-    const { chunkedData } = await req.json();
+    const chunkedData = await req.json();
+
+    console.log("Received chunked data:", chunkedData);
 
     if (!chunkedData || chunkedData.userId !== user.id) {
       return NextResponse.json({ error: "Invalid data" }, { status: 400 });
@@ -34,6 +36,7 @@ export async function POST(req: NextRequest) {
           body: JSON.stringify({
             userId: chunkedData.userId,
             text: chunk.content,
+            category: chunk.category,
           }),
         }
       );
