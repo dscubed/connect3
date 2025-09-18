@@ -28,19 +28,25 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (disabled) return;
     onSubmit?.(localQuery);
     setQuery(localQuery); // Ensure immediate update on submit
   };
 
   return (
     <form onSubmit={handleSubmit} className="flex-1">
-      <div className="flex items-center gap-2 rounded-2xl bg-white/5 border border-white/10 px-4 py-3 backdrop-blur shadow-xl shadow-white/5 hover:shadow-white/10 transition-all">
+      <div
+        className={`flex items-center gap-2 rounded-2xl bg-white/5 border border-white/10 px-4 py-3 backdrop-blur shadow-xl shadow-white/5 hover:shadow-white/10 transition-all ${
+          disabled ? "opacity-50 pointer-events-none grayscale" : ""
+        }`}
+      >
         <Search className="h-5 w-5 text-white/60" />
         <input
           className="w-full bg-transparent outline-none placeholder:text-white/40"
           placeholder={placeholder}
           value={localQuery}
           onChange={(e) => handleChange(e.target.value)}
+          disabled={disabled}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               handleSubmit(e);

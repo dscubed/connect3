@@ -60,7 +60,6 @@ export default function Home() {
     } catch (error) {
       console.error("❌ Error creating chatroom:", error);
       toast.error("Failed to create chatroom. Please try again.");
-    } finally {
       setCreatingChatroom(false);
     }
   };
