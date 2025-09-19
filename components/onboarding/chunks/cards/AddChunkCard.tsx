@@ -1,9 +1,14 @@
 import { motion } from "framer-motion";
 import { WORD_LIMIT, getWordCount, Chunk } from "../utils/ChunkUtils";
+import {
+  handleKeyDown,
+  handleCategoryChange,
+  handleContentChange,
+} from "../utils/FormHandlers";
 
 interface AddChunkCardProps {
-  newChunkDetails: Chunk;
-  setNewChunkDetails: React.Dispatch<React.SetStateAction<Chunk>>;
+  newChunkDetails: Chunk | null;
+  setNewChunkDetails: React.Dispatch<React.SetStateAction<Chunk | null>>;
   handleAddNewChunk: () => void;
   handleCancel: () => void;
 }
@@ -14,6 +19,10 @@ export default function AddChunkCard({
   handleAddNewChunk,
   handleCancel,
 }: AddChunkCardProps) {
+  const onKeyDown = handleKeyDown(handleAddNewChunk, handleCancel);
+  const onCategoryChange = handleCategoryChange(setNewChunkDetails);
+  const onContentChange = handleContentChange(setNewChunkDetails);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30, scale: 0.9 }}
@@ -25,52 +34,38 @@ export default function AddChunkCard({
           <input
             type="text"
             placeholder="Category (e.g., Skills, Experience)"
-            value={newChunkDetails.category}
-            onChange={(e) =>
-              setNewChunkDetails((prev) => ({
-                ...prev,
-                category: e.target.value.slice(0, 50),
-              }))
-            }
+            value={newChunkDetails?.category || ""}
+            onChange={onCategoryChange}
+            onKeyDown={onKeyDown}
             className="w-full bg-white/10 border border-white/20 rounded-lg p-2 text-white/90 text-sm focus:outline-none focus:border-white/40 placeholder-white/50"
             maxLength={50}
           />
           <div className="relative flex-1 flex flex-col">
             <textarea
               placeholder="Describe your highlight..."
-              value={newChunkDetails.content}
-              onChange={(e) =>
-                setNewChunkDetails((prev) => ({
-                  ...prev,
-                  content: e.target.value,
-                }))
-              }
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-                  e.preventDefault();
-                  handleAddNewChunk();
-                }
-              }}
+              value={newChunkDetails?.content || ""}
+              onChange={onContentChange}
+              onKeyDown={onKeyDown}
               className="w-full h-full bg-white/10 border border-white/20 rounded-lg p-3 text-white/90 text-sm resize-none focus:outline-none focus:border-white/40 placeholder-white/50 flex-1"
               rows={3}
             />
             <div
               className={`absolute -bottom-6 right-0 text-xs ${
-                getWordCount(newChunkDetails.content) > WORD_LIMIT
+                getWordCount(newChunkDetails?.content || "") > WORD_LIMIT
                   ? "text-red-400"
                   : "text-white/50"
               }`}
             >
-              {getWordCount(newChunkDetails.content)}/{WORD_LIMIT} words
+              {getWordCount(newChunkDetails?.content || "")}/{WORD_LIMIT} words
             </div>
           </div>
           <div className="flex gap-2 mt-8">
             <button
               onClick={handleAddNewChunk}
               disabled={
-                getWordCount(newChunkDetails.content) > WORD_LIMIT ||
-                !newChunkDetails.category.trim() ||
-                !newChunkDetails.content.trim()
+                getWordCount(newChunkDetails?.content || "") > WORD_LIMIT ||
+                !newChunkDetails?.category.trim() ||
+                !newChunkDetails?.content.trim()
               }
               className="px-3 py-1 bg-white/20 hover:bg-white/30 disabled:bg-white/10 disabled:cursor-not-allowed rounded-lg text-xs text-white transition-all"
             >

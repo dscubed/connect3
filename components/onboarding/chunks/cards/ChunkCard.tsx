@@ -2,12 +2,17 @@ import React from "react";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import { WORD_LIMIT, getWordCount, Chunk } from "../utils/ChunkUtils";
+import {
+  handleKeyDown,
+  handleCategoryChange,
+  handleContentChange,
+} from "../utils/FormHandlers";
 
 type ChunkCardProps = {
   chunk: Chunk;
   editingChunk: string | null;
   editChunkDetails: Chunk | null;
-  setEditChunkDetails: (chunk: Chunk | null) => void;
+  setEditChunkDetails: React.Dispatch<React.SetStateAction<Chunk | null>>;
   handleChunkClick: (chunk: Chunk) => void;
   handleDeleteChunk: (chunkId: string) => void;
   handleSaveEdit: () => void;
@@ -25,25 +30,9 @@ function ChunkCard({
   handleCancel,
 }: ChunkCardProps) {
   const isEditing = editingChunk === chunk.chunk_id;
-  const handleEditKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-      e.preventDefault();
-      handleSaveEdit();
-    }
-  };
-
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (editChunkDetails)
-      setEditChunkDetails({
-        ...editChunkDetails,
-        category: e.target.value.slice(0, 50),
-      });
-  };
-
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (editChunkDetails)
-      setEditChunkDetails({ ...editChunkDetails, content: e.target.value });
-  };
+  const onKeyDown = handleKeyDown(handleSaveEdit, handleCancel);
+  const onCategoryChange = handleCategoryChange(setEditChunkDetails);
+  const onContentChange = handleContentChange(setEditChunkDetails);
   return (
     <motion.div
       className="relative p-6 min-h-[180px] rounded-2xl border-2 border-white/20 bg-white/5 backdrop-blur-md hover:border-white/30 hover:bg-white/8 transition-all duration-300 cursor-pointer h-full"
@@ -56,8 +45,8 @@ function ChunkCard({
           <input
             type="text"
             value={editChunkDetails?.category ?? ""}
-            onChange={handleCategoryChange}
-            onKeyDown={handleEditKeyDown}
+            onChange={onCategoryChange}
+            onKeyDown={onKeyDown}
             maxLength={50}
             className="text-xs font-medium text-white/90 uppercase bg-white/10 px-2 py-1 rounded-full w-2/3 focus:outline-none focus:border-white/40 border border-white/20 z-10"
             placeholder="Category"
@@ -85,8 +74,8 @@ function ChunkCard({
             <div className="relative">
               <textarea
                 value={editChunkDetails?.content ?? ""}
-                onChange={handleContentChange}
-                onKeyDown={handleEditKeyDown}
+                onChange={onContentChange}
+                onKeyDown={onKeyDown}
                 className="w-full bg-white/10 border border-white/20 rounded-lg p-3 text-white/90 text-sm resize-none focus:outline-none focus:border-white/40"
                 rows={6}
                 autoFocus

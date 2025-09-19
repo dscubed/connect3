@@ -26,7 +26,7 @@ export function ChunksGrid({
   const [editingChunk, setEditingChunk] = useState<string | null>(null);
   const [editChunkDetails, setEditChunkDetails] = useState<Chunk | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
-  const [newChunkDetails, setNewChunkDetails] = useState<Chunk>({
+  const [newChunkDetails, setNewChunkDetails] = useState<Chunk | null>({
     chunk_id: "",
     category: "",
     content: "",
@@ -103,6 +103,7 @@ export function ChunksGrid({
   };
 
   const handleAddNewChunk = () => {
+    if (!newChunkDetails) return;
     if (newChunkDetails.category.trim() && newChunkDetails.content.trim()) {
       const newChunk: Chunk = {
         chunk_id: Date.now().toString(),
