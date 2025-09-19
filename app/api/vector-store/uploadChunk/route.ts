@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     }
     const { user } = authResult;
 
-    const { userId, text } = await request.json();
+    const { userId, text, category } = await request.json();
 
     if (!userId || !text || !user) {
       return NextResponse.json(
@@ -87,6 +87,7 @@ export async function POST(request: NextRequest) {
       attributes: {
         userId: userId,
         uploadedBy: userName || "",
+        category: category || "",
       },
     });
 
@@ -98,6 +99,7 @@ export async function POST(request: NextRequest) {
         summary_text: text,
         status: "completed",
         created_at: new Date().toISOString(),
+        category: "general",
       })
       .select()
       .single();
