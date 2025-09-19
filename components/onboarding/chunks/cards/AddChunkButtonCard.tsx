@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Chunk } from "./ChunksSection";
+import { Chunk } from "../utils/ChunkUtils";
 import { Plus } from "lucide-react";
 
 interface AddChunkButtonCardProps {

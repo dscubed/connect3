@@ -1,13 +1,8 @@
 "use client";
 import { motion } from "framer-motion";
 import AnimatedParticles from "@/components/AnimatedParticles";
-import { ChunkCards } from "./ChunkCards";
-
-export interface Chunk {
-  chunk_id: string;
-  category: string;
-  content: string;
-}
+import { ChunkDisplay } from "./ChunksDisplay";
+import { Chunk } from "./utils/ChunkUtils";
 
 interface ChunksSectionProps {
   chunks?: Chunk[]; // initial chunks from parent
@@ -27,7 +22,7 @@ export default function ChunksSection({
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <ChunkCards chunks={chunks} setChunks={setChunks} />
+      <ChunkDisplay chunks={chunks} setChunks={setChunks} />
 
       <AnimatedParticles />
 

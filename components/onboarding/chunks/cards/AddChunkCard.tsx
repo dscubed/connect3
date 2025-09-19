@@ -1,22 +1,18 @@
 import { motion } from "framer-motion";
-import { Chunk } from "./ChunksSection";
+import { WORD_LIMIT, getWordCount, Chunk } from "../utils/ChunkUtils";
 
 interface AddChunkCardProps {
   newChunkDetails: Chunk;
   setNewChunkDetails: React.Dispatch<React.SetStateAction<Chunk>>;
   handleAddNewChunk: () => void;
-  handleCancelAdd: () => void;
-  getWordCount: (text: string) => number;
-  WORD_LIMIT: number;
+  handleCancel: () => void;
 }
 
 export default function AddChunkCard({
   newChunkDetails,
   setNewChunkDetails,
   handleAddNewChunk,
-  handleCancelAdd,
-  getWordCount,
-  WORD_LIMIT,
+  handleCancel,
 }: AddChunkCardProps) {
   return (
     <motion.div
@@ -49,6 +45,12 @@ export default function AddChunkCard({
                   content: e.target.value,
                 }))
               }
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                  e.preventDefault();
+                  handleAddNewChunk();
+                }
+              }}
               className="w-full h-full bg-white/10 border border-white/20 rounded-lg p-3 text-white/90 text-sm resize-none focus:outline-none focus:border-white/40 placeholder-white/50 flex-1"
               rows={3}
             />
@@ -75,7 +77,7 @@ export default function AddChunkCard({
               Add
             </button>
             <button
-              onClick={handleCancelAdd}
+              onClick={handleCancel}
               className="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-xs text-white/70 transition-all"
             >
               Cancel
