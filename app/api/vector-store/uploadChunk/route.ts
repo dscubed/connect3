@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
       attributes: {
         userId: userId,
         uploadedBy: userName || "",
-        category: category || "",
+        category: category || "General",
       },
     });
 
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
         summary_text: text,
         status: "completed",
         created_at: new Date().toISOString(),
-        category: "general",
+        category: category || "General",
       })
       .select()
       .single();
