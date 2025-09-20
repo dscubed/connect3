@@ -4,13 +4,13 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 interface ChunkPaginationProps {
   currentPage: number;
   totalPages: number;
-  handlePageChange: (page: number) => void;
+  setCurrentPage: (page: number) => void;
 }
 
 export default function ChunkPagination({
   currentPage,
   totalPages,
-  handlePageChange,
+  setCurrentPage,
 }: ChunkPaginationProps) {
   return (
     <motion.div
@@ -20,7 +20,7 @@ export default function ChunkPagination({
       transition={{ delay: 0.5 }}
     >
       <button
-        onClick={() => handlePageChange(Math.max(0, currentPage - 1))}
+        onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
         disabled={currentPage === 0}
         className="p-2 rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
       >
@@ -30,7 +30,7 @@ export default function ChunkPagination({
         {Array.from({ length: totalPages }).map((_, idx) => (
           <button
             key={idx}
-            onClick={() => handlePageChange(idx)}
+            onClick={() => setCurrentPage(idx)}
             className={`w-2 h-2 rounded-full transition-all ${
               idx === currentPage ? "bg-white" : "bg-white/30 hover:bg-white/50"
             }`}
@@ -39,7 +39,7 @@ export default function ChunkPagination({
       </div>
       <button
         onClick={() =>
-          handlePageChange(Math.min(totalPages - 1, currentPage + 1))
+          setCurrentPage(Math.min(totalPages - 1, currentPage + 1))
         }
         disabled={currentPage === totalPages - 1}
         className="p-2 rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"

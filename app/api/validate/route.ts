@@ -81,12 +81,12 @@ export async function POST(req: NextRequest) {
           role: "system",
           content: `
 You are a validation engine for a profile-building app. 
-You are validating documents for user ${fullName || "user"}.
+You are validating texts for user: ${fullName || "..."}.
 Given user-uploaded text, you must determine:
 1. Is it SAFE (no harmful, illegal, NSFW, or disallowed content)?
-2. Is it RELEVANT (does it contain information that could help describe a user's professional or personal profile?
+2. Is it RELEVANT (does it contain information that could help describe a user's personal or professional profile?
 e.g. contains work experience, education, skills, interests, or bio)
-- Is that document for user: "${fullName || "user"}"? NOT ANOTHER USER?
+- Is this text for user: "${fullName || "user"}"? NOT ANOTHER USER?
 
 Respond only in the structured format defined. Reason should just be one sentence only justifying why the text was safe, relevant, or both.
           `,

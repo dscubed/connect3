@@ -15,6 +15,7 @@ type ChunkCardProps = {
   setEditChunkDetails: React.Dispatch<React.SetStateAction<Chunk | null>>;
   handleChunkClick: (chunk: Chunk) => void;
   handleDeleteChunk: (chunkId: string) => void;
+  validating: boolean;
   handleSaveEdit: () => void;
   handleCancel: () => void;
 };
@@ -26,6 +27,7 @@ function ChunkCard({
   setEditChunkDetails,
   handleChunkClick,
   handleDeleteChunk,
+  validating,
   handleSaveEdit,
   handleCancel,
 }: ChunkCardProps) {
@@ -101,7 +103,11 @@ function ChunkCard({
                 }
                 className="px-3 py-1 bg-white/20 hover:bg-white/30 disabled:bg-white/10 disabled:cursor-not-allowed rounded-lg text-xs text-white transition-all"
               >
-                Save
+                {validating ? (
+                  <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  "Save"
+                )}
               </button>
               <button
                 onClick={handleCancel}

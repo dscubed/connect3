@@ -24,11 +24,6 @@ export function ChunkDisplay({ chunks, setChunks }: ChunkDisplayProps) {
     currentPage,
   });
 
-  // Unified update function for controlled/uncontrolled usage
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
-  };
-
   return (
     <>
       {/* Chunks Grid */}
@@ -45,7 +40,7 @@ export function ChunkDisplay({ chunks, setChunks }: ChunkDisplayProps) {
         <ChunkPagination
           currentPage={currentPage}
           totalPages={totalPages}
-          handlePageChange={handlePageChange}
+          setCurrentPage={setCurrentPage}
         />
       )}
     </>

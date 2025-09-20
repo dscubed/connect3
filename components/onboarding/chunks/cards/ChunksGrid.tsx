@@ -4,6 +4,8 @@ import AddChunkCard from "./AddChunkCard";
 import AddChunkButtonCard from "./AddChunkButtonCard";
 import { Chunk, CHUNKS_PER_PAGE, MAX_CHUNKS } from "../utils/ChunkUtils";
 import { useState, useEffect } from "react";
+import { validateText } from "@/lib/onboarding/validation/validateText";
+import { toast } from "sonner";
 
 interface ChunksGridProps {
   chunks: Chunk[];
@@ -31,10 +33,15 @@ export function ChunksGrid({
     category: "",
     content: "",
   });
+  const [isValidating, setIsValidating] = useState(false);
 
   useEffect(() => {
     setUserChunks(chunks);
   }, [chunks]);
+
+  useEffect(() => {
+    handleCancel();
+  }, [currentPage]);
 
   const showAddCard =
     displayChunks &&
@@ -53,7 +60,14 @@ export function ChunksGrid({
     setEditChunkDetails({ ...chunk });
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
+    setIsValidating(true);
+    const isValid = await validateText(editChunkDetails?.content || "");
+    if (!isValid) {
+      toast.error(`Failed to validate chunk content.`);
+      setIsValidating(false);
+      return;
+    }
     if (
       editingChunk &&
       editChunkDetails &&
@@ -81,6 +95,7 @@ export function ChunksGrid({
         );
       }
     }
+    setIsValidating(false);
     setEditingChunk(null);
     setEditChunkDetails(null);
   };
@@ -154,6 +169,7 @@ export function ChunksGrid({
                 handleChunkClick={handleChunkClick}
                 handleDeleteChunk={handleDeleteChunk}
                 handleSaveEdit={handleSaveEdit}
+                validating={isValidating}
                 handleCancel={handleCancel}
               />
             </motion.div>
