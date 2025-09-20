@@ -99,7 +99,8 @@ function ChunkCard({
                 disabled={
                   getWordCount(editChunkDetails?.content ?? "") > WORD_LIMIT ||
                   !(editChunkDetails?.content ?? "").trim() ||
-                  !(editChunkDetails?.category ?? "").trim()
+                  !(editChunkDetails?.category ?? "").trim() ||
+                  validating
                 }
                 className="px-3 py-1 bg-white/20 hover:bg-white/30 disabled:bg-white/10 disabled:cursor-not-allowed rounded-lg text-xs text-white transition-all"
               >
