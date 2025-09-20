@@ -1,5 +1,10 @@
 import { motion } from "framer-motion";
-import { WORD_LIMIT, getWordCount, Chunk } from "../utils/ChunkUtils";
+import {
+  WORD_LIMIT,
+  getWordCount,
+  Chunk,
+  CATEGORY_LIMIT,
+} from "../utils/ChunkUtils";
 import {
   handleKeyDown,
   handleCategoryChange,
@@ -40,7 +45,7 @@ export default function AddChunkCard({
             onChange={onCategoryChange}
             onKeyDown={onKeyDown}
             className="w-full bg-white/10 border border-white/20 rounded-lg p-2 text-white/90 text-sm focus:outline-none focus:border-white/40 placeholder-white/50"
-            maxLength={30}
+            maxLength={CATEGORY_LIMIT}
           />
           <div className="relative flex-1 flex flex-col">
             <textarea

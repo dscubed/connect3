@@ -7,6 +7,7 @@ export type Chunk = {
 export const WORD_LIMIT = 50;
 export const MAX_CHUNKS = 30;
 export const CHUNKS_PER_PAGE = 6;
+export const CATEGORY_LIMIT = 30;
 
 export const getWordCount = (text: string) =>
   text

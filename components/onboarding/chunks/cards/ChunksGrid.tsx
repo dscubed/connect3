@@ -4,7 +4,7 @@ import AddChunkCard from "./AddChunkCard";
 import AddChunkButtonCard from "./AddChunkButtonCard";
 import { Chunk, CHUNKS_PER_PAGE, MAX_CHUNKS } from "../utils/ChunkUtils";
 import { useState, useEffect } from "react";
-import { validateText } from "@/lib/onboarding/validation/validateText";
+import { validateChunk } from "@/lib/onboarding/validation/validateChunk";
 import { toast } from "sonner";
 
 interface ChunksGridProps {
@@ -61,42 +61,35 @@ export function ChunksGrid({
   };
 
   const handleSaveEdit = async () => {
+    if (!editingChunk || !editChunkDetails) return;
+    // Validate chunk before saving
     setIsValidating(true);
-    const text = `category: ${
-      editChunkDetails?.category.trim() || ""
-    } content: ${editChunkDetails?.content.trim() || ""}`;
-    const isValid = await validateText(text);
+    const isValid = await validateChunk(editChunkDetails);
     if (!isValid) {
       toast.error(`Failed to validate chunk content.`);
       setIsValidating(false);
       return;
     }
-    if (
-      editingChunk &&
-      editChunkDetails &&
-      editChunkDetails.category.trim() &&
-      editChunkDetails.content.trim()
-    ) {
-      const categoryTrimmed = editChunkDetails.category.trim();
-      const contentTrimmed = editChunkDetails.content.trim();
+    // Save changes
+    const category = editChunkDetails.category.trim();
+    const content = editChunkDetails.content.trim();
 
-      if (userChunks.length === 0) {
-        updateChunks([
-          {
-            chunk_id: editingChunk,
-            category: categoryTrimmed,
-            content: contentTrimmed,
-          },
-        ]);
-      } else {
-        updateChunks(
-          userChunks.map((chunk) =>
-            chunk.chunk_id === editingChunk
-              ? { ...chunk, category: categoryTrimmed, content: contentTrimmed }
-              : chunk
-          )
-        );
-      }
+    if (userChunks.length === 0) {
+      updateChunks([
+        {
+          chunk_id: editingChunk,
+          category: category,
+          content: content,
+        },
+      ]);
+    } else {
+      updateChunks(
+        userChunks.map((chunk) =>
+          chunk.chunk_id === editingChunk
+            ? { ...chunk, category: category, content: content }
+            : chunk
+        )
+      );
     }
     setIsValidating(false);
     setEditingChunk(null);
@@ -124,10 +117,7 @@ export function ChunksGrid({
     if (!newChunkDetails) return;
     if (newChunkDetails.category.trim() && newChunkDetails.content.trim()) {
       setIsValidating(true);
-      const text = `category: ${
-        newChunkDetails?.category.trim() || ""
-      } content: ${newChunkDetails?.content.trim() || ""}`;
-      const isValid = await validateText(text);
+      const isValid = await validateChunk(newChunkDetails);
       if (!isValid) {
         toast.error(`Failed to validate chunk content.`);
         setIsValidating(false);

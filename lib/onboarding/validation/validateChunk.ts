@@ -1,12 +1,16 @@
 import { toast } from "sonner";
-import { TextValidationResult } from "./types";
+import { ChunkValidationResult } from "./types";
 import { useAuthStore } from "@/stores/authStore";
+import { Chunk } from "@/components/onboarding/chunks/utils/ChunkUtils";
 
-export async function validateText(text: string): Promise<boolean> {
+export async function validateChunk(chunk: Chunk): Promise<boolean> {
   try {
     const { profile, makeAuthenticatedRequest } = useAuthStore.getState();
+
+    const text = `Category:${chunk.category}\n${chunk.content}`;
+
     const fullName = `${profile?.first_name} ${profile?.last_name}`;
-    const res = await makeAuthenticatedRequest("/api/validate/text", {
+    const res = await makeAuthenticatedRequest("/api/validate/chunks", {
       method: "POST",
       body: JSON.stringify({ text, fullName }),
     });
@@ -23,7 +27,7 @@ export async function validateText(text: string): Promise<boolean> {
       throw new Error(`Validation failed with status ${res.status}`);
     }
 
-    const validation: TextValidationResult = await res.json();
+    const validation: ChunkValidationResult = await res.json();
 
     if (!validation.safe || !validation.relevant) {
       toast.error(
@@ -32,6 +36,14 @@ export async function validateText(text: string): Promise<boolean> {
         } (${validation.reason || "No reason provided"})`
       );
       return false;
+    }
+
+    if (validation.sensitive) {
+      toast.warning(
+        `The text may contain sensitive content: ${
+          validation.reason || "No reason provided"
+        }`
+      );
     }
 
     return true;
