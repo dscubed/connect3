@@ -87,7 +87,9 @@ Given user-uploaded text, you must determine:
 2. Is it RELEVANT (does it contain information that could help describe a user's personal or professional profile?
 e.g. contains work experience, education, skills, interests, or bio)
 - Is this text for user: "${fullName || "user"}"? NOT ANOTHER USER?
+- If validating a chunk check if category makes sense with content.
 
+Reject and let user know if any personally identifiable information (PII) like emails, phone numbers, addresses is found.
 Respond only in the structured format defined. Reason should just be one sentence only justifying why the text was safe, relevant, or both.
           `,
         },

@@ -40,7 +40,7 @@ export default function AddChunkCard({
             onChange={onCategoryChange}
             onKeyDown={onKeyDown}
             className="w-full bg-white/10 border border-white/20 rounded-lg p-2 text-white/90 text-sm focus:outline-none focus:border-white/40 placeholder-white/50"
-            maxLength={50}
+            maxLength={30}
           />
           <div className="relative flex-1 flex flex-col">
             <textarea

@@ -37,7 +37,7 @@ function ChunkCard({
   const onContentChange = handleContentChange(setEditChunkDetails);
   return (
     <motion.div
-      className="relative p-6 min-h-[180px] rounded-2xl border-2 border-white/20 bg-white/5 backdrop-blur-md hover:border-white/30 hover:bg-white/8 transition-all duration-300 cursor-pointer h-full"
+      className="relative p-5 min-h-[180px] rounded-2xl border-2 border-white/20 bg-white/5 backdrop-blur-md hover:border-white/30 hover:bg-white/8 transition-all duration-300 cursor-pointer h-full"
       whileHover={{ scale: 1.07, y: -2 }}
       whileTap={{ scale: 0.98 }}
       onClick={() => !isEditing && handleChunkClick(chunk)}
@@ -49,12 +49,12 @@ function ChunkCard({
             value={editChunkDetails?.category ?? ""}
             onChange={onCategoryChange}
             onKeyDown={onKeyDown}
-            maxLength={50}
-            className="text-xs font-medium text-white/90 uppercase bg-white/10 px-2 py-1 rounded-full w-2/3 focus:outline-none focus:border-white/40 border border-white/20 z-10"
+            maxLength={30}
+            className="text-xs font-medium text-white/90 uppercase bg-white/10 px-2 py-1 rounded-full w-full focus:outline-none focus:border-white/40 border border-white/20 z-10"
             placeholder="Category"
           />
         ) : (
-          <span className="text-xs font-medium text-white/60 uppercase bg-white/10 px-2 py-1 rounded-full">
+          <span className="inline-block text-xs font-medium text-white/60 uppercase bg-white/10 px-2 py-1 rounded-full truncate whitespace-nowrap">
             {chunk.category}
           </span>
         )}

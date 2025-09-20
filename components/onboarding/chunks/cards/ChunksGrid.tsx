@@ -62,7 +62,10 @@ export function ChunksGrid({
 
   const handleSaveEdit = async () => {
     setIsValidating(true);
-    const isValid = await validateText(editChunkDetails?.content || "");
+    const text = `category: ${
+      editChunkDetails?.category.trim() || ""
+    } content: ${editChunkDetails?.content.trim() || ""}`;
+    const isValid = await validateText(text);
     if (!isValid) {
       toast.error(`Failed to validate chunk content.`);
       setIsValidating(false);
@@ -121,13 +124,15 @@ export function ChunksGrid({
     if (!newChunkDetails) return;
     if (newChunkDetails.category.trim() && newChunkDetails.content.trim()) {
       setIsValidating(true);
-      const isValid = await validateText(newChunkDetails.content);
+      const text = `category: ${
+        newChunkDetails?.category.trim() || ""
+      } content: ${newChunkDetails?.content.trim() || ""}`;
+      const isValid = await validateText(text);
       if (!isValid) {
         toast.error(`Failed to validate chunk content.`);
         setIsValidating(false);
         return;
       }
-      setIsValidating(false);
       const newChunk: Chunk = {
         chunk_id: Date.now().toString(),
         category: newChunkDetails.category.trim(),
