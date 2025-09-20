@@ -89,8 +89,13 @@ export default function MessageThread({
             </div>
           </div>
         ) : message.status === "failed" ? (
-          <div className="text-red-400">
-            <p>Search failed. Please try again.</p>
+          <div className="space-y-4">
+            <div className="text-red-400">
+              <p>Search failed. Please try again.</p>
+            </div>
+            <button className="mt-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+              Retry
+            </button>
           </div>
         ) : message.content ? (
           // Completed Results

@@ -20,7 +20,7 @@ export const templateChunks: Chunk[] = [
     chunk_id: "1",
     category: "Experience",
     content:
-      "John Doe worked as a Project Manager at GlobalCorp from 2019 to 2023, leading diverse teams and delivering successful outcomes.",
+      "John Doe worked as a Project Manager at XYZCorp from 2019 to 2023, leading diverse teams and delivering successful outcomes.",
   },
   {
     chunk_id: "2",
