@@ -117,9 +117,17 @@ export function ChunksGrid({
     }
   };
 
-  const handleAddNewChunk = () => {
+  const handleAddNewChunk = async () => {
     if (!newChunkDetails) return;
     if (newChunkDetails.category.trim() && newChunkDetails.content.trim()) {
+      setIsValidating(true);
+      const isValid = await validateText(newChunkDetails.content);
+      if (!isValid) {
+        toast.error(`Failed to validate chunk content.`);
+        setIsValidating(false);
+        return;
+      }
+      setIsValidating(false);
       const newChunk: Chunk = {
         chunk_id: Date.now().toString(),
         category: newChunkDetails.category.trim(),
@@ -192,6 +200,7 @@ export function ChunksGrid({
             setNewChunkDetails={setNewChunkDetails}
             handleAddNewChunk={handleAddNewChunk}
             handleCancel={handleCancel}
+            validating={isValidating}
           />
         )}
       </motion.div>

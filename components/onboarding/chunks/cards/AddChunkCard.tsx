@@ -11,6 +11,7 @@ interface AddChunkCardProps {
   setNewChunkDetails: React.Dispatch<React.SetStateAction<Chunk | null>>;
   handleAddNewChunk: () => void;
   handleCancel: () => void;
+  validating: boolean;
 }
 
 export default function AddChunkCard({
@@ -18,6 +19,7 @@ export default function AddChunkCard({
   setNewChunkDetails,
   handleAddNewChunk,
   handleCancel,
+  validating,
 }: AddChunkCardProps) {
   const onKeyDown = handleKeyDown(handleAddNewChunk, handleCancel);
   const onCategoryChange = handleCategoryChange(setNewChunkDetails);
@@ -69,7 +71,11 @@ export default function AddChunkCard({
               }
               className="px-3 py-1 bg-white/20 hover:bg-white/30 disabled:bg-white/10 disabled:cursor-not-allowed rounded-lg text-xs text-white transition-all"
             >
-              Add
+              {validating ? (
+                <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                "Add"
+              )}
             </button>
             <button
               onClick={handleCancel}
