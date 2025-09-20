@@ -5,8 +5,10 @@ import OpenAI from "openai";
 
 // Define chunk schema (no chunk_id)
 const ResponseChunkSchema = z.object({
-  category: z.string(),
-  content: z.string(),
+  category: z.string().max(30, "Category must be 30 characters or less"),
+  content: z.string().refine((val) => val.trim().split(/\s+/).length <= 50, {
+    message: "Content must be 50 words or less",
+  }),
 });
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
