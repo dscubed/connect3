@@ -26,11 +26,11 @@ export async function POST(request: NextRequest) {
     }
     const { user } = authResult;
 
-    const { userId, text, category } = await request.json();
+    const { rowId, userId, text, category } = await request.json();
 
-    if (!userId || !text || !user) {
+    if (!rowId || !userId || !text || !user) {
       return NextResponse.json(
-        { error: "userId, text, or authentication required" },
+        { error: "rowId, userId, text, or authentication required" },
         { status: 400 }
       );
     }
@@ -51,10 +51,11 @@ export async function POST(request: NextRequest) {
     // Step 1: Upload to OpenAI Vector Store
     console.log("Uploading to vector store...");
 
+    console.log("Chunk text before upload:", JSON.stringify(text));
     const fileObj = new File([text], `summary_${Date.now()}.txt`, {
       type: "text/plain",
     });
-    console.log("File content:", await fileObj.text());
+    console.log("File content:", fileObj.text);
 
     const file = await openai.files.create({
       file: fileObj,
@@ -93,16 +94,17 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Update the existing row with rowId
     const { data, error } = await supabase
       .from("user_files")
-      .insert({
-        user_id: userId,
+      .update({
         openai_file_id: file.id,
         summary_text: text,
         status: "completed",
-        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
         category: category || "General",
       })
+      .eq("id", rowId)
       .select()
       .single();
 

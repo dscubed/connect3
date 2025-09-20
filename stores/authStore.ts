@@ -31,6 +31,7 @@ interface AuthState {
     url: string,
     options?: RequestInit
   ) => Promise<Response>;
+  getSupabaseClient: () => ReturnType<typeof createClient>;
 }
 
 async function fetchProfile(
@@ -127,5 +128,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
 
     return response;
+  },
+
+  getSupabaseClient: () => {
+    return createClient();
   },
 }));

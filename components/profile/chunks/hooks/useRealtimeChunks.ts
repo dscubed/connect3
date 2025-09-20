@@ -1,16 +1,14 @@
 "use client";
 import { useRef, useCallback } from "react";
 import {
-  createClient,
   RealtimeChannel,
   RealtimePostgresChangesPayload,
 } from "@supabase/supabase-js";
+import { useAuthStore } from "@/stores/authStore";
 
 // Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!
-);
+const { getSupabaseClient } = useAuthStore.getState();
+const supabase = getSupabaseClient();
 
 interface ChunkData {
   id: string;

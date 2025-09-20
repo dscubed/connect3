@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { useRealtimeChunks } from "./useRealtimeChunks";
 import { useAuthStore } from "@/stores/authStore";
+import { useProfileChunkStore } from "@/stores/profiles/profileChunkStore";
 import { ChunkData } from "../ChunkUtils";
 
 function groupChunks(chunks: ChunkData[]) {
@@ -12,15 +13,15 @@ function groupChunks(chunks: ChunkData[]) {
 }
 
 export function useChunksManager(userId: string) {
-  const [chunks, setChunks] = useState<ChunkData[]>([]);
-  const [groupedChunks, setGroupedChunks] = useState<
-    Record<string, ChunkData[]>
-  >({});
-  const [categories, setCategories] = useState<string[]>([]);
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set()
-  );
-  const [loading, setLoading] = useState<boolean>(false);
+  const {
+    chunks,
+    setChunks,
+    setGroupedChunks,
+    setCategories,
+    setExpandedCategories,
+    setLoading,
+  } = useProfileChunkStore();
+
   const { makeAuthenticatedRequest } = useAuthStore.getState();
 
   // Load chunks from API
@@ -32,7 +33,7 @@ export function useChunksManager(userId: string) {
     const data = await res.json();
     setChunks(data.chunks || []);
     setLoading(false);
-  }, [userId, makeAuthenticatedRequest]);
+  }, [userId, makeAuthenticatedRequest, setChunks, setLoading]);
 
   useEffect(() => {
     if (userId) loadChunks();
@@ -44,19 +45,27 @@ export function useChunksManager(userId: string) {
     setGroupedChunks(newGrouped);
     const cats = Object.keys(newGrouped);
     setCategories(cats);
-    setExpandedCategories(new Set(cats)); // expand all by default
-  }, [chunks]);
+    setExpandedCategories(new Set(cats));
+  }, [chunks, setGroupedChunks, setCategories, setExpandedCategories]);
 
   // Real-time handlers just update chunks
-  const onChunkUpdate = useCallback((updatedChunk: ChunkData) => {
-    setChunks((prev) =>
-      prev.map((chunk) => (chunk.id === updatedChunk.id ? updatedChunk : chunk))
-    );
-  }, []);
+  const onChunkUpdate = useCallback(
+    (updatedChunk: ChunkData) => {
+      setChunks(
+        chunks.map((chunk) =>
+          chunk.id === updatedChunk.id ? updatedChunk : chunk
+        )
+      );
+    },
+    [setChunks, chunks]
+  );
 
-  const onNewChunk = useCallback((newChunk: ChunkData) => {
-    setChunks((prev) => [newChunk, ...prev]);
-  }, []);
+  const onNewChunk = useCallback(
+    (newChunk: ChunkData) => {
+      setChunks([newChunk, ...chunks]);
+    },
+    [setChunks, chunks]
+  );
 
   const { subscribeToChunks, unsubscribe } = useRealtimeChunks({
     userId,
@@ -70,36 +79,6 @@ export function useChunksManager(userId: string) {
     return () => unsubscribe();
   }, [userId, subscribeToChunks, unsubscribe]);
 
-  // Toggle category expansion
-  const toggleCategory = (category: string) => {
-    setExpandedCategories((prev) => {
-      const newExpanded = new Set(prev);
-      if (newExpanded.has(category)) {
-        newExpanded.delete(category);
-      } else {
-        newExpanded.add(category);
-      }
-      return newExpanded;
-    });
-  };
-
-  const expandAllCategories = () => {
-    setExpandedCategories(new Set(categories));
-  };
-
-  const collapseAllCategories = () => {
-    setExpandedCategories(new Set());
-  };
-
-  return {
-    chunks,
-    groupedChunks,
-    categories,
-    expandedCategories,
-    toggleCategory,
-    expandAllCategories,
-    collapseAllCategories,
-    loading,
-    loadChunks,
-  };
+  // Only return logic functions if needed
+  return { loadChunks };
 }
