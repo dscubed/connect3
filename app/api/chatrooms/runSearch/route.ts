@@ -218,6 +218,46 @@ export async function POST(req: NextRequest) {
       }
     );
 
+    // Fetch chatroom_id for user_matches entries
+    const { data: chatroomRow, error: chatroomError } = await supabase
+      .from("chatmessages")
+      .select("chatroom_id")
+      .eq("id", messageId)
+      .single();
+
+    const chatroom_id = chatroomRow?.chatroom_id ?? null;
+    if (chatroomError || !chatroom_id) {
+      console.error("❌ Error fetching chatroom ID:", chatroomError);
+    }
+
+    // Prepare user_matches rows
+    const userMatchesRows = [];
+    for (const match of userResults) {
+      const { user_id, files } = match;
+      if (user_id === user.id) continue;
+      for (const file of files) {
+        userMatchesRows.push({
+          user_id,
+          openai_file_id: file.file_id,
+          chatroom_id: chatroom_id,
+          chatmessage_id: messageId,
+          queried_by: user.id,
+        });
+      }
+    }
+
+    // Bulk insert into user_matches table
+    if (userMatchesRows.length > 0) {
+      const { error: userMatchesError } = await supabase
+        .from("user_matches")
+        .insert(userMatchesRows);
+
+      if (userMatchesError) {
+        console.error("❌ Error inserting user_matches:", userMatchesError);
+        // Optionally handle/log error, but don't fail the main request
+      }
+    }
+
     // Update message content and status
     const { error: updateError } = await supabase
       .from("chatmessages")
