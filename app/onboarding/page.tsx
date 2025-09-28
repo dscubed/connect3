@@ -5,8 +5,8 @@ import FileUploadSection from "@/components/onboarding/file-upload/FileUploadSec
 import ChunksSection from "@/components/onboarding/chunks/ChunksSection";
 import ProfilePictureSection from "@/components/onboarding/profile-picture/ProfilePictureSection";
 import { ProcessingStatusIndicator } from "@/components/onboarding/ProcessingStatusIndicator";
-import { useOnboarding } from "@/lib/onboarding/hooks/useOnboarding";
-import { useOnboardingSteps } from "@/lib/onboarding/hooks/useOnboardingSteps";
+import { useOnboarding } from "@/components/onboarding/hooks/useOnboarding";
+import { useOnboardingSteps } from "@/components/onboarding/hooks/useOnboardingSteps";
 import { OnboardingModals } from "@/components/onboarding/OnboardingModals";
 import { OnboardingHeader } from "@/components/onboarding/main-content/OnboardingHeader";
 import { StepContent } from "@/components/onboarding/main-content/StepsComponent";
