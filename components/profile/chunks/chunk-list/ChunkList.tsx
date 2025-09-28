@@ -3,6 +3,7 @@ import { Plus, Trash, Loader2 } from "lucide-react";
 import { useProfileChunkStore } from "@/stores/profiles/profileChunkStore";
 import type { ChunkData } from "../ChunkUtils";
 import { AddInput } from "./AddInput";
+import { CubeLoader } from "@/components/ui/CubeLoader";
 
 interface ChunkListProps {
   category: string;
@@ -55,7 +56,6 @@ export function ChunkList({ category, chunks }: ChunkListProps) {
   };
 
   const handleDelete = (chunkId: string) => async () => {
-    console.log("Delete chunk:", chunkId);
     await deleteChunk(chunkId);
   };
 
@@ -100,20 +100,27 @@ export function ChunkList({ category, chunks }: ChunkListProps) {
             </motion.div>
           ))}
         {addingChunk ? (
-          <motion.div
-            className="flex flex-col gap-2 pl-6"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: chunks.length * 0.05 }}
-          >
-            <AddInput
-              value={inputValue}
-              onChange={handleInputChange}
-              onSave={handleSubmit}
-              onCancel={handleCancel}
-              disabled={isAdding}
-            />
-          </motion.div>
+          isAdding ? (
+            <div className="flex flex-col items-center justify-center h-32">
+              <CubeLoader size={40} />
+              <span className="text-white/70">Adding chunk...</span>
+            </div>
+          ) : (
+            <motion.div
+              className="flex flex-col gap-2 pl-6"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: chunks.length * 0.05 }}
+            >
+              <AddInput
+                value={inputValue}
+                onChange={handleInputChange}
+                onSave={handleSubmit}
+                onCancel={handleCancel}
+                disabled={isAdding}
+              />
+            </motion.div>
+          )
         ) : (
           <motion.p
             className="flex items-center gap-2 pl-6 border-l-2 border-white/10 hover:border-gray-200/30 text-white/70 leading-relaxed group-hover/chunk:text-white/90 transition-colors cursor-pointer"

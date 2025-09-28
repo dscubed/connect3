@@ -7,4 +7,5 @@ export interface ChunkData {
   created_at: string;
   updated_at: string;
   openai_file_id: string;
+  order: number;
 }

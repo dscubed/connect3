@@ -5,21 +5,11 @@ import {
   RealtimePostgresChangesPayload,
 } from "@supabase/supabase-js";
 import { useAuthStore } from "@/stores/authStore";
+import { ChunkData } from "../ChunkUtils";
 
 // Initialize Supabase client
 const { getSupabaseClient } = useAuthStore.getState();
 const supabase = getSupabaseClient();
-
-interface ChunkData {
-  id: string;
-  user_id: string;
-  category: string;
-  summary_text: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-  openai_file_id: string;
-}
 
 interface UseRealtimeChunksProps {
   userId: string;

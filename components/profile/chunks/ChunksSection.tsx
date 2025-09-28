@@ -6,6 +6,7 @@ import { useProfileChunkStore } from "@/stores/profiles/profileChunkStore";
 import { EmptyChunksState } from "./EmptyChunksState";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import { CategorySection } from "./chunk-list/CategorySection";
+import { AddCategoryButton } from "./chunk-list/AddCategoryButton";
 
 interface ChunksSectionProps {
   userId: string;
@@ -41,7 +42,8 @@ export default function ChunksSection({ userId }: ChunksSectionProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0.4 }}
     >
-      <div className="space-y-8">
+      <div className="space-y-6">
+        <AddCategoryButton />
         {Object.entries(groupedChunks).map(
           ([category, categoryChunks], categoryIndex) => (
             <CategorySection

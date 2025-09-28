@@ -11,6 +11,13 @@ interface ProfileChunkStore {
   addingChunks: Record<string, { text: string; loading: boolean }>;
   deleting: Record<string, boolean>;
   loading: boolean;
+  addingCategory: { category: string; chunk: string; loading: boolean };
+  setAddingCategory: (adding: {
+    category: string;
+    chunk: string;
+    loading: boolean;
+  }) => void;
+  addCategory: (category: string, chunkText: string) => Promise<void>;
 
   setChunks: (chunks: ChunkData[]) => void;
   setGroupedChunks: (grouped: Record<string, ChunkData[]>) => void;
@@ -45,6 +52,8 @@ export const useProfileChunkStore = create<ProfileChunkStore>((set) => ({
   setAddingChunks: (adding) => set({ addingChunks: adding }),
   setDeleting: (deleting) => set({ deleting }),
   setLoading: (loading) => set({ loading }),
+  addingCategory: { category: "", chunk: "", loading: false },
+  setAddingCategory: (adding) => set({ addingCategory: adding }),
 
   addChunk: async ({ category, summary_text }) => {
     const { user, makeAuthenticatedRequest, getSupabaseClient } =
@@ -138,5 +147,16 @@ export const useProfileChunkStore = create<ProfileChunkStore>((set) => ({
         return { deleting: next };
       });
     }
+  },
+
+  addCategory: async (category: string, chunkText: string) => {
+    set({ addingCategory: { category, chunk: chunkText, loading: true } });
+
+    // TODO: Implement backend logic for adding the first chunk here
+    await useProfileChunkStore
+      .getState()
+      .addChunk({ category, summary_text: chunkText });
+
+    set({ addingCategory: { category: "", chunk: "", loading: false } });
   },
 }));

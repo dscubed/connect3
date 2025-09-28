@@ -41,7 +41,7 @@ export function CategorySection({
       <div className="relative">
         <motion.button
           onClick={handleToggle}
-          className="w-full flex items-center justify-between py-3 hover:bg-white/5 transition-all rounded-lg group"
+          className="w-full flex items-center justify-between py-2 hover:bg-white/5 transition-all rounded-lg group"
           whileHover={{ x: 4 }}
           whileTap={{ scale: 0.99 }}
         >

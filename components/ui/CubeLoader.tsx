@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 
 export const CubeLoader = ({ size = 12 }: { size?: number }) => (
-  <div className="flex items-center justify-center py-12">
+  <div className="flex items-center justify-center py-4">
     <motion.div
       className="relative"
       style={{ width: size, height: size }}
