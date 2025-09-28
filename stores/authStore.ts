@@ -16,7 +16,6 @@ interface Profile {
   tldr?: string;
   cover_image_url?: string;
   status?: string;
-  information?: Record<string, unknown>;
 }
 
 interface AuthState {
