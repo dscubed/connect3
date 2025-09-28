@@ -2,6 +2,7 @@ import { Clock, Flame, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import RecentChatrooms from "./QuickInfo/RecentChatrooms";
+import MatchStats from "./QuickInfo/MatchStats";
 
 export default function QuickInfoSection() {
   const user = useAuthStore((state) => state.user);
@@ -19,11 +20,7 @@ export default function QuickInfoSection() {
       key: "stats",
       label: "Your Stats",
       icon: <TrendingUp className="h-4 w-4 text-white/40" />,
-      content: (
-        <div className="text-white/60 text-sm px-2 py-4">
-          Your stats content coming soon!
-        </div>
-      ),
+      content: <MatchStats userId={userId} activeTab={activeTab} />,
     },
     {
       key: "trending",
@@ -31,7 +28,7 @@ export default function QuickInfoSection() {
       icon: <Flame className="h-4 w-4 text-white/40" />,
       content: (
         <div className="text-white/60 text-sm px-2 py-4">
-          Trending content coming soon!
+          More content coming soon!
         </div>
       ),
     },

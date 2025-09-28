@@ -1,5 +1,6 @@
 import { useRouter } from "next/navigation";
-import { useRecentChats, formatTime } from "../hooks/useRecentChats";
+import { useRecentChats } from "../hooks/useRecentChats";
+import { formatTime } from "../hooks/QuickInfoUtils";
 
 export default function RecentChatrooms({ userId }: { userId: string | null }) {
   const router = useRouter();
