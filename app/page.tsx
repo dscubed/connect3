@@ -4,7 +4,6 @@ import HeroSection from "@/components/home/HeroSection";
 import React, { useState } from "react";
 import AnimatedParticles from "@/components/AnimatedParticles";
 import { useRouter } from "next/navigation";
-import { useSuggestedProfiles } from "@/components/home/hooks/useSuggestedProfiles";
 import {
   createChatroom,
   triggerBackgroundSearch,
@@ -18,14 +17,6 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [creatingChatroom, setCreatingChatroom] = useState(false);
   const router = useRouter();
-
-  // Fetch suggested profiles
-  const {
-    profiles,
-    loading: profilesLoading,
-    error: profilesError,
-    refetch: retryProfiles,
-  } = useSuggestedProfiles();
 
   const handleSearch = async (searchQuery: string) => {
     if (!searchQuery.trim()) {
@@ -67,7 +58,7 @@ export default function Home() {
             <AnimatedParticles />
 
             {/* Top Section */}
-            <div className="flex-[1] flex flex-col items-center justify-end w-full">
+            <div className="flex-[1] flex flex-col items-center justify-center w-full">
               <HeroSection />
               <SearchBar
                 query={query}

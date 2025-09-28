@@ -20,7 +20,7 @@ export default function QuickInfoSection() {
       key: "stats",
       label: "Your Stats",
       icon: <TrendingUp className="h-4 w-4 text-white/40" />,
-      content: <MatchStats userId={userId} activeTab={activeTab} />,
+      content: <MatchStats userId={userId} />,
     },
     {
       key: "trending",
@@ -51,14 +51,14 @@ export default function QuickInfoSection() {
                 }`}
             >
               {tab.icon}
-              <span>{tab.label}</span>
+              <span className="sm:block hidden">{tab.label}</span>
             </button>
           ))}
         </div>
         <div className="h-0.5 bg-white/5 mb-4 rounded-full w-full" />
 
         {/* Tab Content */}
-        <div className="space-y-2 mb-2">
+        <div className="space-y-2 mb-1">
           {TABS.find((tab) => tab.key === activeTab)?.content}
         </div>
       </div>
