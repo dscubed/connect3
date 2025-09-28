@@ -8,7 +8,6 @@ interface EditLocationModalProps {
   currentLocation: string;
   onClose: () => void;
   onSave: (location: string) => void;
-  setLocation: (location: string) => void;
 }
 
 export default function EditLocationModal({
@@ -16,7 +15,6 @@ export default function EditLocationModal({
   currentLocation,
   onClose,
   onSave,
-  setLocation,
 }: EditLocationModalProps) {
   const [editingLocation, setEditingLocation] = useState(currentLocation);
 

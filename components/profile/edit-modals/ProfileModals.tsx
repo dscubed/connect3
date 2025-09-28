@@ -5,6 +5,7 @@ import EditTLDRModal from "@/components/profile/edit-modals/EditTLDRModal";
 import {
   Profile,
   ModalType,
+  SaveArgs,
 } from "@/components/profile/hooks/useProfileModals";
 
 export default function ProfileModals({
@@ -18,7 +19,7 @@ export default function ProfileModals({
   editing: Profile;
   setField: (field: keyof Profile, value: string) => void;
   handleClose: () => void;
-  handleSave: (type: ModalType, directValue?: string) => void;
+  handleSave: (args: SaveArgs) => void;
 }) {
   return (
     <>
@@ -27,32 +28,30 @@ export default function ProfileModals({
         currentFirstName={editing.first_name || ""}
         currentLastName={editing.last_name || ""}
         onClose={handleClose}
-        onSave={() => handleSave("name")}
-        setFirstName={(v) => setField("first_name", v)}
-        setLastName={(v) => setField("last_name", v)}
+        onSave={(first, last) =>
+          handleSave({ type: "name", value: { first, last } })
+        }
       />
 
       <EditLocationModal
         isOpen={modal === "location"}
         currentLocation={editing.location || ""}
         onClose={handleClose}
-        onSave={(location) => handleSave("location", location)}
-        setLocation={(v) => setField("location", v)}
+        onSave={(location) => handleSave({ type: "location", value: location })}
       />
 
       <EditStatusModal
         isOpen={modal === "status"}
         currentStatus={editing.status || ""}
         onClose={handleClose}
-        onSave={() => handleSave("status")}
-        setStatus={(v) => setField("status", v)}
+        onSave={(status) => handleSave({ type: "status", value: status })}
       />
 
       <EditTLDRModal
         isOpen={modal === "tldr"}
         value={editing.tldr || ""}
         onClose={handleClose}
-        onSave={() => handleSave("tldr")}
+        onSave={() => handleSave({ type: "tldr" })}
         onChange={(v) => setField("tldr", v)}
       />
     </>
