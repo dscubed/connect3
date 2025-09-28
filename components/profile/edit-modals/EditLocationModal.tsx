@@ -7,7 +7,7 @@ interface EditLocationModalProps {
   isOpen: boolean;
   currentLocation: string;
   onClose: () => void;
-  onSave: () => void;
+  onSave: (location: string) => void;
   setLocation: (location: string) => void;
 }
 
@@ -28,8 +28,8 @@ export default function EditLocationModal({
   }, [isOpen, currentLocation]);
 
   const handleSave = () => {
-    setLocation(editingLocation.trim());
-    onSave();
+    const trimmedLocation = editingLocation.trim();
+    onSave(trimmedLocation); // Pass the value directly
   };
 
   const handleCancel = () => {

@@ -61,7 +61,7 @@ export function useProfileModals(profile: Profile | null) {
 
   // Save handlers
   const handleSave = useCallback(
-    async (type: ModalType) => {
+    async (type: ModalType, directValue?: string) => {
       try {
         if (!type) return;
         let payload: Partial<Profile> = {};
@@ -71,7 +71,8 @@ export function useProfileModals(profile: Profile | null) {
             last_name: editing.last_name?.trim(),
           };
         } else if (type === "location") {
-          payload = { location: editing.location?.trim() };
+          const locationValue = directValue || editing.location?.trim();
+          payload = { location: locationValue };
         } else if (type === "status") {
           payload = { status: editing.status?.trim() };
         } else if (type === "tldr") {
@@ -88,7 +89,10 @@ export function useProfileModals(profile: Profile | null) {
 
   // Editing setters
   const setField = (field: keyof Profile, value: string) => {
-    setEditing((prev) => ({ ...prev, [field]: value }));
+    setEditing((prev) => {
+      const newState = { ...prev, [field]: value };
+      return newState;
+    });
   };
 
   return {

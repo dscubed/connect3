@@ -18,7 +18,7 @@ export default function ProfileModals({
   editing: Profile;
   setField: (field: keyof Profile, value: string) => void;
   handleClose: () => void;
-  handleSave: (type: ModalType) => void;
+  handleSave: (type: ModalType, directValue?: string) => void;
 }) {
   return (
     <>
@@ -36,7 +36,7 @@ export default function ProfileModals({
         isOpen={modal === "location"}
         currentLocation={editing.location || ""}
         onClose={handleClose}
-        onSave={() => handleSave("location")}
+        onSave={(location) => handleSave("location", location)}
         setLocation={(v) => setField("location", v)}
       />
 
