@@ -2,11 +2,11 @@
 import React, { useState, useEffect } from "react";
 import AnimatedParticles from "@/components/AnimatedParticles";
 import FileUploadSection from "@/components/onboarding/file-upload/FileUploadSection";
-import DescriptionSection from "@/components/onboarding/description/DescriptionSection";
+import ChunksSection from "@/components/onboarding/chunks/ChunksSection";
 import ProfilePictureSection from "@/components/onboarding/profile-picture/ProfilePictureSection";
 import { ProcessingStatusIndicator } from "@/components/onboarding/ProcessingStatusIndicator";
-import { useOnboarding } from "@/lib/onboarding/hooks/useOnboarding";
-import { useOnboardingSteps } from "@/lib/onboarding/hooks/useOnboardingSteps";
+import { useOnboarding } from "@/components/onboarding/hooks/useOnboarding";
+import { useOnboardingSteps } from "@/components/onboarding/hooks/useOnboardingSteps";
 import { OnboardingModals } from "@/components/onboarding/OnboardingModals";
 import { OnboardingHeader } from "@/components/onboarding/main-content/OnboardingHeader";
 import { StepContent } from "@/components/onboarding/main-content/StepsComponent";
@@ -33,7 +33,7 @@ export default function OnboardingPage() {
   }, [user, profile]);
 
   const handleConfirmBack = () => {
-    onboardingState.setDescription("");
+    onboardingState.setChunks([]);
     onboardingState.setCurrentStep(0);
     setShowBackWarning(false);
   };
@@ -41,7 +41,7 @@ export default function OnboardingPage() {
   const prevStep = () => {
     if (
       onboardingState.currentStep === 1 &&
-      onboardingState.description.trim() !== ""
+      onboardingState.chunks.length > 0
     ) {
       setShowBackWarning(true);
       return;
@@ -58,6 +58,9 @@ export default function OnboardingPage() {
     } else {
       onboardingState.setCurrentStep(onboardingState.currentStep + 1);
     }
+    if (onboardingState.currentStep === 0) {
+      onboardingState.setIsAIChunked(false);
+    }
   };
 
   const steps = [
@@ -73,13 +76,15 @@ export default function OnboardingPage() {
       ),
     },
     {
-      title: "tell your story",
-      subtitle: "help others understand what makes you unique",
+      title: "Your key highlights",
+      subtitle: onboardingState.isAIChunked
+        ? "review and edit the highlights extracted by AI"
+        : "let's add some highlights to make your profile stand out or go back and upload your resume to speed things up!",
       content: (
-        <DescriptionSection
-          value={onboardingState.description}
-          onChange={onboardingState.setDescription}
-          onWordCountChange={() => {}} // Word count is handled in the hook
+        <ChunksSection
+          chunks={onboardingState.chunks}
+          setChunks={onboardingState.setChunks}
+          isAIChunked={onboardingState.isAIChunked}
         />
       ),
     },

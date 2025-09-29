@@ -34,9 +34,9 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex-1">
+    <form onSubmit={handleSubmit} className="w-full">
       <div
-        className={`flex items-center gap-2 rounded-2xl bg-white/5 border border-white/10 px-4 py-3 backdrop-blur shadow-xl shadow-white/5 hover:shadow-white/10 transition-all ${
+        className={`mx-auto max-w-2xl flex items-center gap-2 rounded-2xl bg-white/5 border border-white/10 px-4 py-3 backdrop-blur shadow-xl shadow-white/5 hover:shadow-white/10 transition-all ${
           disabled ? "opacity-50 pointer-events-none grayscale" : ""
         }`}
       >
@@ -56,7 +56,7 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
         <button
           type="submit"
           disabled={disabled || isSearching || localQuery.trim() === ""}
-          className="rounded-xl px-3 py-1.5 bg-white text-black text-sm font-medium hover:bg-white/90 transition-all hover:scale-105 shadow-lg"
+          className="rounded-xl px-3 py-1.5 bg-white text-black text-sm font-medium cursor-pointer hover:bg-white/90 transition-all hover:scale-105 shadow-lg"
         >
           Search
         </button>

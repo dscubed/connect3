@@ -13,6 +13,7 @@ const client = new OpenAI({
 const ValidationSchema = z.object({
   safe: z.boolean(),
   relevant: z.boolean(),
+  sensitive: z.boolean(),
   reason: z.string(),
 });
 
@@ -81,14 +82,22 @@ export async function POST(req: NextRequest) {
           role: "system",
           content: `
 You are a validation engine for a profile-building app. 
-You are validating documents for user ${fullName || "user"}.
-Given user-uploaded text, you must determine:
-1. Is it SAFE (no harmful, illegal, NSFW, or disallowed content)?
-2. Is it RELEVANT (does it contain information that could help describe a user's professional or personal profile?
-e.g. contains work experience, education, skills, interests, or bio)
-- Is that document for user: "${fullName || "user"}"? NOT ANOTHER USER?
+You are validating a chunk for user: ${fullName || "..."}.
+A chunk contains a category and content describing the user's personal or professional profile.
 
-Respond only in the structured format defined. Reason should just be one sentence only justifying why the text was safe, relevant, or both.
+Given user-uploaded chunk, you must determine:
+1. Is it SAFE (no harmful, illegal, NSFW, or disallowed content)?
+2. Is it RELEVANT (does it contain information that could help describe a user's personal or professional profile?
+e.g. contains work experience, education, skills, interests, or bio)
+- Don't be too strict on personal interests if they're not professional, as long as they're not disallowed.
+- Is this chunk for user: "${fullName || "user"}"? NOT ANOTHER USER?
+- Does the category and the content match each other in a reasonable way?
+- Is the category a valid category?
+3. Does it contain SENSITIVE info (PII like phone numbers, emails, addresses, or other private info)?
+- Broad addresses like city or state are OK, but not specific street addresses.
+- Business contact info like work email or phone is OK.
+
+Respond only in the structured format defined. Reason should just be one sentence only justifying why the text was safe, relevant, sensitive etc.
           `,
         },
         {

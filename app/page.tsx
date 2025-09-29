@@ -1,44 +1,22 @@
 "use client";
 import Sidebar from "@/components/Sidebar";
 import HeroSection from "@/components/home/HeroSection";
-import PeopleSection from "@/components/home/PeopleSection";
 import React, { useState } from "react";
 import AnimatedParticles from "@/components/AnimatedParticles";
-import SearchSection from "@/components/home/SearchSection";
 import { useRouter } from "next/navigation";
-import { useSuggestedProfiles } from "@/components/home/hooks/useSuggestedProfiles";
 import {
   createChatroom,
   triggerBackgroundSearch,
 } from "@/lib/chatrooms/chatroomUtils";
 import { toast } from "sonner";
-
-const SUGGESTED_QUERIES = [
-  "Who here loves generative art?",
-  "Anyone building with Rust?",
-  "Looking for a climate tech founder?",
-  "Who can help with growth hacking?",
-  "Any experts in retrieval models?",
-  "Who's passionate about community building?",
-  "Seeking AI musicians for a collab!",
-  "Who's prototyping with LLMs?",
-  "Any creative coders around?",
-  "Who's into design systems?",
-];
+import QuickInfoSection from "@/components/home/QuickInfoSection";
+import { SearchBar } from "@/components/home/SearchBar";
 
 export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [creatingChatroom, setCreatingChatroom] = useState(false);
   const router = useRouter();
-
-  // Fetch suggested profiles
-  const {
-    profiles,
-    loading: profilesLoading,
-    error: profilesError,
-    refetch: retryProfiles,
-  } = useSuggestedProfiles();
 
   const handleSearch = async (searchQuery: string) => {
     if (!searchQuery.trim()) {
@@ -71,30 +49,29 @@ export default function Home() {
 
         <main className="flex-1 relative w-full">
           <div
-            className="min-h-screen overflow-y-auto overflow-x-hidden px-4 md:px-6 w-full"
+            className="flex flex-col h-screen overflow-y-auto overflow-x-hidden px-4 md:px-6 w-full"
             style={{
               scrollbarWidth: "thin",
               scrollbarColor: "rgba(255,255,255,0.3) transparent",
             }}
           >
-            <div className="w-full max-w-none">
-              <AnimatedParticles />
+            <AnimatedParticles />
+
+            {/* Top Section */}
+            <div className="flex-[1] flex flex-col items-center justify-center w-full">
               <HeroSection />
-              <SearchSection
+              <SearchBar
                 query={query}
                 setQuery={setQuery}
-                suggestedQueries={SUGGESTED_QUERIES}
-                onSearch={handleSearch}
-                creatingChatroom={creatingChatroom}
+                onSubmit={handleSearch}
+                placeholder="Search by skills, vibes, or ideas (e.g. 'Ex amazon intern')…"
+                disabled={creatingChatroom}
               />
+            </div>
 
-              {/* Profiles Section */}
-              <PeopleSection
-                profiles={profiles}
-                isLoading={profilesLoading}
-                error={profilesError}
-                onRetry={retryProfiles}
-              />
+            {/* Bottom Section */}
+            <div className="flex-[1] flex flex-col items-start w-full justify-end mb-12">
+              <QuickInfoSection />
             </div>
           </div>
         </main>

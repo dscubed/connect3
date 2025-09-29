@@ -1,3 +1,5 @@
+import { toast } from "sonner";
+
 interface RateLimitOptions {
   interval: number;
 }
@@ -21,6 +23,10 @@ export function rateLimit({ interval }: RateLimitOptions) {
           resetTime: now + interval,
         });
         return;
+      }
+
+      if (tokenState.count >= limit / 2) {
+        toast.warning("You're approaching the rate limit.");
       }
 
       if (tokenState.count >= limit) {

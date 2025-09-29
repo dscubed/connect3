@@ -1,6 +1,13 @@
-export interface ValidationResult {
+export interface TextValidationResult {
   safe: boolean;
   relevant: boolean;
+  reason?: string;
+}
+
+export interface ChunkValidationResult {
+  safe: boolean;
+  relevant: boolean;
+  sensitive: boolean;
   reason?: string;
 }
 

@@ -73,13 +73,7 @@ export default function ProfilePage() {
                   <UserDetails profile={profile} />
 
                   <div className="flex gap-3 md:pb-4">
-                    {/* <motion.button
-                      className="px-6 py-2 rounded-xl border border-white/20 text-white font-medium hover:bg-white/10 transition-colors"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      Connect
-                    </motion.button> */}
+                    {/* Future action buttons can be added here */}
                   </div>
                 </div>
               </motion.div>
@@ -89,32 +83,6 @@ export default function ProfilePage() {
 
               {/* Chunks Section */}
               <ChunksSection userId={user.id} />
-
-              {/* Experience Section */}
-              <motion.div
-                className="bg-white/5 rounded-2xl p-6 md:p-8 border border-white/10 backdrop-blur-sm mb-8"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.8 }}
-              >
-                <h2 className="text-2xl font-bold mb-6">Experience</h2>
-                <div className="text-white/60 text-center py-12">
-                  <p>Experience section coming soon...</p>
-                </div>
-              </motion.div>
-
-              {/* Skills Section */}
-              <motion.div
-                className="bg-white/5 rounded-2xl p-6 md:p-8 border border-white/10 backdrop-blur-sm mb-8"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 1.0 }}
-              >
-                <h2 className="text-2xl font-bold mb-6">Skills</h2>
-                <div className="text-white/60 text-center py-12">
-                  <p>Skills section coming soon...</p>
-                </div>
-              </motion.div>
             </div>
           </div>
         </main>
