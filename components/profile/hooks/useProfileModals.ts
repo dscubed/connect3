@@ -12,6 +12,12 @@ export interface Profile {
 
 export type ModalType = "name" | "location" | "status" | "tldr" | null;
 
+export type SaveArgs =
+  | { type: "name"; value: { first: string; last: string } }
+  | { type: "location"; value: string }
+  | { type: "status"; value: string }
+  | { type: "tldr"; value?: string };
+
 export function useProfileModals(profile: Profile | null) {
   const { updateProfile } = useAuthStore();
 
@@ -61,21 +67,25 @@ export function useProfileModals(profile: Profile | null) {
 
   // Save handlers
   const handleSave = useCallback(
-    async (type: ModalType) => {
+    async (args: SaveArgs) => {
       try {
-        if (!type) return;
         let payload: Partial<Profile> = {};
-        if (type === "name") {
-          payload = {
-            first_name: editing.first_name?.trim(),
-            last_name: editing.last_name?.trim(),
-          };
-        } else if (type === "location") {
-          payload = { location: editing.location?.trim() };
-        } else if (type === "status") {
-          payload = { status: editing.status?.trim() };
-        } else if (type === "tldr") {
-          payload = { tldr: editing.tldr?.trim() };
+        switch (args.type) {
+          case "name":
+            payload = {
+              first_name: args.value.first.trim(),
+              last_name: args.value.last.trim(),
+            };
+            break;
+          case "location":
+            payload = { location: args.value.trim() };
+            break;
+          case "status":
+            payload = { status: args.value.trim() };
+            break;
+          case "tldr":
+            payload = { tldr: args.value?.trim() };
+            break;
         }
         await updateProfile(payload);
         setOpenModal(null);
@@ -83,12 +93,15 @@ export function useProfileModals(profile: Profile | null) {
         console.error("Failed to update profile:", error);
       }
     },
-    [editing, updateProfile]
+    [updateProfile]
   );
 
   // Editing setters
   const setField = (field: keyof Profile, value: string) => {
-    setEditing((prev) => ({ ...prev, [field]: value }));
+    setEditing((prev) => {
+      const newState = { ...prev, [field]: value };
+      return newState;
+    });
   };
 
   return {

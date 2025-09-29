@@ -8,9 +8,7 @@ interface EditNameModalProps {
   currentFirstName: string;
   currentLastName: string;
   onClose: () => void;
-  onSave: () => void;
-  setFirstName: (name: string) => void;
-  setLastName: (name: string) => void;
+  onSave: (firstName: string, lastName: string) => void;
 }
 
 export default function EditNameModal({
@@ -19,13 +17,10 @@ export default function EditNameModal({
   currentLastName,
   onClose,
   onSave,
-  setFirstName,
-  setLastName,
 }: EditNameModalProps) {
   const [editingFirstName, setEditingFirstName] = useState(currentFirstName);
   const [editingLastName, setEditingLastName] = useState(currentLastName);
 
-  // Sync the editing names when the modal opens
   useEffect(() => {
     if (isOpen) {
       setEditingFirstName(currentFirstName);
@@ -34,9 +29,7 @@ export default function EditNameModal({
   }, [isOpen, currentFirstName, currentLastName]);
 
   const handleSave = () => {
-    setFirstName(editingFirstName.trim());
-    setLastName(editingLastName.trim());
-    onSave();
+    onSave(editingFirstName.trim(), editingLastName.trim());
   };
 
   const handleCancel = () => {
