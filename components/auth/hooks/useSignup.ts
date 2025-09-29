@@ -24,6 +24,7 @@ export function useSignUp() {
     repeatPassword: string;
     firstName: string;
     lastName: string;
+    accountType: "user" | "organisation";
   }) => {
     setIsSigningUp(true);
     if (params.password !== params.repeatPassword) {

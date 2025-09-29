@@ -5,13 +5,16 @@ export async function signUpWithEmail({
   password,
   firstName,
   lastName,
+  accountType,
 }: {
   email: string;
   password: string;
   firstName: string;
   lastName: string;
+  accountType: "user" | "organisation";
 }) {
   const supabase = createClient();
+
   return supabase.auth.signUp({
     email,
     password,
@@ -21,6 +24,7 @@ export async function signUpWithEmail({
         first_name: firstName,
         last_name: lastName,
         name_provided: true,
+        account_type: accountType,
       },
     },
   });

@@ -26,8 +26,10 @@ export function SignUpForm({
   const [repeatPassword, setRepeatPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [accountType, setAccountType] = useState<"user" | "organisation">(
+    "user"
+  );
 
-  // Only use the isSigningUp from the hook
   const { isSigningUp, handleEmailSignUp, handleGoogleSignUp } = useSignUp();
 
   const onSubmit = (e: React.FormEvent) => {
@@ -38,6 +40,7 @@ export function SignUpForm({
       repeatPassword,
       firstName,
       lastName,
+      accountType,
     });
   };
 
@@ -50,31 +53,66 @@ export function SignUpForm({
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit}>
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4">
+              {/* Tabs for account type */}
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={accountType === "user" ? "default" : "outline"}
+                  onClick={() => setAccountType("user")}
+                  className="flex-1"
+                >
+                  User
+                </Button>
+                <Button
+                  type="button"
+                  variant={
+                    accountType === "organisation" ? "default" : "outline"
+                  }
+                  onClick={() => {
+                    setAccountType("organisation");
+                    setLastName("");
+                  }}
+                  className="flex-1"
+                >
+                  Organisation
+                </Button>
+              </div>
               <div className="flex gap-2">
                 <div className="flex-1 grid gap-2">
-                  <Label htmlFor="first-name">First Name</Label>
+                  <Label htmlFor="first-name">
+                    {accountType === "user"
+                      ? "First Name"
+                      : "Organisation Name"}
+                  </Label>
                   <Input
                     id="first-name"
                     type="text"
-                    placeholder="First Name"
+                    placeholder={
+                      accountType === "user"
+                        ? "First Name"
+                        : "Organisation Name"
+                    }
                     required
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                   />
                 </div>
-                <div className="flex-1 grid gap-2">
-                  <Label htmlFor="last-name">Last Name</Label>
-                  <Input
-                    id="last-name"
-                    type="text"
-                    placeholder="Last Name"
-                    required
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                  />
-                </div>
+                {accountType === "user" && (
+                  <div className="flex-1 grid gap-2">
+                    <Label htmlFor="last-name">Last Name</Label>
+                    <Input
+                      id="last-name"
+                      type="text"
+                      placeholder="Last Name"
+                      required
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                    />
+                  </div>
+                )}
               </div>
+              {/* ...existing code for email, password, etc... */}
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
