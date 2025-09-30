@@ -51,8 +51,10 @@ async function fetchMultipleUsers(
     users?.forEach((user) => {
       userMap.set(user.id, {
         id: user.id,
-        full_name: `${user.first_name} ${user.last_name}`,
-        avatar_url: user.avatar_url || `https://i.pravatar.cc/120?u=${user.id}`,
+        full_name: `${user.first_name} ${user.last_name || ""}`.trim(),
+        avatar_url:
+          user.avatar_url ||
+          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/avatars/placeholder_avatar.png`,
       });
     });
 
@@ -212,7 +214,8 @@ export async function POST(req: NextRequest) {
           user_id,
           full_name: user?.full_name || `User ${user_id.slice(0, 8)}`,
           avatar_url:
-            user?.avatar_url || `https://i.pravatar.cc/120?u=${user_id}`,
+            user?.avatar_url ||
+            `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/avatars/placeholder_avatar.png`,
           files,
         };
       }

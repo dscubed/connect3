@@ -65,7 +65,9 @@ export async function fetchMultipleUsers(
       userMap.set(user.id, {
         id: user.id,
         full_name: `${user.first_name} ${user.last_name}`,
-        avatar_url: user.avatar_url || `https://i.pravatar.cc/120?u=${user.id}`,
+        avatar_url:
+          user.avatar_url ||
+          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/avatars/placeholder_avatar.png`,
       });
     });
 

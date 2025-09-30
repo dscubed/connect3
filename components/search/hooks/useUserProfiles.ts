@@ -54,12 +54,13 @@ export function useUserProfiles(userIds: string[]) {
       profiles?.forEach((profile) => {
         profileMap.set(profile.id, {
           id: profile.id,
-          name: `${profile.first_name} ${profile.last_name}`,
+          name: `${profile.first_name} ${profile.last_name || ""}`,
           status: profile.status,
           location: profile.location,
           tldr: profile.tldr,
           avatar:
-            profile.avatar_url || `https://i.pravatar.cc/120?u=${profile.id}`,
+            profile.avatar_url ||
+            `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/avatars/placeholder_avatar.png`,
         });
       });
 
