@@ -8,4 +8,5 @@ export interface ChunkData {
   updated_at: string;
   openai_file_id: string;
   order: number;
+  visible: boolean;
 }

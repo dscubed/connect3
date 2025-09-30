@@ -36,6 +36,7 @@ export async function POST(request: NextRequest) {
 
     const userId = body.userId;
     const userPrompt = body.userPrompt;
+    const currentTldr = body.currentTldr || "";
 
     console.log(userId);
 
@@ -66,8 +67,12 @@ export async function POST(request: NextRequest) {
     Make it 2-3 sentences, focus on any recent skills and experience and anything notable.
     Sentences should be short and concise and have one or two references no more.
     You don't have to reference every single chunk
+
+    ${currentTldr ? `Current TLDR: ${currentTldr}` : ""}
     
     ${userPrompt ? `User's Instructions: ${userPrompt}` : ""}
+
+    -DON'T GENERATE ANY OTHER TEXT, MARKDOWNS, ETC. JUST THE RAW TEXT
     `;
 
     // Use OpenAI responses API for structured output
@@ -86,8 +91,6 @@ export async function POST(request: NextRequest) {
     });
 
     const tldr = response.output_text || "Failed to generate TLDR.";
-
-    // supabase.from("profiles").update({ tldr }).eq("id", userId).then();
 
     return NextResponse.json(
       {

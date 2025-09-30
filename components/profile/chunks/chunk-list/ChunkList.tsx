@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Plus, Trash, Loader2 } from "lucide-react";
+import { Plus, Trash, Loader2, Eye, EyeOff } from "lucide-react";
 import { useProfileChunkStore } from "@/stores/profiles/profileChunkStore";
 import type { ChunkData } from "../ChunkUtils";
 import { AddInput } from "./AddInput";
@@ -65,6 +65,12 @@ export function ChunkList({ category, chunks }: ChunkListProps) {
     setAddingChunks(next);
   };
 
+  const handleVisibilityToggle = (chunk: ChunkData) => async () => {
+    await useProfileChunkStore.getState().updateChunk(chunk.id, {
+      visible: !chunk.visible,
+    });
+  };
+
   return (
     <motion.div
       initial={false}
@@ -88,6 +94,14 @@ export function ChunkList({ category, chunks }: ChunkListProps) {
             >
               <div className="flex justify-between w-full gap-x-2">
                 <span className="flex-1">{chunk.summary_text}</span>
+                <div onClick={handleVisibilityToggle(chunk)} className="ml-2">
+                  {chunk.visible ? (
+                    <Eye className="w-4 h-4 hover:text-gray-300" />
+                  ) : (
+                    <EyeOff className="w-4 h-4 hover:text-gray-300" />
+                  )}
+                </div>
+
                 {(deleting[chunk.id] && (
                   <Loader2 className="animate-spin w-4 h-4" />
                 )) || (

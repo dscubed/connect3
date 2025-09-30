@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { useAuthStore } from "../authStore";
 import type { ChunkData } from "@/components/profile/chunks/ChunkUtils";
 import { validateChunk } from "@/lib/onboarding/validation/validateChunk";
+import { toast } from "sonner";
 
 interface ProfileChunkStore {
   chunks: ChunkData[];
@@ -34,6 +35,7 @@ interface ProfileChunkStore {
     summary_text: string;
   }) => Promise<void>;
   deleteChunk: (chunkId: string) => Promise<void>;
+  updateChunk: (chunkId: string, updates: Partial<ChunkData>) => Promise<void>;
 }
 
 export const useProfileChunkStore = create<ProfileChunkStore>((set) => ({
@@ -105,6 +107,25 @@ export const useProfileChunkStore = create<ProfileChunkStore>((set) => ({
       delete next[category];
       return { addingChunks: next };
     });
+  },
+
+  updateChunk: async (chunkId: string, updates: Partial<ChunkData>) => {
+    const { getSupabaseClient, user } = useAuthStore.getState();
+    if (!user) throw new Error("User not authenticated");
+    const supabase = getSupabaseClient();
+
+    const response = await supabase
+      .from("user_files")
+      .update(updates)
+      .eq("id", chunkId)
+      .select()
+      .single();
+    console.log("Update response:", response);
+
+    if (response.error) {
+      toast.error(`Error updating chunk: ${response.error.message}`);
+      return;
+    }
   },
 
   deleteChunk: async (chunkId: string) => {

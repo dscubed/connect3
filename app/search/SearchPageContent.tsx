@@ -80,14 +80,14 @@ export default function SearchPageContent() {
       if (!selectedUser?.id) return;
       try {
         const res = await makeAuthenticatedRequest(
-          `/api/profiles/getChunks?userId=${selectedUser.id}`
+          `/api/chatrooms/getChunks?userId=${selectedUser.id}`
         );
         if (!res.ok) throw new Error("Failed to fetch chunks");
         const data = await res.json();
+        const chunks: ChunkData[] = data.chunks || [];
+
         setSelectedUser((prev) =>
-          prev
-            ? { ...prev, chunks: data.chunks || [], chunkLoading: false }
-            : prev
+          prev ? { ...prev, chunks: chunks, chunkLoading: false } : prev
         );
       } catch (err) {
         console.error("Error fetching user chunks:", err);

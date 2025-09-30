@@ -42,7 +42,7 @@ export default function TLDRSection({ tldr }: TLDRSectionProps) {
         `/api/profiles/generate-tldr`,
         {
           method: "POST",
-          body: JSON.stringify({ userId: user?.id, userPrompt }),
+          body: JSON.stringify({ userId: user?.id, userPrompt, tldr }),
           headers: { "Content-Type": "application/json" },
         }
       );
