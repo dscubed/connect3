@@ -33,38 +33,6 @@ export interface UserDetails {
   avatar_url: string;
 }
 
-async function fetchMultipleUsers(
-  userIds: string[]
-): Promise<Map<string, UserDetails>> {
-  try {
-    const { data: users, error } = await supabase
-      .from("profiles")
-      .select("id, first_name, last_name, avatar_url")
-      .in("id", userIds);
-
-    if (error) {
-      console.error("❌ Error fetching multiple users:", error);
-      return new Map();
-    }
-
-    const userMap = new Map<string, UserDetails>();
-    users?.forEach((user) => {
-      userMap.set(user.id, {
-        id: user.id,
-        full_name: `${user.first_name} ${user.last_name || ""}`.trim(),
-        avatar_url:
-          user.avatar_url ||
-          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/avatars/placeholder_avatar.png`,
-      });
-    });
-
-    return userMap;
-  } catch (error) {
-    console.error("❌ Error in fetchMultipleUsers:", error);
-    return new Map();
-  }
-}
-
 // --- Handler ---
 export async function POST(req: NextRequest) {
   try {
@@ -202,23 +170,12 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Fetch user details in one go
-    const userIds = Array.from(userIdsSet);
-    const userDetailsMap = await fetchMultipleUsers(userIds);
-
     // Compose userResults with avatar and name
     const userResults = Array.from(userMap.entries()).map(
-      ([user_id, files]) => {
-        const user = userDetailsMap.get(user_id);
-        return {
-          user_id,
-          full_name: user?.full_name || `User ${user_id.slice(0, 8)}`,
-          avatar_url:
-            user?.avatar_url ||
-            `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/avatars/placeholder_avatar.png`,
-          files,
-        };
-      }
+      ([user_id, files]) => ({
+        user_id,
+        files,
+      })
     );
 
     // Fetch chatroom_id for user_matches entries

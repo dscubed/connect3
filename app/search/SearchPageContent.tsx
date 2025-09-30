@@ -13,12 +13,11 @@ import { useChatroomData } from "@/components/search/hooks/useChatroomData";
 import { useSearch } from "@/components/search/hooks/useSearch";
 import { ChunkData } from "@/components/profile/chunks/ChunkUtils";
 
-interface SearchResults {
+interface MessageContent {
   result: string;
   matches: {
     user_id: string;
     full_name: string;
-    avatar_url?: string;
     files: { file_id: string; description: string }[];
   }[];
   followUps: string;
@@ -28,7 +27,7 @@ interface ChatMessage {
   id: string;
   query: string;
   chatroom_id: string;
-  content: SearchResults | null;
+  content: MessageContent | null;
   created_at: string;
   user_id: string;
   status: "pending" | "processing" | "completed" | "failed";
