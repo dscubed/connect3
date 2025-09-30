@@ -25,9 +25,11 @@ export function useUserMatches(userId: string | null) {
         p_user_id: userId,
       });
       const matchData = (data as MatchData[]) || [];
+
       const matchedYouIds = Array.from(
         new Set(matchData.map((match) => match.queried_by))
       );
+
       const { data: profiles } = await supabase
         .from("profiles")
         .select("id, avatar_url")
@@ -66,6 +68,7 @@ export function useUserMatches(userId: string | null) {
       const youMatchedIds = Array.from(
         new Set(matchData.map((match) => match.user_id))
       );
+
       const { data: profiles } = await supabase
         .from("profiles")
         .select("id, avatar_url")

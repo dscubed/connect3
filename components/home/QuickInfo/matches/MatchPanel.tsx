@@ -58,13 +58,15 @@ export default function MatchPanel({
     type === "youMatched" ? "user_id" : "queried_by"
   );
   const hasMatches = filteredMatches.length > 0;
+  const uniqueQueryCount = new Set(filteredMatches.map((m) => m.chatmessage_id))
+    .size;
 
   // Tooltip logic for info icon
   const [showTooltip, setShowTooltip] = useState(false);
   const tooltipText =
     type === "youMatched"
-      ? `You matched ${filteredAvatars.length} users in ${filteredMatches.length} queries`
-      : `You were matched by ${filteredAvatars.length} users in ${filteredMatches.length} queries`;
+      ? `You matched ${filteredAvatars.length} users in ${uniqueQueryCount} queries`
+      : `You were matched by ${filteredAvatars.length} users in ${uniqueQueryCount} queries`;
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center p-2">
@@ -104,7 +106,7 @@ export default function MatchPanel({
           <div className="flex flex-col items-center">
             <div className="flex flex-row gap-4">
               <span className="flex items-center gap-1 font-normal text-white/60 text-lg">
-                {filteredMatches.length}
+                {uniqueQueryCount}
                 <MessageCircle className="inline h-4 w-4 text-white/40" />
               </span>
               <span className="flex items-center gap-1 font-normal text-white/60 text-lg">
