@@ -99,7 +99,7 @@ export default function SearchPageContent() {
     if (selectedUser?.chunkLoading) {
       fetchChunks();
     }
-  }, [selectedUser?.id, selectedUser?.chunkLoading]);
+  }, [selectedUser?.id, selectedUser?.chunkLoading, makeAuthenticatedRequest]);
 
   // Custom hooks for cleaner logic separation
   const { subscribeToChatroom, unsubscribe } = useRealtimeSubscription({
