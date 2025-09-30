@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import Image from "next/image";
 import { ChunkData } from "@/components/profile/chunks/ChunkUtils";
 import { ChunksList } from "./ChunksList";
+import { useEffect } from "react";
 
 export interface UserProfileProps {
   user: {
@@ -20,6 +21,20 @@ export interface UserProfileProps {
 }
 
 export const UserProfile = ({ user, isOpen, onClose }: UserProfileProps) => {
+  // On escape key press, close the profile
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose]);
+
   if (!user) return null;
 
   return (
