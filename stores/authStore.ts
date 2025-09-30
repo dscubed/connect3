@@ -123,6 +123,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     if (response.status === 401) {
       get().signOut();
+      console.error("Authentication failed. Please log in again.");
       throw new Error("Authentication failed. Please log in again.");
     }
 
