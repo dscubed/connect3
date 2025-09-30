@@ -59,16 +59,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 5. Verify fullName matches authenticated user (optional security check)
-    if (fullName) {
-      const userFullName = `${user.user_metadata?.first_name || ""} ${
-        user.user_metadata?.last_name || ""
-      }`.trim();
-      if (userFullName && userFullName !== fullName) {
-        console.warn(`Name mismatch: ${userFullName} vs ${fullName}`);
-      }
-    }
-
     console.log(
       `Validation request from user: ${user.id}, text length: ${text.length}`
     );

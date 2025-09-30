@@ -1,35 +1,74 @@
+import { toast } from "sonner";
 import { createClient } from "./client";
+import { SupabaseClient } from "@supabase/supabase-js";
 
-export async function uploadAvatar(file: File, userId: string) {
+// Replace blurImageFile with sharp version
+async function blurImageFile(file: File): Promise<File> {
+  // Send the file to your API route
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch("/api/blur", {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) throw new Error("Failed to blur image");
+
+  const blob = await response.blob();
+  return new File([blob], file.name.replace(/\.[^.]+$/, ".blurred.png"), {
+    type: "image/png",
+  });
+}
+
+export async function uploadAvatar(file: File, userId?: string) {
   const supabase = createClient();
-
-  // Generate unique filename with timestamp to avoid conflicts
+  // Generate random UUID filename
   const fileExt = file.name.split(".").pop();
-  const fileName = `${Date.now()}.${fileExt}`;
+  const fileName = `${crypto.randomUUID()}.${fileExt}`;
+
   const filePath = `${userId}/${fileName}`;
 
+  // Blur the image
+  const blurredFile = await blurImageFile(file);
+  const blurredFileName = `blurred_${crypto.randomUUID()}.png`;
+  const blurredFilePath = `${blurredFileName}`;
+
   try {
-    // Upload file to storage
-    const { error } = await supabase.storage
+    // Upload original
+    const { error: origError } = await supabase.storage
       .from("avatars")
       .upload(filePath, file, {
         cacheControl: "3600",
         upsert: false,
       });
 
-    if (error) {
-      throw error;
-    }
+    if (origError) throw origError;
 
-    // Get public URL
+    // Upload blurred
+    const { error: blurError } = await supabase.storage
+      .from("avatars")
+      .upload(blurredFilePath, blurredFile, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (blurError) throw blurError;
+
+    // Get public URLs
     const { data: publicUrlData } = supabase.storage
       .from("avatars")
       .getPublicUrl(filePath);
+    const { data: blurredUrlData } = supabase.storage
+      .from("avatars")
+      .getPublicUrl(blurredFilePath);
 
     return {
       success: true,
       url: publicUrlData.publicUrl,
+      blurredUrl: blurredUrlData.publicUrl,
       path: filePath,
+      blurredPath: blurredFilePath,
     };
   } catch (error) {
     console.error("Error uploading avatar:", error);
@@ -40,15 +79,43 @@ export async function uploadAvatar(file: File, userId: string) {
   }
 }
 
-export async function deleteAvatar(filePath: string) {
-  const supabase = createClient();
+function getStoragePathFromUrl(url: string | null): string | null {
+  if (!url) return null;
+  // Find everything after the first "/avatars/"
+  const match = url.match(/\/avatars\/(.+)$/);
+  return match ? match[1] : null;
+}
+
+export async function deleteAvatar(userId: string, supabase: SupabaseClient) {
+  const result = await supabase
+    .from("profiles")
+    .select("avatar_url, blurred_avatar_url")
+    .eq("id", userId)
+    .single();
+
+  if (result.error) {
+    console.error("Error fetching profile for deletion:", result.error);
+    return { success: false, error: result.error.message };
+  }
+
+  const avatarPath = getStoragePathFromUrl(result.data.avatar_url);
+  const blurredAvatarPath = getStoragePathFromUrl(
+    result.data.blurred_avatar_url
+  );
 
   try {
-    const { error } = await supabase.storage.from("avatars").remove([filePath]);
+    console.log("Deleting avatar files:", avatarPath, blurredAvatarPath);
+    const { error } = await supabase.storage
+      .from("avatars")
+      .remove([avatarPath || "", blurredAvatarPath || ""]);
 
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
+
+    console.log(
+      "Deleted avatars:",
+      result.data.avatar_url,
+      result.data.blurred_avatar_url
+    );
 
     return { success: true };
   } catch (error) {
@@ -58,4 +125,30 @@ export async function deleteAvatar(filePath: string) {
       error: error instanceof Error ? error.message : "Delete failed",
     };
   }
+}
+export async function updateAvatar(
+  userId: string,
+  file: File,
+  supabase: SupabaseClient
+) {
+  const uploadResult = await uploadAvatar(file, userId);
+  if (!uploadResult.success || !uploadResult.url || !uploadResult.blurredUrl) {
+    toast.error(
+      `Failed to upload new avatar: ${uploadResult.error || "Unknown error"}`
+    );
+    return { success: false, error: uploadResult.error || "Upload failed" };
+  }
+
+  const deleteResult = await deleteAvatar(userId, supabase);
+  if (!deleteResult.success) {
+    toast.error(
+      `Failed to delete old avatar: ${deleteResult.error || "Unknown error"}`
+    );
+  }
+
+  return {
+    success: true,
+    url: uploadResult.url,
+    blurredUrl: uploadResult.blurredUrl,
+  };
 }

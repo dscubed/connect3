@@ -29,6 +29,7 @@ interface UseOnboardingStepsParams {
   updateProfile: (data: {
     onboarding_completed: boolean;
     avatar_url?: string;
+    blurred_avatar_url?: string;
   }) => Promise<void>;
 }
 
@@ -136,6 +137,7 @@ export const useOnboardingSteps = ({
   const onboardingCompleted = async () => {
     try {
       let avatarUrl: string | undefined = undefined;
+      let blurredAvatarUrl: string | undefined = undefined;
 
       if (selectedFile && user?.id) {
         const { uploadAvatar } = await import("@/lib/supabase/storage");
@@ -146,6 +148,10 @@ export const useOnboardingSteps = ({
           if (profileImage && profileImage.startsWith("blob:")) {
             URL.revokeObjectURL(profileImage);
           }
+          blurredAvatarUrl = result.blurredUrl;
+          if (blurredAvatarUrl && blurredAvatarUrl.startsWith("blob:")) {
+            URL.revokeObjectURL(blurredAvatarUrl);
+          }
         } else {
           toast.error(result.error || "Failed to upload profile picture");
           return;
@@ -155,6 +161,7 @@ export const useOnboardingSteps = ({
       await updateProfile({
         onboarding_completed: true,
         avatar_url: avatarUrl,
+        blurred_avatar_url: blurredAvatarUrl,
       });
 
       if (chunks.length > 0 && user?.id) {

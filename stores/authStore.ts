@@ -7,7 +7,8 @@ interface Profile {
   email: string;
   first_name: string;
   last_name: string;
-  avatar_url?: string;
+  avatar_url: string;
+  blurred_avatar_url?: string;
   created_at: string;
   updated_at: string;
   onboarding_completed: boolean;

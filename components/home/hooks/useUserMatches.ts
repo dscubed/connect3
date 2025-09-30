@@ -32,12 +32,14 @@ export function useUserMatches(userId: string | null) {
 
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("id, avatar_url")
+        .select("id, blurred_avatar_url")
         .in("id", matchedYouIds);
       const avatarDetails = matchedYouIds
         .map((id) => {
           const profile = profiles?.find((p) => p.id === id);
-          return profile ? { userId: id, avatarUrl: profile.avatar_url } : null;
+          return profile
+            ? { userId: id, avatarUrl: profile.blurred_avatar_url }
+            : null;
         })
         .filter(Boolean) as AvatarDetails[];
       setMatchedYouUsers({ matchData, avatarDetails });

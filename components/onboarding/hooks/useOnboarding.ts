@@ -60,51 +60,6 @@ export const useOnboarding = () => {
       URL.revokeObjectURL(profileImage);
     }
   };
-  // Finalize onboarding and upload chunks
-  const completeOnboarding = async () => {
-    try {
-      let avatarUrl: string | undefined = undefined;
-
-      if (selectedFile && user?.id) {
-        const { uploadAvatar } = await import("@/lib/supabase/storage");
-        const result = await uploadAvatar(selectedFile, user.id);
-
-        if (result.success) {
-          avatarUrl = result.url;
-          if (profileImage && profileImage.startsWith("blob:")) {
-            URL.revokeObjectURL(profileImage);
-          }
-        } else {
-          toast.error(result.error || "Failed to upload profile picture");
-          return;
-        }
-      }
-
-      await updateProfile({
-        onboarding_completed: true,
-        avatar_url: avatarUrl,
-      });
-
-      if (chunks.length > 0) {
-        useAuthStore
-          .getState()
-          .makeAuthenticatedRequest("/api/onboarding/upload", {
-            method: "POST",
-            body: JSON.stringify({
-              chunks,
-              userId: user?.id,
-            }),
-          })
-          .catch(console.error);
-      }
-
-      toast.success("Welcome to connect³! Onboarding completed successfully");
-      router.push("/");
-    } catch (error) {
-      console.error("Onboarding completion error:", error);
-      toast.error("Failed to complete onboarding");
-    }
-  };
 
   return {
     // State
@@ -126,6 +81,5 @@ export const useOnboarding = () => {
     handleFileRemove,
     handleImageUpload,
     handleImageRemove,
-    completeOnboarding,
   };
 };

@@ -45,7 +45,6 @@ export default function UserMatchSection({
             activeSection === "matchedYou" ? matchedYouUsers : youMatchedUsers
           }
           type={activeSection}
-          blurAvatars={activeSection === "matchedYou"}
           filter={filter}
         />
       </div>
@@ -55,7 +54,6 @@ export default function UserMatchSection({
           <MatchPanel
             matchedUsersDetails={matchedYouUsers}
             type="matchedYou"
-            blurAvatars={true}
             filter={filter}
           />
         </div>
@@ -66,7 +64,6 @@ export default function UserMatchSection({
           <MatchPanel
             matchedUsersDetails={youMatchedUsers}
             type="youMatched"
-            blurAvatars={false}
             filter={filter}
           />
         </div>

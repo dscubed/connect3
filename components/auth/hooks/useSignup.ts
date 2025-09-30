@@ -35,7 +35,7 @@ export function useSignUp() {
     }
 
     if (params.accountType == "organisation") {
-      const orgEmails = process.env.ORGANISATION_EMAILS;
+      const orgEmails = process.env.NEXT_PUBLIC_ORGANISATION_EMAILS;
       const allowedEmails = JSON.parse(orgEmails || "[]") as string[];
       if (!allowedEmails.includes(params.email)) {
         toast.error(

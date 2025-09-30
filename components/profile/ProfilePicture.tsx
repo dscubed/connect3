@@ -1,8 +1,12 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { Edit3 } from "lucide-react";
+import EditAvatarModal from "./edit-modals/EditAvatarModal";
 
 export default function ProfilePicture({ avatar }: { avatar: string | null }) {
+  const [modalOpen, setModalOpen] = useState(false);
+
   return (
     <div className="relative">
       <motion.div
@@ -26,9 +30,12 @@ export default function ProfilePicture({ avatar }: { avatar: string | null }) {
         className="absolute bottom-2 right-2 p-2 rounded-full bg-white text-black hover:bg-white/90 transition-colors shadow-lg"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
+        onClick={() => setModalOpen(true)}
       >
         <Edit3 className="h-3 w-3" />
       </motion.button>
+
+      <EditAvatarModal open={modalOpen} onOpenChange={setModalOpen} />
     </div>
   );
 }

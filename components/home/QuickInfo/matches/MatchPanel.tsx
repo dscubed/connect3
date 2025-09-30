@@ -7,12 +7,10 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export default function MatchPanel({
   matchedUsersDetails,
-  blurAvatars,
   type = "youMatched",
   filter = "all",
 }: {
   matchedUsersDetails: MatchedUsersDetails | null;
-  blurAvatars?: boolean;
   type?: "youMatched" | "matchedYou";
   filter?: FilterType;
 }) {
@@ -128,9 +126,7 @@ export default function MatchPanel({
                     src={avatar.avatarUrl}
                     alt={`User you matched ${index + 1}`}
                     fill
-                    className={`object-cover ${
-                      blurAvatars ? "blur-[6px]" : ""
-                    }`}
+                    className={"object-cover"}
                     sizes="32px"
                   />
                 </div>
