@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { ProfileCard } from "./ProfileCard";
 import { useUserProfiles } from "./hooks/useUserProfiles";
 
-interface PeopleSectionProps {
+interface PeopleListProps {
   isVisible: boolean;
   searchMatches?: {
     user_id: string;
@@ -21,11 +21,11 @@ interface PeopleSectionProps {
   }) => void;
 }
 
-export default function PeopleSection({
+export default function PeopleList({
   isVisible,
   searchMatches = [],
   onUserClick,
-}: PeopleSectionProps) {
+}: PeopleListProps) {
   // Extract user IDs from search matches
   const userIds = searchMatches.map((match) => match.user_id);
 

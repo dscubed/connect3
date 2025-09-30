@@ -23,13 +23,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "User ID required" }, { status: 401 });
     }
 
-    if (userId !== user.id) {
-      return NextResponse.json(
-        { error: "Unauthorized access to user chunks" },
-        { status: 403 }
-      );
-    }
-
     const { data: chunks, error } = await supabase
       .from("user_files")
       .select("*")

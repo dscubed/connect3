@@ -1,6 +1,9 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import Image from "next/image";
+import { ChunkData } from "@/components/profile/chunks/ChunkUtils";
+import { ChunksList } from "./ChunksList";
+import { useEffect } from "react";
 
 export interface UserProfileProps {
   user: {
@@ -10,12 +13,28 @@ export interface UserProfileProps {
     status?: string;
     location?: string;
     tldr?: string;
+    chunks?: ChunkData[];
+    chunkLoading?: boolean;
   } | null;
   isOpen: boolean;
   onClose: () => void;
 }
 
 export const UserProfile = ({ user, isOpen, onClose }: UserProfileProps) => {
+  // On escape key press, close the profile
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose]);
+
   if (!user) return null;
 
   return (
@@ -34,9 +53,9 @@ export const UserProfile = ({ user, isOpen, onClose }: UserProfileProps) => {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed right-0 top-0 h-full w-96 bg-[#0B0B0C]/95 backdrop-blur-xl border-l border-white/10 z-50 overflow-y-auto"
+            className="fixed right-0 top-0 h-full w-full max-w-4/5 md:w-[512px] bg-[#0B0B0C]/95 backdrop-blur-xl border-l border-white/10 z-50 overflow-y-auto"
           >
-            <div className="p-6">
+            <div className="p-4">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex gap-3">
                   <button className="px-4 py-2 bg-white text-black rounded-xl font-medium hover:bg-white/90 transition-colors">
@@ -89,9 +108,15 @@ export const UserProfile = ({ user, isOpen, onClose }: UserProfileProps) => {
 
                 {/* Information tab placeholder - to be implemented later */}
                 <div className="pt-4 border-t border-white/10">
-                  <div className="text-white/40 text-sm text-center">
+                  {/* <div className="text-white/40 text-sm text-center">
                     More information coming soon...
-                  </div>
+                  </div> */}
+
+                  {/* Chunks List */}
+                  <ChunksList
+                    chunks={user.chunks || []}
+                    chunksLoading={user.chunkLoading || false}
+                  />
                 </div>
               </div>
             </div>

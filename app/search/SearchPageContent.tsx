@@ -6,11 +6,12 @@ import { CubeLoader } from "@/components/ui/CubeLoader";
 import MessageList from "@/components/search/MessageList";
 import SearchInput from "@/components/search/SearchInput";
 import ShareButton from "@/components/search/ShareButton";
-import { UserProfile } from "@/components/search/UserProfile";
+import { UserProfile } from "@/components/search/UserProfile/UserProfile";
 import { useAuthStore } from "@/stores/authStore";
 import { useRealtimeSubscription } from "@/components/search/hooks/useRealtimeSubscription";
 import { useChatroomData } from "@/components/search/hooks/useChatroomData";
 import { useSearch } from "@/components/search/hooks/useSearch";
+import { ChunkData } from "@/components/profile/chunks/ChunkUtils";
 
 interface SearchResults {
   result: string;
@@ -45,12 +46,18 @@ export default function SearchPageContent() {
     location?: string;
     tldr?: string;
     avatar?: string;
+    chunks?: ChunkData[];
+    chunkLoading?: boolean;
   } | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
   const [chatroomId, setChatroomId] = useState<string | null>(null);
   const [allMessages, setAllMessages] = useState<ChatMessage[]>([]);
 
-  const { user, loading: isAuthLoading } = useAuthStore();
+  const {
+    user,
+    loading: isAuthLoading,
+    makeAuthenticatedRequest,
+  } = useAuthStore();
   const searchParams = useSearchParams();
   const chatroomParam = mounted ? searchParams?.get("chatroom") || "" : "";
 
@@ -63,9 +70,36 @@ export default function SearchPageContent() {
     tldr?: string;
     avatar?: string;
   }) => {
-    setSelectedUser(user);
+    setSelectedUser({ ...user, chunkLoading: true, chunks: [] });
     setProfileOpen(true);
   };
+
+  // Fetch chunks when selectedUser changes
+  useEffect(() => {
+    const fetchChunks = async () => {
+      if (!selectedUser?.id) return;
+      try {
+        const res = await makeAuthenticatedRequest(
+          `/api/profiles/getChunks?userId=${selectedUser.id}`
+        );
+        if (!res.ok) throw new Error("Failed to fetch chunks");
+        const data = await res.json();
+        setSelectedUser((prev) =>
+          prev
+            ? { ...prev, chunks: data.chunks || [], chunkLoading: false }
+            : prev
+        );
+      } catch (err) {
+        console.error("Error fetching user chunks:", err);
+        setSelectedUser((prev) =>
+          prev ? { ...prev, chunks: [], chunkLoading: false } : prev
+        );
+      }
+    };
+    if (selectedUser?.chunkLoading) {
+      fetchChunks();
+    }
+  }, [selectedUser?.id, selectedUser?.chunkLoading, makeAuthenticatedRequest]);
 
   // Custom hooks for cleaner logic separation
   const { subscribeToChatroom, unsubscribe } = useRealtimeSubscription({

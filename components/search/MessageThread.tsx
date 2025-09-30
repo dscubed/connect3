@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import { useUserProfiles } from "./hooks/useUserProfiles";
 import MatchResults from "./MatchResults";
-import PeopleSection from "./PeopleSection";
+import PeopleList from "./PeopleSection";
 
 interface SearchResults {
   result: string;
@@ -175,7 +175,7 @@ function CompletedResponse({
       </motion.p>
 
       {/* People section */}
-      <PeopleSection
+      <PeopleList
         isVisible={content.matches && content.matches.length > 0}
         searchMatches={content.matches}
         onUserClick={onUserClick || (() => {})}
