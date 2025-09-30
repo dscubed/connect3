@@ -27,11 +27,25 @@ export function useSignUp() {
     accountType: "user" | "organisation";
   }) => {
     setIsSigningUp(true);
+
     if (params.password !== params.repeatPassword) {
       toast.error("Passwords do not match");
       setIsSigningUp(false);
       return;
     }
+
+    if (params.accountType == "organisation") {
+      const orgEmails = process.env.ORGANISATION_EMAILS;
+      const allowedEmails = JSON.parse(orgEmails || "[]") as string[];
+      if (!allowedEmails.includes(params.email)) {
+        toast.error(
+          `${params.email} is not a registered organisation email yet. Please contact us for collaboration 😊.`
+        );
+        setIsSigningUp(false);
+        return;
+      }
+    }
+
     try {
       const { data, error } = await signUpWithEmail(params);
       if (error) {

@@ -34,6 +34,12 @@ export function SignUpForm({
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Submitting sign up form", {
+      email,
+      firstName,
+      lastName,
+      accountType,
+    });
     handleEmailSignUp({
       email,
       password,
@@ -148,22 +154,28 @@ export function SignUpForm({
                 <Button type="submit" className="w-full" disabled={isSigningUp}>
                   {isSigningUp ? "Creating an account..." : "Sign up"}
                 </Button>
-                <div className="relative my-2 flex items-center">
-                  <span className="w-full border-t border-gray-300" />
-                  <span className="mx-2 text-xs text-gray-500">or</span>
-                  <span className="w-full border-t border-gray-300" />
-                </div>
-                <Button
-                  type="button"
-                  className="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 hover:bg-gray-100 text-gray-700"
-                  onClick={handleGoogleSignUp}
-                  disabled={isSigningUp}
-                  aria-label="Sign up with Google"
-                >
-                  <span>Sign up with </span>
-                  <FcGoogle size={20} />
-                  {isSigningUp && <span className="ml-2">Redirecting...</span>}
-                </Button>
+                {accountType === "user" && (
+                  <>
+                    <div className="relative my-2 flex items-center">
+                      <span className="w-full border-t border-gray-300" />
+                      <span className="mx-2 text-xs text-gray-500">or</span>
+                      <span className="w-full border-t border-gray-300" />
+                    </div>
+                    <Button
+                      type="button"
+                      className="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 hover:bg-gray-100 text-gray-700"
+                      onClick={handleGoogleSignUp}
+                      disabled={isSigningUp}
+                      aria-label="Sign up with Google"
+                    >
+                      <span>Sign up with </span>
+                      <FcGoogle size={20} />
+                      {isSigningUp && (
+                        <span className="ml-2">Redirecting...</span>
+                      )}
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
             <div className="mt-4 text-center text-sm">
