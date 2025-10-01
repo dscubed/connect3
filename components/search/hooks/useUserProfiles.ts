@@ -64,6 +64,8 @@ export function useUserProfiles(userIds: string[]) {
         });
       });
 
+      console.log("✅ Fetched user profiles:", profileMap);
+
       setState((prev) => ({
         ...prev,
         profiles: profileMap,

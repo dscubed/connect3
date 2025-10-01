@@ -61,7 +61,7 @@ async function transformMessageContentToSearchResults(
 
   const userMap = new Map<string, { full_name: string; avatar_url?: string }>();
   userProfiles.data?.forEach((profile) => {
-    const full_name = `${profile.first_name} ${profile.last_name}`.trim();
+    const full_name = `${profile.first_name} ${profile.last_name || ""}`.trim();
     userMap.set(profile.id, {
       full_name,
       avatar_url: profile.avatar_url || undefined,
