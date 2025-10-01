@@ -42,14 +42,6 @@ export function AuthButton() {
       </div>
     </div>
   ) : (
-    <div>
-      <div className="text-white/60 text-sm leading-relaxed">
-        welcome to{" "}
-        <span className="text-white font-semibold">
-          connect<sup className="pl-0.5">3</sup>
-        </span>
-        , a place to find the people your ideas need. powered by nlp discovery.
-      </div>
       <div className="mt-4 flex gap-2">
         <Link
           href="/auth/sign-up"
