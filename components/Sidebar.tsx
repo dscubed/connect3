@@ -10,7 +10,7 @@ import {
   Calendar,
   UsersRound,
 } from "lucide-react";
-import { AuthButton } from "./auth/auth-button";
+
 import Link from "next/link";
 
 interface SidebarLinkProps {
@@ -117,12 +117,12 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onOpenChange }) => {
       >
         <button
           onClick={() => setSidebarOpen(false)}
-          className="absolute top-4 right-4 flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 border border-white/10 hover:bg-white/15 transition-all md:hidden"
+          className="absolute top-6 right-4 flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 border border-white/10 hover:bg-white/15 transition-all md:hidden safe-area-inset-top"
         >
           <X className="h-4 w-4" />
         </button>
 
-        <div className="flex flex-col gap-4 pt-6 px-4 md:px-0">
+        <div className="flex flex-col gap-4 pt-8 px-4 md:px-0 md:pt-6 safe-area-inset-top">
           <Link
             href="/"
             className="flex items-center gap-2 hover:scale-105 transition-transform duration-200 cursor-pointer"
@@ -142,9 +142,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onOpenChange }) => {
           </nav>
         </div>
 
-        <div className="flex flex-col gap-4 pb-6 px-4 md:px-0">
-          <AuthButton />
-        </div>
+
       </motion.aside>
     </>
   );
