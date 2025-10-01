@@ -1,7 +1,15 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Box, Compass, Users, Menu, X, Bell, Clock } from "lucide-react";
+import {
+  Box,
+  Compass,
+  Menu,
+  X,
+  Clock,
+  Calendar,
+  UsersRound,
+} from "lucide-react";
 import { AuthButton } from "./auth/auth-button";
 import Link from "next/link";
 
@@ -128,8 +136,8 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onOpenChange }) => {
           </Link>
           <nav className="mt-2 flex flex-col gap-1.5">
             <SidebarLink icon={Compass} label="Discover" active />
-            <SidebarLink icon={Bell} label="Notifications" />
-            <SidebarLink icon={Users} label="People" />
+            <SidebarLink icon={Calendar} label="Events" />
+            <SidebarLink icon={UsersRound} label="Clubs" />
             <SidebarLink icon={Clock} label="History" />
           </nav>
         </div>
