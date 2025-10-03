@@ -4,155 +4,74 @@ export const eventQueries = {
       query: "Are there any networking events this week?",
       response: {
         result:
-          "Yes! I found several networking events happening this week that match your interests.",
+          "This week, there are a couple of networking events scheduled. On August 27, 2025, DSCubed will host a Microsoft Panel + Networking event focused on careers in AI, data, and software. Additionally, on August 30, 2025, the Inter-Uni Datathon will provide opportunities to compete and network with industry leaders from IMC and Allianz.",
         matches: [
           {
-            user_id: "demo23",
             files: [
               {
-                file_id: "23",
+                file_id: "file-49AGqC4Sb5AWBSddbpJZQj",
                 description:
-                  "Thursday 6PM - Tech industry networking with alumni and recruiters",
+                  "Details about the Microsoft Panel + Networking event on August 27, focusing on AI and data careers.",
               },
-            ],
-          },
-          {
-            user_id: "demo24",
-            files: [
               {
-                file_id: "24",
+                file_id: "file-N5sQJU3FiVc8s3U1S4fMuq",
                 description:
-                  "Friday 7PM - Entrepreneurship networking event with investor panel",
+                  "Information regarding the Inter-Uni Datathon on August 30, which allows networking with industry leaders.",
               },
             ],
+            user_id: "81cba4a3-a014-40a1-9417-f236ce967112",
           },
         ],
         followUps:
-          "Would you like me to help you RSVP to any of these events or find more networking opportunities?",
+          "Would you like more information about any specific networking events?",
       },
     },
     {
       query: "Any upcoming math/AI competitions?",
-      response: {
-        result:
-          "Great timing! There are several exciting competitions coming up that you can participate in.",
-        matches: [
-          {
-            user_id: "demo25",
-            files: [
-              {
-                file_id: "25",
-                description:
-                  "National AI hackathon - registration closes next week",
-              },
-            ],
-          },
-          {
-            user_id: "demo26",
-            files: [
-              {
-                file_id: "26",
-                description:
-                  "Team-based math competition with real-world problem solving",
-              },
-            ],
-          },
-        ],
-        followUps:
-          "Want help forming a team for these competitions or getting more details about registration?",
-      },
+      response: {},
     },
     {
       query: "Are there any events today that offers free coffee?",
-      response: {
-        result:
-          "Coffee lover detected! ☕ Here are today's events with free refreshments.",
-        matches: [
-          {
-            user_id: "demo27",
-            files: [
-              {
-                file_id: "27",
-                description:
-                  "2PM - Career services info session with free coffee and pastries",
-              },
-            ],
-          },
-          {
-            user_id: "demo28",
-            files: [
-              {
-                file_id: "28",
-                description:
-                  "4PM - Student lounge hangout with free coffee and snacks",
-              },
-            ],
-          },
-        ],
-        followUps:
-          "Should I help you find the exact locations of these events or set reminders?",
-      },
+      response: {},
     },
     {
       query: "What events are happening today related to AI?",
-      response: {
-        result:
-          "Perfect timing! There are several AI-focused events happening today.",
-        matches: [
-          {
-            user_id: "demo29",
-            files: [
-              {
-                file_id: "29",
-                description:
-                  "3PM - Professor's talk on latest developments in machine learning",
-              },
-            ],
-          },
-          {
-            user_id: "demo30",
-            files: [
-              {
-                file_id: "30",
-                description:
-                  "5PM - Interactive discussion on responsible AI development",
-              },
-            ],
-          },
-        ],
-        followUps:
-          "Want to register for these events or find out about recurring AI meetups?",
-      },
+      response: {},
     },
     {
       query: "Which workshops are good for learning Python?",
       response: {
         result:
-          "Excellent choice! I found beginner-friendly Python workshops that are highly recommended.",
+          "You can attend workshops organized by DSCubed, which provide hands-on training in Python, data analysis, machine learning (ML), and artificial intelligence (AI). These workshops are designed to help participants gain practical skills and connect with peers in a collaborative environment.",
         matches: [
           {
-            user_id: "demo31",
             files: [
               {
-                file_id: "31",
+                file_id: "file-WkmgJycXsF4ReWWA2nbiVa",
                 description:
-                  "Weekly 2-hour workshops covering Python fundamentals to advanced topics",
+                  "DSCubed conducts various workshops focused on Python and data science, helping attendees improve their technical skills.",
+              },
+              {
+                file_id: "file-Wz29K8AkBmmSAi745jdXBD",
+                description:
+                  "DSCubed connects students through workshops that foster a collaborative learning environment in data science and AI.",
               },
             ],
+            user_id: "81cba4a3-a014-40a1-9417-f236ce967112",
           },
           {
-            user_id: "demo32",
             files: [
               {
-                file_id: "32",
+                file_id: "file-TDRnPVcMvewv94iCaXXJCd",
                 description:
-                  "Peer-led Python practice sessions with hands-on projects",
+                  "The DSC hosts 'Up-Skilling Workshops' that aim to enhance knowledge in data science, which includes Python training.",
               },
             ],
+            user_id: "f2d127bb-17de-4179-84af-0c008fddcdde",
           },
         ],
         followUps:
-          "Should I help you register for the next workshop or connect you with Python study groups?",
+          "Would you like information on specific Python topics or additional resources for learning?",
       },
     },
   ],
