@@ -17,24 +17,34 @@ interface SidebarLinkProps {
   icon: React.ElementType;
   label: string;
   active?: boolean;
+  href?: string;
 }
 
 const SidebarLink: React.FC<SidebarLinkProps> = ({
   icon: Icon,
   label,
   active = false,
-}) => (
-  <div
-    className={`flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer select-none transition-all duration-200 ${
-      active
-        ? "bg-white/10 text-white shadow-lg shadow-white/5"
-        : "text-white/80 hover:bg-white/5 hover:text-white hover:scale-105"
-    }`}
-  >
-    <Icon className="h-4 w-4" />
-    <span className="text-sm">{label}</span>
-  </div>
-);
+  href,
+}) => {
+  const content = (
+    <div
+      className={`flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer select-none transition-all duration-200 ${
+        active
+          ? "bg-white/10 text-white shadow-lg shadow-white/5"
+          : "text-white/80 hover:bg-white/5 hover:text-white hover:scale-105"
+      }`}
+    >
+      <Icon className="h-4 w-4" />
+      <span className="text-sm">{label}</span>
+    </div>
+  );
+
+  if (href) {
+    return <Link href={href}>{content}</Link>;
+  }
+
+  return content;
+};
 
 interface SidebarProps {
   open?: boolean;
@@ -137,7 +147,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onOpenChange }) => {
           <nav className="mt-2 flex flex-col gap-1.5">
             <SidebarLink icon={Compass} label="Discover" active />
             <SidebarLink icon={Calendar} label="Events" />
-            <SidebarLink icon={UsersRound} label="Clubs" />
+            <SidebarLink icon={UsersRound} label="Clubs" href="/clubs-page" />
             <SidebarLink icon={Clock} label="History" />
           </nav>
         </div>
