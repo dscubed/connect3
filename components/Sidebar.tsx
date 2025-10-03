@@ -1,15 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Box,
-  Compass,
-  Menu,
-  X,
-  Clock,
-  Calendar,
-  UsersRound,
-} from "lucide-react";
+import { Box, Menu, X, Clock, Calendar, UsersRound, Home } from "lucide-react";
 
 import Link from "next/link";
 
@@ -87,6 +79,8 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onOpenChange }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [sidebarOpen, isDesktop, setSidebarOpen]);
+  const pathName =
+    typeof window !== "undefined" ? window.location.pathname : "";
 
   return (
     <>
@@ -145,9 +139,19 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onOpenChange }) => {
             </span>
           </Link>
           <nav className="mt-2 flex flex-col gap-1.5">
-            <SidebarLink icon={Compass} label="Discover" active />
+            <SidebarLink
+              icon={Home}
+              label="Home"
+              href="/"
+              active={pathName === "/"}
+            />
             <SidebarLink icon={Calendar} label="Events" />
-            <SidebarLink icon={UsersRound} label="Clubs" href="/clubs-page" />
+            <SidebarLink
+              icon={UsersRound}
+              label="Clubs"
+              href="/clubs"
+              active={pathName === "/clubs"}
+            />
             <SidebarLink icon={Clock} label="History" />
           </nav>
         </div>
