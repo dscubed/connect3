@@ -112,9 +112,9 @@ export function ClubDetailPanel({
               <ExternalLink className="w-4 h-4 text-white/40 group-hover:text-white/80 transition-colors" />
             </a>
           )}
-          {club.links.umsu && (
+          {club.links.club && (
             <a
-              href={club.links.umsu}
+              href={club.links.club}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-between p-3 sm:p-4 rounded-lg sm:rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-white/20 transition-all group shadow-sm hover:shadow-md shadow-black/5"
@@ -122,7 +122,7 @@ export function ClubDetailPanel({
               <div className="flex items-center gap-3">
                 <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-white/60" />
                 <span className="text-white/90 font-medium text-sm sm:text-base">
-                  UMSU Club Page
+                  Club Page
                 </span>
               </div>
               <ExternalLink className="w-4 h-4 text-white/40 group-hover:text-white/80 transition-colors" />

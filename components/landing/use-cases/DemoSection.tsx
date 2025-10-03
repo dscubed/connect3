@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import { DemoQuery } from "./types";
 import DemoCompletedResponse from "./demo-ui/DemoCompletedResponse";
+import { PlayIcon } from "lucide-react";
 
 interface DemoSectionProps {
   selectedQuery: DemoQuery | null;
@@ -104,7 +105,10 @@ export function DemoSection({ selectedQuery }: DemoSectionProps) {
         )}
 
         {!selectedQuery && (
-          <div className="flex items-center justify-center h-full">
+          <div className="flex flex-row gap-2 items-center justify-center h-full">
+            <button>
+              <PlayIcon className="w-6 h-6 text-white/50 ml-2 animate-pulse" />
+            </button>
             <p className="text-white/50 text-lg">
               Select a demo query to see connect3 in action!
             </p>

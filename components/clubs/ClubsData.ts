@@ -10,7 +10,7 @@ export interface ClubData {
   };
   links: {
     website?: string;
-    umsu?: string;
+    club?: string;
   };
   established?: string;
   logoUrl?: string;
@@ -31,7 +31,7 @@ export const clubsData: ClubData[] = [
     },
     links: {
       website: "https://hack.melbourne/",
-      umsu: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/hackmelbourne/",
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/hackmelbourne/",
     },
     established: "2015",
     logoUrl:
@@ -51,7 +51,7 @@ export const clubsData: ClubData[] = [
     links: {
       website:
         "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/7902/",
-      umsu: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/7902/",
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/7902/",
     },
     established: "2017",
     logoUrl:
@@ -70,7 +70,7 @@ export const clubsData: ClubData[] = [
     },
     links: {
       website: "https://www.raidmelb.au/",
-      umsu: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/6573/",
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/6573/",
     },
     established: "2023",
     logoUrl:
@@ -90,10 +90,31 @@ export const clubsData: ClubData[] = [
     },
     links: {
       website: "https://www.dscubed.org.au/",
-      umsu: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/dscubed/",
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/dscubed/",
     },
     established: "2018",
     logoUrl:
       "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/dscubed.png",
+  },
+  {
+    id: "uwa_dsc",
+    name: "UWA Data Science Club",
+    location: "Perth, Australia",
+    description:
+      "Empowering students to explore, learn, and innovate in the world of data science, machine learning, and artificial intelligence.",
+    fullDescription:
+      "The Data Science club of UWA aims to create a collaborative and professional space for like-minded students looking to take advantage of the power of data to innovate and make a positive impact in the world. Our goal is to promote the interaction between industry professionals and our students to develop and nurture relationships via collaboration, training and the creation of new opportunities.",
+    contact: {
+      address:
+        "School of Computing and Information Systems, University of Melbourne",
+      email: "dsc.uwa@gmail.com",
+    },
+    links: {
+      website: "https://www.dscuwa.com/",
+      club: "https://www.uwastudentguild.com/clubs/data-science-club-of-uwa/",
+    },
+    established: "2018",
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/uwa_dsc.png",
   },
 ];
