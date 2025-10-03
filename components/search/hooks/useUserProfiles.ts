@@ -52,7 +52,7 @@ export function useUserProfiles(userIds: string[]) {
           tldr: profile.tldr,
           avatar_url:
             profile.avatar_url ||
-            `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/avatars/placeholder_avatar.png`,
+            process.env.NEXT_PUBLIC_PLACEHOLDER_AVATAR_URL,
         });
       });
 

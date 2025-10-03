@@ -6,7 +6,7 @@ export function ClubsHeader({ clubCount }: { clubCount: number }) {
         <h1 className="text-xl sm:text-2xl font-bold text-white">Clubs</h1>
       </div>
       <p className="text-white/50 text-xs sm:text-sm font-medium">
-        {clubCount} clubs at University of Melbourne
+        {clubCount} clubs affiliated with connect3
       </p>
     </div>
   );

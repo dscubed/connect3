@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Box, Menu, X, Clock, Calendar, UsersRound, Home } from "lucide-react";
 import { SidebarLink } from "./SidebarLink";
-
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 
 interface SidebarProps {
@@ -22,6 +22,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onOpenChange }) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   const sidebarRef = useRef<HTMLElement>(null);
+  const pathName = usePathname();
 
   // Use controlled state if provided, otherwise use internal state
   const sidebarOpen = open !== undefined ? open : internalOpen;
@@ -54,8 +55,6 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onOpenChange }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [sidebarOpen, isDesktop, setSidebarOpen]);
-  const pathName =
-    typeof window !== "undefined" ? window.location.pathname : "";
 
   return (
     <>
