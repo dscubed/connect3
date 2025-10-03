@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import { useUserProfiles } from "./hooks/useUserProfiles";
 import MatchResults from "./MatchResults";
-import PeopleList from "./PeopleSection";
+import PeopleList from "./PeopleList";
 
 interface SearchResults {
   result: string;
