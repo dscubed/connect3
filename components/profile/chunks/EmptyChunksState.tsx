@@ -1,6 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import { ChevronsRight } from "lucide-react";
+import { AddCategoryButton } from "./chunk-list/AddCategoryButton";
 
 interface EmptyChunksStateProps {
   onboardingCompleted?: boolean;
@@ -22,7 +23,10 @@ export function EmptyChunksState({
         </div>
         <div className="text-white/30 text-sm">
           {onboardingCompleted ? (
-            "Start adding highlights to showcase your professional journey"
+            <>
+              <div className="mb-8">Start adding your chunks below</div>
+              <AddCategoryButton />
+            </>
           ) : (
             <div className="flex flex-col items-center gap-6">
               <p>

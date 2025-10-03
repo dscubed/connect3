@@ -11,6 +11,7 @@ import {
 import { toast } from "sonner";
 import QuickInfoSection from "@/components/home/QuickInfoSection";
 import { SearchBar } from "@/components/home/SearchBar";
+import { AuthButton } from "@/components/auth/auth-button";
 
 export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -48,6 +49,15 @@ export default function Home() {
         <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
 
         <main className="flex-1 relative w-full">
+          {/* Top Navigation Bar */}
+          <div className="fixed top-0 right-0 z-40 p-4 safe-area-inset-top">
+            <div className="flex justify-end">
+              <div className="bg-black/20 backdrop-blur-md border border-white/10 rounded-xl p-2">
+                <AuthButton />
+              </div>
+            </div>
+          </div>
+
           <div
             className="flex flex-col h-screen overflow-y-auto overflow-x-hidden px-4 md:px-6 w-full"
             style={{

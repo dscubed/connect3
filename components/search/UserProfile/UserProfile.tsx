@@ -106,12 +106,7 @@ export const UserProfile = ({ user, isOpen, onClose }: UserProfileProps) => {
                   </p>
                 </div>
 
-                {/* Information tab placeholder - to be implemented later */}
                 <div className="pt-4 border-t border-white/10">
-                  {/* <div className="text-white/40 text-sm text-center">
-                    More information coming soon...
-                  </div> */}
-
                   {/* Chunks List */}
                   <ChunksList
                     chunks={user.chunks || []}

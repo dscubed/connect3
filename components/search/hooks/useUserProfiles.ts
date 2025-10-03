@@ -1,14 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-
-interface UserProfile {
-  id: string;
-  name: string;
-  status?: string;
-  location?: string;
-  tldr?: string;
-  avatar?: string;
-}
+import { UserProfile } from "@/components/search/types";
 
 interface UserProfilesState {
   profiles: Map<string, UserProfile>;
@@ -58,11 +50,13 @@ export function useUserProfiles(userIds: string[]) {
           status: profile.status,
           location: profile.location,
           tldr: profile.tldr,
-          avatar:
+          avatar_url:
             profile.avatar_url ||
             `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/avatars/placeholder_avatar.png`,
         });
       });
+
+      console.log("✅ Fetched user profiles:", profileMap);
 
       setState((prev) => ({
         ...prev,
@@ -82,7 +76,7 @@ export function useUserProfiles(userIds: string[]) {
   useEffect(() => {
     fetchUserProfiles(userIds);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userIds.join(","), fetchUserProfiles]); // Stringify userIds to avoid deep comparison
+  }, [userIds.join(","), fetchUserProfiles]);
 
   return state;
 }
