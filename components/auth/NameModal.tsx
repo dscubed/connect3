@@ -69,6 +69,7 @@ export default function NameModal({
                 name_provided: true,
               });
 
+              console.log("updating profile: ", accountType);
               const displayName =
                 accountType === "user" ? `${firstName} ${lastName}` : firstName;
 
