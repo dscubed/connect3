@@ -17,6 +17,7 @@ interface Profile {
   tldr?: string;
   cover_image_url?: string;
   status?: string;
+  account_type?: "user" | "organisation";
 }
 
 interface AuthState {
