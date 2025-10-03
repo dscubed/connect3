@@ -135,6 +135,7 @@ export function ChunksGrid({
       }
       setNewChunkDetails({ chunk_id: "", category: "", content: "" });
       setIsAddingNew(false);
+      setIsValidating(false);
       const newTotalChunks =
         userChunks.length === 0 ? 1 : userChunks.length + 1;
       const newChunkPage = Math.floor((newTotalChunks - 1) / CHUNKS_PER_PAGE);

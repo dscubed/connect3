@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import Sidebar from "@/components/Sidebar";
+import Sidebar from "@/components/sidebar/Sidebar";
 import { useAuthStore } from "@/stores/authStore";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import CoverImage from "@/components/profile/CoverImage";

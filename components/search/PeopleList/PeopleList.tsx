@@ -1,7 +1,8 @@
 "use client";
 import { motion } from "framer-motion";
 import { ProfileCard } from "./ProfileCard";
-import { useUserProfiles } from "./hooks/useUserProfiles";
+import { useUserProfiles } from "../hooks/useUserProfiles";
+import { UserProfile } from "../types";
 
 interface PeopleListProps {
   isVisible: boolean;
@@ -11,14 +12,7 @@ interface PeopleListProps {
     avatar_url?: string;
     files: { file_id: string; description: string }[];
   }[];
-  onUserClick: (user: {
-    id: string;
-    name: string;
-    status?: string;
-    location?: string;
-    tldr?: string;
-    avatar?: string;
-  }) => void;
+  onUserClick: (user: UserProfile) => void;
 }
 
 export default function PeopleList({
@@ -45,7 +39,7 @@ export default function PeopleList({
       status: profile?.status,
       location: profile?.location,
       tldr: profile?.tldr,
-      avatar: profile?.avatar || match.avatar_url || "/placeholder.svg",
+      avatar: profile?.avatar_url || match.avatar_url || "/placeholder.svg",
     };
   });
 
