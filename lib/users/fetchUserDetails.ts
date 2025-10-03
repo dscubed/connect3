@@ -65,8 +65,7 @@ export async function fetchMultipleUsers(
       userMap.set(user.id, {
         id: user.id,
         full_name: `${user.first_name} ${user.last_name}`,
-        avatar_url:
-          user.avatar_url || process.env.NEXT_PUBLIC_PLACEHOLDER_AVATAR_URL,
+        avatar_url: user.avatar_url || "/placeholder.png",
       });
     });
 

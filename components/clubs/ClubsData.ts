@@ -113,7 +113,7 @@ export const clubsData: ClubData[] = [
       website: "https://www.dscuwa.com/",
       club: "https://www.uwastudentguild.com/clubs/data-science-club-of-uwa/",
     },
-    established: "2018",
+    established: "N/A",
     logoUrl:
       "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/uwa_dsc.png",
   },
