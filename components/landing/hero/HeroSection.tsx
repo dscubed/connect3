@@ -25,7 +25,7 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="max-w-5xl text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight"
+          className="max-w-5xl text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-bold mb-6 leading-tight"
         >
           Discover clubs and opportunities
           <br />
@@ -37,7 +37,7 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="max-w-3xl text-base sm:text-lg md:text-xl lg:text-2xl text-white/70 mb-10 px-4"
+          className="max-w-3xl text-base sm:text-lg md:text-xl lg:text-xl text-white/70 mb-10 px-4"
         >
           Connect3 helps students at Unimelb instantly find clubs and
           opportunities, and makes it effortless for clubs to reach and engage

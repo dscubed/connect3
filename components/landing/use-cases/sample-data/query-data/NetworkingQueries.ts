@@ -153,36 +153,5 @@ export const networkingQueries = {
           "Should I help you join these study groups or find more specialized groups for specific DS topics?",
       },
     },
-    {
-      query: "Who else is interested in AI?",
-      response: {
-        result:
-          "Lots of AI enthusiasts here! I found students with various AI interests and expertise levels.",
-        matches: [
-          {
-            user_id: "demo11",
-            files: [
-              {
-                file_id: "11",
-                description:
-                  "AI researcher working on natural language processing",
-              },
-            ],
-          },
-          {
-            user_id: "demo12",
-            files: [
-              {
-                file_id: "12",
-                description:
-                  "Beginner in AI, looking for study partners and project ideas",
-              },
-            ],
-          },
-        ],
-        followUps:
-          "Want to join AI discussion groups or connect with people working on specific AI domains?",
-      },
-    },
   ],
 };

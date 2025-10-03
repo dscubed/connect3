@@ -35,7 +35,7 @@ export function ClubListCard({
           <div className="w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center">
             {club.logoUrl ? (
               <Image
-                src={club.logoUrl || "/placeholder.svg"}
+                src={club.logoUrl || "/placeholder.png"}
                 alt={`${club.name} logo`}
                 width={48}
                 height={48}

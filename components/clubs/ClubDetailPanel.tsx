@@ -44,7 +44,11 @@ export function ClubDetailPanel({
             <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
               {club.logoUrl ? (
                 <Image
-                  src={club.logoUrl || "/placeholder.svg"}
+                  src={
+                    club.logoUrl ||
+                    process.env.NEXT_PUBLIC_PLACEHOLDER_AVATAR_URL ||
+                    ""
+                  }
                   alt={`${club.name} logo`}
                   width={80}
                   height={80}

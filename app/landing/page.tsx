@@ -9,7 +9,7 @@ const sections = [
   { id: "home", label: "Home" },
   { id: "use-cases", label: "Use cases" },
   { id: "benefits", label: "Benefits" },
-  { id: "collaborations", label: "Collaborations" }, // <-- fix spelling here
+  { id: "collaborations", label: "Collaborations" },
 ];
 
 export default function LandingPage() {
@@ -21,7 +21,7 @@ export default function LandingPage() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrollPos = window.scrollY + window.innerHeight / 2; // Use middle of viewport
+      const scrollPos = window.scrollY + window.innerHeight / 2;
 
       for (const section of sections) {
         const element = document.getElementById(section.id);
@@ -40,9 +40,9 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-black text-white flex">
+    <div className="min-h-screen bg-black text-white">
       {/* Sticky Sidebar - Hidden on Mobile */}
-      <aside className="hidden lg:flex w-64 bg-black border-r border-white/10 flex-col items-center py-8 h-screen sticky top-0">
+      <aside className="hidden lg:flex fixed left-0 top-0 w-64 bg-black border-r border-white/10 flex-col items-center py-8 h-screen z-30">
         <div className="flex flex-row items-center justify-center mb-8">
           <Box className="h-10 w-10 text-white/80" />
           <span className="ml-2 text-lg font-extrabold">connect3</span>
@@ -71,8 +71,8 @@ export default function LandingPage() {
         <span className="text-base font-extrabold text-white">connect3</span>
       </div>
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center px-4 md:px-8">
+      {/* Main Content - Offset by sidebar width on desktop */}
+      <main className="lg:ml-64 flex flex-col items-center px-4 md:px-8">
         {/* Sticky Header */}
         <header className="w-full flex justify-end items-center mb-4 bg-transparent backdrop-blur-lg sticky top-0 z-20 py-4 px-2">
           <div className="flex gap-3 md:gap-4">

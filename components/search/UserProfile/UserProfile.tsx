@@ -76,7 +76,7 @@ export const UserProfile = ({ user, isOpen, onClose }: UserProfileProps) => {
               <div className="text-center mb-6">
                 <div className="w-20 h-20 mx-auto mb-4 relative">
                   <Image
-                    src={user.avatar || "/placeholder.svg"}
+                    src={user.avatar || "/placeholder.png"}
                     alt={user.name}
                     fill
                     className="rounded-full object-cover ring-2 ring-white/10"

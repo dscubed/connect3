@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import DemoProfileCard from "./DemoProfileCard";
-import { MappedMatchDetails } from "../../types";
+import { MappedMatchDetails } from "../types";
+import { ProfileCard } from "@/components/search/PeopleList/ProfileCard";
+import { demoUsers, UserDetails } from "../sample-data/DemoUsers";
 
 export default function DemoPeopleList({
   matches,
@@ -8,6 +9,15 @@ export default function DemoPeopleList({
   matches: MappedMatchDetails[];
 }) {
   if (!matches || matches.length === 0) return null;
+
+  const users = matches.map((match) => demoUsers[match.user_id] as UserDetails);
+  const profiles = matches.map((match, index) => ({
+    id: match.user_id,
+    name: users[index]?.name || match.user_id,
+    status: users[index]?.status || "Unknown",
+    location: users[index]?.location || "Unknown",
+    avatar: users[index]?.avatar || "",
+  }));
 
   return (
     <motion.div
@@ -26,7 +36,11 @@ export default function DemoPeopleList({
       <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/20">
         {matches.map((match, index) => (
           <div key={match.user_id} className="flex-shrink-0 w-80">
-            <DemoProfileCard match={match} index={index} />
+            <ProfileCard
+              profile={profiles[index]}
+              index={index}
+              onClick={() => {}}
+            />
           </div>
         ))}
       </div>

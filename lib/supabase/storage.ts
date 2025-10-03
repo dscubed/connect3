@@ -31,7 +31,7 @@ export async function uploadAvatar(file: File, userId?: string) {
 
   // Blur the image
   const blurredFile = await blurImageFile(file);
-  const blurredFileName = `blurred_${crypto.randomUUID()}.png`;
+  const blurredFileName = `blurred/${crypto.randomUUID()}.png`;
   const blurredFilePath = `${blurredFileName}`;
 
   try {
@@ -102,6 +102,11 @@ export async function deleteAvatar(userId: string, supabase: SupabaseClient) {
   const blurredAvatarPath = getStoragePathFromUrl(
     result.data.blurred_avatar_url
   );
+
+  if (avatarPath == process.env.NEXT_PUBLIC_PLACEHOLDER_AVATAR_URL) {
+    console.log("Placeholder avatar detected, skipping deletion.");
+    return { success: true };
+  }
 
   try {
     console.log("Deleting avatar files:", avatarPath, blurredAvatarPath);

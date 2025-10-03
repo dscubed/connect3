@@ -18,11 +18,6 @@ interface MatchResultsProps {
 export default function MatchResults({ match, userIndex }: MatchResultsProps) {
   const [isExpanded, setIsExpanded] = useState(true);
 
-  // useEffect(() => {
-  //   console.log("Match user ID:", match.user_id);
-  //   console.log
-  // }, [match.avatar_url, match.full_name]);
-
   return (
     <motion.div
       key={`user-${userIndex}`}

@@ -25,14 +25,6 @@ export interface File {
   description: string;
 }
 
-export interface UserDetails {
-  user_id: string;
-  full_name: string;
-  avatar_url: string;
-  status: string;
-  location: string;
-}
-
 export interface MappedMatchDetails {
   user_id: string;
   full_name: string;

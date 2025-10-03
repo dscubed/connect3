@@ -39,7 +39,7 @@ export default function PeopleList({
       status: profile?.status,
       location: profile?.location,
       tldr: profile?.tldr,
-      avatar: profile?.avatar_url || match.avatar_url || "/placeholder.svg",
+      avatar: profile?.avatar_url || match.avatar_url || "/placeholder.png",
     };
   });
 

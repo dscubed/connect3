@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
 import { DemoQuery, MappedMatchDetails } from "../types";
-import DemoMatchResult from "./MatchResult/DemoMatchResult";
-import DemoPeopleList from "./PeopleList/DemoPeopleList";
-import { demoUsers } from "../sample-data/DemoUsers";
+import DemoPeopleList from "./DemoPeopleList";
+import { demoUsers, UserDetails } from "../sample-data/DemoUsers";
+import MatchResults from "@/components/search/MatchResult/MatchResults";
 
 export default function DemoCompletedResponse({ query }: { query: DemoQuery }) {
   const { response } = query;
@@ -12,12 +12,12 @@ export default function DemoCompletedResponse({ query }: { query: DemoQuery }) {
     return null;
   }
   const mappedMatches: MappedMatchDetails[] = response.matches.map((match) => {
-    const userData = demoUsers[match.user_id as keyof typeof demoUsers];
+    const userData = demoUsers[match.user_id] as UserDetails;
 
     return {
       user_id: match.user_id,
-      full_name: userData?.full_name || "Unknown User",
-      avatar_url: userData?.avatar_url || "",
+      full_name: userData?.name || "Unknown User",
+      avatar_url: userData?.avatar || "",
       files: match.files,
     };
   });
@@ -40,11 +40,7 @@ export default function DemoCompletedResponse({ query }: { query: DemoQuery }) {
 
       {/* User matches - Pass mapped data */}
       {mappedMatches.map((match, userIndex) => (
-        <DemoMatchResult
-          key={match.user_id}
-          match={match}
-          userIndex={userIndex}
-        />
+        <MatchResults key={match.user_id} match={match} userIndex={userIndex} />
       ))}
 
       {/* Follow-up questions */}

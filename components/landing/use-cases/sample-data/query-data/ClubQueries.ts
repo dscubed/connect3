@@ -4,31 +4,41 @@ export const clubQueries = {
       query: "What clubs should I join if I want to become a data scientist?",
       response: {
         result:
-          "Perfect question! Here are the most relevant clubs for aspiring data scientists at UniMelb.",
+          "Joining clubs focused on data science can significantly enhance your skills and networking opportunities. Notable organizations include DSCubed, which offers workshops and social events, and the Data Science Student Society (DSC), known for technical upskilling and networking events.",
         matches: [
           {
-            user_id: "demo13",
             files: [
               {
-                file_id: "13",
+                file_id: "file-Wz29K8AkBmmSAi745jdXBD",
                 description:
-                  "President of Data Science Student Society - runs workshops and industry talks",
+                  "DSCubed connects students passionate about Data Science and AI through events and workshops, fostering community and industry connections.",
+              },
+              {
+                file_id: "file-2RFF7d8nNPMcdDss1jFD4A",
+                description:
+                  "DSCubed offers industry opportunities including networking events and skill-building workshops for aspiring data scientists.",
+              },
+              {
+                file_id: "file-WkmgJycXsF4ReWWA2nbiVa",
+                description:
+                  "DSCubed conducts hands-on technical workshops in Python and data analysis, helping members gain practical skills.",
               },
             ],
+            user_id: "81cba4a3-a014-40a1-9417-f236ce967112",
           },
           {
-            user_id: "demo14",
             files: [
               {
-                file_id: "14",
+                file_id: "file-V6h8tzsmsTPyi1tyq5PfCx",
                 description:
-                  "VP of Analytics Club - organizes Kaggle competitions and networking events",
+                  "The DSC is a university club aimed at job readiness through technical upskilling and professional networking.",
               },
             ],
+            user_id: "f2d127bb-17de-4179-84af-0c008fddcdde",
           },
         ],
         followUps:
-          "Would you like me to connect you with club leaders or find information about joining requirements?",
+          "Do you want to know about specific activities or benefits of these clubs?",
       },
     },
     {
