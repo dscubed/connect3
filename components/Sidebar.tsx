@@ -151,8 +151,6 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onOpenChange }) => {
             <SidebarLink icon={Clock} label="History" />
           </nav>
         </div>
-
-
       </motion.aside>
     </>
   );
