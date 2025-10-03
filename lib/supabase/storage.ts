@@ -103,7 +103,10 @@ export async function deleteAvatar(userId: string, supabase: SupabaseClient) {
     result.data.blurred_avatar_url
   );
 
-  if (avatarPath == process.env.NEXT_PUBLIC_PLACEHOLDER_AVATAR_URL) {
+  if (
+    avatarPath ==
+    `${process.env.NEXT_PUBLIC_URL}/storage/v1/object/public/avatars/placeholder_avatar.png`
+  ) {
     console.log("Placeholder avatar detected, skipping deletion.");
     return { success: true };
   }

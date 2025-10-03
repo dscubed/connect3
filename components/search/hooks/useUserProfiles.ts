@@ -50,9 +50,7 @@ export function useUserProfiles(userIds: string[]) {
           status: profile.status,
           location: profile.location,
           tldr: profile.tldr,
-          avatar_url:
-            profile.avatar_url ||
-            process.env.NEXT_PUBLIC_PLACEHOLDER_AVATAR_URL,
+          avatar_url: profile.avatar_url || "/placeholder.png",
         });
       });
 

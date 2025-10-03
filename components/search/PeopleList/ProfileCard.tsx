@@ -32,11 +32,7 @@ export const ProfileCard = ({ profile, index, onClick }: ProfileCardProps) => {
       >
         <div className="flex items-center gap-3 mb-3">
           <motion.img
-            src={
-              profile.avatar ||
-              process.env.NEXT_PUBLIC_PLACEHOLDER_AVATAR_URL ||
-              "/placeholder.png"
-            }
+            src={profile.avatar || "/placeholder.png"}
             alt={profile.name}
             className="h-12 w-12 rounded-full object-cover ring-2 ring-white/10"
             animate={{ scale: hovered ? 1.1 : 1 }}
