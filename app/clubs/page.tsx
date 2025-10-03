@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Sidebar from "@/components/Sidebar";
+import Sidebar from "@/components/sidebar/Sidebar";
 import { clubsData, type ClubData } from "@/components/clubs/ClubsData";
 import { ClubListCard } from "@/components/clubs/ClubListCard";
 import { ClubDetailPanel } from "@/components/clubs/ClubDetailPanel";

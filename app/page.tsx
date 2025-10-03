@@ -1,5 +1,5 @@
 "use client";
-import Sidebar from "@/components/Sidebar";
+import Sidebar from "@/components/sidebar/Sidebar";
 import HeroSection from "@/components/home/HeroSection";
 import React, { useState } from "react";
 import AnimatedParticles from "@/components/AnimatedParticles";
