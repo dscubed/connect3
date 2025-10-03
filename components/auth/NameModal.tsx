@@ -41,6 +41,7 @@ export default function NameModal({
     if (open && profile) {
       setFirstName(profile.first_name ?? "");
       setLastName(profile.last_name ?? "");
+      setAccountType(profile.account_type ?? "user");
     }
   }, [open, profile]);
 
