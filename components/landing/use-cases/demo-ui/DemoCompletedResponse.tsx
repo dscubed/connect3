@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { DemoQuery, MappedMatchDetails } from "../types";
-import DemoMatchResult from "./DemoMatchResult";
-import DemoPeopleList from "./DemoPeopleList";
+import DemoMatchResult from "./MatchResult/DemoMatchResult";
+import DemoPeopleList from "./PeopleList/DemoPeopleList";
 import { demoUsers } from "../sample-data/DemoUsers";
 
 export default function DemoCompletedResponse({ query }: { query: DemoQuery }) {

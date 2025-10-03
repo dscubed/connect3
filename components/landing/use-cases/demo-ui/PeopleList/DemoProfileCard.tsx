@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { MappedMatchDetails } from "../types";
-import { demoUsers } from "../sample-data/DemoUsers";
+import { MappedMatchDetails } from "../../types";
+import { demoUsers } from "../../sample-data/DemoUsers";
 
 export default function DemoProfileCard({
   match,

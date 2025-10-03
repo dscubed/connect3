@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import DemoUserAvatar from "./DemoUserAvatar";
 import DemoFileDescription from "./DemoFileDescription";
-import { MappedMatchDetails } from "../types";
+import { MappedMatchDetails } from "../../types";
 
 export default function DemoMatchResult({
   match,

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import DemoProfileCard from "./DemoProfileCard";
-import { MappedMatchDetails } from "../types";
+import { MappedMatchDetails } from "../../types";
 
 export default function DemoPeopleList({
   matches,
