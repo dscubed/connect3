@@ -43,6 +43,8 @@ export function QueryCardsGrid({
       blurWidth="md"
       gap="md"
       enableDrag={true}
+      autoPlay={true}
+      autoPlaySpeed={4000}
     >
       {/* DON'T wrap in motion.div - animate each card individually */}
       {queries.map((queryObj, idx) => (
@@ -59,9 +61,9 @@ export function QueryCardsGrid({
           onClick={() => handleCardClick(queryObj)}
           onMouseDown={() => setIsDragging(true)}
           onMouseUp={() => setIsDragging(false)}
-          className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-sm rounded-2xl p-5 md:p-6 border border-white/10 hover:border-white/20 hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] transition-all duration-300 cursor-pointer group flex-shrink-0 w-48 md:w-96 pointer-events-auto"
+          className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-sm rounded-xl p-4 md:p-5 border border-white/10 hover:border-white/20 hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] transition-all duration-300 cursor-pointer group flex-shrink-0 w-64 md:w-80 pointer-events-auto"
         >
-          <p className="text-white/90 text-sm text-center md:text-base leading-relaxed group-hover:text-white transition-colors">
+          <p className="text-white/90 text-xs md:text-sm text-center leading-relaxed group-hover:text-white transition-colors">
             {`"${queryObj.query}"`}
           </p>
         </motion.div>

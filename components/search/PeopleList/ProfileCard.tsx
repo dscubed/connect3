@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
+import Image from "next/image";
 
 export interface ProfileCardProps {
   profile: {
@@ -31,13 +32,19 @@ export const ProfileCard = ({ profile, index, onClick }: ProfileCardProps) => {
         transition={{ duration: 0.2 }}
       >
         <div className="flex items-center gap-3 mb-3">
-          <motion.img
-            src={profile.avatar || "/placeholder.png"}
-            alt={profile.name}
-            className="h-12 w-12 rounded-full object-cover ring-2 ring-white/10"
+          <motion.div
             animate={{ scale: hovered ? 1.1 : 1 }}
             transition={{ duration: 0.2 }}
-          />
+            className="relative h-12 w-12 rounded-full overflow-hidden ring-2 ring-white/10"
+          >
+            <Image
+              src={profile.avatar || "/placeholder.png"}
+              alt={profile.name}
+              fill
+              className="object-cover"
+              sizes="48px"
+            />
+          </motion.div>
 
           <div className="flex-1">
             <motion.h3

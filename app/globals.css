@@ -15,6 +15,101 @@
   background: #222 !important; /* or any solid color you prefer */
 }
 
+/* Infinite scroll animation for benefits */
+@keyframes infiniteScroll {
+  0% {
+    transform: translateX(0) translateZ(0);
+  }
+  100% {
+    transform: translateX(-33.333%) translateZ(0);
+  }
+}
+
+.animate-infinite-scroll {
+  animation: infiniteScroll 20s linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.animate-infinite-scroll:hover {
+  animation-play-state: paused;
+}
+
+/* Splide customizations for smooth infinite scroll */
+.splide {
+  position: relative;
+}
+
+.splide__track {
+  overflow: hidden;
+  position: relative;
+}
+
+.splide__list {
+  display: flex;
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none;
+  align-items: center;
+  backface-visibility: hidden;
+  will-change: transform;
+  transform: translateZ(0); /* Force hardware acceleration */
+}
+
+.splide__slide {
+  flex-shrink: 0;
+  position: relative;
+  box-sizing: border-box;
+  backface-visibility: hidden;
+  transform: translateZ(0); /* Force hardware acceleration */
+}
+
+.benefits-splide .splide__track,
+.clubs-splide .splide__track {
+  overflow: visible;
+}
+
+.benefits-splide .splide__list,
+.clubs-splide .splide__list {
+  align-items: center;
+}
+
+/* Faster, smoother transitions */
+.benefits-splide .splide__slide,
+.clubs-splide .splide__slide {
+  transition: all 0.2s ease-out;
+  opacity: 0.7;
+  transform: scale(0.95) translateZ(0);
+}
+
+.benefits-splide .splide__slide.is-active,
+.clubs-splide .splide__slide.is-active {
+  opacity: 1;
+  transform: scale(1) translateZ(0);
+}
+
+.benefits-splide .splide__slide.is-visible,
+.clubs-splide .splide__slide.is-visible {
+  opacity: 0.85;
+  transform: scale(0.98) translateZ(0);
+}
+
+/* Enhance infinite loop performance */
+.splide.is-moving .splide__slide {
+  pointer-events: none;
+}
+
+/* Smooth autoplay transitions */
+.splide[data-splide] .splide__list {
+  transition: transform 0.6s ease !important;
+}
+
+/* Hide default Splide arrows and pagination */
+.splide__arrows,
+.splide__pagination {
+  display: none !important;
+}
+
 @layer base {
   :root {
     --background: 0 0% 3.9%;

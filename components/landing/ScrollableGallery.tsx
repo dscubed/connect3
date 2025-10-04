@@ -12,6 +12,12 @@ interface ScrollableGalleryProps {
   centerKey?: string | number; // When this changes, re-center (like selectedUseCase)
   gap?: "sm" | "md" | "lg"; // Gap between items
   enableDrag?: boolean; // Enable drag to scroll
+  autoPlay?: boolean; // Enable infinite auto-scroll
+  autoPlaySpeed?: number; // Speed in milliseconds
+  onMouseDown?: (e: React.MouseEvent) => void;
+  onMouseUp?: (e: React.MouseEvent) => void;
+  onMouseLeave?: (e: React.MouseEvent) => void;
+  onMouseEnter?: (e: React.MouseEvent) => void;
 }
 
 const blurWidths = {
@@ -34,11 +40,18 @@ export function ScrollableGallery({
   centerKey,
   gap = "md",
   enableDrag = true,
+  autoPlay = false,
+  autoPlaySpeed = 3000,
+  onMouseDown: externalMouseDown,
+  onMouseUp: externalMouseUp,
+  onMouseLeave: externalMouseLeave,
+  onMouseEnter: externalMouseEnter,
 }: ScrollableGalleryProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
+  const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
 
   // Auto-center logic - simple and clean
   useEffect(() => {
@@ -52,6 +65,72 @@ export function ScrollableGallery({
       container.scrollLeft = centerPosition;
     }
   }, [autoCenter, centerKey]); // Only depends on autoCenter and centerKey
+
+  // Auto-play logic
+  useEffect(() => {
+    if (!autoPlay || isDragging) return;
+
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const startAutoPlay = () => {
+      autoPlayRef.current = setInterval(() => {
+        const maxScroll = container.scrollWidth - container.clientWidth;
+        const currentScroll = container.scrollLeft;
+        
+        if (currentScroll >= maxScroll) {
+          // Reset to beginning for infinite loop
+          container.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          // Scroll forward
+          container.scrollBy({ left: 200, behavior: 'smooth' });
+        }
+      }, autoPlaySpeed);
+    };
+
+    startAutoPlay();
+
+    return () => {
+      if (autoPlayRef.current) {
+        clearInterval(autoPlayRef.current);
+      }
+    };
+  }, [autoPlay, autoPlaySpeed, isDragging]);
+
+  // Pause auto-play on hover
+  const handleMouseEnter = () => {
+    if (autoPlayRef.current) {
+      clearInterval(autoPlayRef.current);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    // Handle auto-play resume
+    if (autoPlay && !isDragging) {
+      const container = scrollContainerRef.current;
+      if (!container) return;
+
+      autoPlayRef.current = setInterval(() => {
+        const maxScroll = container.scrollWidth - container.clientWidth;
+        const currentScroll = container.scrollLeft;
+        
+        if (currentScroll >= maxScroll) {
+          container.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          container.scrollBy({ left: 200, behavior: 'smooth' });
+        }
+      }, autoPlaySpeed);
+    }
+
+    // Handle drag state
+    if (enableDrag) {
+      setIsDragging(false);
+      const container = scrollContainerRef.current;
+      if (container) {
+        container.style.cursor = "grab";
+      }
+    }
+  };
 
   // Drag handlers
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -88,16 +167,6 @@ export function ScrollableGallery({
     container.scrollLeft = scrollLeft - walk;
   };
 
-  const handleMouseLeave = () => {
-    if (!enableDrag) return;
-
-    setIsDragging(false);
-    const container = scrollContainerRef.current;
-    if (container) {
-      container.style.cursor = "grab";
-    }
-  };
-
   return (
     <div className={`relative w-full ${className}`}>
       {/* Left blur fade */}
@@ -119,10 +188,23 @@ export function ScrollableGallery({
           scrollbarWidth: "none",
           msOverflowStyle: "none",
         }}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
+        onMouseDown={(e) => {
+          handleMouseDown(e);
+          externalMouseDown?.(e);
+        }}
+        onMouseUp={(e) => {
+          handleMouseUp();
+          externalMouseUp?.(e);
+        }}
         onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
+        onMouseLeave={(e) => {
+          handleMouseLeave();
+          externalMouseLeave?.(e);
+        }}
+        onMouseEnter={(e) => {
+          handleMouseEnter();
+          externalMouseEnter?.(e);
+        }}
       >
         <div className="flex py-4">
           {/* Outer flex with py-4 only */}

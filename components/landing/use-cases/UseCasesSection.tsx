@@ -15,23 +15,35 @@ export function UseCasesSection() {
   return (
     <div
       id="use-cases"
-      className="w-full flex flex-col items-center justify-center py-12 md:py-16"
+      className="w-full flex flex-col items-center justify-center py-2 px-4 relative"
     >
-      <section className="w-full max-w-6xl mx-auto px-4 md:px-8">
-        <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-8 md:mb-12 text-center">
-          Discover Your Community
+      {/* Background grid pattern */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-5">
+        <div className="absolute inset-0" style={{
+          backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
+          backgroundSize: '40px 40px'
+        }} />
+      </div>
+      
+      <div className="relative z-10 w-full">
+      <section className="w-full max-w-5xl mx-auto text-center">
+        <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3 md:mb-4 text-center bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent px-4">
+          Discover What's Possible
         </h3>
+        <p className="text-white/60 text-xs md:text-sm text-center mb-6 max-w-2xl mx-auto px-4">
+          Real queries from UniMelb students, powered by AI to connect you with the right people
+        </p>
         {/* Use Case Tabs */}
-        <div className="flex flex-wrap justify-center gap-3 md:gap-4 mb-8 md:mb-12">
+        <div className="flex flex-row justify-center gap-2 mb-6 px-4">
           {demoUseCases.map((section) => (
             <button
               key={section.id}
               onClick={() => setSelectedUseCase(section.id)}
-              className={`px-5 md:px-6 py-2.5 md:py-3 rounded-full font-semibold transition-all border text-sm md:text-base
+              className={`px-4 py-1.5 rounded-full font-medium transition-all border text-xs whitespace-nowrap
                     ${
                       selectedUseCase === section.id
-                        ? "bg-white/15 text-white border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
-                        : "bg-black/40 text-white/60 border-white/10 hover:bg-white/5 hover:text-white hover:border-white/20"
+                        ? "bg-white/15 text-white border-white/30 shadow-lg"
+                        : "bg-white/5 text-white/60 border-white/10 hover:bg-white/10 hover:text-white hover:border-white/20"
                     }`}
             >
               {section.label}
@@ -44,12 +56,11 @@ export function UseCasesSection() {
           selectedUseCase={selectedUseCase}
           onQueryClick={setSelectedQuery}
         />
-        {/* Separator Line */}
-        <div className="w-full border-t border-white/20 my-2 shadow-[0_0_32px_0px_rgba(255,255,255,0.25)]" />
 
         {/* Demo Section */}
         <DemoSection selectedQuery={selectedQuery} />
       </section>
+      </div>
     </div>
   );
 }
