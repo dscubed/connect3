@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { DemoQuery } from "./types";
+import { useRef, useEffect, useState } from "react";
 
 const itemVariants = {
   hidden: {
@@ -40,6 +41,67 @@ export function QueryCardsGrid({
   selectedUseCase,
   onQueryClick,
 }: QueryCardsGridProps) {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  // Only center on selectedUseCase change, not on every render
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      const scrollWidth = container.scrollWidth;
+      const clientWidth = container.clientWidth;
+      const centerPosition = (scrollWidth - clientWidth) / 2;
+      container.scrollLeft = centerPosition;
+    }
+  }, [selectedUseCase]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    setIsDragging(true);
+    setStartX(e.pageX - container.offsetLeft);
+    setScrollLeft(container.scrollLeft);
+    container.style.cursor = "grabbing";
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.style.cursor = "grab";
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    e.preventDefault();
+
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const x = e.pageX - container.offsetLeft;
+    const walk = (x - startX) * 2; // Multiply by 2 for faster scrolling
+    container.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.style.cursor = "grab";
+    }
+  };
+
+  const handleCardClick = (queryObj: DemoQuery) => {
+    // Only trigger click if not dragging
+    if (!isDragging) {
+      onQueryClick?.(queryObj);
+    }
+  };
+
   return (
     <div className="relative w-full">
       {/* Left blur fade */}
@@ -49,27 +111,23 @@ export function QueryCardsGrid({
       <div className="absolute right-0 top-0 z-10 w-6 md:w-16 h-full bg-gradient-to-l from-black via-black/80 to-transparent pointer-events-none" />
 
       <div
-        className="w-full overflow-x-auto pb-4 scrollbar-hide"
+        ref={scrollContainerRef}
+        className="w-full overflow-x-auto pb-4 scrollbar-hide cursor-grab active:cursor-grabbing select-none"
         style={{
           scrollbarWidth: "none",
           msOverflowStyle: "none",
         }}
-        ref={(el) => {
-          if (el) {
-            const container = el;
-            const scrollWidth = container.scrollWidth;
-            const clientWidth = container.clientWidth;
-            const centerPosition = (scrollWidth - clientWidth) / 2;
-            container.scrollLeft = centerPosition;
-          }
-        }}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
       >
         <motion.div
           className="flex gap-4 md:gap-5"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          key={selectedUseCase} // Force re-animation when tab changes
+          key={selectedUseCase}
         >
           {/* Empty spacer card - LEFT */}
           <div className="flex-shrink-0 w-8"></div>
@@ -78,10 +136,10 @@ export function QueryCardsGrid({
             <motion.div
               key={`${selectedUseCase}-${idx}`}
               variants={itemVariants}
-              onClick={() => onQueryClick?.(queryObj)}
-              className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-sm rounded-2xl p-5 md:p-6 border border-white/10 hover:border-white/20 hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] transition-all duration-300 cursor-pointer group flex-shrink-0 w-80 md:w-96"
+              onClick={() => handleCardClick(queryObj)}
+              className="bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-sm rounded-2xl p-5 md:p-6 border border-white/10 hover:border-white/20 hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] transition-all duration-300 cursor-pointer group flex-shrink-0 w-48 md:w-96 pointer-events-auto"
             >
-              <p className="text-white/90 text-sm md:text-base leading-relaxed group-hover:text-white transition-colors">
+              <p className="text-white/90 text-sm text-center md:text-base leading-relaxed group-hover:text-white transition-colors">
                 {`"${queryObj.query}"`}
               </p>
             </motion.div>
