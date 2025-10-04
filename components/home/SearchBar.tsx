@@ -1,5 +1,5 @@
 import React from "react";
-import { Search } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 import { useSearch } from "@/components/home/hooks/useSearch";
 
 interface SearchBarProps {
@@ -57,8 +57,7 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
           disabled={disabled || isSearching || localQuery.trim() === ""}
           className="flex flex-row items-center gap-2 rounded-xl px-3 py-1.5 bg-white text-black text-sm font-medium cursor-pointer hover:bg-white/90 transition-all hover:scale-105 shadow-lg"
         >
-          <Search className="inline-block h-4 w-4" />
-          <p className="hidden md:block">Search</p>
+          <ArrowUp className="inline-block h-4 w-4" />
         </button>
       </div>
     </form>

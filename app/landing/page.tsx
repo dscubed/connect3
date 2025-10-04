@@ -2,6 +2,7 @@
 import { Box } from "lucide-react";
 import { useState, useEffect } from "react";
 import { HeroSection } from "@/components/landing/hero/HeroSection";
+import { HeroGlowSection } from "@/components/landing/hero/HeroGlowSection";
 import { UseCasesSection } from "@/components/landing/use-cases/UseCasesSection";
 import { BenefitsSection } from "@/components/landing/benefits/BenefitsSection";
 import { CollaborationsSection } from "@/components/landing/collaborations/CollaborationsSection";
@@ -102,18 +103,7 @@ export default function LandingPage() {
 
         {/* Hero Section */}
         <HeroSection />
-
-        {/* Glowy gradient transition - GitHub style */}
-        <div className="w-full relative pb-6">
-          {/* Main gradient line */}
-          <div className="w-full h-px bg-gradient-to-r from-transparent via-white/80 to-transparent" />
-
-          {/* Glow effects - positioned to emanate from the line */}
-          <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-6 bg-gradient-to-r from-transparent via-white/30 to-transparent blur-sm" />
-          <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-12 bg-gradient-to-r from-transparent via-white/20 to-transparent blur-md" />
-          <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-16 bg-gradient-to-r from-transparent via-white/10 to-transparent blur-lg" />
-          <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-20 bg-gradient-to-r from-transparent via-white/5 to-transparent blur-xl" />
-        </div>
+        <HeroGlowSection />
 
         {/* Collaborations Section */}
         <CollaborationsSection />

@@ -21,7 +21,7 @@ export function HeroSection() {
   return (
     <div
       id="home"
-      className="w-full flex flex-col items-center justify-center min-h-[80vh] py-12 animated-gradient"
+      className="w-full flex flex-col items-center justify-center min-h-[80vh] py-12 z-10 animated-gradient"
     >
       <section className="flex flex-col items-center w-full justify-center text-center mb-4 pt-20">
         <motion.h2
@@ -80,55 +80,24 @@ export function HeroSection() {
         >
           {/* Go to Home Button */}
           <Link href="/" className="w-full sm:w-auto">
-            <motion.div
-              className="relative group"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              {/* Subtle glow effect */}
-              <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-white/5 via-gray-500/5 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm" />
-
-              <Button
-                className="relative rounded-2xl bg-white/[0.08] backdrop-blur-xl border border-white/20 hover:border-white/30 transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:shadow-[0_12px_40px_rgba(0,0,0,0.4)] hover:bg-white/[0.12] group overflow-hidden p-4"
-                disabled
-              >
-                {/* Inner glow */}
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/5 via-transparent to-gray-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                <div className="relative flex items-center gap-3 py-2 sm:px-6 sm:py-3 md:px-8 md:py-4">
-                  <Home className="w-4 h-4 md:w-5 md:h-5 text-white/80 group-hover:text-white transition-colors" />
-                  <span className="text-sm md:text-base font-medium text-white/90 group-hover:text-white transition-colors">
-                    Go to Home
-                  </span>
-                </div>
-              </Button>
-            </motion.div>
+            <Button className="w-full sm:w-auto px-6 py-3 md:px-8 md:py-6 rounded-2xl bg-white/[0.08] backdrop-blur-xl border border-white/20 hover:border-white/30 transition-all duration-300 shadow-lg hover:shadow-xl hover:bg-white/[0.12] group">
+              <div className="flex items-center gap-2">
+                <Home className="w-4 h-4 md:w-5 md:h-5 text-white/80 group-hover:text-white transition-colors" />
+                <span className="text-sm md:text-base font-medium text-white/90 group-hover:text-white transition-colors">
+                  Go to Home
+                </span>
+              </div>
+            </Button>
           </Link>
 
           {/* Sign Up Button - Primary Style */}
           <Link href="/auth/sign-up" className="w-full">
-            <motion.div
-              className="relative group"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              {/* Subtle glow effect */}
-              <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-white/10 via-gray-300/10 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm" />
-
-              <Button
-                className="relative rounded-2xl bg-white text-black hover:bg-gray-100 transition-all duration-300 shadow-[0_8px_32px_rgba(255,255,255,0.1)] hover:shadow-[0_12px_40px_rgba(255,255,255,0.15)] group overflow-hidden border border-white/10 p-4"
-                disabled
-              >
-                {/* Inner shine effect */}
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 via-transparent to-gray-200/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="relative flex items-center gap-3 py-2 sm:px-6 sm:py-3 md:px-8 md:py-4">
-                  <span className="text-sm md:text-base font-medium">
-                    Sign up now!
-                  </span>
-                  <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform duration-200" />
-                </div>
-              </Button>
-            </motion.div>
+            <Button className="w-full flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-6 rounded-2xl bg-white text-black hover:bg-gray-200 transition-all duration-200 shadow-lg group">
+              <span className="text-sm md:text-base font-medium">
+                Sign up now
+              </span>
+              <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform duration-200" />
+            </Button>
           </Link>
         </motion.div>
       </motion.section>
