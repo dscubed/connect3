@@ -3,6 +3,8 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Building2 } from "lucide-react";
 import Link from "next/link";
+import { ScrollableGallery } from "../ScrollableGallery";
+import * as Tooltip from "@radix-ui/react-tooltip";
 
 export function CollaborationsSection() {
   const collaboratingClubs = clubsData
@@ -43,75 +45,58 @@ export function CollaborationsSection() {
           viewport={{ once: true }}
           className="mb-8 w-full"
         >
-          <div className="relative w-full">
-            {/* Left blur fade */}
-            <div className="absolute left-0 top-0 z-10 w-6 md:w-16 h-full bg-gradient-to-r from-black via-black/80 to-transparent pointer-events-none" />
-
-            {/* Right blur fade */}
-            <div className="absolute right-0 top-0 z-10 w-6 md:w-16 h-full bg-gradient-to-l from-black via-black/80 to-transparent pointer-events-none" />
-
-            <div
-              className="w-full overflow-x-auto scrollbar-hide"
-              style={{
-                scrollbarWidth: "none",
-                msOverflowStyle: "none",
-              }}
-              ref={(el) => {
-                if (el) {
-                  const container = el;
-                  const scrollWidth = container.scrollWidth;
-                  const clientWidth = container.clientWidth;
-                  const centerPosition = (scrollWidth - clientWidth) / 2;
-                  container.scrollLeft = centerPosition;
-                }
-              }}
+          <Tooltip.Provider delayDuration={300}>
+            <ScrollableGallery
+              autoCenter={true}
+              centerKey="once" // Only center once on mount
+              blurWidth="md"
+              gap="lg"
+              enableDrag={true}
+              className="pb-10"
             >
-              <div className="flex gap-6 md:gap-8 items-center justify-center py-4 pb-10">
-                {/* Empty spacer - LEFT */}
-                <div className="flex-shrink-0 w-8"></div>
-
-                {collaboratingClubs.map((club, index) => (
-                  <motion.div
-                    key={club.id}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    transition={{
-                      duration: 0.5,
-                      delay: 0.6 + index * 0.1,
-                      ease: "easeOut",
-                    }}
-                    viewport={{ once: true }}
-                    whileHover={{ scale: 1.1 }}
-                    className="group relative flex-shrink-0"
-                  >
-                    <div className="relative w-24 h-24 lg:w-28 lg:h-28 rounded-2xl bg-white/[0.04] backdrop-blur-sm border border-white/10 p-4 flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-white/[0.08] hover:border-white/20">
-                      {club.logoUrl ? (
-                        <Image
-                          src={club.logoUrl}
-                          alt={`${club.name} logo`}
-                          width={80}
-                          height={80}
-                          className="object-contain max-w-full max-h-full filter brightness-90 group-hover:brightness-100 transition-all duration-300"
-                        />
-                      ) : (
-                        <Building2 className="w-10 h-10 text-white/60 group-hover:text-white/80 transition-colors" />
-                      )}
-                    </div>
-
-                    {/* Tooltip */}
-                    <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
-                      <div className="bg-black/90 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg border border-white/20 whitespace-nowrap">
-                        {club.name}
+              {collaboratingClubs.map((club, index) => (
+                <Tooltip.Root key={club.id}>
+                  <Tooltip.Trigger asChild>
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      transition={{
+                        duration: 0.5,
+                        delay: 0.6 + index * 0.1,
+                        ease: "easeOut",
+                      }}
+                      viewport={{ once: true }}
+                      whileHover={{ scale: 1.1 }}
+                      className="group relative flex-shrink-0 pointer-events-auto cursor-pointer"
+                    >
+                      <div className="relative w-24 h-24 lg:w-28 lg:h-28 rounded-2xl bg-white/[0.04] backdrop-blur-sm border border-white/10 p-4 flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-white/[0.08] hover:border-white/20">
+                        {club.logoUrl ? (
+                          <Image
+                            src={club.logoUrl}
+                            alt={`${club.name} logo`}
+                            width={80}
+                            height={80}
+                            className="object-contain max-w-full max-h-full filter brightness-90 group-hover:brightness-100 transition-all duration-300"
+                          />
+                        ) : (
+                          <Building2 className="w-10 h-10 text-white/60 group-hover:text-white/80 transition-colors" />
+                        )}
                       </div>
-                    </div>
-                  </motion.div>
-                ))}
-
-                {/* Empty spacer - RIGHT */}
-                <div className="flex-shrink-0 w-8"></div>
-              </div>
-            </div>
-          </div>
+                    </motion.div>
+                  </Tooltip.Trigger>
+                  <Tooltip.Portal>
+                    <Tooltip.Content
+                      className="bg-black/90 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg border border-white/20 whitespace-nowrap z-50"
+                      sideOffset={8}
+                      side="bottom"
+                    >
+                      {club.name}
+                    </Tooltip.Content>
+                  </Tooltip.Portal>
+                </Tooltip.Root>
+              ))}
+            </ScrollableGallery>
+          </Tooltip.Provider>
         </motion.div>
 
         {/* Call to Action */}
