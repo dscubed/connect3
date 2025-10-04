@@ -72,7 +72,9 @@ export default function LandingPage() {
       {/* Mobile Logo - Shown only on mobile */}
       <div className="lg:hidden fixed top-4 left-4 z-30 flex items-center gap-2">
         <Box className="h-8 w-8 text-white/80" />
-        <span className="text-base font-extrabold text-white">connect3</span>
+        <span className="hidden xs:block text-base font-extrabold text-white">
+          connect3
+        </span>
       </div>
 
       {/* Main Content - Offset by sidebar width on desktop */}
@@ -81,7 +83,7 @@ export default function LandingPage() {
         <header className="w-full flex justify-end items-center mb-4 bg-transparent backdrop-blur-lg sticky top-0 z-20 py-4 px-2">
           <div className="flex gap-3 md:gap-4 justify-center items-center">
             <Link href="mailto:president@dscubed.org.au?subject=Student Club Join Request | Connect3&body=Hi there!%0D%0A%0D%0A Our club: {club name} is interested in joining Connect3.%0D%0A%0D%0A Here is our club email address: {club email address}.">
-              <span className="text-white/70 self-center text-sm md:text-base">
+              <span className="hidden xs:block text-white/70 self-center text-sm md:text-base">
                 Contact
               </span>
             </Link>

@@ -105,12 +105,20 @@ export function CollaborationsSection() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 1.2 }}
           viewport={{ once: true }}
-          className="mt-12"
+          className="flex flex-row sm:flex-row gap-4 sm:gap-6 mt-12 justify-center items-center"
         >
           <Link href="mailto:president@dscubed.org.au?subject=Student Club Join Request | Connect3&body=Hi there!%0D%0A%0D%0A Our club: {club name} is interested in joining Connect3.%0D%0A%0D%0A Here is our club email address: {club email address}.">
-            <button className="px-8 py-4 rounded-2xl bg-white/[0.08] backdrop-blur-xl border border-white/20 hover:border-white/30 transition-all duration-300 shadow-lg hover:shadow-xl hover:bg-white/[0.12] group">
-              <span className="text-white/90 group-hover:text-white font-medium">
+            <button className="w-full sm:w-auto px-6 py-3 md:px-8 md:py-4 rounded-2xl bg-white/[0.08] backdrop-blur-xl border border-white/20 hover:border-white/30 transition-all duration-300 shadow-lg hover:shadow-xl hover:bg-white/[0.12] group">
+              <span className="text-sm md:text-base font-medium text-white/90 group-hover:text-white">
                 Join the Community
+              </span>
+            </button>
+          </Link>
+
+          <Link href="/clubs">
+            <button className="w-full sm:w-auto flex items-center justify-center gap-3 px-6 py-3 md:px-8 md:py-4 rounded-2xl bg-white text-black hover:bg-gray-200 transition-all duration-200 shadow-lg group">
+              <span className="text-sm md:text-base font-medium">
+                View All Clubs
               </span>
             </button>
           </Link>
