@@ -39,7 +39,7 @@ export const clubsData: ClubData[] = [
   },
   {
     id: "misc",
-    name: "Melbourne Information Security Club",
+    name: "Melbourne Information Security Club (MISC)",
     location: "Melbourne, Australia",
     description: "Dedicated to cybersecurity education for all skill levels.",
     fullDescription:
@@ -59,7 +59,7 @@ export const clubsData: ClubData[] = [
   },
   {
     id: "raid",
-    name: "RAID",
+    name: "Responsible AI Development (RAID)",
     location: "Melbourne, Australia",
     description: "Building a community around responsible AI development.",
     fullDescription:
@@ -78,7 +78,7 @@ export const clubsData: ClubData[] = [
   },
   {
     id: "dscubed",
-    name: "DSCubed",
+    name: "Data Science Students Society (DSCubed)",
     location: "Melbourne, Australia",
     description: "Empowering students to use data science for positive impact.",
     fullDescription:
@@ -98,7 +98,7 @@ export const clubsData: ClubData[] = [
   },
   {
     id: "uwa_dsc",
-    name: "UWA Data Science Club",
+    name: "UWA Data Science Club (DSC)",
     location: "Perth, Australia",
     description:
       "Empowering students to explore, learn, and innovate in the world of data science, machine learning, and artificial intelligence.",
