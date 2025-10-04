@@ -92,3 +92,9 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;  /* Chrome, Safari, Opera */
 }
+
+.animated-gradient {
+    background-color: hsla(0, 0%, 0%, 1);
+    background-image: radial-gradient(circle at 85% 80%, hsla(266.99999999999983, 1%, 12%, 1) 9%, transparent 55%), radial-gradient(circle at 60% 24%, hsla(335.9999999999997, 2%, 22%, 1) 5%, transparent 72%), radial-gradient(circle at 13% 82%, hsla(53.999999999999886, 0%, 0%, 0.49) 5%, transparent 52%), radial-gradient(circle at 24% 7%, hsla(299, 4%, 36%, 1) 13%, transparent 68%);
+    background-blend-mode: normal, normal, normal, normal;
+}
