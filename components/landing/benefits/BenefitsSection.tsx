@@ -1,66 +1,34 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useRef } from "react";
-
-const benefits = [
-  {
-    id: "discovery",
-    category: "Visibility",
-    title: "Be Found Instantly",
-    description:
-      "Students searching for opportunities discover your club automatically. No more hoping they'll stumble upon your Instagram—Connect3 puts you right where they're looking.",
-    image:
-      "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&h=800&fit=crop&q=80", // Students studying/discovering
-  },
-  {
-    id: "reach",
-    category: "Growth",
-    title: "Reach the Right Students",
-    description:
-      "Connect with students who are genuinely interested in what you offer. Our AI matches your club with students based on their passions, majors, and career goals.",
-    image:
-      "https://images.unsplash.com/photo-1529070538774-1843cb3265df?w=800&h=800&fit=crop&q=80", // University campus aerial view
-  },
-  {
-    id: "engagement",
-    category: "Engagement",
-    title: "Boost Event Turnout",
-    description:
-      "Get more students at your events with intelligent reminders and personalized recommendations. Turn one-time visitors into dedicated members.",
-    image:
-      "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=800&fit=crop&q=80", // Conference/event gathering
-  },
-  {
-    id: "setup",
-    category: "Simplicity",
-    title: "Set Up in 60 Seconds",
-    description:
-      "No complex forms or manual data entry. Just paste your club's website or social media link, and Connect3 does the rest. Start reaching students immediately.",
-    image:
-      "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=800&fit=crop&q=80", // Clean tech/coding setup
-  },
-  {
-    id: "analytics",
-    category: "Insights",
-    title: "Understand Your Members",
-    description:
-      "See what students are searching for, which events get the most interest, and how your club compares. Make data-driven decisions to grow faster.",
-    image:
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=800&fit=crop&q=80", // Analytics dashboard/charts
-  },
-  {
-    id: "automation2",
-    category: "Efficiency",
-    title: "Let AI Handle the Busywork",
-    description:
-      "Automatically answer common questions, update event details, and notify interested students. Focus on building community, not managing spreadsheets.",
-    image:
-      "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=800&fit=crop&q=80", // AI/futuristic technology
-  },
-];
+import { benefits } from "./benefits";
+import { ArrowBigLeft, ArrowBigRight } from "lucide-react";
 
 export function BenefitsSection() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const scrollToCard = (index: number) => {
+    const container = scrollContainerRef.current;
+    const card = cardRefs.current[index];
+
+    if (container && card) {
+      const containerRect = container.getBoundingClientRect();
+      const cardRect = card.getBoundingClientRect();
+      const scrollLeft = container.scrollLeft;
+
+      // Calculate the position to center the card
+      const cardCenter =
+        cardRect.left - containerRect.left + scrollLeft + cardRect.width / 2;
+      const containerCenter = containerRect.width / 2;
+      const targetScrollLeft = cardCenter - containerCenter;
+
+      container.scrollTo({
+        left: Math.max(0, targetScrollLeft),
+        behavior: "smooth",
+      });
+    }
+  };
 
   return (
     <div
@@ -100,12 +68,16 @@ export function BenefitsSection() {
               {benefits.map((benefit, idx) => (
                 <motion.div
                   key={benefit.id}
+                  ref={(el) => {
+                    cardRefs.current[idx] = el;
+                  }}
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   transition={{ delay: idx * 0.08, duration: 0.4 }}
                   viewport={{ once: true, margin: "-100px" }}
                   whileHover={{ scale: 1.03 }}
-                  className="flex-shrink-0 w-[80vw] sm:w-[340px] md:w-[380px] lg:w-[420px]"
+                  onClick={() => scrollToCard(idx)}
+                  className="flex-shrink-0 w-[80vw] sm:w-[340px] md:w-[380px] lg:w-[420px] cursor-pointer"
                 >
                   <div className="relative h-[440px] md:h-[480px] rounded-3xl overflow-hidden bg-gradient-to-br from-white/[0.08] via-white/[0.04] to-transparent border border-white/10 backdrop-blur-sm shadow-2xl transition-all duration-300 hover:border-white/25 hover:shadow-[0_0_80px_rgba(255,255,255,0.15)]">
                     {/* Image Container with Gradient Overlay */}
@@ -159,29 +131,19 @@ export function BenefitsSection() {
             {benefits.map((_, idx) => (
               <div
                 key={idx}
-                className="w-1.5 h-1.5 rounded-full bg-white/30 transition-all"
+                className="w-1.5 h-1.5 rounded-full bg-white/30 transition-all cursor-pointer hover:bg-white/50"
+                onClick={() => scrollToCard(idx)}
               />
             ))}
           </div>
-          <span>← Drag or scroll to explore →</span>
+          <span>← Click, drag or scroll to explore →</span>
         </div>
 
         {/* Swipe Hint for Mobile */}
         <div className="flex md:hidden items-center justify-center gap-2 mt-6 text-white/30 text-xs">
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M7 16l-4-4m0 0l4-4m-4 4h18"
-            />
-          </svg>
-          <span>Swipe or scroll to see more</span>
+          <span className="flex items-center gap-1">
+            <ArrowBigLeft /> Drag or scroll around to see more <ArrowBigRight />
+          </span>
         </div>
       </div>
     </div>
