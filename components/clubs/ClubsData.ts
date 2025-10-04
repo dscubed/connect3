@@ -1,6 +1,7 @@
 export interface ClubData {
   id: string;
   name: string;
+  full_name?: string;
   location: string;
   description: string;
   fullDescription: string;
@@ -39,7 +40,8 @@ export const clubsData: ClubData[] = [
   },
   {
     id: "misc",
-    name: "Melbourne Information Security Club (MISC)",
+    name: "MISC",
+    full_name: "Melbourne Information Security Club",
     location: "Melbourne, Australia",
     description: "Dedicated to cybersecurity education for all skill levels.",
     fullDescription:
@@ -59,7 +61,8 @@ export const clubsData: ClubData[] = [
   },
   {
     id: "raid",
-    name: "Responsible AI Development (RAID)",
+    name: "RAID",
+    full_name: "Responsible Artificial Intelligence Development",
     location: "Melbourne, Australia",
     description: "Building a community around responsible AI development.",
     fullDescription:
@@ -78,7 +81,8 @@ export const clubsData: ClubData[] = [
   },
   {
     id: "dscubed",
-    name: "Data Science Students Society (DSCubed)",
+    name: "DSCubed",
+    full_name: "Data Science Students Society",
     location: "Melbourne, Australia",
     description: "Empowering students to use data science for positive impact.",
     fullDescription:
@@ -98,7 +102,8 @@ export const clubsData: ClubData[] = [
   },
   {
     id: "uwa_dsc",
-    name: "UWA Data Science Club (DSC)",
+    name: "DSC",
+    full_name: "Data Science Club of UWA",
     location: "Perth, Australia",
     description:
       "Empowering students to explore, learn, and innovate in the world of data science, machine learning, and artificial intelligence.",
@@ -118,7 +123,8 @@ export const clubsData: ClubData[] = [
   },
   {
     id: "cssc",
-    name: "The Computer Science Students Club (CSSC)",
+    name: "CSSC",
+    full_name: "Computer Science Students Club",
     location: "Perth, Australia",
     description:
       "CSSC is the premier UWA computer science club. Join us for a variety of events such as workshop, talks and LAN parties!",
