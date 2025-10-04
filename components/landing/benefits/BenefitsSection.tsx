@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { useRef } from "react";
 import { benefits } from "./benefits";
-import { ArrowBigLeft, ArrowBigRight } from "lucide-react";
 
 export function BenefitsSection() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -57,12 +56,8 @@ export function BenefitsSection() {
               msOverflowStyle: "none",
             }}
           >
-            <motion.div
-              drag="x"
-              dragConstraints={{ left: -1800, right: 0 }}
-              dragElastic={0.1}
-              dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
-              className="flex gap-5 md:gap-6 cursor-grab active:cursor-grabbing pb-8"
+            <div
+              className="flex gap-5 md:gap-6 pb-8"
               style={{ width: "max-content" }}
             >
               {benefits.map((benefit, idx) => (
@@ -121,7 +116,7 @@ export function BenefitsSection() {
                   </div>
                 </motion.div>
               ))}
-            </motion.div>
+            </div>
           </div>
         </div>
 
@@ -136,14 +131,12 @@ export function BenefitsSection() {
               />
             ))}
           </div>
-          <span>← Click, drag or scroll to explore →</span>
+          <span>← Click or scroll to explore →</span>
         </div>
 
         {/* Swipe Hint for Mobile */}
         <div className="flex md:hidden items-center justify-center gap-2 mt-6 text-white/30 text-xs">
-          <span className="flex items-center gap-1">
-            <ArrowBigLeft /> Drag or scroll around to see more <ArrowBigRight />
-          </span>
+          <span>Swipe to see more →</span>
         </div>
       </div>
     </div>
