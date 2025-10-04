@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 
 interface SearchInputProps {
   onSearch: (query: string) => void;
@@ -47,7 +47,6 @@ export default function SearchInput({
           }}
           transition={{ duration: 0.2 }}
         >
-          <Search className="h-5 w-5 text-white/60" />
           <input
             className="w-full bg-transparent outline-none placeholder:text-white/40 text-white"
             placeholder="Ask another question or refine your search..."
@@ -62,7 +61,7 @@ export default function SearchInput({
             whileTap={query.trim() ? { scale: 0.95 } : {}}
             onClick={handleSubmit}
           >
-            Search
+            <ArrowUp className="h-5 w-5" />
           </motion.button>
         </motion.div>
       </div>

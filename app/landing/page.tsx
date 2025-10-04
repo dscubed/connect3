@@ -2,6 +2,7 @@
 import { Box } from "lucide-react";
 import { useState, useEffect } from "react";
 import { HeroSection } from "@/components/landing/hero/HeroSection";
+import { HeroGlowSection } from "@/components/landing/hero/HeroGlowSection";
 import { UseCasesSection } from "@/components/landing/use-cases/UseCasesSection";
 import { BenefitsSection } from "@/components/landing/benefits/BenefitsSection";
 import { CollaborationsSection } from "@/components/landing/collaborations/CollaborationsSection";
@@ -44,7 +45,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Sticky Sidebar - Hidden on Mobile */}
-      <aside className="hidden lg:flex fixed left-0 top-0 w-64 bg-black border-r border-white/10 flex-col items-center py-8 h-screen z-30">
+      <aside className="hidden lg:flex fixed left-0 top-0 w-64 bg-black border-r-2 border-white/10 flex-col items-center py-8 h-screen z-30">
         <Link href="/">
           <div className="flex flex-row items-center justify-center mb-8 hover:scale-105 transition-transform duration-200 cursor-pointer">
             <Box className="h-10 w-10 text-white/80" />
@@ -72,16 +73,18 @@ export default function LandingPage() {
       {/* Mobile Logo - Shown only on mobile */}
       <div className="lg:hidden fixed top-4 left-4 z-30 flex items-center gap-2">
         <Box className="h-8 w-8 text-white/80" />
-        <span className="text-base font-extrabold text-white">connect3</span>
+        <span className="hidden xs:block text-base font-extrabold text-white">
+          connect3
+        </span>
       </div>
 
       {/* Main Content - Offset by sidebar width on desktop */}
-      <main className="lg:ml-64 flex flex-col items-center px-4 md:px-8">
-        {/* Sticky Header */}
-        <header className="w-full flex justify-end items-center mb-4 bg-transparent backdrop-blur-lg sticky top-0 z-20 py-4 px-2">
+      <main className="lg:ml-64 flex flex-col items-center">
+        {/* Fixed Header - Floats over content but stays at top */}
+        <header className="fixed top-0 left-0 right-0 lg:left-64 flex justify-end items-center bg-black/20 backdrop-blur-md border-b border-white/10 z-20 py-4 px-6 md:px-8">
           <div className="flex gap-3 md:gap-4 justify-center items-center">
             <Link href="mailto:president@dscubed.org.au?subject=Student Club Join Request | Connect3&body=Hi there!%0D%0A%0D%0A Our club: {club name} is interested in joining Connect3.%0D%0A%0D%0A Here is our club email address: {club email address}.">
-              <span className="text-white/70 self-center text-sm md:text-base">
+              <span className="hidden xs:block text-white/70 self-center text-sm md:text-base">
                 Contact
               </span>
             </Link>
@@ -100,8 +103,7 @@ export default function LandingPage() {
 
         {/* Hero Section */}
         <HeroSection />
-
-        <div className="w-full border-t border-white/10 my-12 shadow-[0_0_32px_0px_rgba(255,255,255,0.25)]" />
+        <HeroGlowSection />
 
         {/* Collaborations Section */}
         <CollaborationsSection />

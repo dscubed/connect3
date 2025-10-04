@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { SearchBar } from "@/components/home/SearchBar";
 import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { ArrowRight, Home } from "lucide-react";
 import Link from "next/link";
 
@@ -20,9 +21,9 @@ export function HeroSection() {
   return (
     <div
       id="home"
-      className="w-full flex flex-col items-center justify-center min-h-[80vh] py-12"
+      className="w-full flex flex-col items-center justify-center min-h-[80vh] py-12 z-10 animated-gradient"
     >
-      <section className="flex flex-col items-center w-full justify-center text-center mb-4">
+      <section className="flex flex-col items-center w-full justify-center text-center mb-4 pt-20">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -78,23 +79,25 @@ export function HeroSection() {
           className="flex flex-row gap-4 items-center justify-center mt-4"
         >
           {/* Go to Home Button */}
-          <Link href="/">
-            <button className="flex items-center gap-3 px-6 py-3 md:px-8 md:py-4 rounded-2xl bg-white/[0.08] backdrop-blur-xl border border-white/20 hover:bg-white/[0.15] hover:border-white/40 transition-all duration-200 shadow-lg group">
-              <Home className="w-4 h-4 md:w-5 md:h-5 text-white/80 group-hover:text-white transition-colors" />
-              <span className="text-sm md:text-base font-medium text-white/90 group-hover:text-white transition-colors">
-                Go to Home
-              </span>
-            </button>
+          <Link href="/" className="w-full sm:w-auto">
+            <Button className="w-full sm:w-auto px-6 py-3 md:px-8 md:py-6 rounded-2xl bg-white/[0.08] backdrop-blur-xl border border-white/20 hover:border-white/30 transition-all duration-300 shadow-lg hover:shadow-xl hover:bg-white/[0.12] group">
+              <div className="flex items-center gap-2">
+                <Home className="w-4 h-4 md:w-5 md:h-5 text-white/80 group-hover:text-white transition-colors" />
+                <span className="text-sm md:text-base font-medium text-white/90 group-hover:text-white transition-colors">
+                  Go to Home
+                </span>
+              </div>
+            </Button>
           </Link>
 
-          {/* Sign Up Button */}
-          <Link href="/auth/sign-up">
-            <button className="flex items-center gap-3 px-6 py-3 md:px-8 md:py-4 rounded-2xl bg-white text-black hover:bg-gray-200 transition-all duration-200 shadow-lg group">
+          {/* Sign Up Button - Primary Style */}
+          <Link href="/auth/sign-up" className="w-full">
+            <Button className="w-full flex items-center justify-center gap-2 px-6 py-3 md:px-8 md:py-6 rounded-2xl bg-white text-black hover:bg-gray-200 transition-all duration-200 shadow-lg group">
               <span className="text-sm md:text-base font-medium">
-                Sign up now!
+                Sign up now
               </span>
               <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform duration-200" />
-            </button>
+            </Button>
           </Link>
         </motion.div>
       </motion.section>
