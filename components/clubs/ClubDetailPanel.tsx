@@ -63,14 +63,12 @@ export function ClubDetailPanel({
               <MapPin className="inline-block w-4 h-4 mr-2" />
               {club.location}
             </p>
-            {club.established && (
-              <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/10 border border-white/20 shadow-md shadow-black/5">
-                <Calendar className="w-4 h-4 text-white/80" />
-                <span className="text-xs sm:text-sm text-white/90 font-medium">
-                  Est. {club.established}
-                </span>
-              </div>
-            )}
+            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/10 border border-white/20 shadow-md shadow-black/5">
+              <Calendar className="w-4 h-4 text-white/80" />
+              <span className="text-xs sm:text-sm text-white/90 font-medium">
+                Est. {club.established || "N/A"}
+              </span>
+            </div>
           </div>
         </div>
       </div>

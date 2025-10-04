@@ -105,8 +105,7 @@ export const clubsData: ClubData[] = [
     fullDescription:
       "The Data Science club of UWA aims to create a collaborative and professional space for like-minded students looking to take advantage of the power of data to innovate and make a positive impact in the world. Our goal is to promote the interaction between industry professionals and our students to develop and nurture relationships via collaboration, training and the creation of new opportunities.",
     contact: {
-      address:
-        "School of Computing and Information Systems, University of Melbourne",
+      address: " Mathematics Building G15a, UWA",
       email: "dsc.uwa@gmail.com",
     },
     links: {
@@ -116,5 +115,25 @@ export const clubsData: ClubData[] = [
     established: "N/A",
     logoUrl:
       "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/uwa_dsc.png",
+  },
+  {
+    id: "cssc",
+    name: "The Computer Science Students Club (CSSC)",
+    location: "Perth, Australia",
+    description:
+      "CSSC is the premier UWA computer science club. Join us for a variety of events such as workshop, talks and LAN parties!",
+    fullDescription:
+      "The Computer Science Students Club (CSSC) runs social, educational and professional events for students in the School of Computer Science and Software Engineering at the University of Western Australia. We provide students with opportunities to meet others with a shared interest or course in computer science. We have a club room in the Computer Science building, near the computer labs. Feel free to use our clubroom to rest, study and enjoy discounted drinks. It has a fridge, microwave, gaming consoles and a PC for computer science students to use. We run events such as sausage sizzles, games nights, laser tag and quiz nights.",
+    contact: {
+      address: "CSSE building, second floor, room 2.26, UWA",
+      email: " cssc@guild.uwa.edu.au",
+    },
+    links: {
+      website: "https://cssc.asn.au/",
+      club: "https://www.uwastudentguild.com/clubs/computer-science-students-club",
+    },
+    established: "N/A",
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/cssc.png",
   },
 ];
