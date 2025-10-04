@@ -40,9 +40,8 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
           disabled ? "opacity-50 pointer-events-none grayscale" : ""
         }`}
       >
-        <Search className="h-5 w-5 text-white/60" />
         <input
-          className="w-full bg-transparent outline-none placeholder:text-white/40"
+          className="w-full bg-transparent outline-none text-sm placeholder:text-white/40"
           placeholder={placeholder}
           value={localQuery}
           onChange={(e) => handleChange(e.target.value)}
@@ -56,9 +55,10 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
         <button
           type="submit"
           disabled={disabled || isSearching || localQuery.trim() === ""}
-          className="rounded-xl px-3 py-1.5 bg-white text-black text-sm font-medium cursor-pointer hover:bg-white/90 transition-all hover:scale-105 shadow-lg"
+          className="flex flex-row items-center gap-2 rounded-xl px-3 py-1.5 bg-white text-black text-sm font-medium cursor-pointer hover:bg-white/90 transition-all hover:scale-105 shadow-lg"
         >
-          Search
+          <Search className="inline-block h-4 w-4" />
+          <p className="hidden md:block">Search</p>
         </button>
       </div>
     </form>
