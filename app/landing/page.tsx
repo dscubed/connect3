@@ -66,18 +66,18 @@ export default function LandingPage() {
         <header className="fixed top-0 left-0 right-0 lg:left-64 flex justify-end items-center bg-black/20 backdrop-blur-md border-b border-white/10 z-20 py-4 px-6 md:px-8">
           <div className="flex gap-3 md:gap-4 justify-center items-center">
             <Link href="mailto:president@dscubed.org.au?subject=Student Club Join Request | Connect3&body=Hi there!%0D%0A%0D%0A Our club: {club name} is interested in joining Connect3.%0D%0A%0D%0A Here is our club email address: {club email address}.">
-              <span className="hidden xs:block text-white/70 self-center text-sm md:text-base">
+              <span className="hidden xs:block text-white/70 self-center text-sm md:text-base hover:text-white transition-colors">
                 Contact
               </span>
             </Link>
             <Link href="/auth/login">
-              <button className="px-4 md:px-5 py-2 rounded-full bg-white text-black font-medium hover:bg-white/90 transition text-sm md:text-base">
-                Log in
+              <button className="px-4 md:px-5 py-1.5 text-sm rounded-lg border border-white/20 hover:border-white/30 hover:bg-white/5 transition-all hover:scale-105 text-white font-medium">
+                log in
               </button>
             </Link>
             <Link href="/auth/sign-up">
-              <button className="px-4 md:px-5 py-2 rounded-full bg-gradient-to-r from-gray-700 to-gray-600 text-white font-medium hover:from-gray-600 hover:to-gray-500 transition text-sm md:text-base">
-                Sign up
+              <button className="px-4 md:px-5 py-1.5 text-sm rounded-lg bg-white text-black font-medium hover:bg-white/90 transition-all hover:scale-105 shadow-md">
+                sign up
               </button>
             </Link>
           </div>
