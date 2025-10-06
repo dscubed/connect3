@@ -1,12 +1,11 @@
 import React from "react";
 import AnimatedConnect from "@/components/home/AnimatedConnect";
+import Logo from "../Logo";
 
 const HeroSection: React.FC = () => (
-  <div className="mt-12 text-center py-8">
+  <div className="flex flex-col sm:flex-row sm:gap-4 mt-12 text-center py-8">
+    <Logo className="mx-auto mb-6 h-12 w-12 sm:h-16 sm:w-16 text-gray-100" />
     <AnimatedConnect />
-    <p className="mt-2 text-white/70">
-      discover collaborators, find your people.
-    </p>
   </div>
 );
 
