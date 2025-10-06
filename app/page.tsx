@@ -50,11 +50,9 @@ export default function Home() {
 
         <main className="flex-1 relative w-full">
           {/* Top Navigation Bar */}
-          <div className="fixed top-0 right-0 z-40 p-4 safe-area-inset-top">
+          <div className="fixed top-2 right-2 z-40 p-4 safe-area-inset-top">
             <div className="flex justify-end">
-              <div className="bg-black/20 backdrop-blur-md border border-white/10 rounded-xl p-2">
-                <AuthButton />
-              </div>
+              <AuthButton />
             </div>
           </div>
 
