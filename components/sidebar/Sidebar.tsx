@@ -1,9 +1,10 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Box, Menu, X, Clock, Calendar, UsersRound, Home } from "lucide-react";
+import { Menu, X, Clock, Calendar, UsersRound, Home } from "lucide-react";
 import { SidebarLink } from "./SidebarLink";
 import { usePathname } from "next/navigation";
+import Logo from "../Logo";
 import Link from "next/link";
 
 interface SidebarProps {
@@ -105,12 +106,8 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onOpenChange }) => {
             href="/"
             className="flex items-center gap-2 hover:scale-105 transition-transform duration-200 cursor-pointer"
           >
-            <div className="h-7 w-7 rounded-xl bg-white/10 grid place-items-center border border-white/10 shadow-lg shadow-white/5">
-              <Box className="h-4 w-4" />
-            </div>
-            <span className="font-semibold tracking-tight">
-              connect<sup className="pl-0.5">3</sup>
-            </span>
+            <Logo width={20} height={20} fill={"white"} />
+            <span className="font-semibold tracking-tight">connect3</span>
           </Link>
           <nav className="mt-2 flex flex-col gap-1.5">
             {sidebarLinks.map((link) => (

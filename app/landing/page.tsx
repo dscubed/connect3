@@ -1,5 +1,4 @@
 "use client";
-import { Box } from "lucide-react";
 import { useState, useEffect } from "react";
 import { HeroSection } from "@/components/landing/hero/HeroSection";
 import { HeroGlowSection } from "@/components/landing/hero/HeroGlowSection";
@@ -7,6 +6,8 @@ import { UseCasesSection } from "@/components/landing/use-cases/UseCasesSection"
 import { BenefitsSection } from "@/components/landing/benefits/BenefitsSection";
 import { CollaborationsSection } from "@/components/landing/collaborations/CollaborationsSection";
 import Link from "next/link";
+import LandingSidebar from "@/components/landing/Sidebar/LandingSidebar";
+import Logo from "@/components/Logo";
 
 const sections = [
   { id: "home", label: "Home" },
@@ -45,34 +46,15 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Sticky Sidebar - Hidden on Mobile */}
-      <aside className="hidden lg:flex fixed left-0 top-0 w-64 bg-black border-r-2 border-white/10 flex-col items-center py-8 h-screen z-30">
-        <Link href="/">
-          <div className="flex flex-row items-center justify-center mb-8 hover:scale-105 transition-transform duration-200 cursor-pointer">
-            <Box className="h-10 w-10 text-white/80" />
-            <span className="ml-2 text-lg font-extrabold">connect3</span>
-          </div>
-        </Link>
-        <div className="flex-1" />
-        <nav className="flex flex-col gap-2 w-full px-6">
-          {sections.map((section) => (
-            <button
-              key={section.id}
-              onClick={() => handleNavClick(section.id)}
-              className={`text-left px-2 py-1 rounded transition-all ${
-                activeSection === section.id
-                  ? "bg-white/10 text-white font-bold"
-                  : "text-white/60 hover:text-white hover:scale-105 duration-200"
-              }`}
-            >
-              {section.label}
-            </button>
-          ))}
-        </nav>
-      </aside>
+      <LandingSidebar
+        activeSection={activeSection}
+        sections={sections}
+        handleNavClick={handleNavClick}
+      />
 
       {/* Mobile Logo - Shown only on mobile */}
       <div className="lg:hidden fixed top-4 left-4 z-30 flex items-center gap-2">
-        <Box className="h-8 w-8 text-white/80" />
+        <Logo width={32} height={32} fill={"white"} />
         <span className="hidden xs:block text-base font-extrabold text-white">
           connect3
         </span>

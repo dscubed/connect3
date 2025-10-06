@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Home } from "lucide-react";
 import Link from "next/link";
+import Logo from "@/components/Logo";
 
 export function HeroSection() {
   const [query, setQuery] = useState("");
@@ -24,6 +25,16 @@ export function HeroSection() {
       className="w-full flex flex-col items-center justify-center min-h-[80vh] py-12 z-10 animated-gradient"
     >
       <section className="flex flex-col items-center w-full justify-center text-center mb-4 pt-20">
+        {/* Background Logo */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <Logo
+            width={300}
+            height={268}
+            fill="white"
+            className="opacity-5 scale-150"
+          />
+        </div>
+
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
