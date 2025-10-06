@@ -101,6 +101,27 @@ export const clubsData: ClubData[] = [
       "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/dscubed.png",
   },
   {
+    id: "cissa",
+    name: "CISSA",
+    full_name: "Computing and Information Systems Students Association.",
+    location: "Melbourne, Australia",
+    description: "Bridging university and industry",
+    fullDescription:
+      "The Computing and Information Systems Students Association (CISSA) represents the IT and tech-oriented student community at the University of Melbourne. For those studying Computer Science, Software Engineering, Information Technology or Information Systems, UI/UX Design, and Data Science, we believe joining CISSA is a must, and of course we welcome students from different academic backgrounds too!",
+    contact: {
+      address:
+        "School of Computing and Information Systems, University of Melbourne",
+      email: "executives@cissa.org.au",
+    },
+    links: {
+      website: "https://www.cissa.org.au/",
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/cissa/",
+    },
+    established: "1992",
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/cissa.png",
+  },
+  {
     id: "uwa_dsc",
     name: "DSC",
     full_name: "Data Science Club of UWA",
