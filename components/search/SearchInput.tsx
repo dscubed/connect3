@@ -49,7 +49,7 @@ export default function SearchInput({
         >
           <input
             className="w-full bg-transparent outline-none placeholder:text-white/40 text-white"
-            placeholder="Ask another question or refine your search..."
+            placeholder=""
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}

@@ -14,7 +14,7 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
   query,
   setQuery,
   onSubmit,
-  placeholder = "Search...",
+  // placeholder = "Search...",
   disabled = false,
 }) => {
   const {
@@ -42,7 +42,7 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
       >
         <input
           className="w-full bg-transparent outline-none text-sm placeholder:text-white/40"
-          placeholder={placeholder}
+          placeholder={"Ask me anything..."}
           value={localQuery}
           onChange={(e) => handleChange(e.target.value)}
           disabled={disabled}
