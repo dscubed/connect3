@@ -52,7 +52,8 @@ export function CollaborationsSection() {
               blurWidth="md"
               gap="lg"
               enableDrag={true}
-              className="pb-10"
+              className="pb-10 bg-[#0B0B0C]"
+              bgColor="#0B0B0C"
             >
               {collaboratingClubs.map((club, index) => (
                 <Tooltip.Root key={club.id}>

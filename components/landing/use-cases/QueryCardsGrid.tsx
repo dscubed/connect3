@@ -43,6 +43,7 @@ export function QueryCardsGrid({
       blurWidth="md"
       gap="md"
       enableDrag={true}
+      bgColor="#0B0B0C"
     >
       {/* DON'T wrap in motion.div - animate each card individually */}
       {queries.map((queryObj, idx) => (

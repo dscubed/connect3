@@ -12,6 +12,7 @@ interface ScrollableGalleryProps {
   centerKey?: string | number; // When this changes, re-center (like selectedUseCase)
   gap?: "sm" | "md" | "lg"; // Gap between items
   enableDrag?: boolean; // Enable drag to scroll
+  bgColor?: string; // Background color for blur gradients (default: "black")
 }
 
 const blurWidths = {
@@ -34,6 +35,7 @@ export function ScrollableGallery({
   centerKey,
   gap = "md",
   enableDrag = true,
+  bgColor = "black",
 }: ScrollableGalleryProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -51,7 +53,7 @@ export function ScrollableGallery({
       const centerPosition = (scrollWidth - clientWidth) / 2;
       container.scrollLeft = centerPosition;
     }
-  }, [autoCenter, centerKey]); // Only depends on autoCenter and centerKey
+  }, [autoCenter, centerKey]);
 
   // Drag handlers
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -102,12 +104,18 @@ export function ScrollableGallery({
     <div className={`relative w-full ${className}`}>
       {/* Left blur fade */}
       <div
-        className={`absolute left-0 top-0 z-10 ${blurWidths[blurWidth]} h-full bg-gradient-to-r from-black via-black/80 to-transparent pointer-events-none`}
+        className={`absolute left-0 top-0 z-10 ${blurWidths[blurWidth]} h-full pointer-events-none`}
+        style={{
+          background: `linear-gradient(to right, ${bgColor}, ${bgColor}cc, transparent)`,
+        }}
       />
 
       {/* Right blur fade */}
       <div
-        className={`absolute right-0 top-0 z-10 ${blurWidths[blurWidth]} h-full bg-gradient-to-l from-black via-black/80 to-transparent pointer-events-none`}
+        className={`absolute right-0 top-0 z-10 ${blurWidths[blurWidth]} h-full pointer-events-none`}
+        style={{
+          background: `linear-gradient(to left, ${bgColor}, ${bgColor}cc, transparent)`,
+        }}
       />
 
       <div
@@ -125,9 +133,7 @@ export function ScrollableGallery({
         onMouseLeave={handleMouseLeave}
       >
         <div className="flex py-4">
-          {/* Outer flex with py-4 only */}
           <div className={`flex items-center ${gaps[gap]} px-6 md:px-16`}>
-            {/* Inner flex with gap and padding */}
             {children}
           </div>
         </div>

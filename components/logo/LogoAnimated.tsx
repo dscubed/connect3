@@ -8,6 +8,8 @@ interface LogoAnimatedProps {
   className?: string;
   cycleDuration?: number; // Duration in seconds for complete cycle (default: 1.5)
   delay?: number; // Delay in seconds between cycles (default: 2)
+  onHover?: boolean; // If true, only animates on hover instead of auto-cycling
+  hovering?: boolean; // If true, indicates the logo is currently being hovered
 }
 
 export default function LogoAnimated({
@@ -15,11 +17,14 @@ export default function LogoAnimated({
   height,
   fill,
   className,
-  cycleDuration = 1,
+  onHover = false,
+  cycleDuration = 0.6,
   delay = 2,
+  hovering = false,
 }: LogoAnimatedProps) {
   const [currentLogoIndex, setCurrentLogoIndex] = useState(1);
   const [isDelaying, setIsDelaying] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   // Array of logo keys for easy cycling
   const logoKeys = [
@@ -38,6 +43,10 @@ export default function LogoAnimated({
     "logo13",
     "logo14",
   ];
+
+  useEffect(() => {
+    setIsHovered(hovering);
+  }, [hovering]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -73,21 +82,45 @@ export default function LogoAnimated({
       }, intervalTime);
     };
 
-    // Start the first cycle
-    startCycle();
+    // Start cycling based on conditions
+    const shouldCycle = onHover ? isHovered : true;
+
+    if (shouldCycle) {
+      startCycle();
+    } else {
+      // Reset to first logo when not cycling
+      setCurrentLogoIndex(1);
+      setIsDelaying(false);
+    }
 
     return () => {
       clearInterval(interval);
       clearTimeout(delayTimeout);
     };
-  }, [cycleDuration, delay, logoKeys.length]);
+  }, [cycleDuration, delay, logoKeys.length, onHover, isHovered]);
 
   // Get the current logo component
   const CurrentLogo =
     AnimatedLogos[`logo${currentLogoIndex}` as keyof typeof AnimatedLogos];
 
+  const handleMouseEnter = () => {
+    if (onHover && isHovered) {
+      setIsHovered(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (onHover && isHovered) {
+      setIsHovered(false);
+    }
+  };
+
   return (
-    <div className={className}>
+    <div
+      className={className}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <CurrentLogo width={width} height={height} fill={fill} />
       {/* Optional: show delay indicator */}
       {isDelaying && <div className="sr-only">Cycling paused...</div>}

@@ -32,10 +32,10 @@ export function BenefitsSection() {
   return (
     <div
       id="benefits"
-      className="w-full flex flex-col items-center justify-center py-20 overflow-hidden"
+      className="w-full flex flex-col items-center justify-center py-20" // Removed overflow-hidden
     >
       {/* Header */}
-      <section className="w-full max-w-6xl mx-auto text-center mb-16 px-4 md:px-8">
+      <section className="w-full max-w-6xl mx-auto text-center px-4 md:px-8">
         <h3 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-white/90 to-white/80 bg-clip-text text-transparent">
           Why clubs choose Connect3
         </h3>
@@ -47,10 +47,10 @@ export function BenefitsSection() {
 
       {/* Scrollable Carousel Container */}
       <div className="w-full relative">
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
+        <div className="max-w-7xl mx-auto">
           <div
             ref={scrollContainerRef}
-            className="overflow-x-auto scrollbar-hide"
+            className="overflow-x-auto scrollbar-hide pb-20 pt-24 px-20 md:px-24"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
@@ -121,7 +121,7 @@ export function BenefitsSection() {
         </div>
 
         {/* Scroll Hint for Desktop */}
-        <div className="hidden md:flex flex-col items-center justify-center gap-3 mt-8 text-white/30 text-sm">
+        <div className="hidden md:flex flex-col items-center justify-center gap-3 text-white/30 text-sm">
           <div className="flex gap-2">
             {benefits.map((_, idx) => (
               <div

@@ -4,8 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Clock, Calendar, UsersRound, Home } from "lucide-react";
 import { SidebarLink } from "./SidebarLink";
 import { usePathname } from "next/navigation";
-import Link from "next/link";
-import LogoAnimated from "../logo/LogoAnimated";
+import SidebarHeader from "./SidebarHeader";
 
 interface SidebarProps {
   open?: boolean;
@@ -102,19 +101,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onOpenChange }) => {
         </button>
 
         <div className="flex flex-col gap-4 pt-8 px-4 md:px-0 md:pt-6 safe-area-inset-top">
-          <Link
-            href="/"
-            className="flex items-center gap-2 hover:scale-105 transition-transform duration-200 cursor-pointer"
-          >
-            <LogoAnimated
-              width={20}
-              height={20}
-              fill={"white"}
-              delay={5}
-              cycleDuration={1}
-            />
-            <span className="font-semibold tracking-tight">connect3</span>
-          </Link>
+          <SidebarHeader />
           <nav className="mt-2 flex flex-col gap-1.5">
             {sidebarLinks.map((link) => (
               <SidebarLink

@@ -1,4 +1,4 @@
-export const HeroGlowSection = () => {
+export const LandingHeroGlow = () => {
   return (
     <div className="w-full relative pb-6">
       {/* Main gradient line */}
