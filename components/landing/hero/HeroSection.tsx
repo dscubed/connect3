@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Home } from "lucide-react";
 import Link from "next/link";
-import Logo from "@/components/Logo";
+import Logo from "@/components/logo/Logo";
 
 export function HeroSection() {
   const [query, setQuery] = useState("");

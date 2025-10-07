@@ -7,7 +7,7 @@ import { BenefitsSection } from "@/components/landing/benefits/BenefitsSection";
 import { CollaborationsSection } from "@/components/landing/collaborations/CollaborationsSection";
 import Link from "next/link";
 import LandingSidebar from "@/components/landing/Sidebar/LandingSidebar";
-import Logo from "@/components/Logo";
+import LogoAnimated from "@/components/logo/LogoAnimated";
 
 const sections = [
   { id: "home", label: "Home" },
@@ -55,7 +55,13 @@ export default function LandingPage() {
       {/* Mobile Logo - Shown only on mobile */}
       <Link href="/">
         <div className="lg:hidden fixed top-4 left-4 z-30 flex items-center gap-2">
-          <Logo width={32} height={32} fill={"white"} />
+          <LogoAnimated
+            width={32}
+            height={32}
+            fill={"white"}
+            delay={5}
+            cycleDuration={1}
+          />{" "}
           <span className="hidden xs:block text-base font-extrabold text-white">
             connect3
           </span>

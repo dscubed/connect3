@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Logo from "../../Logo";
+import LogoAnimated from "@/components/logo/LogoAnimated";
 
 interface LandingSidebarProps {
   activeSection: string;
@@ -20,7 +20,13 @@ export default function LandingSidebar({
           href="/"
           className="flex items-center gap-2 hover:scale-105 transition-transform duration-200 cursor-pointer"
         >
-          <Logo width={20} height={20} fill={"white"} />
+          <LogoAnimated
+            width={20}
+            height={20}
+            fill={"white"}
+            delay={5}
+            cycleDuration={1}
+          />
           <span className="font-semibold tracking-tight">connect3</span>
         </Link>
       </div>

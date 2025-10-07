@@ -1,6 +1,6 @@
 import React from "react";
 import { ProgressIndicator } from "./ProgressIndicator";
-import Logo from "@/components/Logo";
+import Logo from "@/components/logo/Logo";
 
 interface OnboardingHeaderProps {
   currentStep: number;
