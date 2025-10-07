@@ -1,3 +1,4 @@
+import React from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import {
@@ -9,6 +10,13 @@ import {
 } from "lucide-react";
 import { FaInstagram, FaLinkedin, FaFacebook, FaDiscord } from "react-icons/fa";
 import { ClubData } from "./ClubsData";
+
+const socialsIconMap: { [key: string]: React.ElementType } = {
+  instagram: FaInstagram,
+  linkedin: FaLinkedin,
+  facebook: FaFacebook,
+  discord: FaDiscord,
+};
 
 export function ClubDetailPanel({
   club,
@@ -126,46 +134,25 @@ export function ClubDetailPanel({
             Socials
           </h1>
           <div className="flex items-center gap-3 text-white/70 mt-3 ml-3">
-            {club.socials?.instagram && (
-              <a
-                href={club.socials.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-white transition-colors"
-              >
-                <FaInstagram className="w-5 h-5" />
-              </a>
-            )}
-            {club.socials?.linkedin && (
-              <a
-                href={club.socials.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-white transition-colors"
-              >
-                <FaLinkedin className="w-5 h-5" />
-              </a>
-            )}
-            {club.socials?.facebook && (
-              <a
-                href={club.socials.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-white transition-colors"
-              >
-                <FaFacebook className="w-5 h-5" />
-              </a>
-            )}
-            {club.socials?.discord && (
-              <a
-                href={club.socials.discord}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-white transition-colors"
-              >
-                <FaDiscord className="w-5 h-5" />
-              </a>
-            )}
+            {/* Map club socials to their links and icons */}
+
+            {club.socials &&
+              Object.entries(club.socials).map(([platform, link]) => {
+                const Icon = socialsIconMap[platform];
+                return (
+                  Icon && (
+                    <a
+                      key={platform}
+                      href={link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-white transition-colors"
+                    >
+                      <Icon className="w-5 h-5" />
+                    </a>
+                  )
+                );
+              })}
           </div>
         </div>
       </div>
