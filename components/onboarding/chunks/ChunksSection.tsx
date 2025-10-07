@@ -1,6 +1,5 @@
 "use client";
 import { motion } from "framer-motion";
-import AnimatedParticles from "@/components/AnimatedParticles";
 import { ChunkDisplay } from "./ChunksDisplay";
 import { Chunk } from "./utils/ChunkUtils";
 
@@ -23,8 +22,6 @@ export default function ChunksSection({
       transition={{ duration: 0.5 }}
     >
       <ChunkDisplay chunks={chunks} setChunks={setChunks} />
-
-      <AnimatedParticles />
 
       {/* Bottom hint */}
       <motion.div

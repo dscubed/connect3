@@ -65,7 +65,7 @@ export default function OnboardingPage() {
 
   const steps = [
     {
-      title: "welcome to connect³",
+      title: "welcome to connect3",
       subtitle: "let's get you set up in just a few steps",
       content: (
         <FileUploadSection
@@ -103,7 +103,7 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-screen bg-[#0B0B0C] text-white relative overflow-hidden">
-      <AnimatedParticles />
+      <AnimatedParticles particlesCount={100} />
       <OnboardingHeader
         currentStep={onboardingState.currentStep}
         totalSteps={steps.length}

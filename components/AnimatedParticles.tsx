@@ -10,11 +10,17 @@ type Particle = {
   delay: number;
 };
 
-const AnimatedParticles = () => {
+interface AnimatedParticlesProps {
+  particlesCount?: number;
+}
+
+const AnimatedParticles: React.FC<AnimatedParticlesProps> = ({
+  particlesCount = 75,
+}) => {
   const [particles, setParticles] = useState<Particle[]>([]);
 
   useEffect(() => {
-    const generated = Array.from({ length: 150 }, (_, i) => ({
+    const generated = Array.from({ length: particlesCount }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
@@ -23,7 +29,7 @@ const AnimatedParticles = () => {
       delay: Math.random() * 5,
     }));
     setParticles(generated);
-  }, []);
+  }, [particlesCount]);
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
