@@ -76,7 +76,7 @@ export default function ClubsPage() {
         {/* Desktop: Side by side layout */}
         <div className="hidden lg:flex flex-1 overflow-hidden">
           {/* Left Panel - Club List */}
-          <div className="w-96 xl:w-[450px] border-r border-white/10 bg-black/50 backdrop-blur-sm overflow-hidden flex flex-col">
+          <div className="w-80 xl:w-96 border-r border-white/10 bg-black/50 backdrop-blur-sm overflow-hidden flex flex-col">
             {/* Header */}
             <ClubsHeader clubCount={clubsData.length} />
 

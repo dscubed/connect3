@@ -53,12 +53,14 @@ export default function LandingPage() {
       />
 
       {/* Mobile Logo - Shown only on mobile */}
-      <div className="lg:hidden fixed top-4 left-4 z-30 flex items-center gap-2">
-        <Logo width={32} height={32} fill={"white"} />
-        <span className="hidden xs:block text-base font-extrabold text-white">
-          connect3
-        </span>
-      </div>
+      <Link href="/">
+        <div className="lg:hidden fixed top-4 left-4 z-30 flex items-center gap-2">
+          <Logo width={32} height={32} fill={"white"} />
+          <span className="hidden xs:block text-base font-extrabold text-white">
+            connect3
+          </span>
+        </div>
+      </Link>
 
       {/* Main Content - Offset by sidebar width on desktop */}
       <main className="lg:ml-64 flex flex-col items-center">

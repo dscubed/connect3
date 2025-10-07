@@ -3,11 +3,11 @@ import Image from "next/image";
 import {
   Building2,
   MapPin,
-  Calendar,
   Globe,
   ExternalLink,
   ChevronLeft,
 } from "lucide-react";
+import { FaInstagram, FaLinkedin, FaFacebook, FaDiscord } from "react-icons/fa";
 import { ClubData } from "./ClubsData";
 
 export function ClubDetailPanel({
@@ -55,27 +55,20 @@ export function ClubDetailPanel({
               )}
             </div>
           </div>
-          <div className="flex-1 text-left">
+          <div className="flex-1 text-left min-w-0">
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2 sm:mb-3 leading-tight">
               {club.name}
-              {club.full_name && (
-                <p className="text-white/70 font-normal text-sm sm:text-base mb-1 sm:mb-2">
-                  {club.full_name}
-                </p>
-              )}
+              <p className="text-white/70 font-normal text-xs sm:text-sm md:text-base mb-1 sm:mb-2 truncate overflow-hidden whitespace-nowrap">
+                {club.full_name || club.name}
+              </p>
             </h1>
-            <p className="flex flex-row items-center justify-start text-base sm:text-lg text-white/70 mb-3 sm:mb-4">
+            <p className="flex flex-row items-center justify-start text-base sm:text-lg text-white/70 mb-1.5 sm:mb-2">
               <MapPin className="inline-block w-4 h-4 mr-2" />
               {club.location}
             </p>
-            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/10 border border-white/20 shadow-md shadow-black/5">
-              <Calendar className="w-4 h-4 text-white/80" />
-              <span className="text-xs sm:text-sm text-white/90 font-medium">
-                Est. {club.established || "N/A"}
-              </span>
-            </div>
           </div>
         </div>
+        {/* Social Media Icons */}
       </div>
 
       {/* Main Content */}
@@ -94,6 +87,7 @@ export function ClubDetailPanel({
           <Globe className="h-4 w-4 sm:h-5 sm:w-5 text-white/60" />
           <h2 className="text-lg sm:text-xl font-bold text-white">Links</h2>
         </div>
+
         <div className="space-y-3">
           {club.links.website && (
             <a
@@ -127,6 +121,52 @@ export function ClubDetailPanel({
               <ExternalLink className="w-4 h-4 text-white/40 group-hover:text-white/80 transition-colors" />
             </a>
           )}
+
+          <h1 className="text-white/90 font-bold text-md sm:text-lg mb-2">
+            Socials
+          </h1>
+          <div className="flex items-center gap-3 text-white/70 mt-3 ml-3">
+            {club.socials?.instagram && (
+              <a
+                href={club.socials.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors"
+              >
+                <FaInstagram className="w-5 h-5" />
+              </a>
+            )}
+            {club.socials?.linkedin && (
+              <a
+                href={club.socials.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors"
+              >
+                <FaLinkedin className="w-5 h-5" />
+              </a>
+            )}
+            {club.socials?.facebook && (
+              <a
+                href={club.socials.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors"
+              >
+                <FaFacebook className="w-5 h-5" />
+              </a>
+            )}
+            {club.socials?.discord && (
+              <a
+                href={club.socials.discord}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors"
+              >
+                <FaDiscord className="w-5 h-5" />
+              </a>
+            )}
+          </div>
         </div>
       </div>
     </motion.div>

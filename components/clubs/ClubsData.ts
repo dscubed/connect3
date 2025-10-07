@@ -15,9 +15,16 @@ export interface ClubData {
   };
   established?: string;
   logoUrl?: string;
+  socials?: {
+    linkedin?: string;
+    facebook?: string;
+    instagram?: string;
+    discord?: string;
+  };
 }
 
 export const clubsData: ClubData[] = [
+  // HackMelbourne
   {
     id: "hackmelbourne",
     name: "HackMelbourne",
@@ -37,7 +44,15 @@ export const clubsData: ClubData[] = [
     established: "2015",
     logoUrl:
       "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/hackmelbourne.png",
+    socials: {
+      instagram: "https://www.instagram.com/hack.melbourne/",
+      linkedin: "https://www.linkedin.com/company/hackmelbourne/",
+      facebook: "https://www.facebook.com/hackmelbourne",
+      discord: "https://discord.gg/tEQ5m6ayTV",
+    },
   },
+
+  // MISC
   {
     id: "misc",
     name: "MISC",
@@ -58,7 +73,16 @@ export const clubsData: ClubData[] = [
     established: "2017",
     logoUrl:
       "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/misc.png",
+    socials: {
+      instagram: "https://www.instagram.com/unimelb_misc/",
+      linkedin:
+        "https://www.linkedin.com/company/melbourne-information-security-club/",
+      facebook: "https://www.facebook.com/uomisc/",
+      discord: "https://discord.com/invite/PybR9kpBMn",
+    },
   },
+
+  // RAID
   {
     id: "raid",
     name: "RAID",
@@ -78,7 +102,14 @@ export const clubsData: ClubData[] = [
     established: "2023",
     logoUrl:
       "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/raid.png",
+    socials: {
+      instagram: "https://www.instagram.com/raidunimelb",
+      linkedin: "https://www.linkedin.com/company/raidunimelb/",
+      facebook: "https://www.facebook.com/RAID.Unimelb/",
+    },
   },
+
+  // DSCubed
   {
     id: "dscubed",
     name: "DSCubed",
@@ -99,11 +130,19 @@ export const clubsData: ClubData[] = [
     established: "2018",
     logoUrl:
       "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/dscubed.png",
+    socials: {
+      instagram: "https://www.instagram.com/dscubed.unimelb/",
+      linkedin: "https://www.linkedin.com/company/dscubed/",
+      facebook: "https://www.facebook.com/dscubed.unimelb/",
+      discord: "https://discord.gg/Dj8a7P6jXN",
+    },
   },
+
+  // CISSA
   {
     id: "cissa",
     name: "CISSA",
-    full_name: "Computing and Information Systems Students Association.",
+    full_name: "Computing and Information Systems Students Association",
     location: "Melbourne, Australia",
     description: "Bridging university and industry",
     fullDescription:
@@ -120,7 +159,15 @@ export const clubsData: ClubData[] = [
     established: "1992",
     logoUrl:
       "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/cissa.png",
+    socials: {
+      facebook: "https://www.facebook.com/cissa.unimelb/",
+      instagram: "https://www.instagram.com/cissa_unimelb/",
+      linkedin: "https://www.linkedin.com/company/cissa-unimelb/",
+      discord: "https://discord.com/invite/Dq9A5GFFBD",
+    },
   },
+
+  // UWA DSC
   {
     id: "uwa_dsc",
     name: "DSC",
@@ -141,7 +188,15 @@ export const clubsData: ClubData[] = [
     established: "N/A",
     logoUrl:
       "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/uwa_dsc.png",
+    socials: {
+      facebook: "https://www.facebook.com/dsc.uwa/",
+      instagram: "https://www.instagram.com/dscuwa",
+      linkedin: "https://www.linkedin.com/company/dscuwa/",
+      discord: "https://discord.com/invite/ZBY8jC4cnn",
+    },
   },
+
+  // CSSC
   {
     id: "cssc",
     name: "CSSC",
@@ -162,5 +217,59 @@ export const clubsData: ClubData[] = [
     established: "N/A",
     logoUrl:
       "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/cssc.png",
+    socials: {
+      instagram: "https://www.instagram.com/csscuwaofficial/",
+      linkedin: "https://www.linkedin.com/company/csscuwa",
+    },
+  },
+
+  // UWA AI Club
+  {
+    id: "uwa_ai",
+    name: "UWA AI Club",
+    full_name: "UWA Artificial Intelligence Club",
+    location: "Perth, Australia",
+    description:
+      "UWA Artificial Intelligence Club: Technical and non technical workshops, UWA ML team, social events, talks.",
+    fullDescription:
+      "The UWA Artificial Intelligence Club is a student community for students passionate about artificial intelligence and its impact across industries. We host technical and non technical workshops, informative talks with guest speakers & weekly meetings for the UWA ML team. Our goal is to foster collaboration, learning, and innovation among students at UWA. Join us to connect, share ideas, and explore the future of AI together!",
+    contact: {},
+    links: {
+      website: "https://www.linkedin.com/company/uwa-ai-club",
+    },
+    established: "N/A",
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/uwa_ai.png",
+    socials: {
+      instagram: "https://www.instagram.com/uwaaiclub/",
+      linkedin: "https://www.linkedin.com/company/uwa-ai-club",
+    },
+  },
+
+  // CFC
+  {
+    id: "cfc",
+    name: "CFC",
+    full_name: "Coders for Causes",
+    location: "Perth, Australia",
+    description: "Innovation with a mission",
+    fullDescription:
+      "Coders for Causes is a not for profit organization that empowers charities and other not for profit organizations by connecting them with university students to develop technical solutions. We are a student-run club based in Perth, Western Australia with a wide range of clients.",
+    contact: {
+      email: "hello@codersforcauses.org",
+    },
+    links: {
+      website: "https://codersforcauses.org/",
+      club: "https://www.uwastudentguild.com/clubs/coders-for-causes",
+    },
+    established: "N/A",
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/cfc.png",
+    socials: {
+      linkedin: "https://www.linkedin.com/company/coders-for-causes/",
+      instagram: "https://www.instagram.com/cfc_uwa",
+      facebook: "https://www.facebook.com/codersforcauses",
+      discord: "https://discord.codersforcauses.org/",
+    },
   },
 ];
