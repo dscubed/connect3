@@ -246,30 +246,190 @@ export const clubsData: ClubData[] = [
     },
   },
 
-  // CFC
+  // StartUp Link
   {
-    id: "cfc",
-    name: "CFC",
-    full_name: "Coders for Causes",
-    location: "Perth, Australia",
-    description: "Innovation with a mission",
+    id: "startup_link",
+    name: "StartUp Link",
+    full_name: "StartuUp Link",
+    location: "Melbourne, Australia",
+    description: "Connecting UniMelb students to the startup world",
     fullDescription:
-      "Coders for Causes is a not for profit organization that empowers charities and other not for profit organizations by connecting them with university students to develop technical solutions. We are a student-run club based in Perth, Western Australia with a wide range of clients.",
+      "We are the UniMelb chapter of StartUp Link, a student-led society, aiming to connect young, entrepreneurial minds to opportunities in the startup world through a range of networking, recruitment and skill-development opportunities.",
     contact: {
-      email: "hello@codersforcauses.org",
+      email: "info@startuplinkunimelb.net",
     },
     links: {
-      website: "https://codersforcauses.org/",
-      club: "https://www.uwastudentguild.com/clubs/coders-for-causes",
+      website: "https://www.startuplinkunimelb.net/",
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/8055/",
     },
     established: "N/A",
     logoUrl:
-      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/cfc.png",
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/startuplink.png",
     socials: {
-      linkedin: "https://www.linkedin.com/company/coders-for-causes/",
-      instagram: "https://www.instagram.com/cfc_uwa",
+      linkedin: "https://www.linkedin.com/company/startuplinkunimelb/",
+      instagram: "https://www.instagram.com/startuplinkunimelb",
+      facebook: "https://www.facebook.com/startuplinkunimelb/",
+    },
+  },
+
+  // LEC
+  {
+    id: "lec",
+    name: "LEC",
+    full_name: "Language Exchange Club",
+    location: "Melbourne, Australia",
+    description: "🌏A place for all language learners",
+    fullDescription:
+      "The Language Exchange Club (LEC) at the University of Melbourne is a student-run, not-for-profit club that provides a social language learning platform for second language learners, from beginner all the way up to advanced or fluent. Our sessions are run by native or fluent speakers of the language and are targeted at both second language learners looking to start or improve their learning, or native speakers looking to practice their mother tongue. Make friends, establish international contacts and improve your language skills naturally! We also run a Language Buddies program, where we match you with a learning partner who knows the language you're learning, and is learning the language you know! That way, you can practice your language skills and meet new people, with the guidance of a native or fluent speaker.",
+    contact: {
+      email: "",
+    },
+    links: {
+      website: "https://www.linkedin.com/company/lecmelb/",
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/7085/",
+    },
+    established: "N/A",
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/lec.png",
+    socials: {
+      linkedin: "https://www.linkedin.com/company/lecmelb/",
+      instagram: "https://www.instagram.com/lecmelbourne/?hl=en",
+      facebook: "https://www.facebook.com/lec.uni/",
+    },
+  },
+
+  // QFin UWA
+  {
+    id: "qfin",
+    name: "QFin UWA",
+    full_name: "Quantitative Finance UWA",
+    location: "Perth, Australia",
+    description:
+      "Providing Western Australian students with practical trading experience.",
+    fullDescription:
+      "QFin UWA or Quantitative Finance UWA is a mathematical finance club, focused on algorithmic trading and quantitative research. We operate at the intersection of mathematics, finance and computer science by providing students opportunities to develop back-tested algorithmic trading strategies, workshops to develop their research and scientific communication skills and quant finance career-related events. We will provide a medium for science and commerce students to engage with one another and develop their quantitative research skills and financial knowledge..",
+    contact: {
+      email: "",
+    },
+    links: {
+      website: "https://codersforcauses.org/",
+      club: "https://www.uwastudentguild.com/clubs/quantitative-finance-uwa",
+    },
+    established: "N/A",
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/qfin.png",
+    socials: {
+      linkedin: "https://www.linkedin.com/company/qfin-uwa/",
+      instagram: "https://www.instagram.com/qfinuwa/",
       facebook: "https://www.facebook.com/codersforcauses",
-      discord: "https://discord.codersforcauses.org/",
+    },
+  },
+
+  // MUMS
+  {
+    id: "mums",
+    name: "MUMS",
+    full_name: "MELBOURNE UNI MATHS AND STATS SOCIETY",
+    location: "Melbourne, Australia",
+    description:
+      "Society for all mathematics and mathematically-interested students at the University of Melbourne.",
+    fullDescription:
+      "Melbourne University Mathematics and Statistics Society (MUMS) is here to support maths students and promote mathematical interest and learning through a broad range of events and activities. Membership is free, as are all of our events! Our events include: the University Maths Olympics, Puzzle Hunt, trivia nights, BBQs, board game nights, picnics, seminars, first year study groups and much more! We also have a club room, located down the corridor opposite the Peter Hall General Office. All maths students are welcome to come and hang out there, play board games, use the whiteboards, or just nap on the sofas. MUMS welcome anyone with an interest in mathematics and statistics! Our membership is free and open to everyone with all levels of experience in maths. Sign up and be part of this welcoming community!",
+    contact: {
+      email: "mu-ms@unimelb.edu.au",
+    },
+    links: {
+      website: "https://www.melbunimathsstats.org/",
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/mums/",
+    },
+    established: "N/A",
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/mums.png",
+    socials: {
+      linkedin: "https://www.linkedin.com/company/melb-uni-maths-and-stats/?",
+      instagram: "https://www.instagram.com/melbunimathsstats/",
+      facebook: "https://www.facebook.com/MelbUniMathsStats/",
+    },
+  },
+
+  // Enactus
+  {
+    id: "enactus",
+    name: "Enactus",
+    full_name: "Enactus",
+    location: "Melbourne, Australia",
+    description:
+      "The home for student start-ups at The University of Melbourne",
+    fullDescription:
+      "We are a community of student, academic and business leaders committed to shaping a better, more sustainable world through entrepreneurship. We ideate and iterate our very own social impact startups, with our vision to create a better more sustainable world in mind. While we emphasize social impact, we welcome all startup enthusiasts, believing that university students have the power to change the world.",
+    contact: {
+      email: "",
+    },
+    links: {
+      website: "https://enactusmelbourne.com/",
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/6653/",
+    },
+    established: "N/A",
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/enactus.png",
+    socials: {
+      linkedin:
+        "https://www.linkedin.com/company/enactusunimelb/?originalSubdomain=au",
+      instagram: "https://www.instagram.com/enactusunimelb/?hl=en",
+      facebook: "https://www.facebook.com/Enactusunimelb/",
+    },
+  },
+
+  // ass
+  {
+    id: "ass",
+    name: "Actuarial Students Society",
+    full_name: "Actuarial Students Society",
+    location: "Melbourne, Australia",
+    description:
+      "The Actuarial Students' Society is the representative body for UoM actuarial students.",
+    fullDescription:
+      "We are a student society based out of the University of Melbourne that aims to bring actuarial students and actuaries working in the corporate world together. We run a variety of events including information sessions, networking functions and social functions. We are affiliated with both the University of Melbourne's Student Union as well as the Faculty of Business and Economics.",
+    contact: {
+      email: "",
+    },
+    links: {
+      website: "https://www.melbourneactuary.com/",
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/6653/",
+    },
+    established: "N/A",
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/ass.png",
+    socials: {
+      linkedin: "https://www.linkedin.com/company/actuarial-students'-society/",
+      instagram: "https://www.instagram.com/assmelb/",
+      facebook: "https://www.facebook.com/actuarialstudentssociety/",
+    },
+  },
+
+  // NTU SCDS
+  {
+    id: "ntu-scds",
+    name: "NTU SCDSC",
+    full_name: "NTU Students' Computing and Data Science Club",
+    location: "Singapore",
+    description:
+      "A student organisation established to improve the welfare and student lives of CCDS Students.",
+    fullDescription:
+      "The Students' Computing and Data Science (SCDS Club, formerly known as SCSE Club) is a student organisation established to improve the welfare and lives of SCSE Students. We aim to enrich all CCDS students' university lives, meet their needs, and be the voice of CCDS-ians.",
+    contact: {
+      email: "",
+    },
+    links: {
+      website: "https://ntuscds.com/",
+      club: "https://www.ntu.edu.sg/life-at-ntu/student-life/student-activities-and-engagement/clubs-groups-societies/ntu-students-union-council",
+    },
+    established: "N/A",
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/ntu-scds.png",
+    socials: {
+      linkedin: "https://www.linkedin.com/company/ntu-scdsc/",
+      instagram: "https://www.instagram.com/ntuscdsclub/",
     },
   },
 ];
