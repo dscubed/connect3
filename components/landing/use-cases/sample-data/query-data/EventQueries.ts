@@ -27,10 +27,6 @@ export const eventQueries = {
       },
     },
     {
-      query: "Any upcoming math/AI competitions?",
-      response: {},
-    },
-    {
       query: "Are there any events today that offers free coffee?",
       response: {},
     },
@@ -73,6 +69,10 @@ export const eventQueries = {
         followUps:
           "Would you like information on specific Python topics or additional resources for learning?",
       },
+    },
+    {
+      query: "Any upcoming math/AI competitions?",
+      response: {},
     },
   ],
 };

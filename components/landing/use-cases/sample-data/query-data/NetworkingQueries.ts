@@ -1,6 +1,14 @@
 export const networkingQueries = {
   queries: [
     {
+      query: "Who is working on cool AI projects?",
+      response: {},
+    },
+    {
+      query: "Looking for collaborators for a startup idea",
+      response: {},
+    },
+    {
       query: "I want to join a hackathon team, any teammates available?",
       response: {
         result:
@@ -35,14 +43,6 @@ export const networkingQueries = {
         followUps:
           "Would you like more information on how to get involved with specific hackathons or teams?",
       },
-    },
-    {
-      query: "Who is working on cool AI projects?",
-      response: {},
-    },
-    {
-      query: "Looking for collaborators for a startup idea",
-      response: {},
     },
     {
       query: "Which seniors can give advice on internships?",

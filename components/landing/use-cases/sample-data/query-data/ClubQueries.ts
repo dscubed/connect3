@@ -1,6 +1,10 @@
 export const clubQueries = {
   queries: [
     {
+      query: "Which clubs focus on sustainability?",
+      response: {},
+    },
+    {
       query: "What clubs should I join if I want to become a data scientist?",
       response: {
         result:
@@ -42,7 +46,7 @@ export const clubQueries = {
       },
     },
     {
-      query: "Which clubs focus on sustainability?",
+      query: "Are there any cultural clubs for international students?",
       response: {},
     },
     {
@@ -80,10 +84,6 @@ export const clubQueries = {
         followUps:
           "What specific aspects of the Data Science Students Society are you most interested in?",
       },
-    },
-    {
-      query: "Are there any cultural clubs for international students?",
-      response: {},
     },
   ],
 };
