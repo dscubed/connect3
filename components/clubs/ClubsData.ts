@@ -246,6 +246,33 @@ export const clubsData: ClubData[] = [
     },
   },
 
+  // CFC
+  {
+    id: "cfc",
+    name: "CFC",
+    full_name: "Coders for Causes",
+    location: "Perth, Australia",
+    description: "Innovation with a mission",
+    fullDescription:
+      "Coders for Causes is a not for profit organization that empowers charities and other not for profit organizations by connecting them with university students to develop technical solutions. We are a student-run club based in Perth, Western Australia with a wide range of clients.",
+    contact: {
+      email: "hello@codersforcauses.org",
+    },
+    links: {
+      website: "https://codersforcauses.org/",
+      club: "https://www.uwastudentguild.com/clubs/coders-for-causes",
+    },
+    established: "N/A",
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/cfc.png",
+    socials: {
+      linkedin: "https://www.linkedin.com/company/coders-for-causes/",
+      instagram: "https://www.instagram.com/cfc_uwa",
+      facebook: "https://www.facebook.com/codersforcauses",
+      discord: "https://discord.codersforcauses.org/",
+    },
+  },
+
   // StartUp Link
   {
     id: "startup_link",
@@ -410,7 +437,7 @@ export const clubsData: ClubData[] = [
   // NTU SCDS
   {
     id: "ntu-scds",
-    name: "NTU SCDSC",
+    name: "NTU SCDS",
     full_name: "NTU Students' Computing and Data Science Club",
     location: "Singapore",
     description:
