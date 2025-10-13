@@ -459,4 +459,31 @@ export const clubsData: ClubData[] = [
       instagram: "https://www.instagram.com/ntuscdsclub/",
     },
   },
+
+  // Women in Engineering & Mathematical Sciences
+  {
+    id: "wiems",
+    name: "WiEMS",
+    full_name: "Women in Engineering & Mathematical Sciences",
+    location: "Perth, Australia",
+    description:
+      "To create an inclusive culture for Women in Engineering and Mathematical Sciences at The University of Western Australia.",
+    fullDescription:
+      "Women in Engineering and Mathematical Sciences UWA is a newly founded student club dedicated to creating a supportive and inclusive community for female-identifying students studying throughout their university studies. We aim to achieve this mission through a variety of professional industry events and intimate social occasions.",
+    contact: {
+      email: "wiemsuwa@gmail.com",
+    },
+    links: {
+      website: "https://www.wiemsuwa.com/",
+      club: "https://www.uwastudentguild.com/clubs/women-in-engineering-mathematical-sciences",
+    },
+    established: "N/A",
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/wiems.png",
+    socials: {
+      linkedin: "https://www.linkedin.com/company/wiemsuwa/",
+      instagram: "https://www.instagram.com/wiems_uwa/",
+      facebook: "https://www.facebook.com/wiemsuwa",
+    },
+  },
 ];

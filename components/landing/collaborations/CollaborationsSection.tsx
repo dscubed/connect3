@@ -7,9 +7,7 @@ import { ScrollableGallery } from "../ScrollableGallery";
 import * as Tooltip from "@radix-ui/react-tooltip";
 
 export function CollaborationsSection() {
-  const collaboratingClubs = clubsData
-    .filter((club) => club.logoUrl)
-    .slice(0, 12); // Show first 12 clubs with logos
+  const collaboratingClubs = clubsData.filter((club) => club.logoUrl);
 
   return (
     <div
