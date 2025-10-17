@@ -731,6 +731,27 @@ export const clubsData: ClubData[] = [
     },
   },
 
+  // Hispanic Culture and Language Society
+  {
+    id: "hcls",
+    name: "HCLS",
+    full_name: "Hispanic Culture and Language Society",
+    location: "Melbourne, Australia",
+    description:
+      "¡Bienvenidos! those who are learning Spanish, those who are of Hispanic descent, and those who share an interest in Hispanic culture and language ❤️",
+    fullDescription:
+      "Welcome to the Melbourne University Hispanic Culture and Language Society. Our society celebrates all things related to the Hispanic world. We welcome and are open to everyone, including those who are learning Spanish, those who are of Hispanic descent, and those who share an interest in Hispanic culture and language! Our society is excited to bring you a fun and diverse year of events. ¡Hasta pronto!",
+    links: {
+      website: "https://www.instagram.com/muhispanicsociety/",
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/9252/",
+    },
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/hcls.png",
+    socials: {
+      instagram: "https://www.instagram.com/muhispanicsociety/",
+    },
+  },
+
   // Melbourne Sports Business Society
   {
     id: "msbs",
