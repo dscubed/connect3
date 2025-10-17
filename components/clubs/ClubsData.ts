@@ -406,6 +406,30 @@ export const clubsData: ClubData[] = [
       facebook: "https://www.facebook.com/wiemsuwa",
     },
   },
+
+  // Melbourne University Biomedical Engineering Society
+  {
+    id: "mubes",
+    name: "MUBES",
+    full_name: "Melbourne University Biomedical Engineering Society",
+    location: "Melbourne, Australia",
+    description:
+      "A university club that supports Biomedical Engineering students and those interested in the field, through the facilitation of various social and academic events partnered with industry and academia",
+    fullDescription:
+      "The Melbourne University Biomedical Engineering Society (MUBES) is the official student-led society for biomedical engineering students at the University of Melbourne. Our mission is to empower members with the resources, opportunities, and connections needed to thrive in the dynamic field of biomedical engineering. Through innovative events, we bridge the gap between students and industry leaders, promote professional development, and cultivate an inclusive community in biomedical engineering.",
+    links: {
+      website: "https://www.linkedin.com/company/mubes/",
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/6245/",
+    },
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/mubes.png",
+    socials: {
+      linkedin: "https://www.linkedin.com/company/mubes/",
+      instagram: "https://www.instagram.com/mubes_unimelb/",
+      facebook: "https://www.facebook.com/officialmubespage/",
+    },
+  },
+
   // University of Melbourne Competitive Programming Club
   {
     id: "umcpc",
@@ -428,5 +452,299 @@ export const clubsData: ClubData[] = [
       instagram: "https://www.instagram.com/unimelbcpc/",
       facebook: "https://www.facebook.com/umcpc",
     },
+  },
+
+  // RMIT Rover
+  {
+    id: "rmit_rover",
+    name: "RMIT Rover Team",
+    full_name: "RMIT Rover Team",
+    location: "Melbourne, Australia",
+    description:
+      "Student team based at RMIT University building a semi-autonomous rover to compete on the national stage and beyond!",
+    fullDescription:
+      "We at RMIT Rover are an intrepid student team based at RMIT University, Melbourne working on building a semi-autonomous rover to compete on the national stage and beyond. This project brings students from diverse backgrounds and experiences to collaborate – supplementing student’s studies through practical applications in the design and manufacturing of advanced robotics. Through our work, we seek to expand student interest in space technologies and inspire new generations of the workforce towards the burgeoning space industry in our own backyard.",
+    links: {
+      website: "https://rmitroverteam.com/",
+      club: "https://www.linkedin.com/company/rmitroverteam/",
+    },
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/rmit-rover.png",
+    socials: {
+      linkedin: "https://www.linkedin.com/company/rmitroverteam/",
+      instagram: "https://www.instagram.com/rmitrover/",
+      facebook: "https://www.facebook.com/rmitroverteam",
+    },
+  },
+
+  // Women in Tech
+  {
+    id: "wit",
+    name: "Women in Tech",
+    full_name: "Women in Tech",
+    location: "Melbourne, Australia",
+    description:
+      "We are a community of students from The University of Melbourne with a mission to empower fellow female students studying and interested in all things tech!",
+    fullDescription:
+      "A student-run organisation at the University of Melbourne. Engaging, inspiring and supporting females pursuing tech-related studies from Undergraduate all the way to PhD. Also involved in some high school outreach. ",
+    links: {
+      website: "https://witunimelb.org.au/",
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/website/",
+    },
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/wit.png",
+    socials: {
+      linkedin: "https://www.linkedin.com/company/women-in-tech-wit-unimelb/",
+      instagram: "https://www.instagram.com/witunimelb/",
+      facebook: "https://www.facebook.com/witunimelb",
+    },
+  },
+
+  // Business One
+  {
+    id: "businessone",
+    name: "BusinessOne",
+    full_name: "BusinessOne",
+    location: "Melbourne, Australia",
+    description:
+      "Empowering the students of today, creating the consultants of tomorrow.",
+    fullDescription:
+      "BusinessOne Consulting Unimelb is a student run, pro-bono consulting service based in the University of Melbourne. Our focus is on helping startup businesses in any industry on their journey to success. Our consulting services combines classic consulting frameworks with innovative fresh thinking to provide clients with meaningful impact whilst still adapting to the modern entrepreneurship landscape.",
+    links: {
+      website: "https://www.businessoneunimelb.com/",
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/8031/",
+    },
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/businessone.png",
+    socials: {
+      linkedin: "https://www.linkedin.com/company/businessoneunimelb/",
+      instagram: "https://www.instagram.com/businessoneunimelb/",
+      facebook: "https://www.facebook.com/businessoneunimelb",
+    },
+  },
+
+  // MTECH
+  {
+    id: "mtech",
+    name: "MTech",
+    full_name: "MTech Consulting Club",
+    location: "Melbourne, Australia",
+    description:
+      "Preparing University of Melbourne students to enter IT Consulting industry.",
+    fullDescription:
+      "Melbourne Technology Consulting Club (MTech) is a club dedicated to all things technology consulting. The club offers members with the opportunities to experience real-life technology consulting projects and to interact with industry professionals and like-minded people. This club is the right choice for you if you want to pursue a career in technology consulting, or want to know more about the field!",
+    links: {
+      website: "https://www.mtechcc.com/",
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/mtech/",
+    },
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/mtech.png",
+    socials: {
+      linkedin: "https://www.linkedin.com/company/mtechunimelb/",
+      instagram: "https://www.instagram.com/mtech_unimelb/",
+    },
+  },
+
+  //Women* in Science and Engineering
+  {
+    id: "wise",
+    name: "WISE",
+    full_name: "Women* in Science and Engineering",
+    location: "Melbourne, Australia",
+    description:
+      "A student organisation which aims to support female and non-binary students and professionals in STEM.",
+    fullDescription:
+      "Women* in Science and Engineering (WISE) is a student-run organisation based at the University of Melbourne and proudly affiliated with UMSU. Established in 2010, we've grown to hold a wide range of events to inspire and support female and non-binary students in the STEMM field. Our upskilling workshops, site visits, trivia nights, panels, yearly Networking Night and famed Coffee and Cake events help link the UniMelb WISEdom with our industry connections, providing an inclusive community dedicated to the advancement of professional and determined women in STEMM. With our committee building on the tireless work of previous years, and drawing from a wide range of studies, interests and backgrounds, 2025 is sure to be a great year to be a woman in Science and Engineering.",
+    links: {
+      website: "https://wiseunimelb.wixsite.com/wiseunimelb",
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/7773/",
+    },
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/wise.png",
+    socials: {
+      linkedin:
+        "https://www.linkedin.com/company/women-in-science-and-engineering-wise/",
+      facebook: "https://www.facebook.com/wiseunimelb",
+      instagram: "https://www.instagram.com/wise_unimelb/",
+    },
+  },
+
+  // 180 Degrees Consulting Melbourne
+  {
+    id: "180dc",
+    name: "180 Degrees Consulting Melbourne",
+    full_name: "180 Degrees Consulting Melbourne",
+    location: "Melbourne, Australia",
+    description:
+      "Our aim is to connect high-achieving and creative students with leading socially-aware organisations.",
+    fullDescription:
+      "180 Degrees Consulting is the world’s largest non-profit student-driven consultancy. Our mission is to strengthen the ability of socially conscious organizations to achieve high impact social outcomes through the development of innovative, practical and sustainable solutions. Teams of university students completing studies in relevant fields work throughout the year with worthwhile organizations to identify and overcome specific challenges they are facing. This process is mutually beneficial. Organizations are assisted in the development of innovative, sustainable and practical solutions. At the same time, students are able to contribute to their communities, apply their university studies in a practical environment, and develop valuable life skills.",
+    links: {
+      club: "https://180dc.org/branches/Melbourne",
+      website: "https://www.180dcunimelb.org/",
+    },
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/180dc.png",
+    socials: {
+      linkedin: "https://www.linkedin.com/company/180-degrees-consulting-umelb",
+      instagram: "https://www.instagram.com/180dcunimelb/",
+      facebook: "https://www.facebook.com/180DegreesMelbourneUniversity/",
+    },
+  },
+
+  // Robogals Melbourne
+  {
+    id: "robogals-melb",
+    name: "Robogals Melbourne",
+    full_name: "Robogals Melbourne",
+    location: "Melbourne, Australia",
+    description:
+      "A student led organisation aimed at inspiring the next generation of young women engineers!",
+    fullDescription:
+      "Robogals is an international not for profit organisation that aims to inspire, engage and empower young women into engineering and related fields, creating a globally diverse and inclusive culture in engineering. To fulfil this mission, an extensive global network of Robogals volunteers - typically university students - deliver interactive workshops for primary and secondary school students. This approach means that Robogals is in a unique position to empower girls and young women from an early age.",
+    links: {
+      website:
+        "https://robogals.org/locations/asia-pacific-apac/university-of-melbourne/",
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/7453/",
+    },
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/robogals-melb.png",
+    socials: {
+      linkedin: "https://www.linkedin.com/company/robogalsmelbourne/",
+      instagram: "https://www.instagram.com/robogalsmelb/",
+      facebook: "https://www.facebook.com/robogalsmelb",
+    },
+  },
+
+  // Melbourne University Sri Lankan Student Association
+  {
+    id: "muslsa",
+    name: "MUSLSA",
+    full_name: "Melbourne University Sri Lankan Student Association",
+    location: "Melbourne, Australia",
+    description:
+      "Join our club to engage in community-oriented events, to meet a range of diverse, new people and to support our charitable causes.",
+    fullDescription:
+      "The Melbourne University Sri Lankan Students’ Association (MUSLSA) is one of the university’s most popular and active social clubs. We have a broad membership base focussed around students of a Sri Lankan or sub-continental background. MUSLSA prides itself on the quality of the events it organises for its members.",
+    links: {
+      website:
+        "https://www.linkedin.com/company/muslsa-melbourne-university-sri-lankan-students-association/",
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/7549/",
+    },
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/muslsa.png",
+    socials: {
+      linkedin:
+        "https://www.linkedin.com/company/muslsa-melbourne-university-sri-lankan-students-association/",
+      instagram: "https://www.instagram.com/muslsa.uom/",
+      facebook: "https://www.facebook.com/muslsa.uni",
+    },
+  },
+
+  // Melbourne University Civil and Structure Society
+  {
+    id: "mucss",
+    name: "Civil and Structural Society",
+    full_name: "Melbourne University Civil and Structure Society",
+    location: "Melbourne, Australia",
+    description: "Everything Civil & Structural Engineering!",
+    fullDescription:
+      "The Melbourne University Civil & Structural Society (MUCSS) is the official infrastructure faculty-based student-run body for all Civil and Structural Engineering students at The University of Melbourne. MUCSS aims to foster the professional and personal development of both current students and alumni by creating a strong cohort within the Civil and Structural Engineering community. This is achieved via professional networking and industry events, site visits, technical workshops (eg: AutoCAD), study sessions, regular social events such as barbecues, trivia and game nights, and pub nights. MUCSS’ annual flagship events: the Infrastructure Engineering Networking Night and End of Year Cocktail Night, are not to be missed and are a staple in the Faculty of Engineering and IT calendar every year.",
+    links: {
+      website: "https://www.linkedin.com/company/mucss/",
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/6461/",
+    },
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/mucss.png",
+    socials: {
+      linkedin: "https://www.linkedin.com/company/mucss/",
+      instagram: "https://www.instagram.com/mucssociety/",
+      facebook: "https://www.facebook.com/mucssociety",
+    },
+  },
+
+  // Progressive Energy Society UWA
+  {
+    id: "pes",
+    name: "Progressive Energy Society",
+    full_name: "Progressive Energy Society UWA",
+    location: "Perth, Australia",
+    description:
+      "A student society connecting University of Western Australia's most passionate students to the energy industry.",
+    fullDescription:
+      "The UWA Progressive Energy Society (PES) aims to encourage and facilitate discussion and networking with respect to the ongoing energy transition and future innovations within the energy sector, by hosting careers and student events across all relevant disciplines of study. Established in 2020, PES is UWA Guild affiliated and UWA's first and only student-led energy society. Join the conversation today.",
+    links: {
+      website: "https://www.linkedin.com/company/pesuwa/",
+      club: "https://www.uwastudentguild.com/clubs/progressive-energy-strategies",
+    },
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/pes.png",
+    socials: {
+      linkedin: "https://www.linkedin.com/company/pesuwa/",
+      instagram: "https://www.instagram.com/pes.uwa/",
+      facebook: "https://www.facebook.com/progressiveenergysociety/",
+    },
+  },
+
+  // Quantitative Trading Society
+  {
+    id: "qts",
+    name: "QTS",
+    full_name: "Quantitative Trading Society",
+    location: "Melbourne, Australia",
+    description:
+      "A place for students to connect and explore quantitative methods to identify and capitalize on available opportunities",
+    fullDescription:
+      "A place for like-minded individuals to connect and increase their understanding and proficiency in quantitative trading.",
+    links: {
+      website: "https://qtsunimelb.com/",
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/7967/",
+    },
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/qts.png",
+    socials: {
+      linkedin: "https://www.linkedin.com/company/unimelb-qts/",
+      instagram: "https://www.instagram.com/qtsunimelb/",
+      facebook: "https://www.facebook.com/unimelb.qts/",
+    },
+  },
+
+  // Drone Aviation and Racing Engineering Society
+  {
+    id: "dares",
+    name: "DARES",
+    full_name: "Drone Aviation and Racing Engineering Society",
+    location: "Melbourne, Australia",
+    description:
+      "Our members will have the opportunity to build, design and fly, no matter their degree and experience.",
+    fullDescription:
+      "DARES is the Drone Aviation and Racing Engineering Society at the University of Melbourne. Our members have the opportunity to build, design and fly drones of all different types and sizes, We hope to allow anyone, regardless of degree and experience to learn about drones and the broader aviation industry. We aim to facilitate this through various social, technical and professional events run throughout the academic year.",
+    links: {
+      website: "https://www.linkedin.com/in/dares-unimelb/",
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/daresunimelb/",
+    },
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/dares.png",
+    socials: {
+      linkedin: "https://www.linkedin.com/in/dares-unimelb/",
+      instagram: "https://www.instagram.com/daresunimelb/",
+    },
+  },
+
+  // Melbourne Sports Business Society
+  {
+    id: "msbs",
+    name: "MSBS",
+    full_name: "Melbourne Sports Business Society",
+    location: "Melbourne, Australia",
+    description:
+      "We are a sports business club based at the University of Melbourne oriented at providing students with a world class education around the opportunities in business behind the sports world.",
+    fullDescription:
+      "We are a sports business club based at the Univeristy of Melbourne oriented at providing students with a world class education around the opportunities in business behind the sports world.",
+    links: {
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/msbs/",
+    },
+    logoUrl:
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/msbs.png",
   },
 ];

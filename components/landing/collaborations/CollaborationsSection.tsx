@@ -61,7 +61,7 @@ export function CollaborationsSection() {
                       whileInView={{ opacity: 1, scale: 1 }}
                       transition={{
                         duration: 0.5,
-                        delay: 0.6 + index * 0.1,
+                        delay: 0.1 + index * 0.02,
                         ease: "easeOut",
                       }}
                       viewport={{ once: true }}
