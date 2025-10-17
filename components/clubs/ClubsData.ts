@@ -1,4 +1,4 @@
-type Category =
+export type Category =
   | "Tech"
   | "Commerce"
   | "Engineering"

@@ -1,16 +1,55 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Sidebar from "@/components/sidebar/Sidebar";
 import { clubsData, type ClubData } from "@/components/clubs/ClubsData";
+import { Category } from "@/components/clubs/ClubsData";
 import { ClubListCard } from "@/components/clubs/ClubListCard";
 import { ClubDetailPanel } from "@/components/clubs/ClubDetailPanel";
 import { ClubsHeader } from "@/components/clubs/HeaderSection";
+import ClubFilters from "@/components/clubs/ClubFilters";
 
 export default function ClubsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedClub, setSelectedClub] = useState<ClubData>(clubsData[0]);
   const [showDetails, setShowDetails] = useState(false);
+
+  // Search and category filter state
+  const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<Category | "All">(
+    "All"
+  );
+
+  // Get all unique categories from clubsData
+  const categoryOptions: (Category | "All")[] = [
+    "All",
+    ...Array.from(
+      new Set(clubsData.flatMap((club) => club.category ?? []))
+    ).sort(),
+  ];
+
+  // Filter clubs by search and category
+  const filteredClubs = clubsData.filter((club) => {
+    const matchesSearch =
+      search.trim() === "" ||
+      club.name.toLowerCase().includes(search.toLowerCase()) ||
+      (club.full_name ?? "").toLowerCase().includes(search.toLowerCase()) ||
+      club.description.toLowerCase().includes(search.toLowerCase()) ||
+      club.fullDescription.toLowerCase().includes(search.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "All" ||
+      (club.category ?? []).includes(selectedCategory as Category);
+    return matchesSearch && matchesCategory;
+  });
+
+  // Ensure selectedClub is always in filteredClubs
+  useEffect(() => {
+    if (filteredClubs.length === 0) return;
+    if (!filteredClubs.find((c) => c.id === selectedClub.id)) {
+      setSelectedClub(filteredClubs[0]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, selectedCategory]);
 
   const handleClubSelect = (club: ClubData) => {
     setSelectedClub(club);
@@ -42,9 +81,18 @@ export default function ClubsPage() {
                 {/* Header */}
                 <ClubsHeader clubCount={clubsData.length} />
 
+                {/* Search and Category Filter */}
+                <ClubFilters
+                  search={search}
+                  setSearch={setSearch}
+                  selectedCategory={selectedCategory}
+                  setSelectedCategory={setSelectedCategory}
+                  categoryOptions={categoryOptions}
+                />
+
                 {/* Club List */}
                 <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 scrollbar-hide">
-                  {clubsData.map((club) => (
+                  {filteredClubs.map((club) => (
                     <ClubListCard
                       key={club.id}
                       club={club}
@@ -52,6 +100,11 @@ export default function ClubsPage() {
                       onClick={() => handleClubSelect(club)}
                     />
                   ))}
+                  {filteredClubs.length === 0 && (
+                    <div className="p-4 text-sm text-white/60">
+                      No clubs match your search / filter.
+                    </div>
+                  )}
                 </div>
               </motion.div>
             ) : (
@@ -80,9 +133,18 @@ export default function ClubsPage() {
             {/* Header */}
             <ClubsHeader clubCount={clubsData.length} />
 
+            {/* Search and Category Filter */}
+            <ClubFilters
+              search={search}
+              setSearch={setSearch}
+              selectedCategory={selectedCategory}
+              setSelectedCategory={setSelectedCategory}
+              categoryOptions={categoryOptions}
+            />
+
             {/* Club List */}
             <div className="flex-1 overflow-y-auto p-5 space-y-3 scrollbar-hide">
-              {clubsData.map((club) => (
+              {filteredClubs.map((club) => (
                 <ClubListCard
                   key={club.id}
                   club={club}
@@ -90,6 +152,11 @@ export default function ClubsPage() {
                   onClick={() => setSelectedClub(club)}
                 />
               ))}
+              {filteredClubs.length === 0 && (
+                <div className="p-4 text-sm text-white/60">
+                  No clubs match your search / filter.
+                </div>
+              )}
             </div>
           </div>
 
