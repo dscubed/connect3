@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown } from "lucide-react";
+import { Filter } from "lucide-react";
 
 interface ClubFiltersProps {
   search: string;
@@ -40,7 +40,7 @@ export default function ClubFilters({
             variant="outline"
             className="justify-between bg-white/5 border border-white/10 rounded-md px-3 py-2 text-sm"
           >
-            <ArrowUpDown className="h-4 w-4" />
+            <Filter className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-full max-h-56 overflow-y-auto scrollbar-hide">
