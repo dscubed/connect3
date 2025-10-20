@@ -13,7 +13,7 @@ export function AuthButton() {
     return <div className="text-xs text-white/60">Loading...</div>;
   }
 
-  return user ? (
+  return user && !user.is_anonymous ? (
     <div className="flex items-center gap-2">
       <Link href="/profile" className="flex-shrink-0">
         <div className="relative w-8 h-8 rounded-full overflow-hidden ring-1 ring-white/20 hover:ring-white/40 transition-all hover:scale-105">

@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import QuickInfoSection from "@/components/home/QuickInfoSection";
 import { SearchBar } from "@/components/home/SearchBar";
 import { AuthButton } from "@/components/auth/auth-button";
+import { useAuthStore } from "@/stores/authStore";
 
 export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -27,6 +28,20 @@ export default function Home() {
 
     setCreatingChatroom(true);
     try {
+      const userId = useAuthStore.getState().user?.id;
+      // Fix: Import and get supabase client instance, then use it for anonymous sign in
+      if (!userId) {
+        toast.info("Creating guest session...");
+        const supabase = useAuthStore.getState().getSupabaseClient();
+        const { error } = await supabase.auth.signInAnonymously();
+        console.log("🚀 Guest session created:", error);
+        if (error) {
+          toast.error("Failed to create guest session. Please try again.");
+          setCreatingChatroom(false);
+          return;
+        }
+      }
+
       console.log("🚀 Creating chatroom for query:", searchQuery);
 
       const { chatroomId, messageId } = await createChatroom(searchQuery);
