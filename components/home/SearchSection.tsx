@@ -1,5 +1,5 @@
 import React from "react";
-import { SearchBar } from "@/components/home/SearchBar";
+import { SearchBarUI } from "@/components/home/SearchBarUI";
 
 interface SearchSectionProps {
   query: string;
@@ -15,7 +15,7 @@ const SearchSection: React.FC<SearchSectionProps> = ({
   creatingChatroom,
 }) => (
   <div className="mx-auto max-w-2xl">
-    <SearchBar
+    <SearchBarUI
       query={query}
       setQuery={setQuery}
       onSubmit={onSearch}

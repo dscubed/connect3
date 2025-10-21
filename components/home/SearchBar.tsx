@@ -1,67 +1,62 @@
-import React from "react";
-import { ArrowUp } from "lucide-react";
-import { useSearch } from "@/components/home/hooks/useSearch";
+import { SearchBarUI } from "./SearchBarUI";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useAuthStore } from "@/stores/authStore";
+import {
+  createChatroom,
+  triggerBackgroundSearch,
+} from "@/lib/chatrooms/chatroomUtils";
 
-interface SearchBarProps {
-  query: string;
-  setQuery: (q: string) => void;
-  placeholder?: string;
-  onSubmit?: (query: string) => void;
-  disabled?: boolean;
-}
+export function SearchBar() {
+  const [query, setQuery] = useState("");
+  const [creatingChatroom, setCreatingChatroom] = useState(false);
+  const router = useRouter();
 
-const SearchBarComponent: React.FC<SearchBarProps> = ({
-  query,
-  setQuery,
-  onSubmit,
-  // placeholder = "Search...",
-  disabled = false,
-}) => {
-  const {
-    query: localQuery,
-    isSearching,
-    handleChange,
-  } = useSearch({
-    initialQuery: query,
-    onSearchChange: setQuery,
-  });
+  const handleSearch = async (searchQuery: string) => {
+    if (!searchQuery.trim()) {
+      toast.error("Please enter a search query.");
+      return;
+    }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (disabled) return;
-    onSubmit?.(localQuery);
-    setQuery(localQuery); // Ensure immediate update on submit
+    setCreatingChatroom(true);
+    try {
+      const userId = useAuthStore.getState().user?.id;
+      // Fix: Import and get supabase client instance, then use it for anonymous sign in
+      if (!userId) {
+        toast.info("Creating guest session...");
+        const supabase = useAuthStore.getState().getSupabaseClient();
+        const { error } = await supabase.auth.signInAnonymously();
+        console.log("🚀 Guest session created:", error);
+        if (error) {
+          toast.error("Failed to create guest session. Please try again.");
+          setCreatingChatroom(false);
+          return;
+        }
+      }
+
+      console.log("🚀 Creating chatroom for query:", searchQuery);
+
+      const { chatroomId, messageId } = await createChatroom(searchQuery);
+
+      // Navigate immediately
+      router.push(`/search?chatroom=${chatroomId}`);
+
+      // Trigger background search (fire and forget)
+      triggerBackgroundSearch(messageId);
+    } catch (error) {
+      console.error("❌ Error creating chatroom:", error);
+      toast.error("Failed to create chatroom. Please try again.");
+      setCreatingChatroom(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full">
-      <div
-        className={`mx-auto max-w-2xl flex items-center gap-2 rounded-2xl bg-white/5 border border-white/10 px-4 py-3 backdrop-blur shadow-xl shadow-white/5 hover:shadow-white/10 transition-all ${
-          disabled ? "opacity-50 pointer-events-none grayscale" : ""
-        }`}
-      >
-        <input
-          className="w-full bg-transparent outline-none text-sm placeholder:text-white/40"
-          placeholder={"Ask me anything..."}
-          value={localQuery}
-          onChange={(e) => handleChange(e.target.value)}
-          disabled={disabled}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleSubmit(e);
-            }
-          }}
-        />
-        <button
-          type="submit"
-          disabled={disabled || isSearching || localQuery.trim() === ""}
-          className="flex flex-row items-center gap-2 rounded-xl px-3 py-1.5 bg-white text-black text-sm font-medium cursor-pointer hover:bg-white/90 transition-all hover:scale-105 shadow-lg"
-        >
-          <ArrowUp className="inline-block h-4 w-4" />
-        </button>
-      </div>
-    </form>
+    <SearchBarUI
+      query={query}
+      setQuery={setQuery}
+      disabled={creatingChatroom}
+      onSubmit={handleSearch}
+    />
   );
-};
-
-export const SearchBar = React.memo(SearchBarComponent);
+}

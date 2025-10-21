@@ -1,24 +1,12 @@
 import { motion } from "framer-motion";
-import { SearchBar } from "@/components/home/SearchBar";
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Home } from "lucide-react";
 import Link from "next/link";
 import Logo from "@/components/logo/Logo";
+import { SearchBar } from "@/components/home/SearchBar";
 
 export function LandingHero() {
-  const [query, setQuery] = useState("");
-  const [creating, setCreating] = useState(false);
-
-  const handleSearch = async (searchQuery: string) => {
-    if (!searchQuery.trim()) return;
-    setCreating(true);
-    // Simulate query creation (replace with your logic)
-    setTimeout(() => setCreating(false), 1000);
-    // You can navigate or trigger actions here
-    // router.push(`/search?chatroom=demo`);
-  };
-
   return (
     <div
       id="home"
@@ -71,13 +59,7 @@ export function LandingHero() {
           <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 blur-3xl opacity-60 animate-pulse" />
           <div className="relative rounded-full bg-gradient-to-br from-gray-800 via-gray-900 to-black p-1 shadow-2xl">
             <div className="rounded-full bg-black px-6 py-4 md:px-8 md:py-6 shadow-[inset_0_0_20px_rgba(139,92,246,0.3)]">
-              <SearchBar
-                query={query}
-                setQuery={setQuery}
-                disabled={creating}
-                placeholder="Search for clubs, opportunities, or keywords..."
-                onSubmit={handleSearch}
-              />
+              <SearchBar />
             </div>
           </div>
         </div>

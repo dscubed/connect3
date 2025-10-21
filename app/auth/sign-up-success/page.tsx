@@ -21,10 +21,9 @@ export default function Page() {
   const router = useRouter();
   const [isResending, setIsResending] = useState(false);
   const [pendingEmail, setPendingEmail] = useState("");
-  const [hasMigrated, setHasMigrated] = useState(false);
 
   useEffect(() => {
-    const email = localStorage.getItem('pendingVerificationEmail');
+    const email = localStorage.getItem("pendingVerificationEmail");
     if (email) {
       setPendingEmail(email);
     }
@@ -43,6 +42,7 @@ export default function Page() {
       }
     } catch (error) {
       toast.error("An error occurred while resending verification email");
+      console.error("Resend verification error:", error);
     } finally {
       setIsResending(false);
     }
@@ -62,7 +62,7 @@ export default function Page() {
         (user.email_confirmed_at || user.confirmed_at) &&
         !profile.onboarding_completed
       ) {
-        localStorage.removeItem('pendingVerificationEmail');
+        localStorage.removeItem("pendingVerificationEmail");
         router.replace("/onboarding");
       }
     }
@@ -84,24 +84,26 @@ export default function Page() {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col gap-4">
-
                   <p className="text-sm text-muted-foreground">
-                    You&apos;ve successfully signed up. Please check your email to
-                    confirm your account before signing in.
+                    You&apos;ve successfully signed up. Please check your email
+                    to confirm your account before signing in.
                   </p>
 
                   <Button
                     variant="outline"
                     onClick={handleResendVerification}
                     disabled={isResending || !pendingEmail}
-                    className={`w-full ${(!pendingEmail || isResending) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`w-full ${
+                      !pendingEmail || isResending
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
                   >
                     {isResending
                       ? "Sending..."
                       : !pendingEmail
-                        ? "Unable to Resend"
-                        : "Resend Confirmation"
-                    }
+                      ? "Unable to Resend"
+                      : "Resend Confirmation"}
                   </Button>
                 </div>
               </CardContent>
