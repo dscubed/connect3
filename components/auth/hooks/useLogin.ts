@@ -14,12 +14,19 @@ export function useLogin(onLoggingInChange?: (loggingIn: boolean) => void) {
     onLoggingInChange?.(state);
   };
 
-  const handleEmailLogin = async (params: { email: string; password: string }) => {
+  const handleEmailLogin = async (params: {
+    email: string;
+    password: string;
+  }) => {
+    if (user?.is_anonymous) {
+      await useAuthStore.getState().signOut();
+    }
+
     if (user) {
       toast.error("Already signed in!");
       return;
     }
-    
+
     setLoggingState(true);
     try {
       const { error } = await loginWithEmail(params);
@@ -36,13 +43,15 @@ export function useLogin(onLoggingInChange?: (loggingIn: boolean) => void) {
       toast.error("Already signed in!");
       return;
     }
-    
+
     setLoggingState(true);
     try {
       const { error } = await loginWithGoogle();
       if (error) throw error;
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Google login failed");
+      toast.error(
+        error instanceof Error ? error.message : "Google login failed"
+      );
       setLoggingState(false);
     }
   };

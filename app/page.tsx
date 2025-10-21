@@ -33,13 +33,13 @@ export default function Home() {
             <AnimatedParticles />
 
             {/* Top Section */}
-            <div className="flex-[1] flex flex-col items-center justify-center w-full">
+            <div className="flex-[1] h-1/2 flex flex-col items-center justify-center w-full">
               <HeroSection />
               <SearchBar />
             </div>
 
             {/* Bottom Section */}
-            <div className="flex-[1] flex flex-col items-start w-full justify-end mb-12">
+            <div className="flex-[1] h-1/2 flex flex-col items-start w-full justify-end mb-12">
               <QuickInfoSection />
             </div>
           </div>

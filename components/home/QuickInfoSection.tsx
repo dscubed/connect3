@@ -14,13 +14,13 @@ export default function QuickInfoSection() {
       key: "chats",
       label: "Chats",
       icon: <Clock className="h-4 w-4 text-white/40" />,
-      content: <RecentChatrooms userId={userId} />,
+      content: <RecentChatrooms userId={userId} guest={user?.is_anonymous} />,
     },
     {
       key: "stats",
       label: "Your Stats",
       icon: <TrendingUp className="h-4 w-4 text-white/40" />,
-      content: <MatchStats userId={userId} />,
+      content: <MatchStats userId={userId} guest={user?.is_anonymous} />,
     },
     {
       key: "trending",
@@ -35,7 +35,8 @@ export default function QuickInfoSection() {
   ];
 
   return (
-    <div className="mx-auto max-w-2xl px-4 w-full">
+    <div className="mx-auto max-w-2xl px-4 w-full h-full flex flex-col justify-end">
+      {" "}
       <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3 backdrop-blur-sm">
         {/* Tab Buttons */}
         <div className="flex items-center gap-3 mb-2">

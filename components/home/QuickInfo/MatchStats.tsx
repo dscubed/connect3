@@ -4,7 +4,12 @@ import { useUserMatches } from "../hooks/useUserMatches";
 import { useState } from "react";
 import { FilterType } from "./matches/types";
 
-export default function MatchStats({ userId }: { userId: string | null }) {
+interface MatchStatsProps {
+  userId: string | null;
+  guest?: boolean;
+}
+
+export default function MatchStats({ userId, guest }: MatchStatsProps) {
   const [filter, setFilter] = useState<FilterType>("all");
   const [activeSection, setActiveSection] = useState<
     "matchedYou" | "youMatched"
@@ -13,8 +18,15 @@ export default function MatchStats({ userId }: { userId: string | null }) {
   // Use the hook!
   const { matchedYouUsers, youMatchedUsers, lastMatchDetails, loading } =
     useUserMatches(userId);
+  console.log("MatchStats:", {
+    matchedYouUsers,
+    youMatchedUsers,
+    lastMatchDetails,
+    loading,
+    userId,
+  });
 
-  if (!userId) {
+  if (!userId || guest) {
     return <span className="text-xs text-white/30">Not logged in</span>;
   }
 
@@ -22,7 +34,11 @@ export default function MatchStats({ userId }: { userId: string | null }) {
     return <span className="text-xs text-white/30">Loading...</span>;
   }
 
-  if (!matchedYouUsers || matchedYouUsers.matchData.length === 0) {
+  if (
+    (!matchedYouUsers && !youMatchedUsers) ||
+    (matchedYouUsers?.matchData.length === 0 &&
+      youMatchedUsers?.matchData.length === 0)
+  ) {
     return <span className="text-xs text-white/30">No matches yet</span>;
   }
 

@@ -88,7 +88,14 @@ export function useUserMatches(userId: string | null) {
       getMatchesAndAvatars(userId);
       getYouMatchedAndAvatars(userId);
     }
+    console.log("Fetching matches for user:", userId);
   }, [userId, supabase]);
+  console.log("useUserMatches state:", {
+    matchedYouUsers,
+    youMatchedUsers,
+    lastMatchDetails,
+    loading,
+  });
 
   return { matchedYouUsers, youMatchedUsers, lastMatchDetails, loading };
 }
