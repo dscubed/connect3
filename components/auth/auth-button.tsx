@@ -42,16 +42,16 @@ export function AuthButton() {
   ) : (
     <div className="flex gap-2">
       <Link
-        href="/auth/sign-up"
-        className="px-4 md:px-5 py-1.5 text-sm rounded-lg bg-white text-black font-medium hover:bg-white/90 transition-all hover:scale-105 shadow-md"
-      >
-        sign up
-      </Link>
-      <Link
         href="/auth/login"
         className="px-4 md:px-5 py-1.5 text-sm rounded-lg border border-white/20 hover:border-white/30 hover:bg-white/5 transition-all hover:scale-105 text-white"
       >
         log in
+      </Link>
+      <Link
+        href="/auth/sign-up"
+        className="px-4 md:px-5 py-1.5 text-sm rounded-lg bg-white text-black font-medium hover:bg-white/90 transition-all hover:scale-105 shadow-md"
+      >
+        sign up
       </Link>
     </div>
   );
