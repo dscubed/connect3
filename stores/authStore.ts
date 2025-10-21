@@ -25,7 +25,6 @@ interface AuthState {
   profile: Profile | null;
   loading: boolean;
   session: Session | null;
-  isAnonymous: boolean;
   initialize: () => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (fields: Partial<Profile>) => Promise<void>;
@@ -55,7 +54,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   profile: null,
   loading: true,
   session: null,
-  isAnonymous: false,
 
   initialize: async () => {
     const supabase = createClient();
@@ -67,7 +65,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     const isAnon = session?.user?.is_anonymous ?? false;
 
-    set({ user: session?.user ?? null, session, loading: false, isAnonymous: isAnon });
+    set({ user: session?.user ?? null, session, loading: false });
 
     if (session?.user && !isAnon) {
       fetchProfile(session.user.id, set);
@@ -77,9 +75,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     // Listen for changes
     supabase.auth.onAuthStateChange((event, session) => {
-
       const isAnon = session?.user?.is_anonymous ?? false;
-      set({ user: session?.user ?? null, session, loading: false, isAnonymous: isAnon });
+      set({ user: session?.user ?? null, session, loading: false });
       if (session?.user && !isAnon) {
         fetchProfile(session.user.id, set);
       } else {

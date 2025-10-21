@@ -16,7 +16,7 @@ export default function Page() {
           {loading ? <LoadingIndicator /> : <SignUpForm />}
         </div>
       </div>
-      {user && (
+      {user && !user.is_anonymous && !loading && (
         <AlreadyAuthenticatedDialog
           onboardingCompleted={profile?.onboarding_completed}
         />

@@ -3,18 +3,19 @@ import { signUpWithEmail, signUpWithGoogle } from "@/lib/auth/signup";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
+import { metadata } from "@/app/layout";
 
 export function useSignUp() {
   const [isSigningUp, setIsSigningUp] = useState(false);
   const router = useRouter();
 
   const user = useAuthStore((state) => state.user);
-  if (user) {
+  if (user && !user.is_anonymous) {
     toast.error("Already signed in!");
     return {
       isSigningUp: false,
-      handleEmailSignUp: async () => {},
-      handleGoogleSignUp: async () => {},
+      handleEmailSignUp: async () => { },
+      handleGoogleSignUp: async () => { },
     };
   }
 
@@ -47,7 +48,16 @@ export function useSignUp() {
     // }
 
     try {
-      const { data, error } = await signUpWithEmail(params);
+
+      let anonymousId = null;
+      if (user?.is_anonymous) {
+        anonymousId = user.id;
+        await useAuthStore.getState().signOut();
+      }
+
+      const { data, error } = await signUpWithEmail({
+        ...params, anonymousId
+      });
       if (error) {
         toast.error(error.message || "An error occurred");
         setIsSigningUp(false);
@@ -61,6 +71,9 @@ export function useSignUp() {
         toast.error("Account already exists.");
         setIsSigningUp(false);
         return;
+      }
+      if (data?.user?.email) {
+        localStorage.setItem('pendingVerificationEmail', data.user.email);
       }
       router.push("/auth/sign-up-success");
     } catch (error: unknown) {

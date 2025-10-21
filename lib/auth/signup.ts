@@ -6,12 +6,14 @@ export async function signUpWithEmail({
   firstName,
   lastName,
   accountType,
+  anonymousId,
 }: {
   email: string;
   password: string;
   firstName: string;
   lastName: string;
   accountType: "user" | "organisation";
+  anonymousId?: string | null;
 }) {
   const supabase = createClient();
 
@@ -25,7 +27,20 @@ export async function signUpWithEmail({
         last_name: lastName,
         name_provided: true,
         account_type: accountType,
+        anonymousId,
       },
+    },
+  });
+}
+
+export async function resendVerificationEmail(email: string) {
+  const supabase = createClient();
+
+  return supabase.auth.resend({
+    type: 'signup',
+    email,
+    options: {
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
     },
   });
 }

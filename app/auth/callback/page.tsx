@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -16,6 +17,34 @@ export default function AuthCallbackPage() {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session?.user) {
+        // migration check 
+        if (session.user.user_metadata.anonymousId) {
+          console.log("Migrating anonymous data for user: ", session.user);
+          toast.info("Migrating existing chats to your new account...")
+          try {
+            const {data, error} = await supabase.rpc('migrate_anonymous_user_data', {
+              old_anonymous_id: session.user.user_metadata.anonymousId,
+              new_user_id: session.user.id,
+            });
+            if (error) {
+              toast.error("Failed to migrate anonymous data");
+              console.error(error);
+            } else {
+              toast.success("Anonymous data migrated successfully");
+              // clear anonymous metadata
+              await supabase.auth.updateUser({
+                data: {
+                  anonymousId: null,
+                },
+              });
+              console.log(data);
+            }
+          } catch (error) {
+            toast.error("Failed to migrate anonymous data");
+            console.error(error);
+          }
+        }
+
         // Got user, check onboarding
         const { data: profile } = await supabase
           .from("profiles")

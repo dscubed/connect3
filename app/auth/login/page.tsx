@@ -24,7 +24,7 @@ export default function Page() {
           )}
         </div>
       </div>
-      {!isLoggingIn && user && (
+      {!isLoggingIn && user && !user.is_anonymous && (
         <AlreadyAuthenticatedDialog
           onboardingCompleted={profile?.onboarding_completed}
         />
