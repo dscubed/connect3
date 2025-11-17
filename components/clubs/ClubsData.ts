@@ -1,7 +1,10 @@
 export type Category =
   | "Tech"
   | "Commerce"
+  | "Arts"
   | "Engineering"
+  | "Education"
+  | "Environment"
   | "Science"
   | "Cultural"
   | "Start Ups"
@@ -474,7 +477,7 @@ export const clubsData: ClubData[] = [
     description:
       "The Competitive Programming Club is about doing ridiculously difficult problems within unfairly short time limits.",
     fullDescription:
-      "The Competitive Programming Club is about doing ridiculously difficult problems within unfairly short time limits. Our focus is contests such as the ACM ICPC, VCPC, Google Codejam, and Facebook Hacker Cup. We have weekly meetings where we practice problems, discuss algorithms, cry over the parts we didn’t understand, figure things out, and celebrate with free pizza. If you think you’re the next Zuckerberg, this is not the club for you. If you want to be the next Zuckerberg then this is the club for you. Seriously though, succeeding here can greatly increase your prospects for employment.",
+      "The Competitive Programming Club is about doing ridiculously difficult problems within unfairly short time limits. Our focus is contests such as the ACM ICPC, VCPC, Google Codejam, and Facebook Hacker Cup. We have weekly meetings where we practice problems, discuss algorithms, cry over the parts we didn't understand, figure things out, and celebrate with free pizza. If you think you're the next Zuckerberg, this is not the club for you. If you want to be the next Zuckerberg then this is the club for you. Seriously though, succeeding here can greatly increase your prospects for employment.",
     category: ["Tech", "Computing"],
     links: {
       website: "https://umcpc.club/",
@@ -499,7 +502,7 @@ export const clubsData: ClubData[] = [
     description:
       "Student team based at RMIT University building a semi-autonomous rover to compete on the national stage and beyond!",
     fullDescription:
-      "We at RMIT Rover are an intrepid student team based at RMIT University, Melbourne working on building a semi-autonomous rover to compete on the national stage and beyond. This project brings students from diverse backgrounds and experiences to collaborate – supplementing student’s studies through practical applications in the design and manufacturing of advanced robotics. Through our work, we seek to expand student interest in space technologies and inspire new generations of the workforce towards the burgeoning space industry in our own backyard.",
+      "We at RMIT Rover are an intrepid student team based at RMIT University, Melbourne working on building a semi-autonomous rover to compete on the national stage and beyond. This project brings students from diverse backgrounds and experiences to collaborate – supplementing student's studies through practical applications in the design and manufacturing of advanced robotics. Through our work, we seek to expand student interest in space technologies and inspire new generations of the workforce towards the burgeoning space industry in our own backyard.",
     category: ["Engineering", "Robotics", "Tech"],
     links: {
       website: "https://rmitroverteam.com/",
@@ -619,7 +622,7 @@ export const clubsData: ClubData[] = [
     description:
       "Our aim is to connect high-achieving and creative students with leading socially-aware organisations.",
     fullDescription:
-      "180 Degrees Consulting is the world’s largest non-profit student-driven consultancy. Our mission is to strengthen the ability of socially conscious organizations to achieve high impact social outcomes through the development of innovative, practical and sustainable solutions. Teams of university students completing studies in relevant fields work throughout the year with worthwhile organizations to identify and overcome specific challenges they are facing. This process is mutually beneficial. Organizations are assisted in the development of innovative, sustainable and practical solutions. At the same time, students are able to contribute to their communities, apply their university studies in a practical environment, and develop valuable life skills.",
+      "180 Degrees Consulting is the world's largest non-profit student-driven consultancy. Our mission is to strengthen the ability of socially conscious organizations to achieve high impact social outcomes through the development of innovative, practical and sustainable solutions. Teams of university students completing studies in relevant fields work throughout the year with worthwhile organizations to identify and overcome specific challenges they are facing. This process is mutually beneficial. Organizations are assisted in the development of innovative, sustainable and practical solutions. At the same time, students are able to contribute to their communities, apply their university studies in a practical environment, and develop valuable life skills.",
     category: ["Commerce", "Consulting"],
     links: {
       club: "https://180dc.org/branches/Melbourne",
@@ -668,7 +671,7 @@ export const clubsData: ClubData[] = [
     description:
       "Join our club to engage in community-oriented events, to meet a range of diverse, new people and to support our charitable causes.",
     fullDescription:
-      "The Melbourne University Sri Lankan Students’ Association (MUSLSA) is one of the university’s most popular and active social clubs. We have a broad membership base focussed around students of a Sri Lankan or sub-continental background. MUSLSA prides itself on the quality of the events it organises for its members.",
+      "The Melbourne University Sri Lankan Students' Association (MUSLSA) is one of the university's most popular and active social clubs. We have a broad membership base focussed around students of a Sri Lankan or sub-continental background. MUSLSA prides itself on the quality of the events it organises for its members.",
     category: ["Cultural"],
     links: {
       website:
@@ -693,7 +696,7 @@ export const clubsData: ClubData[] = [
     location: "Melbourne, Australia",
     description: "Everything Civil & Structural Engineering!",
     fullDescription:
-      "The Melbourne University Civil & Structural Society (MUCSS) is the official infrastructure faculty-based student-run body for all Civil and Structural Engineering students at The University of Melbourne. MUCSS aims to foster the professional and personal development of both current students and alumni by creating a strong cohort within the Civil and Structural Engineering community. This is achieved via professional networking and industry events, site visits, technical workshops (eg: AutoCAD), study sessions, regular social events such as barbecues, trivia and game nights, and pub nights. MUCSS’ annual flagship events: the Infrastructure Engineering Networking Night and End of Year Cocktail Night, are not to be missed and are a staple in the Faculty of Engineering and IT calendar every year.",
+      "The Melbourne University Civil & Structural Society (MUCSS) is the official infrastructure faculty-based student-run body for all Civil and Structural Engineering students at The University of Melbourne. MUCSS aims to foster the professional and personal development of both current students and alumni by creating a strong cohort within the Civil and Structural Engineering community. This is achieved via professional networking and industry events, site visits, technical workshops (eg: AutoCAD), study sessions, regular social events such as barbecues, trivia and game nights, and pub nights. MUCSS' annual flagship events: the Infrastructure Engineering Networking Night and End of Year Cocktail Night, are not to be missed and are a staple in the Faculty of Engineering and IT calendar every year.",
     category: ["Engineering"],
     links: {
       website: "https://www.linkedin.com/company/mucss/",
@@ -817,5 +820,209 @@ export const clubsData: ClubData[] = [
     },
     logoUrl:
       "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/msbs.png",
+  },
+
+  {
+    id: "lost-and-refound",
+    name: "Lost & Refound",
+    full_name: "Lost & Refound",
+    location: "Melbourne, Australia",
+    description:
+      "Lost & ReFound is a space for students to connect over a shared love of art and sustainability. We use eco-friendly practices to create, experiment, and explore our creativity. Whether you're new to art, the environment, or both, we welcome you to unwind and express yourself through different artistic mediums.",
+    fullDescription:
+      "Lost & ReFound is a space for students to connect over a shared love of art and sustainability. We use eco-friendly practices to create, experiment, and explore our creativity. Whether you're new to art, the environment, or both, we welcome you to unwind and express yourself through different artistic mediums.",
+    category: ["Environment"],
+    links: {
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/10120/",
+    },
+    logoUrl:
+      "/clubs/unimelb/lost-and-refound.png",
+  },
+
+  {
+    id: "asa",
+    name: "ASA",
+    full_name: "Accounting Students Association",
+    location: "Melbourne, Australia",
+    description:
+      "ASA links students and employers via networking and skills-building events to jumpstart accounting careers.",
+    fullDescription:
+      "The Accounting Students' Association (ASA) strives to become the leading student-run association in preparing students for their accounting and business related careers. ASA was founded in 2001 in conjunction with the Department of Accounting and Business Information Systems at the University of Melbourne. Currently, ASA is a Faculty of Business and Economics (FBE) and University of Melbourne Student Union (UMSU) affiliated student society.",
+    category: ["Commerce"],
+    links: {
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/6029/",
+    },
+    logoUrl:
+      "/clubs/unimelb/asa.jpg",
+  },
+
+  {
+    id: "umfc",
+    name: "Filmmakers Collaborative",
+    full_name: "Filmmakers Collaborative",
+    location: "Melbourne, Australia",
+    description:
+      "Filmmakers Collaborative is a society dedicated to the production and exhibition of student films",
+    fullDescription:
+      "Whether you're a writer dying to bring your script to life, a cinematographer with a vision, or a newbie learning how to hold a boom mic, UMFC shares a passion for any and all aspects of student films ✨Uniting those interested in any and every aspect of film making, the University of Melbourne Filmmakers Collaborative is a society dedicated to the production and exhibition of student films✨",
+    category: ["Arts"],
+    links: {
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/6765/",
+    },
+    logoUrl:
+      "/clubs/unimelb/umfc.jpg",
+  },
+
+  {
+    id: "saps",
+    name: "SAPS",
+    full_name: "Soil and Plant Society",
+    location: "Melbourne, Australia",
+    description:
+      "A student club for plants and soil, offering field trips, workshops, and community gardening.",
+    fullDescription:
+      "Whether you know nothing about plants, or you're a proud soil nerd - and whether you enjoy plants indoors, in the veggie patch, on your plate, or in nature – SAPS is a club you can call home.  Sign up to be a part of a group looking to appreciate the plants around us and the soil under our feet, and advocate for conservation and food sovereignty.",
+    category: ["Environment"],
+    links: {
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/saps/",
+    },
+    logoUrl:
+      "/clubs/unimelb/saps.png",
+  },
+
+  {
+    id: "game-makers-club",
+    name: "Game Makers' Club",
+    full_name: "Game Makers' Club",
+    location: "Melbourne, Australia",
+    description:
+      "The UniMelb Game Makers' Club is open to everyone interested in game-making regardless of experience! We host game jams, meetups, social events, career events, and workshops!",
+    fullDescription:
+      "The UniMelb Game Makers' Club is open to everyone interested in making games regardless of experience! We host game-making competitions (game jams), meetups, social events, career events, workshops, and a discord server.  We are dedicated to the production and exhibition of student games, even if you're not a programmer.   So, if you're interested in pursuing game dev as a career, learning it as a hobby, or just think making games is cool: join the UniMelb Game Makers' Club!",
+    category: ["Tech"],
+    links: {
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/9180/",
+    },
+    logoUrl:
+      "/clubs/unimelb/game-makers.png",
+  },
+
+  {
+    id: "embrace-education",
+    name: "Embrace Education",
+    full_name: "Embrace Education",
+    location: "Melbourne, Australia",
+    description:
+      "Embrace Education is a non-profit, university student-run organisation that offers free educational support to disadvantaged high school students in Melbourne",
+    fullDescription:
+      "Embrace Education is a non-profit, university student-run organisation that offers free educational support to disadvantaged high school students in Melbourne, Victoria. We help connect club members to high school students who are in need of tutoring and mentoring. We believe that education should be accessible to everyone, regardless of their background. This organisation believes in eradicating education inequality and advocates wholeheartedly for, not only education for all, but also those most impacted by this social injustice, such as marginalised communities and peoples.",
+    category: ["Education"],
+    links: {
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/6645/",
+    },
+    logoUrl:
+      "/clubs/unimelb/embrace-education.jpeg",
+  },
+
+  {
+    id: "piano-society",
+    name: "Piano Society",
+    full_name: "Piano Society",
+    location: "Melbourne, Australia",
+    description:
+      "At the Piano Society, it is our goal to resurrect the piano scene at the University of Melbourne, and to provide a platform for those talented pianists to hone their craft and perform their art to others.",
+    fullDescription:
+      "At the Piano Society, it is our goal to resurrect the piano scene at the University of Melbourne, and to provide a platform for those talented pianists to hone their craft and perform their art to others. If you are a pianist at Unimelb or other institutions, specialising in classical, contemporary or any other genre of music, this is the club for you!",
+    category: ["Arts"],
+    links: {
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/10486/",
+    },
+    logoUrl:
+      "/clubs/unimelb/piano-society.png",
+  },
+
+  {
+    id: "seec",
+    name: "SEEC",
+    full_name: "Student Environmental Engineering Club",
+    location: "Perth, Australia",
+    description:
+      "SEEC is a student-run, non-profit community that supports UWA environmental engineering students with social events, study resources, networking, and career connections.",
+    fullDescription:
+      "The Student Environmental Engineering Club (SEEC) is all about helping environmental engineering students at UWA. We’ve got your back with social events, support, educational resources, networking events, and career tips. We also work to connect students with professors and industry pros so you have everything you need to succeed. Plus, we’re a non-profit run by students who really care about building a strong community.",
+    category: ["Environment", "Engineering"],
+    links: {
+      club: "https://www.uwastudentguild.com/clubs/student-environmental-engineering-club",
+    },
+    logoUrl:
+      "/clubs/uwa/seec.jpg",
+  },
+
+  {
+    id: "mees",
+    name: "MEES",
+    full_name: "Monash Environmental Engineering Society",
+    location: "Melbourne, Australia",
+    description:
+      "The Monash Environmental Engineering Society (MEES) is a fun and friendly society for students interested in the field of environmental engineering. We run events throughout the year to support students’ academic pursuits and build a sense of community.",
+    fullDescription:
+      "The Monash Environmental Engineering Society (MEES) is a fun and friendly society for students interested in the field of environmental engineering. We run events throughout the year to support students’ academic pursuits and build a sense of community.",
+    category: ["Environment", "Engineering"],
+    links: {
+      club: "https://clubs.msa.monash.edu/organisation/7643/",
+    },
+    logoUrl:
+      "/clubs/monash/mees.jpg",
+  },
+
+  {
+    id: "muslcc",
+    name: "MUSLCC",
+    full_name: "Monash University Sri Lankan Cultural Club",
+    location: "Melbourne, Australia",
+    description:
+      "Our mission is to celebrate our Sri Lankan heritage and share our culture with our wider community. Along with this, our main focus is to give back to those in need both locally and internationally. We run various charity events throughout the year such as sporting events, concerts and many more.",
+    fullDescription:
+      "Our mission is to celebrate our Sri Lankan heritage and share our culture with our wider community. Along with this, our main focus is to give back to those in need both locally and internationally. We run various charity events throughout the year such as sporting events, concerts and many more.",
+    category: ["Cultural"],
+    links: {
+      club: "https://clubs.msa.monash.edu/organisation/7203/",
+    },
+    logoUrl:
+      "/clubs/monash/muslcc.png",
+  },
+
+  {
+    id: "mecc",
+    name: "MECC",
+    full_name: "Mechatronics Engineering Clayton Club",
+    location: "Melbourne, Australia",
+    description:
+      "Mechatronics Engineering Clayton Club (MECC) is a student-run club with a focus on Robotics and Mechatronics. Our goal is to connect students with industry, teach valuable skills and help them discover what mechatronics has to offer. We run a bunch of social and academic events throughout the year for various skill levels.",
+    fullDescription:
+      "Mechatronics Engineering Clayton Club (MECC) is a student-run club with a focus on Robotics and Mechatronics. Our goal is to connect students with industry, teach valuable skills and help them discover what mechatronics has to offer. We run a bunch of social and academic events throughout the year for various skill levels.",
+    category: ["Engineering"],
+    links: {
+      club: "https://clubs.msa.monash.edu/organisation/7148/",
+    },
+    logoUrl:
+      "/clubs/monash/mecc.png",
+  },
+
+  {
+    id: "msa",
+    name: "MSA",
+    full_name: "Myanmar Student Association",
+    location: "Melbourne, Australia",
+    description:
+      "Our club is for everyone that misses Myanmar, wants to meet wholesome new people, or would like to appreciate our culture! We will be your home away from home!",
+    fullDescription:
+      "Our club is for everyone that misses Myanmar, wants to meet wholesome new people, or would like to appreciate our culture! We will be your home away from home!",
+    category: ["Cultural"],
+    links: {
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/7245/",
+    },
+    logoUrl:
+      "/clubs/unimelb/msa.png",
   },
 ];
