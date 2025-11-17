@@ -56,7 +56,7 @@ export function ClubDetailPanel({
                   alt={`${club.name} logo`}
                   width={80}
                   height={80}
-                  className="object-contain max-h-16 sm:max-h-20 rounded-lg"
+                  className="object-contain max-h-16 sm:max-h-20 rounded-lg grayscale"
                 />
               ) : (
                 <Building2 className="w-16 h-16 sm:w-20 sm:h-20 text-white/80" />

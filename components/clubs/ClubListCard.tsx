@@ -39,7 +39,7 @@ export function ClubListCard({
                 alt={`${club.name} logo`}
                 width={48}
                 height={48}
-                className="object-contain max-h-8 sm:max-h-12 rounded-md"
+                className="object-contain max-h-8 sm:max-h-12 rounded-md grayscale"
               />
             ) : (
               <Building2 className="w-8 h-8 sm:w-12 sm:h-12 text-white/80" />
