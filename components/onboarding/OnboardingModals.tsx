@@ -1,22 +1,20 @@
 import React from "react";
 import NameModal from "@/components/auth/NameModal";
 import { BackWarningModal } from "@/components/onboarding/chunks/BackWarningModal";
+import { useOnboardingContext } from "./context/OnboardingContext";
 
 interface OnboardingModalsProps {
   showNameModal: boolean;
-  showBackWarning: boolean;
   onCloseNameModal: () => void;
-  onConfirmBack: () => void;
-  onCancelBack: () => void;
 }
 
 export const OnboardingModals = ({
   showNameModal,
-  showBackWarning,
   onCloseNameModal,
-  onConfirmBack,
-  onCancelBack,
 }: OnboardingModalsProps) => {
+  const { handleConfirmBack, showBackWarning, setShowBackWarning } =
+    useOnboardingContext();
+
   return (
     <>
       {showNameModal && (
@@ -29,8 +27,8 @@ export const OnboardingModals = ({
         <div className="fixed inset-0 flex items-end justify-center z-50 pointer-events-auto">
           <BackWarningModal
             open={showBackWarning}
-            onConfirm={onConfirmBack}
-            onCancel={onCancelBack}
+            onConfirm={handleConfirmBack}
+            onCancel={() => setShowBackWarning(false)}
           />
         </div>
       )}

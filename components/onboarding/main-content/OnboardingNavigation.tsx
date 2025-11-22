@@ -1,28 +1,21 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ChevronsRightIcon as Skip, Check } from "lucide-react";
+import { useOnboardingContext } from "../context/OnboardingContext";
+import { useProcessingStore } from "@/stores/processingStore";
 
-interface OnboardingNavigationProps {
-  currentStep: number;
-  canContinue: boolean;
-  canSkip: boolean;
-  state: string;
-  onNext: () => void;
-  onPrev: () => void;
-  onSkip: () => void;
-  onComplete: () => void;
-}
+export const OnboardingNavigation = () => {
+  const {
+    currentStep,
+    onboardingCompleted,
+    nextStep,
+    canContinue,
+    canSkip,
+    prevStep,
+    skipStep,
+  } = useOnboardingContext();
+  const { state } = useProcessingStore();
 
-export const OnboardingNavigation = ({
-  currentStep,
-  canContinue,
-  canSkip,
-  state,
-  onNext,
-  onPrev,
-  onSkip,
-  onComplete,
-}: OnboardingNavigationProps) => {
   const isProcessing =
     state === "parsing" ||
     state === "validating" ||
@@ -42,7 +35,7 @@ export const OnboardingNavigation = ({
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            onClick={onPrev}
+            onClick={prevStep}
             disabled={state === "chunking"}
             className="px-6 py-3 rounded-xl border border-white/20 text-white/70 hover:border-white/30 hover:text-white hover:bg-white/5 transition-all hover:scale-105 flex items-center gap-2"
           >
@@ -52,9 +45,9 @@ export const OnboardingNavigation = ({
         )}
       </AnimatePresence>
 
-      {canSkip && (
+      {canSkip() && (
         <button
-          onClick={onSkip}
+          onClick={skipStep}
           disabled={isProcessing}
           className="px-6 py-3 rounded-xl border border-white/20 text-white/70 hover:border-white/30 hover:text-white hover:bg-white/5 transition-all hover:scale-105 flex items-center gap-2"
         >
@@ -65,10 +58,10 @@ export const OnboardingNavigation = ({
 
       {currentStep < 2 ? (
         <button
-          onClick={onNext}
-          disabled={!canContinue}
+          onClick={nextStep}
+          disabled={!canContinue()}
           className={`px-8 py-3 rounded-xl font-medium transition-all hover:scale-105 shadow-lg flex items-center gap-2 ${
-            canContinue
+            canContinue()
               ? "bg-white text-black hover:bg-white/90"
               : "bg-white/20 text-white/40 cursor-not-allowed"
           }`}
@@ -78,7 +71,7 @@ export const OnboardingNavigation = ({
         </button>
       ) : (
         <button
-          onClick={onComplete}
+          onClick={onboardingCompleted}
           className="px-8 py-3 rounded-xl bg-white text-black font-medium hover:bg-white/90 transition-all hover:scale-105 shadow-lg flex items-center gap-2"
         >
           Complete Setup
