@@ -4,6 +4,8 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { processFiles } from "@/lib/onboarding/documentProcessor";
+import { uploadAvatar } from "@/lib/supabase/storage";
 
 import { Chunk } from "../chunks/utils/ChunkUtils";
 import {
@@ -156,7 +158,6 @@ export function OnboardingProvider({
   // Process resume and chunk it
   const handleFileProcessing = async () => {
     try {
-      const { processFiles } = await import("@/lib/documentProcessor");
       const result = await processFiles(uploadedFiles);
 
       if (!result.success || !user) return;
@@ -203,7 +204,6 @@ export function OnboardingProvider({
 
       // upload selected avatar to supabase storage and get url
       if (selectedFile && user?.id) {
-        const { uploadAvatar } = await import("@/lib/supabase/storage");
         const result = await uploadAvatar(selectedFile, user.id);
 
         if (result.success) {

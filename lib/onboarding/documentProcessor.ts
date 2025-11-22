@@ -1,7 +1,7 @@
 import { toast } from "sonner";
-import { validateFiles } from "./onboarding/validation";
+import { validateFiles } from "./validation";
 import { processingActions } from "@/stores/processingStore";
-import { parseDocument } from "./onboarding/parsers/documentParser";
+import { parseDocument } from "./parsers/documentParser";
 
 export async function processFiles(files: File[]): Promise<{
   success: boolean;
