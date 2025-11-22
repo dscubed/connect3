@@ -1,23 +1,19 @@
 import { Loader2 } from "lucide-react";
 import React from "react";
+import { useProcessingStore } from "@/stores/processingStore";
 
-interface ProcessingStatusIndicatorProps {
-  state: string;
-  currentFile?: string;
-}
+export const ProcessingStatusIndicator: React.FC = () => {
+  const state = useProcessingStore((state) => state.state);
 
-export const ProcessingStatusIndicator: React.FC<
-  ProcessingStatusIndicatorProps
-> = ({ state, currentFile }) => {
   if (state === "idle") return null;
 
   let statusText = "";
   switch (state) {
     case "parsing":
-      statusText = `Processing ${currentFile}`;
+      statusText = `Processing`;
       break;
     case "validating":
-      statusText = `Validating ${currentFile} content`;
+      statusText = `Validating content`;
       break;
     case "summarizing":
       statusText = "Generating profile summary";

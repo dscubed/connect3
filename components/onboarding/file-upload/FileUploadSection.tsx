@@ -1,22 +1,15 @@
 import FileUploadCube from "./cube/FileUploadCube";
+import { useOnboardingContext } from "../context/OnboardingContext";
 
-interface FileUploadSectionProps {
-  onFileUpload: (file: File) => void;
-  files: File[];
-  onFileRemove: (index: number) => void;
-}
-
-export default function FileUploadSection({
-  onFileUpload,
-  files,
-  onFileRemove,
-}: FileUploadSectionProps) {
+export default function FileUploadSection() {
+  const { handleFileUpload, uploadedFiles, handleFileRemove } =
+    useOnboardingContext();
   return (
     <div className="space-y-8">
       <FileUploadCube
-        onFileUpload={onFileUpload}
-        files={files}
-        onFileRemove={onFileRemove}
+        onFileUpload={handleFileUpload}
+        files={uploadedFiles}
+        onFileRemove={handleFileRemove}
       />
       <div className="text-center space-y-2">
         <p className="text-white/80">

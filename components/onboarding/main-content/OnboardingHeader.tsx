@@ -1,16 +1,15 @@
 import React from "react";
 import { ProgressIndicator } from "./ProgressIndicator";
 import Logo from "@/components/logo/Logo";
+import { useOnboardingContext } from "../context/OnboardingContext";
 
 interface OnboardingHeaderProps {
-  currentStep: number;
   totalSteps: number;
 }
 
-export const OnboardingHeader = ({
-  currentStep,
-  totalSteps,
-}: OnboardingHeaderProps) => {
+export const OnboardingHeader = ({ totalSteps }: OnboardingHeaderProps) => {
+  const { currentStep } = useOnboardingContext();
+
   return (
     <div className="relative z-10 flex items-center justify-between p-6">
       <div className="flex items-center gap-2">

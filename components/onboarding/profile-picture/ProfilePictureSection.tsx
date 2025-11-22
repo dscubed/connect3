@@ -2,32 +2,25 @@ import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, User, X } from "lucide-react";
 import Image from "next/image";
+import { useOnboardingContext } from "../context/OnboardingContext";
 
-interface ProfilePictureSectionProps {
-  onImageUpload: (file: File) => void;
-  onImageRemove?: () => void;
-  imageUrl: string | null;
-}
-
-export default function ProfilePictureSection({
-  onImageUpload,
-  onImageRemove,
-  imageUrl,
-}: ProfilePictureSectionProps) {
+export default function ProfilePictureSection() {
+  const { profileImage, handleImageUpload, handleImageRemove } =
+    useOnboardingContext();
   const [isHovered, setIsHovered] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      onImageUpload(files[0]);
+      handleImageUpload(files[0]);
     }
   };
 
   const handleClick = () => {
-    if (imageUrl) {
+    if (profileImage) {
       // If image exists, reset/remove it
-      onImageRemove?.();
+      handleImageRemove?.();
     } else {
       // If no image, open file picker
       fileInputRef.current?.click();
@@ -48,9 +41,9 @@ export default function ProfilePictureSection({
           onClick={handleClick}
         >
           <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white/20 bg-white/5 backdrop-blur-md">
-            {imageUrl ? (
+            {profileImage ? (
               <Image
-                src={imageUrl}
+                src={profileImage}
                 alt="Profile"
                 fill
                 className="object-cover"
@@ -89,7 +82,7 @@ export default function ProfilePictureSection({
                 exit={{ opacity: 0 }}
                 className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center backdrop-blur-sm"
               >
-                {imageUrl ? (
+                {profileImage ? (
                   <X className="h-8 w-8 text-white" />
                 ) : (
                   <Upload className="h-8 w-8 text-white" />
@@ -110,12 +103,12 @@ export default function ProfilePictureSection({
 
       <div className="text-center space-y-2">
         <p className="text-white/80">
-          {imageUrl
+          {profileImage
             ? "Click to remove your photo"
             : "Add a photo so people can recognize you"}
         </p>
         <p className="text-white/50 text-sm max-w-md mx-auto">
-          {imageUrl
+          {profileImage
             ? "You can always change or remove your photo later."
             : "Upload a clear photo of yourself. This helps others connect with you more easily."}
         </p>
