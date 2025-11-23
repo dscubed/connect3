@@ -19,7 +19,7 @@ export const config = {
 
 export async function POST(request: NextRequest) {
   try {
-    // 1. Authenticate user via Supabase Auth
+    // Authenticate user via Supabase Auth
     const authResult = await authenticateRequest(request);
     if (authResult instanceof NextResponse) {
       return authResult; // Return error response
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Step 1: Upload to OpenAI Vector Store
+    // Upload to OpenAI Vector Store
     console.log("Uploading to vector store...");
 
     const fileObj = new File([text], `summary_${Date.now()}.txt`, {

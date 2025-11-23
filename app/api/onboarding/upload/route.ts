@@ -11,10 +11,18 @@ export async function POST(req: NextRequest) {
 
     const chunkedData = await req.json();
 
-    console.log("Received chunked data:", chunkedData);
+    if (!chunkedData) {
+      return NextResponse.json(
+        { error: "Missing chunked data" },
+        { status: 400 }
+      );
+    }
 
-    if (!chunkedData || chunkedData.userId !== user.id) {
-      return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+    if (chunkedData.userId !== user.id) {
+      return NextResponse.json(
+        { error: "Forbidden userId doesn't match authenticated user" },
+        { status: 403 }
+      );
     }
 
     // This runs on the server - won't stop if user leaves

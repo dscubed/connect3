@@ -17,7 +17,7 @@ export async function DELETE(
   { params }: { params: Promise<{ chunkId: string }> }
 ) {
   try {
-    // 1. Authenticate the request
+    // Authenticate the request
     const authResult = await authenticateRequest(request);
     if (authResult instanceof NextResponse) {
       return authResult; // Return error response
@@ -30,7 +30,7 @@ export async function DELETE(
       );
     }
 
-    // FIXED: Await params before accessing properties
+    // Await params before accessing properties
     const { chunkId } = await params;
 
     if (!chunkId) {
@@ -40,7 +40,7 @@ export async function DELETE(
       );
     }
 
-    // First, get the chunk from database to get the OpenAI file ID
+    // Get the chunk from database to get the OpenAI file ID
     const { data: chunk, error: fetchError } = await supabase
       .from("user_files")
       .select("openai_file_id, user_id")
@@ -94,8 +94,7 @@ export async function DELETE(
     return NextResponse.json(
       {
         success: false,
-        error:
-          error instanceof Error ? error.message : "Unknown error occurred",
+        error: error instanceof Error ? error.message : "Internal Server Error",
       },
       { status: 500 }
     );

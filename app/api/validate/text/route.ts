@@ -23,24 +23,14 @@ const limiter = rateLimit({
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Authenticate user via Supabase Auth
+    // Authenticate user via Supabase Auth
     const authResult = await authenticateRequest(req);
     if (authResult instanceof NextResponse) {
       return authResult; // Return error response
     }
     const { user } = authResult;
 
-    // 3. Rate limiting per user
-    try {
-      await limiter.check(10, user.id); // 10 requests per minute per user
-    } catch {
-      return NextResponse.json(
-        { error: "Rate limit exceeded. Please try again later." },
-        { status: 429 }
-      );
-    }
-
-    // 4. Validate request body
+    // Validate request body
     const body = await req.json();
     const { text, fullName } = body;
 
@@ -59,11 +49,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Rate limiting per user
+    try {
+      await limiter.check(10, user.id); // 10 requests per minute per user
+    } catch {
+      return NextResponse.json(
+        { error: "Rate limit exceeded. Please try again later." },
+        { status: 429 }
+      );
+    }
+
     console.log(
       `Validation request from user: ${user.id}, text length: ${text.length}`
     );
 
-    // 6. Call OpenAI API
+    // Call OpenAI API
     const response = await client.responses.parse({
       model: "gpt-4o-mini",
       input: [
@@ -93,7 +93,7 @@ Respond only in the structured format defined. Reason should just be one sentenc
 
     const result = response.output_parsed;
 
-    // 7. Log the validation result for monitoring
+    // Log the validation result for monitoring
     console.log(
       `Validation result for user ${user.id}: safe=${result?.safe}, relevant=${result?.relevant}`
     );

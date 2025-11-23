@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const userId = searchParams.get("userId");
 
     if (!userId || !user.id) {
-      return NextResponse.json({ error: "User ID required" }, { status: 401 });
+      return NextResponse.json({ error: "User ID required" }, { status: 400 });
     }
 
     const { data: chunks, error } = await supabase

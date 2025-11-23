@@ -17,12 +17,12 @@ export const config = {
   runtime: "edge",
 };
 
-export async function POST(request: NextRequest) {
+export async function PATCH(request: NextRequest) {
   try {
-    // 1. Authenticate user via Supabase Auth
+    // Authenticate user and check fields and permissions
     const authResult = await authenticateRequest(request);
     if (authResult instanceof NextResponse) {
-      return authResult; // Return error response
+      return authResult;
     }
     const { user } = authResult;
 
@@ -48,7 +48,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Step 1: Upload to OpenAI Vector Store
+    // Gets Existing record and deletes old file from OpenAI if exists
+    const { data: existingRecord } = await supabase
+      .from("user_files")
+      .select("openai_file_id")
+      .eq("id", rowId)
+      .single();
+
+    if (existingRecord?.openai_file_id) {
+      await openai.vectorStores.files.delete(existingRecord.openai_file_id, {
+        vector_store_id: vectorStoreId,
+      }); // Delete from vector store first
+
+      await openai.files.delete(existingRecord.openai_file_id); // delete the OpenAI file
+    }
+
+    // Upload new file to OpenAI Vector Store
     console.log("Uploading to vector store...");
 
     console.log("Chunk text before upload:", JSON.stringify(text));

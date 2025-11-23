@@ -84,7 +84,7 @@ Do not include any explanation or extra text, NO JSON MARKDOWNS.
     } catch {
       return NextResponse.json(
         { error: "Failed to parse chunks" },
-        { status: 500 }
+        { status: 502 }
       );
     }
 
@@ -93,10 +93,11 @@ Do not include any explanation or extra text, NO JSON MARKDOWNS.
     if (!chunksResult.success) {
       return NextResponse.json(
         { error: "Invalid chunk format", details: chunksResult.error.errors },
-        { status: 400 }
+        { status: 502 }
       );
     }
 
+    // Add chunk_id to each chunk
     const chunksWithId = chunksResult.data.map((chunk) => ({
       ...chunk,
       chunk_id: crypto.randomUUID(),
