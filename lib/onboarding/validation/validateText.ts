@@ -25,12 +25,13 @@ export async function validateText(text: string): Promise<boolean> {
 
     const validation: TextValidationResult = await res.json();
 
-    if (!validation.safe || !validation.relevant || !validation.belongsToUser) {
+    if (!validation.safe || !validation.relevant || !validation.belongsToUser || validation.templateResume) {
       let message = "Text rejected: ";
 
       if (!validation.safe) message += "unsafe content";
       else if (!validation.relevant) message += "not relevant";
       else if (!validation.belongsToUser) message += "text refers to a different person";
+      else if (validation.templateResume) message += "resume appears to be a template or mostly placeholder content";
 
       message += ` (${validation.reason || "No explanation provided"})`;
 

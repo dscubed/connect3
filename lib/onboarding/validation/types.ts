@@ -2,6 +2,7 @@ export interface TextValidationResult {
   safe: boolean;
   relevant: boolean;
   belongsToUser: boolean;
+  templateResume:boolean;
   reason?: string;
 }
 

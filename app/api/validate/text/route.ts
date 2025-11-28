@@ -15,6 +15,7 @@ const ValidationSchema = z.object({
   relevant: z.boolean(),
   belongsToUser: z.boolean(),
   detectedNames: z.array(z.string()),
+  templateResume: z.boolean(),
   reason: z.string(),
 });
 
@@ -78,6 +79,8 @@ and fill in the following fields:
   (e.g. work experience, education, skills, interests, biography, portfolio description).
 - "detectedNames": an array of all human person names you find in the text.
 - "belongsToUser": whether the text appears to be primarily about this user ("${fullName}"), and not another person.
+- "templateResume": true if the text appears to be a resume or CV template with mostly placeholder/filler content 
+  (for example, lorem ipsum, generic nonsense sentences, or obviously fake placeholder paragraphs) rather than a real, specific resume.
 - "reason": a single short sentence explaining why you set "belongsToUser" / "isSafe" / "isRelevant" the way you did.
 
 Rules for "belongsToUser":
@@ -86,12 +89,17 @@ Rules for "belongsToUser":
 - If you are uncertain who the text is about, set "belongsToUser": false.
 - Do NOT guess that a different full name refers to the same user.
 
+Rules for "templateResume":
+- Set "templateResume": true if a large portion of the text is placeholder content (e.g. "lorem ipsum", obviously generic Latin text, dummy descriptions, or nonsense).
+- Set "templateResume": true if the resume has realistic structure (name, sections, headings) but the body content is clearly not a real person's experience.
+- Otherwise, set "templateResume": false.
 Respond ONLY as a single JSON object matching this schema:
 {
-  "Safe": boolean,
-  "Relevant": boolean,
+  "safe": boolean,
+  "relevant": boolean,
   "belongsToUser": boolean,
   "detectedNames": string[],
+  "templateResume": boolean,
   "reason": string
 }
 
@@ -110,7 +118,8 @@ Respond ONLY as a single JSON object matching this schema:
 
     // 7. Log the validation result for monitoring
     console.log(
-      `Validation result for user ${user.id}: safe=${result?.safe}, relevant=${result?.relevant}, belongs to user=${result?.belongsToUser}`
+      `Validation result for user ${user.id}: safe=${result?.safe}, relevant=${result?.relevant}, 
+        belongsToUser=${result?.belongsToUser}, templateResume=${result?.templateResume}`
     );
 
     return NextResponse.json(result);
