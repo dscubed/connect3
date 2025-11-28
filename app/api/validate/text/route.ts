@@ -13,6 +13,8 @@ const client = new OpenAI({
 const ValidationSchema = z.object({
   safe: z.boolean(),
   relevant: z.boolean(),
+  belongsToUser: z.boolean(),
+  detectedNames: z.array(z.string()),
   reason: z.string(),
 });
 
@@ -64,38 +66,51 @@ export async function POST(req: NextRequest) {
     );
 
     // 6. Call OpenAI API
+    const systemPrompt = `
+    You are a validation engine for a profile-building app. 
+The user's legal full name is: "${fullName}".
+
+Your job is to analyse the user-uploaded text (provided in the user message) 
+and fill in the following fields:
+
+- "Safe": whether the text avoids harmful, illegal, NSFW, or disallowed content.
+- "Relevant": whether the text contains information that could help describe a personal or professional profile
+  (e.g. work experience, education, skills, interests, biography, portfolio description).
+- "detectedNames": an array of all human person names you find in the text.
+- "belongsToUser": whether the text appears to be primarily about this user ("${fullName}"), and not another person.
+- "reason": a single short sentence explaining why you set "belongsToUser" / "isSafe" / "isRelevant" the way you did.
+
+Rules for "belongsToUser":
+- If the main person described in the text has a different name from "${fullName}", set "belongsToUser": false.
+- If the text clearly describes "${fullName}" (or a very close variant like including a middle name or initials), set "belongsToUser": true.
+- If you are uncertain who the text is about, set "belongsToUser": false.
+- Do NOT guess that a different full name refers to the same user.
+
+Respond ONLY as a single JSON object matching this schema:
+{
+  "Safe": boolean,
+  "Relevant": boolean,
+  "belongsToUser": boolean,
+  "detectedNames": string[],
+  "reason": string
+}
+
+"reason" MUST be exactly one sentence.
+`.trim();
     const response = await client.responses.parse({
       model: "gpt-4o-mini",
       input: [
-        {
-          role: "system",
-          content: `
-You are a validation engine for a profile-building app. 
-You are validating texts for user: ${fullName || "..."}.
-Given user-uploaded text, you must determine:
-1. Is it SAFE (no harmful, illegal, NSFW, or disallowed content)?
-2. Is it RELEVANT (does it contain information that could help describe a user's personal or professional profile?
-e.g. contains work experience, education, skills, interests, or bio)
-- Is this text for user: "${fullName || "user"}"? NOT ANOTHER USER?
-
-Respond only in the structured format defined. Reason should just be one sentence only justifying why the text was safe, relevant, or both.
-          `,
-        },
-        {
-          role: "user",
-          content: text,
-        },
+        { role: "system", content: systemPrompt },
+        { role: "user", content: text },
       ],
-      text: {
-        format: zodTextFormat(ValidationSchema, "validation"),
-      },
+      text: { format: zodTextFormat(ValidationSchema, "validation") },
     });
 
     const result = response.output_parsed;
 
     // 7. Log the validation result for monitoring
     console.log(
-      `Validation result for user ${user.id}: safe=${result?.safe}, relevant=${result?.relevant}`
+      `Validation result for user ${user.id}: safe=${result?.safe}, relevant=${result?.relevant}, belongs to user=${result?.belongsToUser}`
     );
 
     return NextResponse.json(result);
@@ -109,6 +124,7 @@ Respond only in the structured format defined. Reason should just be one sentenc
       {
         safe: false,
         relevant: false,
+        belongsToUser: false,
         reason: `Validation failed: ${errorMessage}`,
       },
       { status: 500 }

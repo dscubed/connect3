@@ -25,12 +25,16 @@ export async function validateText(text: string): Promise<boolean> {
 
     const validation: TextValidationResult = await res.json();
 
-    if (!validation.safe || !validation.relevant) {
-      toast.error(
-        `Text rejected: ${
-          !validation.safe ? "unsafe content" : "not relevant"
-        } (${validation.reason || "No reason provided"})`
-      );
+    if (!validation.safe || !validation.relevant || !validation.belongsToUser) {
+      let message = "Text rejected: ";
+
+      if (!validation.safe) message += "unsafe content";
+      else if (!validation.relevant) message += "not relevant";
+      else if (!validation.belongsToUser) message += "text refers to a different person";
+
+      message += ` (${validation.reason || "No explanation provided"})`;
+
+      toast.error(message);
       return false;
     }
 

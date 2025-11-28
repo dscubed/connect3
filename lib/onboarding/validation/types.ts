@@ -1,6 +1,7 @@
 export interface TextValidationResult {
   safe: boolean;
   relevant: boolean;
+  belongsToUser: boolean;
   reason?: string;
 }
 
