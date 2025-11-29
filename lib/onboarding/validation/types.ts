@@ -10,6 +10,9 @@ export interface ChunkValidationResult {
   safe: boolean;
   relevant: boolean;
   sensitive: boolean;
+  belongsToUser: boolean;
+  categoryValid: boolean;
+  categoryMatchesContent: boolean;
   reason?: string;
 }
 

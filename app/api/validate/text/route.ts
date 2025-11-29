@@ -69,42 +69,44 @@ export async function POST(req: NextRequest) {
     // 6. Call OpenAI API
     const systemPrompt = `
     You are a validation engine for a profile-building app. 
-The user's legal full name is: "${fullName}".
+    The user's legal full name is: "${fullName || "..."}".
 
-Your job is to analyse the user-uploaded text (provided in the user message) 
-and fill in the following fields:
+    Your job is to analyse the user-uploaded text (provided in the user message) 
+    and fill in the following fields:
 
-- "Safe": whether the text avoids harmful, illegal, NSFW, or disallowed content.
-- "Relevant": whether the text contains information that could help describe a personal or professional profile
-  (e.g. work experience, education, skills, interests, biography, portfolio description).
-- "detectedNames": an array of all human person names you find in the text.
-- "belongsToUser": whether the text appears to be primarily about this user ("${fullName}"), and not another person.
-- "templateResume": true if the text appears to be a resume or CV template with mostly placeholder/filler content 
-  (for example, lorem ipsum, generic nonsense sentences, or obviously fake placeholder paragraphs) rather than a real, specific resume.
-- "reason": a single short sentence explaining why you set "belongsToUser" / "isSafe" / "isRelevant" the way you did.
+    - "Safe": whether the text avoids harmful, illegal, NSFW, or disallowed content.
+    - "Relevant": whether the text contains information that could help describe a personal or professional profile
+      (e.g. work experience, education, skills, interests, biography, portfolio description).
+    - "detectedNames": an array of all human person names you find in the text.
+    - "belongsToUser": whether the text appears to be primarily about this user ("${fullName}"), and not another person.
+    - "templateResume": true if the text appears to be a resume or CV template with mostly placeholder/filler content 
+      (for example, lorem ipsum, generic nonsense sentences, or obviously fake placeholder paragraphs) rather than a real, specific resume.
+    - "reason": a single short sentence explaining why you set "belongsToUser" / "isSafe" / "isRelevant" the way you did.
 
-Rules for "belongsToUser":
-- If the main person described in the text has a different name from "${fullName}", set "belongsToUser": false.
-- If the text clearly describes "${fullName}" (or a very close variant like including a middle name or initials), set "belongsToUser": true.
-- If you are uncertain who the text is about, set "belongsToUser": false.
-- Do NOT guess that a different full name refers to the same user.
+    Rules for "belongsToUser":
+    - If the main person described in the text has a different name from "${fullName}", set "belongsToUser": false.
+    - If the text clearly describes "${fullName}" (or a very close variant like including a middle name or initials), set "belongsToUser": true.
+    - If you are uncertain who the text is about, set "belongsToUser": false.
+    - Do NOT guess that a different full name refers to the same user.
 
-Rules for "templateResume":
-- Set "templateResume": true if a large portion of the text is placeholder content (e.g. "lorem ipsum", obviously generic Latin text, dummy descriptions, or nonsense).
-- Set "templateResume": true if the resume has realistic structure (name, sections, headings) but the body content is clearly not a real person's experience.
-- Otherwise, set "templateResume": false.
-Respond ONLY as a single JSON object matching this schema:
-{
-  "safe": boolean,
-  "relevant": boolean,
-  "belongsToUser": boolean,
-  "detectedNames": string[],
-  "templateResume": boolean,
-  "reason": string
-}
+    Rules for "templateResume":
+    - Set "templateResume": true if a large portion of the text is placeholder content (e.g. "lorem ipsum", obviously generic Latin text, dummy descriptions, or nonsense).
+    - Set "templateResume": true if the resume has realistic structure (name, sections, headings) but the body content is clearly not a real person's experience.
+    - Otherwise, set "templateResume": false.
 
-"reason" MUST be exactly one sentence.
-`.trim();
+    Respond ONLY as a single JSON object matching this schema:
+    {
+      "safe": boolean,
+      "relevant": boolean,
+      "belongsToUser": boolean,
+      "detectedNames": string[],
+      "templateResume": boolean,
+      "reason": string
+    }
+
+    "reason" MUST be exactly one sentence.
+    `.trim();
+    
     const response = await client.responses.parse({
       model: "gpt-4o-mini",
       input: [

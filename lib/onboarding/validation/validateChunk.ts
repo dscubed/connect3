@@ -29,7 +29,8 @@ export async function validateChunk(chunk: Chunk): Promise<boolean> {
 
     const validation: ChunkValidationResult = await res.json();
 
-    if (!validation.safe || !validation.relevant) {
+    if (!validation.safe || !validation.relevant || !validation.belongsToUser
+      || !validation.categoryValid || !validation.categoryMatchesContent) {
       toast.error(
         `Text rejected: ${
           !validation.safe ? "unsafe content" : "not relevant"
