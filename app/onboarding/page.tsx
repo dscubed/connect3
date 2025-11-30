@@ -18,14 +18,14 @@ import { useAuthStore } from "@/stores/authStore";
 function OnboardingContent() {
   const [showNameModal, setShowNameModal] = useState(false);
 
-  const { user, profile } = useAuthStore();
+  const { user, profile, loading } = useAuthStore();
   const { isAIChunked } = useOnboardingContext();
 
   useEffect(() => {
-    if (profile && profile.name_provided === false) {
+    if (profile && profile.name_provided === false && !loading) {
       setShowNameModal(true);
     }
-  }, [user, profile]);
+  }, [user, profile, loading]);
 
   const steps = [
     {

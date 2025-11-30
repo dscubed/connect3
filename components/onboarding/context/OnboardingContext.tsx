@@ -57,7 +57,7 @@ export function OnboardingProvider({
 }) {
   // HOOKS AND STORES
   const router = useRouter();
-  const { user, profile, updateProfile } = useAuthStore();
+  const { user, profile, updateProfile, loading } = useAuthStore();
   const { state } = useProcessingStore();
 
   // STATES
@@ -71,15 +71,15 @@ export function OnboardingProvider({
 
   // Redirect if onboarding already completed
   useEffect(() => {
-    if (profile?.onboarding_completed === true) {
+    if (profile?.onboarding_completed === true && !loading) {
       router.push("/");
       toast.error("Onboarding already completed!");
     }
-    if (!user) {
+    if (!user && !loading) {
       router.push("/auth/login");
       toast.error("You must be logged in to access onboarding.");
     }
-  }, [profile, router, user]);
+  }, [profile, router, user, loading]);
 
   // Set existing avatar
   useEffect(() => {
