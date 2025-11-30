@@ -36,5 +36,4 @@ export async function fetchEvent(eventId: string): Promise<Event | null> {
         console.error(`❌ Error fetching event details for ${eventId}:`, error);
         return null;
     }
-
 }

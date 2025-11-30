@@ -62,12 +62,15 @@ export default function EventsPage() {
   useEffect(() => {
     const effect = async () => {
       const response = await fetch(process.env.NODE_ENV === "development" ? 
-        "http://localhost:3000/api/events/ad123ea1-1763-469a-9e82-28d80a06745f" : 
-        `https://connect3/api/event/ad123ea1-1763-469a-9e82-28d80a06745f`)
+        "http://localhost:3000/api/events/" : 
+        `https://connect3/api/events/`)
       
       if (!response.ok) {
         console.error("Could not fetch event");
       }
+
+      const data = await response.json();
+      console.log(data);
     }
 
     effect();
