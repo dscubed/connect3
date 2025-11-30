@@ -54,7 +54,7 @@ export async function DELETE(
     // Get user type from Supabase
     const { data: userProfile, error: profileError } = await supabase
       .from("profiles")
-      .select("user_type")
+      .select("account_type")
       .eq("id", user.id)
       .single();
     if (profileError || !userProfile) {
@@ -62,7 +62,7 @@ export async function DELETE(
       throw new Error("Failed to fetch user profile");
     }
 
-    const isOrgUser = userProfile.user_type === "organisation";
+    const isOrgUser = userProfile.account_type === "organisation";
     const vectorStoreId = isOrgUser ? orgVectorStoreId : userVectorStoreId;
 
     if (fetchError || !chunk) {
