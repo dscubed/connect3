@@ -68,6 +68,7 @@ export function OnboardingProvider({
   const [chunks, setChunks] = useState<Chunk[]>([]);
   const [isAIChunked, setIsAIChunked] = useState(false);
   const [showBackWarning, setShowBackWarning] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Redirect if onboarding already completed
   useEffect(() => {
@@ -198,6 +199,8 @@ export function OnboardingProvider({
 
   // Complete onboarding: upload avatar and chunks
   const onboardingCompleted = async () => {
+    if (isSubmitting) return; // Prevent multiple submissions
+    setIsSubmitting(true);
     try {
       let avatarUrl: string | undefined = undefined;
       let blurredAvatarUrl: string | undefined = undefined;
