@@ -47,6 +47,24 @@ export async function DELETE(
       .eq("id", chunkId)
       .single();
 
+    // Get vector store ID from environment variables
+    const userVectorStoreId = process.env.OPENAI_USER_VECTOR_STORE_ID;
+    const orgVectorStoreId = process.env.OPENAI_ORG_VECTOR_STORE_ID;
+
+    // Get user type from Supabase
+    const { data: userProfile, error: profileError } = await supabase
+      .from("profiles")
+      .select("user_type")
+      .eq("id", user.id)
+      .single();
+    if (profileError || !userProfile) {
+      console.error("Error fetching user profile:", profileError);
+      throw new Error("Failed to fetch user profile");
+    }
+
+    const isOrgUser = userProfile.user_type === "organisation";
+    const vectorStoreId = isOrgUser ? orgVectorStoreId : userVectorStoreId;
+
     if (fetchError || !chunk) {
       return NextResponse.json({ error: "Chunk not found" }, { status: 404 });
     }
@@ -60,7 +78,6 @@ export async function DELETE(
 
     // Delete from OpenAI Vector Store
     try {
-      const vectorStoreId = process.env.OPENAI_VECTOR_STORE_ID;
       if (vectorStoreId && chunk.openai_file_id) {
         // Remove from vector store
         await openai.vectorStores.files.delete(chunk.openai_file_id, {

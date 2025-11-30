@@ -40,7 +40,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Get vector store ID from environment variables
-    const vectorStoreId = process.env.OPENAI_VECTOR_STORE_ID;
+    const userVectorStoreId = process.env.OPENAI_USER_VECTOR_STORE_ID;
+    const orgVectorStoreId = process.env.OPENAI_ORG_VECTOR_STORE_ID;
+
+    // Get user type from Supabase
+    const { data: userProfile, error: profileError } = await supabase
+      .from("profiles")
+      .select("user_type")
+      .eq("id", userId)
+      .single();
+    if (profileError || !userProfile) {
+      console.error("Error fetching user profile:", profileError);
+      throw new Error("Failed to fetch user profile");
+    }
+    const isOrgUser = userProfile.user_type === "organisation";
+    const vectorStoreId = isOrgUser ? orgVectorStoreId : userVectorStoreId;
 
     if (!vectorStoreId) {
       throw new Error(
