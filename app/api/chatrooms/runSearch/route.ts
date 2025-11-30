@@ -162,13 +162,13 @@ export async function POST(req: NextRequest) {
         fileInfo = await openai.vectorStores.files.retrieve(match.file_id, {
           vector_store_id: userVectorStoreId,
         });
-      } catch (error) {
+      } catch (_error) {
         try {
           fileInfo = await openai.vectorStores.files.retrieve(match.file_id, {
             vector_store_id: orgVectorStoreId,
           });
         } catch (orgError) {
-          console.error(`Failed to retrieve file ${match.file_id} from both vector stores`);
+          console.error(orgError);
           continue;
         }
       }
