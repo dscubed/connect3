@@ -90,9 +90,10 @@ export async function POST(req: NextRequest) {
       .eq("id", messageId);
 
     // Run OpenAI vector search
-    const vectorStoreId = process.env.OPENAI_VECTOR_STORE_ID;
+    const userVectorStoreId = process.env.OPENAI_USER_VECTOR_STORE_ID;
     const openaiApiKey = process.env.OPENAI_API_KEY;
-    if (!vectorStoreId || !openaiApiKey) {
+    const orgVectorStoreId = process.env.OPENAI_ORG_VECTOR_STORE_ID;
+    if (!userVectorStoreId || !openaiApiKey || !orgVectorStoreId) {
       return NextResponse.json({ error: "Missing env vars" }, { status: 500 });
     }
     const openai = new OpenAI({ apiKey: openaiApiKey });
@@ -124,7 +125,12 @@ export async function POST(req: NextRequest) {
         },
         { role: "user", content: `Query: ${message.query}` },
       ],
-      tools: [{ type: "file_search", vector_store_ids: [vectorStoreId] }],
+      tools: [
+        {
+          type: "file_search",
+          vector_store_ids: [userVectorStoreId, orgVectorStoreId],
+        },
+      ],
       text: {
         format: zodTextFormat(QueryResultSchema, "search_results"),
       },
@@ -163,10 +169,21 @@ export async function POST(req: NextRequest) {
     >();
 
     for (const match of matches) {
-      const fileInfo = await openai.vectorStores.files.retrieve(match.file_id, {
-        vector_store_id: vectorStoreId,
-      });
-      const userId = String(fileInfo.attributes?.userId);
+      // Fetch from openai_files to get user_id
+      const { data: fileData, error: fileError } = await supabase
+        .from("user_files")
+        .select("openai_file_id, user_id")
+        .eq("openai_file_id", match.file_id)
+        .single();
+      if (fileError || !fileData) {
+        console.error(
+          "❌ Error fetching file data for match:",
+          match,
+          fileError
+        );
+        continue; // Skip this match if error occurs
+      }
+      const userId = fileData.user_id;
       if (userId) {
         const existing = userMap.get(userId) || [];
         userMap.set(userId, [
