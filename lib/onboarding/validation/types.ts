@@ -14,6 +14,7 @@ export interface ChunkValidationResult {
   categoryValid: boolean;
   categoryMatchesContent: boolean;
   reason?: string;
+  suggestion?: string;
 }
 
 type ProcessingState =

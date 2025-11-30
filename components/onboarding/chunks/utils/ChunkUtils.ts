@@ -1,7 +1,10 @@
+import { ChunkValidationResult } from "@/lib/onboarding/validation";
+
 export type Chunk = {
   chunk_id: string;
   category: string;
   content: string;
+  validation?: ChunkValidationResult | null;
 };
 
 export const WORD_LIMIT = 50;

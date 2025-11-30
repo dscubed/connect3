@@ -20,6 +20,7 @@ const ValidationSchema = z.object({
   categoryValid: z.boolean(),
   categoryMatchesContent: z.boolean(),
   reason: z.string(),
+  suggestion: z.string(),
 });
 
 // Rate limiting per user
@@ -159,6 +160,29 @@ export async function POST(req: NextRequest) {
 
     If content could reasonably fit multiple valid categories, choose the MOST appropriate one and set categoryMatchesContent = true.
 
+
+    8. suggestion
+    - Provide ONE short, actionable suggestion only if it would meaningfully improve the chunk.
+    - The goal is to gently help the user strengthen the highlight, not to block or criticise it.
+  
+    Examples of when a suggestion IS appropriate:
+      - The category is invalid → suggest a valid category.
+      - The content clearly fits a better category → suggest the more suitable category.
+      - The content is somewhat irrelevant → suggest shaping it into a skill, task, experience, or interest.
+      - The text does not clearly describe the user → suggest rewriting it from the user’s perspective.
+      - Sensitive personal information appears → suggest removing or generalising it.
+      - The chunk is accepted but noticeably vague or generic → suggest adding one concrete action, tool, or outcome.
+  
+    Examples of when a suggestion should NOT be given:
+      - The chunk is already concrete, detailed, and aligned with its category.
+      - The suggested improvement would be subjective or nitpicky.
+      - The content is stylistically valid but simply concise.
+  
+    Additional rules:
+      - Suggestions must be specific, not generic (“add details” is too vague).
+      - Tone must be neutral and supportive, never judgmental.
+      - If nothing stands out as a clear improvement, return an empty string.
+
     -----------------------
     RESPONSE FORMAT
     -----------------------
@@ -173,10 +197,12 @@ export async function POST(req: NextRequest) {
       "belongsToUser": boolean,
       "categoryValid": boolean,
       "categoryMatchesContent": boolean,
-      "reason": string
+      "reason": string,
+      "suggestion": string
     }
 
     "reason" MUST be exactly one sentence summarizing the main factor.
+    "suggestion" MUST be one short actionable improvement.
     `.trim();
 
     const response = await client.responses.parse({

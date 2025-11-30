@@ -64,12 +64,33 @@ export function ChunksGrid({
     if (!editingChunk || !editChunkDetails) return;
     // Validate chunk before saving
     setIsValidating(true);
-    const isValid = await validateChunk(editChunkDetails);
-    if (!isValid) {
-      toast.error(`Failed to validate chunk content.`);
+    const validation = await validateChunk(editChunkDetails);
+
+    // if invalid: keep editor open + store validation
+    if (
+      !validation.safe ||
+      !validation.relevant ||
+      !validation.belongsToUser ||
+      !validation.categoryValid ||
+      !validation.categoryMatchesContent
+    ) {
+      updateChunks(
+        userChunks.map((chunk) =>
+          chunk.chunk_id === editingChunk
+            ? { ...chunk, validation }
+            : chunk
+        )
+      );
+
+      toast.error(
+        `Text Rejected.${
+          validation.reason ? ` Reason: ${validation.reason}` : ""
+        }`
+      );
       setIsValidating(false);
-      return;
+      return; // Keep editor open
     }
+
     // Save changes
     const category = editChunkDetails.category.trim();
     const content = editChunkDetails.content.trim();
@@ -80,13 +101,14 @@ export function ChunksGrid({
           chunk_id: editingChunk,
           category: category,
           content: content,
+          validation,
         },
       ]);
     } else {
       updateChunks(
         userChunks.map((chunk) =>
           chunk.chunk_id === editingChunk
-            ? { ...chunk, category: category, content: content }
+            ? { ...chunk, category: category, content: content, validation }
             : chunk
         )
       );
@@ -117,9 +139,15 @@ export function ChunksGrid({
     if (!newChunkDetails) return;
     if (newChunkDetails.category.trim() && newChunkDetails.content.trim()) {
       setIsValidating(true);
-      const isValid = await validateChunk(newChunkDetails);
-      if (!isValid) {
-        toast.error(`Failed to validate chunk content.`);
+      const validation = await validateChunk(newChunkDetails);
+      if (
+        !validation.safe ||
+        !validation.relevant ||
+        !validation.belongsToUser ||
+        !validation.categoryValid ||
+        !validation.categoryMatchesContent
+      ) {
+        toast.error("This highlight needs changes before it can be added.");
         setIsValidating(false);
         return;
       }
@@ -175,6 +203,7 @@ export function ChunksGrid({
                 handleSaveEdit={handleSaveEdit}
                 validating={isValidating}
                 handleCancel={handleCancel}
+                validation={chunk.validation}
               />
             </motion.div>
           </AnimatePresence>

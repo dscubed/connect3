@@ -3,7 +3,7 @@ import { ChunkValidationResult } from "./types";
 import { useAuthStore } from "@/stores/authStore";
 import { Chunk } from "@/components/onboarding/chunks/utils/ChunkUtils";
 
-export async function validateChunk(chunk: Chunk): Promise<boolean> {
+export async function validateChunk(chunk: Chunk): Promise<ChunkValidationResult> {
   try {
     const { profile, makeAuthenticatedRequest } = useAuthStore.getState();
 
@@ -12,7 +12,7 @@ export async function validateChunk(chunk: Chunk): Promise<boolean> {
     const fullName = `${profile?.first_name} ${profile?.last_name}`;
     const res = await makeAuthenticatedRequest("/api/validate/chunks", {
       method: "POST",
-      body: JSON.stringify({ text, fullName }),
+      body: JSON.stringify({ text, fullName}),
     });
 
     if (!res.ok) {
@@ -28,29 +28,20 @@ export async function validateChunk(chunk: Chunk): Promise<boolean> {
     }
 
     const validation: ChunkValidationResult = await res.json();
+    return validation;
 
-    if (!validation.safe || !validation.relevant || !validation.belongsToUser
-      || !validation.categoryValid || !validation.categoryMatchesContent) {
-      toast.error(
-        `Text rejected: ${
-          !validation.safe ? "unsafe content" : "not relevant"
-        } (${validation.reason || "No reason provided"})`
-      );
-      return false;
-    }
-
-    if (validation.sensitive) {
-      toast.warning(
-        `The text may contain sensitive content: ${
-          validation.reason || "No reason provided"
-        }`
-      );
-    }
-
-    return true;
   } catch (error) {
     toast.error(`Failed to validate text. Error: ${error}`);
     console.error(`Error validating text:`, error);
-    return false;
+    return {
+      safe: false,
+      relevant: false,
+      sensitive: false,
+      belongsToUser: false,
+      categoryValid: false,
+      categoryMatchesContent: false,
+      reason: "Validation call failed.",
+      suggestion: "Please try again.",
+    };
   }
 }
