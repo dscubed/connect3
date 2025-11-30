@@ -1,0 +1,55 @@
+
+- [ ] **MSBS** (Melbourne Sports Business Society)
+  - [ ] Website: 
+  - [ ] Club Link: 
+  - [ ] Socials: https://www.instagram.com/unimelbsbs
+- [ ] **Lost & Refound**
+  - [ ] Website
+  - [ ] Club Link
+  - [ ] Socials https://www.instagram.com/lostandrefoundmelb
+- [ ] **ASA** (Accounting Students Association)
+  - [ ] Website: https://asaunimelb.com/
+  - [ ] Club Link
+  - [ ] Socials https://www.facebook.com/asamelb, https://www.instagram.com/asamelb, 
+- [ ] **Filmmakers Collaborative**
+  - [ ] Website
+  - [ ] Club Link
+  - [ ] Socials: https://www.instagram.com/um_filmcollab, https://www.facebook.com/umfilmmakers
+- [ ] **SAPS** (Soil and Plant Society)
+  - [ ] Website
+  - [ ] Club Link
+  - [ ] Socials: https://www.facebook.com/soilandplantsociety, https://www.instagram.com/soilandplantsociety, https://www.soilandplantsociety.com/
+- [ ] **Game Makers' Club**
+  - [ ] Website: https://linktr.ee/gmc.unimelb
+  - [ ] Club Link
+  - [ ] Socials: https://www.instagram.com/gmc.unimelb, 
+- [ ] **Embrace Education**
+  - [ ] Website: https://www.embrace-education.org/
+  - [ ] Club Link
+  - [ ] Socials: https://www.facebook.com/EmbracingEducation, https://www.instagram.com/embrace_education, 
+- [ ] **Piano Society**
+  - [ ] Website: https://linktr.ee/unimelb.piano.society
+  - [ ] Club Link
+  - [ ] Socials: https://www.instagram.com/unimelb.piano.society, https://discord.com/invite/4xA5yaWtJc
+- [ ] **SEEC** (Student Environmental Engineering Club)
+  - [ ] Website: https://www.uwastudentguild.com/clubs/student-environmental-engineering-club
+  - [ ] Club Link
+  - [ ] Socials
+- [ ] **MEES** (Monash Environmental Engineering Society)
+  - [ ] Website
+  - [ ] Club Link
+  - [ ] Socials: www.facebook.com/monashenvironmentalengineeringsociety/, instagram.com/mees_monashuni, www.linkedin.com/company/monash-environmental-engineering-society-mees
+
+
+- [ ] **MUSLCC** (Monash University Sri Lankan Cultural Club)
+  - [ ] Website: https://clubs.msa.monash.edu/organisation/7203/
+  - [ ] Club Link
+  - [ ] Socials: www.facebook.com/MuslccMonash
+- [ ] **MECC** (Mechatronics Engineering Clayton Club)
+  - [ ] Website
+  - [ ] Club Link
+  - [ ] Socials: www.facebook.com/monash.mecc, https://www.instagram.com/mecc_monash
+- [ ] **MSA** (Myanmar Student Association)
+  - [ ] Website: https://umsaunimelb.wixsite.com/umsa
+  - [ ] Club Link
+  - [ ] Socials: https://www.facebook.com/umsa.unimelb, https://www.instagram.com/mysa.unimelb
