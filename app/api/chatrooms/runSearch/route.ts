@@ -4,6 +4,7 @@ import OpenAI from "openai";
 import { z } from "zod";
 import { zodTextFormat } from "openai/helpers/zod.mjs";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
+import { console } from "inspector";
 
 export const config = {
   runtime: "edge",
@@ -162,11 +163,12 @@ export async function POST(req: NextRequest) {
         fileInfo = await openai.vectorStores.files.retrieve(match.file_id, {
           vector_store_id: userVectorStoreId,
         });
-      } catch (_error) {
+      } catch (error) {
         try {
           fileInfo = await openai.vectorStores.files.retrieve(match.file_id, {
             vector_store_id: orgVectorStoreId,
           });
+          console.error(error)
         } catch (orgError) {
           console.error(orgError);
           continue;
