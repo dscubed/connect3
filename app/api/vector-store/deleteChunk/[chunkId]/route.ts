@@ -58,9 +58,32 @@ export async function DELETE(
       );
     }
 
+    const userVectorStoreId = process.env.OPENAI_USER_VECTOR_STORE_ID;
+    const orgVectorStoreId = process.env.OPENAI_ORG_VECTOR_STORE_ID;
+
+    if (!userVectorStoreId || !orgVectorStoreId) {
+      throw new Error(
+        "Vector Store ID not configured in environment variables"
+      );
+    }
+
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("account_type")
+      .eq("id", chunk.user_id)
+      .single();
+
+    if (profileError || !profile) {
+      throw new Error("Failed to fetch profile information");
+    }
+
+    const vectorStoreId =
+      profile.account_type === "organization"
+        ? orgVectorStoreId
+        : userVectorStoreId;
+
     // Delete from OpenAI Vector Store
     try {
-      const vectorStoreId = process.env.OPENAI_VECTOR_STORE_ID;
       if (vectorStoreId && chunk.openai_file_id) {
         // Remove from vector store
         await openai.vectorStores.files.delete(chunk.openai_file_id, {

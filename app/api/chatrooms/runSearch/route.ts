@@ -84,9 +84,10 @@ export async function POST(req: NextRequest) {
       .eq("id", messageId);
 
     // Run OpenAI vector search
-    const vectorStoreId = process.env.OPENAI_VECTOR_STORE_ID;
+    const userVectorStoreId = process.env.OPENAI_USER_VECTOR_STORE_ID;
     const openaiApiKey = process.env.OPENAI_API_KEY;
-    if (!vectorStoreId || !openaiApiKey) {
+    const orgVectorStoreId = process.env.OPENAI_ORG_VECTOR_STORE_ID;
+    if (!userVectorStoreId || !openaiApiKey || !orgVectorStoreId) {
       return NextResponse.json({ error: "Missing env vars" }, { status: 500 });
     }
     const openai = new OpenAI({ apiKey: openaiApiKey });
@@ -118,7 +119,7 @@ export async function POST(req: NextRequest) {
         },
         { role: "user", content: `Query: ${message.query}` },
       ],
-      tools: [{ type: "file_search", vector_store_ids: [vectorStoreId] }],
+      tools: [{ type: "file_search", vector_store_ids: [userVectorStoreId, orgVectorStoreId] }],
       text: {
         format: zodTextFormat(QueryResultSchema, "search_results"),
       },
@@ -156,9 +157,21 @@ export async function POST(req: NextRequest) {
     const userIdsSet = new Set<string>();
 
     for (const match of matches) {
-      const fileInfo = await openai.vectorStores.files.retrieve(match.file_id, {
-        vector_store_id: vectorStoreId,
-      });
+      let fileInfo;
+      try {
+        fileInfo = await openai.vectorStores.files.retrieve(match.file_id, {
+          vector_store_id: userVectorStoreId,
+        });
+      } catch (error) {
+        try {
+          fileInfo = await openai.vectorStores.files.retrieve(match.file_id, {
+            vector_store_id: orgVectorStoreId,
+          });
+        } catch (orgError) {
+          console.error(`Failed to retrieve file ${match.file_id} from both vector stores`);
+          continue;
+        }
+      }
       const userId = String(fileInfo.attributes?.userId);
       if (userId) {
         userIdsSet.add(userId);

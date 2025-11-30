@@ -40,13 +40,28 @@ export async function POST(request: NextRequest) {
     }
 
     // Get vector store ID from environment variables
-    const vectorStoreId = process.env.OPENAI_VECTOR_STORE_ID;
+    const userVectorStoreId = process.env.OPENAI_USER_VECTOR_STORE_ID;
+    const orgVectorStoreId = process.env.OPENAI_ORG_VECTOR_STORE_ID;
 
-    if (!vectorStoreId) {
+    if (!userVectorStoreId || !orgVectorStoreId) {
       throw new Error(
         "Vector Store ID not configured in environment variables"
       );
     }
+
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("account_type")
+      .eq("id", userId)
+      .single();
+
+    if (profileError || !profile) {
+      throw new Error("Failed to fetch profile information");
+    }
+    const vectorStoreId =
+      profile.account_type === "organization"
+        ? orgVectorStoreId
+        : userVectorStoreId;
 
     // Step 1: Upload to OpenAI Vector Store
     console.log("Uploading to vector store...");
