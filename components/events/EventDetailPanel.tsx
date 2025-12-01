@@ -20,7 +20,7 @@ const socialsIconMap: { [key: string]: React.ElementType } = {
 
 interface EventDetailPanelProps {
   event: HostedEvent | null;
-  onBack: () => void;
+  onBack?: () => void;
 }
 
 export function EventDetailPanel({ event, onBack }: EventDetailPanelProps){

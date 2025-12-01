@@ -10,6 +10,7 @@ import { EventDetailPanel } from "@/components/events/EventDetailPanel";
 import useSWRInfinite from "swr/infinite";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import { Button } from "@/components/ui/button";
+import EventFilters from "@/components/events/EventFilters";
 
 interface EventsResponse {
   events: HostedEvent[];
@@ -37,8 +38,9 @@ const getKey = (pageIndex: number, previousPageData: EventsResponse | null): str
 export default function EventsPage() {
   const { data, size, setSize, error, isLoading } = useSWRInfinite<EventsResponse>(getKey, fetcher);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<HostedEvent | null >(null);
+  const [selectedEvent, setSelectedEvent] = useState<HostedEvent | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [loaded, setLoaded] = useState<boolean>(false);
 
   // Search and category filter state
   const [search, setSearch] = useState("");
@@ -49,8 +51,13 @@ export default function EventsPage() {
   const events: HostedEvent[] = data ? data.flatMap(page => page.events) : [];
 
   useEffect(() => {
-    setSelectedEvent(events[0]);
-  }, [data])
+    // on initial load set the selected event to be the first in the data
+    // upon further loads do not set the selected event
+    if (!loaded && !isLoading) {
+      setSelectedEvent(events[0]);
+      setLoaded(true);
+    }
+  }, [loaded, isLoading, events])
 
   // const categoryOptions: (EventCategory | "All")[] = [
   //   "All",
@@ -82,14 +89,14 @@ export default function EventsPage() {
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, [search, selectedCategory]);
 
-  // const handleClubSelect = (club: ClubData) => {
-  //   setSelectedClub(club);
-  //   setShowDetails(true);
-  // };
+  const handleEventSelect = (event: HostedEvent) => {
+    setSelectedEvent(event);
+    setShowDetails(true);
+  };
 
-  // const handleBackToList = () => {
-  //   setShowDetails(false);
-  // };
+  const handleBackToList = () => {
+    setShowDetails(false);
+  };
 
   if (isLoading) {
     return <div className="min-h-screen flex justify-center items-center bg-black">
@@ -103,6 +110,7 @@ export default function EventsPage() {
       <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
       <div className="flex-1 flex flex-col overflow-hidden">
       {/* Mobile: Show either list or details */}
+
       <div className="lg:hidden flex-1 overflow-hidden">
       <AnimatePresence mode="wait">
         {!showDetails ? (
@@ -118,15 +126,23 @@ export default function EventsPage() {
 
             {/* Search and Category Filter */}
 
-            {/* <ClubFilters 
+            <EventFilters
               search={search}
               setSearch={setSearch}
               selectedCategory={selectedCategory}
               setSelectedCategory={setSelectedCategory}
-              categoryOptions={categoryOptions}
-            /> */}
+            />
 
-            {/* Club List */}
+            <div className="flex-1 overflow-y-auto  p-4 sm:p-5 space-y-3 scrollbar-hide">
+              {events.map((event: HostedEvent) => (
+                <EventListCard 
+                  key={event.id}
+                  event={event} 
+                  isSelected={ selectedEvent ? selectedEvent.id === event.id : false}
+                  onClick={() => handleEventSelect(event)}
+                />
+              ))}
+            </div>
 
             {/* <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 scrollbar-hide">
               {filteredClubs.map((club) => (
@@ -153,10 +169,10 @@ export default function EventsPage() {
             className="h-full bg-black overflow-hidden"
           >
             <div className="h-full overflow-y-auto p-4 sm:p-6 scrollbar-hide">
-              {/* <ClubDetailPanel
-                club={selectedClub}
+              <EventDetailPanel
+                event={selectedEvent}
                 onBack={handleBackToList}
-              /> */}
+              />
             </div>
           </motion.div>
         )}
@@ -169,14 +185,14 @@ export default function EventsPage() {
       <div className="w-80 xl:w-96 border-r border-white/10 bg-black/50 backdrop-blur-sm overflow-hidden flex flex-col">
         {/* Header */}
         <EventsHeader eventCount={events.length} />
+        <Button onClick={() => setSize(size + 1)}>More</Button>
         {/* Search and Category Filter */}
-        {/* <ClubFilters
+        <EventFilters
           search={search}
           setSearch={setSearch}
           selectedCategory={selectedCategory}
           setSelectedCategory={setSelectedCategory}
-          categoryOptions={categoryOptions}
-        /> */}
+        />
 
         {/* Club List */}
         <div className="flex-1 overflow-y-auto p-5 space-y-3 scrollbar-hide">
@@ -185,7 +201,7 @@ export default function EventsPage() {
               key={event.id}
               event={event} 
               isSelected={ selectedEvent ? selectedEvent.id === event.id : false}
-              onClick={() => setSelectedEvent(event)}
+              onClick={() => handleEventSelect(event)}
             />
           ))}
 
