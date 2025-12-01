@@ -72,7 +72,7 @@ export default function MatchResults({ match, userIndex }: MatchResultsProps) {
         <div className="space-y-2">
           {match.files.map((file, fileIndex) => (
             <FileDescription
-              key={file.file_id}
+              key={file.file_id + fileIndex}
               file={file}
               delay={0.6 + userIndex * 0.2 + fileIndex * 0.1}
             />
