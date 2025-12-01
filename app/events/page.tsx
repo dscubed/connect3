@@ -6,8 +6,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import EventsHeader from "@/components/events/HeaderSection";
 import { HostedEvent } from "@/types/events/event";
 import { EventListCard } from "@/components/events/EventListCard"; 
+import { EventDetailPanel } from "@/components/events/EventDetailPanel";
 import useSWRInfinite from "swr/infinite";
 import { CubeLoader } from "@/components/ui/CubeLoader";
+import { Button } from "@/components/ui/button";
 
 interface EventsResponse {
   events: HostedEvent[];
@@ -26,14 +28,14 @@ const getKey = (pageIndex: number, previousPageData: EventsResponse | null): str
   if (!previousPageData) return null;
   if (previousPageData && !previousPageData.cursor ) return null;
 
+  const encoded = encodeURIComponent(previousPageData.cursor!);
   return process.env.NODE_ENV !== "production" ? 
-    `http://localhost:3000/api/events?cursor=${previousPageData.cursor}` : 
-    `https://connect3.app/api/events?cursor=${previousPageData.cursor}`;
+    `http://localhost:3000/api/events?cursor=${encoded}` : 
+    `https://connect3.app/api/events?cursor=${encoded}`;
 }
 
 export default function EventsPage() {
-  const { data, error, isLoading } = useSWRInfinite<EventsResponse>(getKey, fetcher);
-
+  const { data, size, setSize, error, isLoading } = useSWRInfinite<EventsResponse>(getKey, fetcher);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<HostedEvent | null >(null);
   const [showDetails, setShowDetails] = useState(false);
@@ -45,7 +47,10 @@ export default function EventsPage() {
   );
 
   const events: HostedEvent[] = data ? data.flatMap(page => page.events) : [];
-  console.log(events);
+
+  useEffect(() => {
+    setSelectedEvent(events[0]);
+  }, [data])
 
   // const categoryOptions: (EventCategory | "All")[] = [
   //   "All",
@@ -164,7 +169,6 @@ export default function EventsPage() {
       <div className="w-80 xl:w-96 border-r border-white/10 bg-black/50 backdrop-blur-sm overflow-hidden flex flex-col">
         {/* Header */}
         <EventsHeader eventCount={events.length} />
-
         {/* Search and Category Filter */}
         {/* <ClubFilters
           search={search}
@@ -206,7 +210,7 @@ export default function EventsPage() {
       <div className="flex-1 bg-black overflow-hidden">
         <div className="h-full overflow-y-auto p-6 lg:p-8 scrollbar-hide">
           <AnimatePresence mode="wait">
-            {/* <ClubDetailPanel club={selectedClub} /> */}
+            <EventDetailPanel event={selectedEvent} />
           </AnimatePresence>
         </div>
       </div>
