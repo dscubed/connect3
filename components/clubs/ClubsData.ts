@@ -838,8 +838,7 @@ export const clubsData: ClubData[] = [
     links: {
       club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/10120/",
     },
-    logoUrl:
-      "/clubs/unimelb/lost-and-refound.png",
+    logoUrl: "/clubs/unimelb/lost-and-refound.png",
     socials: {
       instagram: "https://www.instagram.com/lostandrefoundmelb",
     },
@@ -859,8 +858,7 @@ export const clubsData: ClubData[] = [
       website: "https://asaunimelb.com/",
       club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/6029/",
     },
-    logoUrl:
-      "/clubs/unimelb/asa.jpg",
+    logoUrl: "/clubs/unimelb/asa.png",
     socials: {
       facebook: "https://www.facebook.com/asamelb",
       instagram: "https://www.instagram.com/asamelb",
@@ -880,8 +878,7 @@ export const clubsData: ClubData[] = [
     links: {
       club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/6765/",
     },
-    logoUrl:
-      "/clubs/unimelb/umfc.jpg",
+    logoUrl: "/clubs/unimelb/umfc.png",
     socials: {
       instagram: "https://www.instagram.com/um_filmcollab",
       facebook: "https://www.facebook.com/umfilmmakers",
@@ -902,8 +899,7 @@ export const clubsData: ClubData[] = [
       website: "https://www.soilandplantsociety.com/",
       club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/saps/",
     },
-    logoUrl:
-      "/clubs/unimelb/saps.png",
+    logoUrl: "/clubs/unimelb/saps.png",
     socials: {
       facebook: "https://www.facebook.com/soilandplantsociety",
       instagram: "https://www.instagram.com/soilandplantsociety",
@@ -924,8 +920,7 @@ export const clubsData: ClubData[] = [
       website: "https://linktr.ee/gmc.unimelb",
       club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/9180/",
     },
-    logoUrl:
-      "/clubs/unimelb/game-makers.png",
+    logoUrl: "/clubs/unimelb/game-makers.png",
     socials: {
       instagram: "https://www.instagram.com/gmc.unimelb",
     },
@@ -945,8 +940,7 @@ export const clubsData: ClubData[] = [
       website: "https://www.embrace-education.org/",
       club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/6645/",
     },
-    logoUrl:
-      "/clubs/unimelb/embrace-education.jpeg",
+    logoUrl: "/clubs/unimelb/embrace-education.png",
     socials: {
       facebook: "https://www.facebook.com/EmbracingEducation",
       instagram: "https://www.instagram.com/embrace_education",
@@ -967,8 +961,7 @@ export const clubsData: ClubData[] = [
       website: "https://linktr.ee/unimelb.piano.society",
       club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/10486/",
     },
-    logoUrl:
-      "/clubs/unimelb/piano-society.png",
+    logoUrl: "/clubs/unimelb/piano-society.png",
     socials: {
       instagram: "https://www.instagram.com/unimelb.piano.society",
       discord: "https://discord.com/invite/4xA5yaWtJc",
@@ -986,11 +979,11 @@ export const clubsData: ClubData[] = [
       "The Student Environmental Engineering Club (SEEC) is all about helping environmental engineering students at UWA. We’ve got your back with social events, support, educational resources, networking events, and career tips. We also work to connect students with professors and industry pros so you have everything you need to succeed. Plus, we’re a non-profit run by students who really care about building a strong community.",
     category: ["Environment", "Engineering"],
     links: {
-      website: "https://www.uwastudentguild.com/clubs/student-environmental-engineering-club",
+      website:
+        "https://www.uwastudentguild.com/clubs/student-environmental-engineering-club",
       club: "https://www.uwastudentguild.com/clubs/student-environmental-engineering-club",
     },
-    logoUrl:
-      "/clubs/uwa/seec.jpg",
+    logoUrl: "/clubs/uwa/seec.png",
   },
 
   {
@@ -1006,12 +999,13 @@ export const clubsData: ClubData[] = [
     links: {
       club: "https://clubs.msa.monash.edu/organisation/7643/",
     },
-    logoUrl:
-      "/clubs/monash/mees.jpg",
+    logoUrl: "/clubs/monash/mees.png",
     socials: {
-      facebook: "https://www.facebook.com/monashenvironmentalengineeringsociety/",
+      facebook:
+        "https://www.facebook.com/monashenvironmentalengineeringsociety/",
       instagram: "https://www.instagram.com/mees_monashuni",
-      linkedin: "https://www.linkedin.com/company/monash-environmental-engineering-society-mees",
+      linkedin:
+        "https://www.linkedin.com/company/monash-environmental-engineering-society-mees",
     },
   },
 
@@ -1029,8 +1023,7 @@ export const clubsData: ClubData[] = [
       website: "https://clubs.msa.monash.edu/organisation/7203/",
       club: "https://clubs.msa.monash.edu/organisation/7203/",
     },
-    logoUrl:
-      "/clubs/monash/muslcc.png",
+    logoUrl: "/clubs/monash/muslcc.png",
     socials: {
       facebook: "https://www.facebook.com/MuslccMonash",
     },
@@ -1049,8 +1042,7 @@ export const clubsData: ClubData[] = [
     links: {
       club: "https://clubs.msa.monash.edu/organisation/7148/",
     },
-    logoUrl:
-      "/clubs/monash/mecc.png",
+    logoUrl: "/clubs/monash/mecc.png",
     socials: {
       facebook: "https://www.facebook.com/monash.mecc",
       instagram: "https://www.instagram.com/mecc_monash",
@@ -1071,8 +1063,7 @@ export const clubsData: ClubData[] = [
       website: "https://umsaunimelb.wixsite.com/umsa",
       club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/7245/",
     },
-    logoUrl:
-      "/clubs/unimelb/msa.png",
+    logoUrl: "/clubs/unimelb/msa.png",
     socials: {
       facebook: "https://www.facebook.com/umsa.unimelb",
       instagram: "https://www.instagram.com/mysa.unimelb",
