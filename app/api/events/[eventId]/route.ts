@@ -1,6 +1,11 @@
 import { authenticateRequest } from "@/lib/api/auth-middleware";
-import { fetchEvent } from "@/lib/events/fetchEvents";
+import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SECRET_KEY!
+);
 
 interface RouteParameters {
     params: Promise<{ eventId: string }>;
@@ -20,9 +25,14 @@ export async function GET(request: NextRequest, { params }: RouteParameters) {
 
     const { eventId } = await params;
     try {
-        const event = await fetchEvent(eventId);
-        if (!event) {
-            return NextResponse.json({ error: "Could not fetch"})
+        const { data: event, error } = await supabase
+            .from("events")
+            .select("id, name, description, start, end, type")
+            .eq("id", eventId)
+            .single();
+
+        if (error) {
+            return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
         return NextResponse.json({ event: event });

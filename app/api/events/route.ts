@@ -48,9 +48,9 @@ export async function GET(request: NextRequest) {
         // check if more pages exist
         const hasNext = data.length > limit; 
 
-        // if it does remove the final item and use it's timestamp as the cursor
+        // if it does remove the final item and use its timestamp as the cursor
         const events = hasNext ? data.slice(0, limit) : data;
-        const newCursor = hasNext ? data[limit - 1].created_at : null;
+        const newCursor = hasNext ? data[limit].created_at : null;
         
         return NextResponse.json({ events: events, cursor: newCursor });
     } catch (error) {
