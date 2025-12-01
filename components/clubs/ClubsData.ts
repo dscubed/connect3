@@ -1069,4 +1069,87 @@ export const clubsData: ClubData[] = [
       instagram: "https://www.instagram.com/mysa.unimelb",
     },
   },
+
+  {
+    id: "mupa",
+    name: "MUPA",
+    full_name: "Melbourne University Psychology Association",
+    location: "Melbourne, Australia",
+    description:
+      "MUPA is the official student-run association for psychology students at the University of Melbourne, providing academic support, networking opportunities, and social events.",
+    fullDescription:
+      "The Melbourne University Psychology Association (MUPA) is the official student-run association representing psychology students at the University of Melbourne. We aim to enhance the university experience of psychology students by providing academic support, professional development opportunities, and social events. Whether you're majoring in psychology, considering it as a career path, or simply interested in the field, MUPA welcomes all students to join our vibrant community. We host workshops, guest speaker events, networking nights, and social gatherings throughout the year.",
+    category: ["Science"],
+    links: {
+      website: "https://www.mupaunimelb.com/",
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/mupa/",
+    },
+    logoUrl: "/clubs/unimelb/mupa.png",
+    socials: {
+      facebook: "https://www.facebook.com/MUPAUnimelb",
+      instagram: "https://www.instagram.com/mupa_unimelb",
+    },
+  },
+
+  {
+    id: "momu",
+    name: "MoMU",
+    full_name: "Malaysians of Melbourne University",
+    location: "Melbourne, Australia",
+    description:
+      "MoMU is a vibrant community that celebrates Malaysian culture and brings together Malaysian students at the University of Melbourne.",
+    fullDescription:
+      "Malaysians of Melbourne University (MoMU) is one of the largest and most active cultural clubs at the University of Melbourne. We are a community of Malaysian students and friends who celebrate our shared heritage while embracing the multicultural environment of Melbourne. MoMU organizes a wide range of events throughout the year including cultural festivals, sports competitions, networking sessions, and social gatherings. Whether you're Malaysian, have Malaysian heritage, or are simply interested in Malaysian culture, you're welcome to join our family. We aim to make your university experience memorable while keeping you connected to home.",
+    category: ["Cultural"],
+    links: {
+      website: "https://www.momumomu.org/",
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/7141/",
+    },
+    logoUrl: "/clubs/unimelb/momu.png",
+    socials: {
+      facebook: "https://www.facebook.com/momumomu/",
+      instagram: "https://www.instagram.com/momuians",
+      linkedin: "https://www.linkedin.com/company/malaysians-of-melbourne-university-momu/",
+    },
+  },
+
+  {
+    id: "oxfam",
+    name: "Oxfam UniMelb",
+    full_name: "Oxfam University of Melbourne",
+    location: "Melbourne, Australia",
+    description:
+      "Oxfam UniMelb is a student-run club dedicated to raising awareness about global poverty and social justice issues while supporting Oxfam's mission.",
+    fullDescription:
+      "Oxfam University of Melbourne is a student-run volunteer group affiliated with Oxfam Australia, one of the world's leading humanitarian organizations. We are passionate about fighting inequality and poverty, and work to raise awareness about social justice issues affecting communities around the world. Our club organizes fundraising events, advocacy campaigns, educational workshops, and volunteer opportunities. We believe that young people have the power to create positive change, and we provide a platform for students to get involved in meaningful social action. Join us to make a difference in the fight against global poverty and injustice.",
+    category: ["Cultural"],
+    links: {
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/7309/",
+    },
+    logoUrl: "/clubs/unimelb/oxfam.png",
+    socials: {
+      facebook: "https://www.facebook.com/OxfamMU",
+      instagram: "https://www.instagram.com/oxfamunimelb",
+    },
+  },
+
+  {
+    id: "muhfh",
+    name: "MUHFH",
+    full_name: "Melbourne University Habitat for Humanity",
+    location: "Melbourne, Australia",
+    description:
+      "MUHFH is a student-led organization working to eliminate poverty housing and homelessness through volunteer projects and fundraising initiatives.",
+    fullDescription:
+      "Melbourne University Habitat for Humanity (MUHFH) is a campus chapter of Habitat for Humanity, a global non-profit organization dedicated to building homes, communities, and hope. We are a group of passionate students committed to addressing housing poverty and homelessness both locally and internationally. Throughout the year, we organize volunteering opportunities, fundraising events, awareness campaigns, and our signature Global Village Trip where students travel overseas to help build homes for families in need. MUHFH provides students with the opportunity to make a tangible difference in people's lives while developing leadership skills and forming lifelong friendships. No building experience is necessary - just bring your enthusiasm and willingness to help!",
+    category: ["Cultural"],
+    links: {
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/6877/",
+    },
+    logoUrl: "/clubs/unimelb/muhfh.png",
+    socials: {
+      facebook: "https://www.facebook.com/hfh.unimelb",
+      instagram: "https://www.instagram.com/muhfh/?hl=en",
+    },
+  },
 ];
