@@ -14,7 +14,12 @@ const ValidationSchema = z.object({
   safe: z.boolean(),
   relevant: z.boolean(),
   sensitive: z.boolean(),
+  detectedNames: z.array(z.string()),
+  belongsToUser: z.boolean(),
+  categoryValid: z.boolean(),
+  categoryMatchesContent: z.boolean(),
   reason: z.string(),
+  suggestion: z.string(),
 });
 
 // Rate limiting per user
@@ -64,36 +69,135 @@ export async function POST(req: NextRequest) {
       `Validation request from user: ${user.id}, text length: ${text.length}`
     );
 
-    // Call OpenAI API
+    // 6. Call OpenAI API
+    const systemPrompt = `
+    You are a validation engine for a profile-building app. 
+    The user's legal full name is: "${fullName || "..."}".
+
+    A "chunk" contains a category and content describing part of the user's personal or professional profile.
+    Your job is to classify the chunk into the fields defined below.
+
+    -----------------------
+    FIELD DEFINITIONS
+    -----------------------
+
+    1. safe
+    - true if the text contains no harmful, hateful, illegal, pornographic, explicit, or disallowed content.
+
+    2. relevant
+    - true if the content helps describe the user's personal or professional profile:
+      (work experience, responsibilities, skills, tools, education, projects, achievements, interests, or bio).
+    - Personal interests are allowed if they are safe.
+    - Jokes, quotes, unrelated stories, or random rants → false.
+
+    3. sensitive
+    - true if personal PII is present, including:
+      - personal phone number  
+      - personal email  
+      - exact street/home address  
+    - Allowed:
+      - city/state only  
+      - work phone, work email  
+
+    4. detectedNames
+    - A list of all human names mentioned in the content.
+
+    5. belongsToUser
+    - true if the chunk clearly describes the user "${fullName}".
+    - Standard resume-style statements (“Led a team…”) count as describing the user.
+    - If another named person is described as the subject, set false.
+    - If uncertain, set false.
+    - Do NOT assume different names refer to the same person.
+
+    6. categoryValid
+    - true only if the category is one of:
+      ["Work Experience", "Education", "Skills", "Projects", "Achievements", "Interests", "Bio"]
+
+    7. categoryMatchesContent
+    - Determines whether the content fits the meaning of the category.
+    - If categoryValid = false → categoryMatchesContent = false.
+
+    Category matching rules:
+
+    Work Experience:
+    - Matches: roles, responsibilities, job titles, companies, dates, impact.
+    - Not matches: pure skill lists, bios, interests, unrelated info.
+
+    Education:
+    - Matches: schools, degrees, majors, coursework, graduation dates.
+    - Not matches: job duties, skill lists, generic personal statements.
+
+    Skills:
+    - Matches: lists of tools, technologies, frameworks, programming languages, competencies.
+    - Not matches: paragraphs about job history, detailed project descriptions, interests.
+
+    Projects:
+    - Matches: descriptions of things the user built, created, designed, researched, or contributed to.
+    - Not matches: only job titles, pure lists of skills, abstract interests.
+
+    Achievements:
+    - Matches: awards, certifications, measurable accomplishments, honors, distinctions.
+    - Not matches: generic responsibilities or unrelated personal details.
+
+    Interests:
+    - Matches: hobbies, activities, personal interests.
+    - Not matches: work history, academic details, technical skill lists.
+
+    Bio:
+    - Matches: short personal summary (who they are, background, goals).
+    - Not matches: pure lists of skills or job duties with no narrative.
+
+    If content could reasonably fit multiple valid categories, choose the MOST appropriate one and set categoryMatchesContent = true.
+
+    8. suggestion
+    - Provide ONE short, actionable suggestion only if it would meaningfully improve the chunk.
+    - The goal is to gently help the user strengthen the highlight, not to block or criticise it.
+  
+    Examples of when a suggestion IS appropriate:
+      - The category is invalid → suggest a valid category.
+      - The content clearly fits a better category → suggest the more suitable category.
+      - The content is somewhat irrelevant → suggest shaping it into a skill, task, experience, or interest.
+      - The text does not clearly describe the user → suggest rewriting it from the user’s perspective.
+      - Sensitive personal information appears → suggest removing or generalising it.
+      - The chunk is accepted but noticeably vague or generic → suggest adding one concrete action, tool, or outcome.
+  
+    Examples of when a suggestion should NOT be given:
+      - The chunk is already concrete, detailed, and aligned with its category.
+      - The suggested improvement would be subjective or nitpicky.
+      - The content is stylistically valid but simply concise.
+  
+    Additional rules:
+      - Suggestions must be specific, not generic (“add details” is too vague).
+      - Tone must be neutral and supportive, never judgmental.
+      - If nothing stands out as a clear improvement, return an empty string.
+
+    -----------------------
+    RESPONSE FORMAT
+    -----------------------
+
+    Respond ONLY as a JSON object:
+
+    {
+      "safe": boolean,
+      "relevant": boolean,
+      "sensitive": boolean,
+      "detectedNames": string[],
+      "belongsToUser": boolean,
+      "categoryValid": boolean,
+      "categoryMatchesContent": boolean,
+      "reason": string,
+      "suggestion": string
+    }
+
+    "reason" MUST be exactly one sentence summarizing the main factor.
+    "suggestion" MUST be one short actionable improvement.
+    `.trim();
+
     const response = await client.responses.parse({
       model: "gpt-4o-mini",
       input: [
-        {
-          role: "system",
-          content: `
-You are a validation engine for a profile-building app. 
-You are validating a chunk for user: ${fullName || "..."}.
-A chunk contains a category and content describing the user's personal or professional profile.
-
-Given user-uploaded chunk, you must determine:
-1. Is it SAFE (no harmful, illegal, NSFW, or disallowed content)?
-2. Is it RELEVANT (does it contain information that could help describe a user's personal or professional profile?
-e.g. contains work experience, education, skills, interests, or bio)
-- Don't be too strict on personal interests if they're not professional, as long as they're not disallowed.
-- Is this chunk for user: "${fullName || "user"}"? NOT ANOTHER USER?
-- Does the category and the content match each other in a reasonable way?
-- Is the category a valid category?
-3. Does it contain SENSITIVE info (PII like phone numbers, emails, addresses, or other private info)?
-- Broad addresses like city or state are OK, but not specific street addresses.
-- Business contact info like work email or phone is OK.
-
-Respond only in the structured format defined. Reason should just be one sentence only justifying why the text was safe, relevant, sensitive etc.
-          `,
-        },
-        {
-          role: "user",
-          content: text,
-        },
+        { role: "system", content: systemPrompt },
+        { role: "user", content: text },
       ],
       text: {
         format: zodTextFormat(ValidationSchema, "validation"),
@@ -104,7 +208,9 @@ Respond only in the structured format defined. Reason should just be one sentenc
 
     // Log the validation result for monitoring
     console.log(
-      `Validation result for user ${user.id}: safe=${result?.safe}, relevant=${result?.relevant}`
+      `Validation result for user ${user.id}: safe=${result?.safe}, relevant=${result?.relevant},
+      sensitive=${result?.sensitive}, belongsToUser=${result?.belongsToUser}, 
+      categoryValid=${result?.categoryValid}, categoryMatchesContent=${result?.categoryMatchesContent}`
     );
 
     return NextResponse.json(result);
@@ -118,6 +224,9 @@ Respond only in the structured format defined. Reason should just be one sentenc
       {
         safe: false,
         relevant: false,
+        belongsToUser: false,
+        categoryValid: false,
+        categoryMatchesContent: false,
         reason: `Validation failed: ${errorMessage}`,
       },
       { status: 500 }

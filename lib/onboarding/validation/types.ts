@@ -1,6 +1,8 @@
 export interface TextValidationResult {
   safe: boolean;
   relevant: boolean;
+  belongsToUser: boolean;
+  templateResume:boolean;
   reason?: string;
 }
 
@@ -8,7 +10,11 @@ export interface ChunkValidationResult {
   safe: boolean;
   relevant: boolean;
   sensitive: boolean;
+  belongsToUser: boolean;
+  categoryValid: boolean;
+  categoryMatchesContent: boolean;
   reason?: string;
+  suggestion?: string;
 }
 
 type ProcessingState =
