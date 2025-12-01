@@ -106,53 +106,104 @@ export async function POST(req: NextRequest) {
     
     const recentHistory = (historyRows ?? []).slice(-RECENT_LIMIT);
 
+    type StoredMatchFile = { file_id: string; description: string };
+
+    type StoredMatchGroup = {
+      user_id: string;
+      files: StoredMatchFile[];
+    };
+
     type StoredContent = {
       result: string;
-      matches: Array<{ description: string }>;
+      matches: StoredMatchGroup[];
       followUps: string;
     };
 
-    function renderAssistantHistory(content: StoredContent): string {
-      const parts = [content.result];
+    // collect all user_ids that appear in matches
+    const allUserIds = new Set<string>();
 
-      if (content.matches?.length) {
-        parts.push(
-          "Previously retrieved files:",
-          ...content.matches.map((m: any) => `- ${m.description}`)
+    for (const row of recentHistory) {
+      const c = row.content as StoredContent | null;
+      if (c?.matches) {
+        for (const group of c.matches) {
+          if (group.user_id) allUserIds.add(group.user_id);
+        }
+      }
+    }
+
+    let userNameMap: Record<string, string> = {};
+
+    if (allUserIds.size > 0) {
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")               // adjust table name if needed
+        .select("id, full_name")
+        .in("id", Array.from(allUserIds));
+    
+      if (profilesError) {
+        console.error("❌ Error fetching user names:", profilesError);
+      } else {
+        userNameMap = Object.fromEntries(
+          (profiles ?? []).map((p) => [p.id, p.full_name ?? ""])
         );
       }
+    }
 
+    function renderAssistantHistory(
+      content: StoredContent,
+      userNameMap: Record<string, string>
+    ): string {
+      const parts: string[] = [];
+    
+      // main answer
+      if (content.result) {
+        parts.push(content.result);
+      }
+    
+      // previously retrieved files with user names
+      const fileLines: string[] = [];
+    
+      for (const group of content.matches ?? []) {
+        const displayName =
+          userNameMap[group.user_id] ||
+          `User ${group.user_id.slice(0, 8)}`;
+    
+        for (const file of group.files ?? []) {
+          fileLines.push(`- ${displayName}: ${file.description}`);
+        }
+      }
+    
+      if (fileLines.length > 0) {
+        parts.push("Previously retrieved files:", ...fileLines);
+      }
+    
+      // previous follow-up
       if (content.followUps) {
         parts.push(`Previous follow-up suggestion: ${content.followUps}`);
       }
-
+    
       return parts.join("\n");
     }
     
-     // Build history messages as proper {role, content} messages
+    // Build history messages as proper {role, content} messages
     const historyMessages = recentHistory.flatMap((row) => {
       const msgs: { role: "user" | "assistant"; content: string }[] = [];
     
-      // User side
       if (row.query) {
         msgs.push({ role: "user", content: row.query });
       }
     
-      // Assistant side 
       const c = row.content as StoredContent | null;
     
       if (c && typeof c === "object") {
-        const assistantText = renderAssistantHistory(c);
+        const assistantText = renderAssistantHistory(c, userNameMap);
         if (assistantText.trim().length > 0) {
-          msgs.push({
-            role: "assistant",
-            content: assistantText,
-          });
+          msgs.push({ role: "assistant", content: assistantText });
         }
       }
     
       return msgs;
     });
+    
 
     // Run OpenAI vector search
     const userVectorStoreId = process.env.OPENAI_USER_VECTOR_STORE_ID;
