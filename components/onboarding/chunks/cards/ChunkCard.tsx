@@ -12,6 +12,7 @@ import {
   handleCategoryChange,
   handleContentChange,
 } from "../utils/FormHandlers";
+import { ChunkValidationResult } from "@/lib/onboarding/validation";
 
 type ChunkCardProps = {
   chunk: Chunk;
@@ -23,6 +24,7 @@ type ChunkCardProps = {
   validating: boolean;
   handleSaveEdit: () => void;
   handleCancel: () => void;
+  validation?: ChunkValidationResult | null;
 };
 
 function ChunkCard({
@@ -35,14 +37,29 @@ function ChunkCard({
   validating,
   handleSaveEdit,
   handleCancel,
+  validation,
 }: ChunkCardProps) {
   const isEditing = editingChunk === chunk.chunk_id;
   const onKeyDown = handleKeyDown(handleSaveEdit, handleCancel);
   const onCategoryChange = handleCategoryChange(setEditChunkDetails);
   const onContentChange = handleContentChange(setEditChunkDetails);
+  const hasHardError =
+    !!validation &&
+    (!validation.safe ||
+      !validation.relevant ||
+      !validation.belongsToUser ||
+      !validation.categoryValid ||
+      !validation.categoryMatchesContent);
+  const showSuggestion = validation && validation.suggestion;
+  const needsAttention = !!validation && (hasHardError || showSuggestion);
   return (
     <motion.div
-      className="relative p-5 min-h-[180px] rounded-2xl border-2 border-white/20 bg-white/5 backdrop-blur-md hover:border-white/30 hover:bg-white/8 transition-all duration-300 cursor-pointer h-full"
+      className={`relative p-5 min-h-[180px] rounded-2xl border-2 backdrop-blur-md transition-all duration-300 cursor-pointer h-full
+    ${
+      needsAttention
+        ? "border-amber-400/70 bg-amber-500/10 hover:border-amber-300 hover:bg-amber-500/15"
+        : "border-white/20 bg-white/5 hover:border-white/30 hover:bg-white/8"
+    }`}
       whileHover={{ scale: 1.07, y: -2 }}
       whileTap={{ scale: 0.98 }}
       onClick={() => !isEditing && handleChunkClick(chunk)}
@@ -78,7 +95,7 @@ function ChunkCard({
       <div className="relative z-10">
         {isEditing ? (
           <div className="space-y-3">
-            <div className="relative">
+            <div className="space-y-1">
               <textarea
                 value={editChunkDetails?.content ?? ""}
                 onChange={onContentChange}
@@ -88,7 +105,7 @@ function ChunkCard({
                 autoFocus
               />
               <div
-                className={`absolute -bottom-6 right-0 text-xs ${
+                className={`text-right text-xs ${
                   getWordCount(editChunkDetails?.content ?? "") > WORD_LIMIT
                     ? "text-red-400"
                     : "text-white/50"
@@ -98,7 +115,15 @@ function ChunkCard({
                 words
               </div>
             </div>
-            <div className="flex gap-2 mt-8">
+            {showSuggestion && (
+              <div className="mt-4 space-y-1">
+                <p className="text-xs text-white">
+                  <span className="font-semibold">Suggestion:</span>{" "}
+                  {validation.suggestion}
+                </p>
+              </div>
+            )}
+            <div className="flex gap-2 mt-4">
               <button
                 onClick={handleSaveEdit}
                 disabled={

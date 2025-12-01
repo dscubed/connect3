@@ -23,10 +23,9 @@ export async function POST(request: NextRequest) {
     if (authResult instanceof NextResponse) return authResult;
     const { user } = authResult;
 
-    // Parse body for userId (and optionally chunks)
+    // Parse body for userId, prompt (optional), currentTldr (optional)
     const body = await request.json();
 
-    console.log("body:", body);
     if (!body || typeof body !== "object" || Object.keys(body).length === 0) {
       return NextResponse.json(
         { error: "Invalid request body" },
@@ -38,10 +37,8 @@ export async function POST(request: NextRequest) {
     const userPrompt = body.userPrompt;
     const currentTldr = body.currentTldr || "";
 
-    console.log(userId);
-
     if (!userId || !user.id) {
-      return NextResponse.json({ error: "User ID required" }, { status: 401 });
+      return NextResponse.json({ error: "User ID required" }, { status: 400 });
     }
     if (userId !== user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
@@ -92,12 +89,10 @@ export async function POST(request: NextRequest) {
 
     const tldr = response.output_text || "Failed to generate TLDR.";
 
-    return NextResponse.json(
-      {
-        tldr,
-      },
-      { status: 200 }
-    );
+    return NextResponse.json({
+      success: true,
+      tldr,
+    });
   } catch (error) {
     console.error("Error generating TLDR:", error);
     return NextResponse.json(

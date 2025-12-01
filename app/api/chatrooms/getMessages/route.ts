@@ -9,14 +9,14 @@ const supabase = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    // 1. Extract and validate auth token
+    // Extract and validate auth token
     const authResult = await authenticateRequest(request);
     if (authResult instanceof NextResponse) {
       return authResult; // Return error response
     }
     const { user } = authResult;
 
-    // 3. Get chatroom ID from query params
+    // Get chatroom ID from query params
     const { searchParams } = new URL(request.url);
     const chatroomId = searchParams.get("chatroomId");
 
@@ -32,15 +32,15 @@ export async function GET(request: NextRequest) {
       chatroomId
     );
 
-    // 4. Verify chatroom exists and user has access to it
+    // Verify chatroom exists and user has access to it
     const { data: chatroom, error: chatroomError } = await supabase
       .from("chatrooms")
       .select("id, title, created_at, created_by")
       .eq("id", chatroomId)
-      .eq("created_by", user.id) // Ensure user owns this chatroom
+      .eq("created_by", user.id)
       .single();
 
-    // Let's also check if the chatroom exists at all (without user filter)
+    // check if the chatroom exists at all
     const { data: chatroomCheck, error: chatroomCheckError } = await supabase
       .from("chatrooms")
       .select("id, title, created_at, created_by")
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 5. Get all messages for this chatroom
+    // Get all messages for this chatroom
     const { data: messages, error: messagesError } = await supabase
       .from("chatmessages")
       .select("*")
@@ -73,9 +73,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log(
-      `✅ Found ${messages?.length || 0} messages for user ${user.id}`
-    );
+    // console.log(`${messages?.length || 0} messages for user ${user.id}`);
 
     return NextResponse.json({
       success: true,

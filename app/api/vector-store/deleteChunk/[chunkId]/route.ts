@@ -17,7 +17,7 @@ export async function DELETE(
   { params }: { params: Promise<{ chunkId: string }> }
 ) {
   try {
-    // 1. Authenticate the request
+    // Authenticate the request
     const authResult = await authenticateRequest(request);
     if (authResult instanceof NextResponse) {
       return authResult; // Return error response
@@ -30,7 +30,7 @@ export async function DELETE(
       );
     }
 
-    // FIXED: Await params before accessing properties
+    // Await params before accessing properties
     const { chunkId } = await params;
 
     if (!chunkId) {
@@ -40,12 +40,30 @@ export async function DELETE(
       );
     }
 
-    // First, get the chunk from database to get the OpenAI file ID
+    // Get the chunk from database to get the OpenAI file ID
     const { data: chunk, error: fetchError } = await supabase
       .from("user_files")
       .select("openai_file_id, user_id")
       .eq("id", chunkId)
       .single();
+
+    // Get vector store ID from environment variables
+    const userVectorStoreId = process.env.OPENAI_USER_VECTOR_STORE_ID;
+    const orgVectorStoreId = process.env.OPENAI_ORG_VECTOR_STORE_ID;
+
+    // Get user type from Supabase
+    const { data: userProfile, error: profileError } = await supabase
+      .from("profiles")
+      .select("account_type")
+      .eq("id", user.id)
+      .single();
+    if (profileError || !userProfile) {
+      console.error("Error fetching user profile:", profileError);
+      throw new Error("Failed to fetch user profile");
+    }
+
+    const isOrgUser = userProfile.account_type === "organisation";
+    const vectorStoreId = isOrgUser ? orgVectorStoreId : userVectorStoreId;
 
     if (fetchError || !chunk) {
       return NextResponse.json({ error: "Chunk not found" }, { status: 404 });
@@ -60,7 +78,6 @@ export async function DELETE(
 
     // Delete from OpenAI Vector Store
     try {
-      const vectorStoreId = process.env.OPENAI_VECTOR_STORE_ID;
       if (vectorStoreId && chunk.openai_file_id) {
         // Remove from vector store
         await openai.vectorStores.files.delete(chunk.openai_file_id, {
@@ -94,8 +111,7 @@ export async function DELETE(
     return NextResponse.json(
       {
         success: false,
-        error:
-          error instanceof Error ? error.message : "Unknown error occurred",
+        error: error instanceof Error ? error.message : "Internal Server Error",
       },
       { status: 500 }
     );

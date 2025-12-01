@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import Sidebar from "@/components/sidebar/Sidebar";
 import { useAuthStore } from "@/stores/authStore";
@@ -12,11 +12,7 @@ import ChunksSection from "@/components/profile/chunks/ChunksSection";
 
 export default function ProfilePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user, profile, loading, initialize } = useAuthStore();
-
-  useEffect(() => {
-    initialize();
-  }, [initialize]);
+  const { user, profile, loading } = useAuthStore();
 
   if (loading) {
     return (
