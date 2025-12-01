@@ -26,24 +26,14 @@ const limiter = rateLimit({
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Authenticate user via Supabase Auth
+    // Authenticate user via Supabase Auth
     const authResult = await authenticateRequest(req);
     if (authResult instanceof NextResponse) {
       return authResult; // Return error response
     }
     const { user } = authResult;
 
-    // 3. Rate limiting per user
-    try {
-      await limiter.check(10, user.id); // 10 requests per minute per user
-    } catch {
-      return NextResponse.json(
-        { error: "Rate limit exceeded. Please try again later." },
-        { status: 429 }
-      );
-    }
-
-    // 4. Validate request body
+    // Validate request body
     const body = await req.json();
     const { text, fullName } = body;
 
@@ -59,6 +49,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "Text content too large" },
         { status: 400 }
+      );
+    }
+
+    // Rate limiting per user
+    try {
+      await limiter.check(10, user.id); // 10 requests per minute per user
+    } catch {
+      return NextResponse.json(
+        { error: "Rate limit exceeded. Please try again later." },
+        { status: 429 }
       );
     }
 
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
 
     const result = response.output_parsed;
 
-    // 7. Log the validation result for monitoring
+    // Log the validation result for monitoring
     console.log(
       `Validation result for user ${user.id}: safe=${result?.safe}, relevant=${result?.relevant}, 
         belongsToUser=${result?.belongsToUser}, templateResume=${result?.templateResume}`

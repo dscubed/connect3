@@ -21,19 +21,18 @@ const QueryResultSchema = z.object({
   followUps: z.string(),
 });
 
-// --- User details helpers ---
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SECRET_KEY!
 );
 
+// --- User details interface ---
 export interface UserDetails {
   id: string;
   full_name: string;
   avatar_url: string;
 }
 
-// --- Handler ---
 export async function POST(req: NextRequest) {
   try {
     // Authenticate user
@@ -49,10 +48,17 @@ export async function POST(req: NextRequest) {
 
     const { messageId } = await req.json();
 
+    if (!messageId) {
+      return NextResponse.json(
+        { error: "Message ID is required" },
+        { status: 400 }
+      );
+    }
+
     // Fetch message row
     const { data: message, error: fetchError } = await supabase
       .from("chatmessages")
-      .select("query, content, status, user_id")
+      .select("query, content, status, user_id, chatroom_id")
       .eq("id", messageId)
       .single();
 
@@ -84,9 +90,10 @@ export async function POST(req: NextRequest) {
       .eq("id", messageId);
 
     // Run OpenAI vector search
-    const vectorStoreId = process.env.OPENAI_VECTOR_STORE_ID;
+    const userVectorStoreId = process.env.OPENAI_USER_VECTOR_STORE_ID;
     const openaiApiKey = process.env.OPENAI_API_KEY;
-    if (!vectorStoreId || !openaiApiKey) {
+    const orgVectorStoreId = process.env.OPENAI_ORG_VECTOR_STORE_ID;
+    if (!userVectorStoreId || !openaiApiKey || !orgVectorStoreId) {
       return NextResponse.json({ error: "Missing env vars" }, { status: 500 });
     }
     const openai = new OpenAI({ apiKey: openaiApiKey });
@@ -118,12 +125,18 @@ export async function POST(req: NextRequest) {
         },
         { role: "user", content: `Query: ${message.query}` },
       ],
-      tools: [{ type: "file_search", vector_store_ids: [vectorStoreId] }],
+      tools: [
+        {
+          type: "file_search",
+          vector_store_ids: [userVectorStoreId, orgVectorStoreId],
+        },
+      ],
       text: {
         format: zodTextFormat(QueryResultSchema, "search_results"),
       },
     });
 
+    // Check OpenAI parsing result
     if (!apiResponse.output_parsed) {
       await supabase
         .from("chatmessages")
@@ -131,10 +144,11 @@ export async function POST(req: NextRequest) {
         .eq("id", messageId);
       return NextResponse.json(
         { error: "Failed to parse search results" },
-        { status: 500 }
+        { status: 502 }
       );
     }
 
+    // Validate parsed output with Zod
     const parsed = QueryResultSchema.safeParse(apiResponse.output_parsed);
     if (!parsed.success) {
       await supabase
@@ -143,7 +157,7 @@ export async function POST(req: NextRequest) {
         .eq("id", messageId);
       return NextResponse.json(
         { error: "Invalid search result format" },
-        { status: 500 }
+        { status: 502 }
       );
     }
 
@@ -153,15 +167,24 @@ export async function POST(req: NextRequest) {
       string,
       Array<{ file_id: string; description: string }>
     >();
-    const userIdsSet = new Set<string>();
 
     for (const match of matches) {
-      const fileInfo = await openai.vectorStores.files.retrieve(match.file_id, {
-        vector_store_id: vectorStoreId,
-      });
-      const userId = String(fileInfo.attributes?.userId);
+      // Fetch from openai_files to get user_id
+      const { data: fileData, error: fileError } = await supabase
+        .from("user_files")
+        .select("openai_file_id, user_id")
+        .eq("openai_file_id", match.file_id)
+        .single();
+      if (fileError || !fileData) {
+        console.error(
+          "❌ Error fetching file data for match:",
+          match,
+          fileError
+        );
+        continue; // Skip this match if error occurs
+      }
+      const userId = fileData.user_id;
       if (userId) {
-        userIdsSet.add(userId);
         const existing = userMap.get(userId) || [];
         userMap.set(userId, [
           ...existing,
@@ -170,7 +193,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Compose userResults with avatar and name
+    // Convert userMap to array format
     const userResults = Array.from(userMap.entries()).map(
       ([user_id, files]) => ({
         user_id,
@@ -178,17 +201,8 @@ export async function POST(req: NextRequest) {
       })
     );
 
-    // Fetch chatroom_id for user_matches entries
-    const { data: chatroomRow, error: chatroomError } = await supabase
-      .from("chatmessages")
-      .select("chatroom_id")
-      .eq("id", messageId)
-      .single();
-
-    const chatroom_id = chatroomRow?.chatroom_id ?? null;
-    if (chatroomError || !chatroom_id) {
-      console.error("❌ Error fetching chatroom ID:", chatroomError);
-    }
+    // Get chatroom_id fetched earlier
+    const chatroom_id = message.chatroom_id;
 
     // Prepare user_matches rows
     const userMatchesRows = [];

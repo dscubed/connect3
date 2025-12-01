@@ -19,7 +19,7 @@ export const config = {
 
 export async function POST(request: NextRequest) {
   try {
-    // 1. Authenticate user via Supabase Auth
+    // Authenticate user via Supabase Auth
     const authResult = await authenticateRequest(request);
     if (authResult instanceof NextResponse) {
       return authResult; // Return error response
@@ -40,7 +40,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Get vector store ID from environment variables
-    const vectorStoreId = process.env.OPENAI_VECTOR_STORE_ID;
+    const userVectorStoreId = process.env.OPENAI_USER_VECTOR_STORE_ID;
+    const orgVectorStoreId = process.env.OPENAI_ORG_VECTOR_STORE_ID;
+
+    // Get user type from Supabase
+    const { data: userProfile, error: profileError } = await supabase
+      .from("profiles")
+      .select("account_type")
+      .eq("id", userId)
+      .single();
+    if (profileError || !userProfile) {
+      console.error("Error fetching user profile:", profileError);
+      throw new Error("Failed to fetch user profile");
+    }
+    const isOrgUser = userProfile.account_type === "organisation";
+    const vectorStoreId = isOrgUser ? orgVectorStoreId : userVectorStoreId;
 
     if (!vectorStoreId) {
       throw new Error(
@@ -48,7 +62,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Step 1: Upload to OpenAI Vector Store
+    // Upload to OpenAI Vector Store
     console.log("Uploading to vector store...");
 
     const fileObj = new File([text], `summary_${Date.now()}.txt`, {
