@@ -54,7 +54,7 @@ function ChunkCard({
   const needsAttention = !!validation && (hasHardError || showSuggestion);
   return (
     <motion.div
-    className={`relative p-5 min-h-[180px] rounded-2xl border-2 backdrop-blur-md transition-all duration-300 cursor-pointer h-full
+      className={`relative p-5 min-h-[180px] rounded-2xl border-2 backdrop-blur-md transition-all duration-300 cursor-pointer h-full
     ${
       needsAttention
         ? "border-amber-400/70 bg-amber-500/10 hover:border-amber-300 hover:bg-amber-500/15"
@@ -117,9 +117,10 @@ function ChunkCard({
             </div>
             {showSuggestion && (
               <div className="mt-4 space-y-1">
-                  <p className="text-xs text-white">
-                    <span className="font-semibold">Suggestion:</span> {validation.suggestion}
-                  </p>
+                <p className="text-xs text-white">
+                  <span className="font-semibold">Suggestion:</span>{" "}
+                  {validation.suggestion}
+                </p>
               </div>
             )}
             <div className="flex gap-2 mt-4">

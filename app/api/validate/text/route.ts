@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
 
     "reason" MUST be exactly one sentence.
     `.trim();
-    
+
     const response = await client.responses.parse({
       model: "gpt-4o-mini",
       input: [

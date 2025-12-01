@@ -76,9 +76,7 @@ export function ChunksGrid({
     ) {
       updateChunks(
         userChunks.map((chunk) =>
-          chunk.chunk_id === editingChunk
-            ? { ...chunk, validation }
-            : chunk
+          chunk.chunk_id === editingChunk ? { ...chunk, validation } : chunk
         )
       );
 

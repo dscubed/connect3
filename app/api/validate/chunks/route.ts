@@ -4,7 +4,6 @@ import { z } from "zod";
 import { zodTextFormat } from "openai/helpers/zod";
 import { rateLimit } from "@/lib/api/rate-limit";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
-import { X } from "lucide-react";
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -159,7 +158,6 @@ export async function POST(req: NextRequest) {
     - Not matches: pure lists of skills or job duties with no narrative.
 
     If content could reasonably fit multiple valid categories, choose the MOST appropriate one and set categoryMatchesContent = true.
-
 
     8. suggestion
     - Provide ONE short, actionable suggestion only if it would meaningfully improve the chunk.
