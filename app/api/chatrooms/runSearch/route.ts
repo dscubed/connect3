@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
     // Fetch message row
     const { data: message, error: fetchError } = await supabase
       .from("chatmessages")
-      .select("query, content, status, user_id, chatroom_id")
+      .select("query, content, status, user_id, chatroom_id, created_at")
       .eq("id", messageId)
       .single();
 
@@ -89,6 +89,71 @@ export async function POST(req: NextRequest) {
       .update({ status: "processing" })
       .eq("id", messageId);
 
+    // Fetch last 5 completed messages in this chatroom (for history)
+    const RECENT_LIMIT = 5;
+
+    const { data: historyRows, error: historyError } = await supabase
+      .from("chatmessages")
+      .select("query, content, created_at")
+      .eq("chatroom_id", message.chatroom_id)
+      .eq("status", "completed")              // only finished turns
+      .lte("created_at", message.created_at)  // only messages before this one
+      .order("created_at", { ascending: true });
+    
+    if (historyError) {
+      console.error("❌ Error fetching history:", historyError);
+    }
+    
+    const recentHistory = (historyRows ?? []).slice(-RECENT_LIMIT);
+
+    type StoredContent = {
+      result: string;
+      matches: Array<{ description: string }>;
+      followUps: string;
+    };
+
+    function renderAssistantHistory(content: StoredContent): string {
+      const parts = [content.result];
+
+      if (content.matches?.length) {
+        parts.push(
+          "Previously retrieved files:",
+          ...content.matches.map((m: any) => `- ${m.description}`)
+        );
+      }
+
+      if (content.followUps) {
+        parts.push(`Previous follow-up suggestion: ${content.followUps}`);
+      }
+
+      return parts.join("\n");
+    }
+    
+     // Build history messages as proper {role, content} messages
+    const historyMessages = recentHistory.flatMap((row) => {
+      const msgs: { role: "user" | "assistant"; content: string }[] = [];
+    
+      // User side
+      if (row.query) {
+        msgs.push({ role: "user", content: row.query });
+      }
+    
+      // Assistant side 
+      const c = row.content as StoredContent | null;
+    
+      if (c && typeof c === "object") {
+        const assistantText = renderAssistantHistory(c);
+        if (assistantText.trim().length > 0) {
+          msgs.push({
+            role: "assistant",
+            content: assistantText,
+          });
+        }
+      }
+    
+      return msgs;
+    });
+
     // Run OpenAI vector search
     const userVectorStoreId = process.env.OPENAI_USER_VECTOR_STORE_ID;
     const openaiApiKey = process.env.OPENAI_API_KEY;
@@ -98,20 +163,18 @@ export async function POST(req: NextRequest) {
     }
     const openai = new OpenAI({ apiKey: openaiApiKey });
 
-    const apiResponse = await openai.responses.parse({
-      model: "gpt-4o-mini",
-      input: [
-        {
-          role: "system",
-          content: `You are a vector store assistant. Rules:
+    const messagesForOpenAI = [
+      {
+        role: "system" as const,
+        content: `You are a vector store assistant. Rules:
 1. When a user queries, always provide:
    - result: 2-3 sentence summary of relevant content.
    - matches: an array of objects containing:
        * file_id: the actual file_id from the vector store attributes. FORMAT: "file-...", NO .TXT
-       * description: short description of the content and how it relates to the query and describes the user don't mention document
-   - followUps: a single natural language question to continue the conversation
-2. Ignore file_name. Never generate it.
-3. Only include files actually returned by the vector store with attributes.
+       * description: short description of the content and how it relates to the query (do not mention the word "document")
+   - followUps: a single natural language question to continue the conversation.
+2. Ignore file_name entirely.
+3. Only include files actually returned by the vector store.
 4. Return valid JSON strictly in this format:
 {
   "result": "...",
@@ -120,11 +183,18 @@ export async function POST(req: NextRequest) {
   ],
   "followUps": "..."
 }
-5. If you cannot find results, return an empty matches array but still include result and followUps.
-`,
-        },
-        { role: "user", content: `Query: ${message.query}` },
-      ],
+5. If you cannot find results, return an empty matches array but still include result and followUps.`,
+      },
+      ...historyMessages,
+      {
+        role: "user" as const,
+        content: `Query: ${message.query}`,
+      },
+    ];
+
+    const apiResponse = await openai.responses.parse({
+      model: "gpt-4o-mini",
+      input: messagesForOpenAI,
       tools: [
         {
           type: "file_search",
