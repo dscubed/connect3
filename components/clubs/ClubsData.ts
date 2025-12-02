@@ -820,6 +820,9 @@ export const clubsData: ClubData[] = [
     },
     logoUrl:
       "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/msbs.png",
+    socials: {
+      instagram: "https://www.instagram.com/unimelbsbs",
+    },
   },
 
   {
@@ -835,8 +838,10 @@ export const clubsData: ClubData[] = [
     links: {
       club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/10120/",
     },
-    logoUrl:
-      "/clubs/unimelb/lost-and-refound.png",
+    logoUrl: "/clubs/unimelb/lost-and-refound.png",
+    socials: {
+      instagram: "https://www.instagram.com/lostandrefoundmelb",
+    },
   },
 
   {
@@ -850,10 +855,14 @@ export const clubsData: ClubData[] = [
       "The Accounting Students' Association (ASA) strives to become the leading student-run association in preparing students for their accounting and business related careers. ASA was founded in 2001 in conjunction with the Department of Accounting and Business Information Systems at the University of Melbourne. Currently, ASA is a Faculty of Business and Economics (FBE) and University of Melbourne Student Union (UMSU) affiliated student society.",
     category: ["Commerce"],
     links: {
+      website: "https://asaunimelb.com/",
       club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/6029/",
     },
-    logoUrl:
-      "/clubs/unimelb/asa.jpg",
+    logoUrl: "/clubs/unimelb/asa.png",
+    socials: {
+      facebook: "https://www.facebook.com/asamelb",
+      instagram: "https://www.instagram.com/asamelb",
+    },
   },
 
   {
@@ -869,8 +878,11 @@ export const clubsData: ClubData[] = [
     links: {
       club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/6765/",
     },
-    logoUrl:
-      "/clubs/unimelb/umfc.jpg",
+    logoUrl: "/clubs/unimelb/umfc.png",
+    socials: {
+      instagram: "https://www.instagram.com/um_filmcollab",
+      facebook: "https://www.facebook.com/umfilmmakers",
+    },
   },
 
   {
@@ -884,10 +896,14 @@ export const clubsData: ClubData[] = [
       "Whether you know nothing about plants, or you're a proud soil nerd - and whether you enjoy plants indoors, in the veggie patch, on your plate, or in nature – SAPS is a club you can call home.  Sign up to be a part of a group looking to appreciate the plants around us and the soil under our feet, and advocate for conservation and food sovereignty.",
     category: ["Environment"],
     links: {
+      website: "https://www.soilandplantsociety.com/",
       club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/saps/",
     },
-    logoUrl:
-      "/clubs/unimelb/saps.png",
+    logoUrl: "/clubs/unimelb/saps.png",
+    socials: {
+      facebook: "https://www.facebook.com/soilandplantsociety",
+      instagram: "https://www.instagram.com/soilandplantsociety",
+    },
   },
 
   {
@@ -901,10 +917,13 @@ export const clubsData: ClubData[] = [
       "The UniMelb Game Makers' Club is open to everyone interested in making games regardless of experience! We host game-making competitions (game jams), meetups, social events, career events, workshops, and a discord server.  We are dedicated to the production and exhibition of student games, even if you're not a programmer.   So, if you're interested in pursuing game dev as a career, learning it as a hobby, or just think making games is cool: join the UniMelb Game Makers' Club!",
     category: ["Tech"],
     links: {
+      website: "https://linktr.ee/gmc.unimelb",
       club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/9180/",
     },
-    logoUrl:
-      "/clubs/unimelb/game-makers.png",
+    logoUrl: "/clubs/unimelb/game-makers.png",
+    socials: {
+      instagram: "https://www.instagram.com/gmc.unimelb",
+    },
   },
 
   {
@@ -918,10 +937,14 @@ export const clubsData: ClubData[] = [
       "Embrace Education is a non-profit, university student-run organisation that offers free educational support to disadvantaged high school students in Melbourne, Victoria. We help connect club members to high school students who are in need of tutoring and mentoring. We believe that education should be accessible to everyone, regardless of their background. This organisation believes in eradicating education inequality and advocates wholeheartedly for, not only education for all, but also those most impacted by this social injustice, such as marginalised communities and peoples.",
     category: ["Education"],
     links: {
+      website: "https://www.embrace-education.org/",
       club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/6645/",
     },
-    logoUrl:
-      "/clubs/unimelb/embrace-education.jpeg",
+    logoUrl: "/clubs/unimelb/embrace-education.png",
+    socials: {
+      facebook: "https://www.facebook.com/EmbracingEducation",
+      instagram: "https://www.instagram.com/embrace_education",
+    },
   },
 
   {
@@ -935,10 +958,14 @@ export const clubsData: ClubData[] = [
       "At the Piano Society, it is our goal to resurrect the piano scene at the University of Melbourne, and to provide a platform for those talented pianists to hone their craft and perform their art to others. If you are a pianist at Unimelb or other institutions, specialising in classical, contemporary or any other genre of music, this is the club for you!",
     category: ["Arts"],
     links: {
+      website: "https://linktr.ee/unimelb.piano.society",
       club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/10486/",
     },
-    logoUrl:
-      "/clubs/unimelb/piano-society.png",
+    logoUrl: "/clubs/unimelb/piano-society.png",
+    socials: {
+      instagram: "https://www.instagram.com/unimelb.piano.society",
+      discord: "https://discord.com/invite/4xA5yaWtJc",
+    },
   },
 
   {
@@ -952,10 +979,11 @@ export const clubsData: ClubData[] = [
       "The Student Environmental Engineering Club (SEEC) is all about helping environmental engineering students at UWA. We’ve got your back with social events, support, educational resources, networking events, and career tips. We also work to connect students with professors and industry pros so you have everything you need to succeed. Plus, we’re a non-profit run by students who really care about building a strong community.",
     category: ["Environment", "Engineering"],
     links: {
+      website:
+        "https://www.uwastudentguild.com/clubs/student-environmental-engineering-club",
       club: "https://www.uwastudentguild.com/clubs/student-environmental-engineering-club",
     },
-    logoUrl:
-      "/clubs/uwa/seec.jpg",
+    logoUrl: "/clubs/uwa/seec.png",
   },
 
   {
@@ -971,8 +999,14 @@ export const clubsData: ClubData[] = [
     links: {
       club: "https://clubs.msa.monash.edu/organisation/7643/",
     },
-    logoUrl:
-      "/clubs/monash/mees.jpg",
+    logoUrl: "/clubs/monash/mees.png",
+    socials: {
+      facebook:
+        "https://www.facebook.com/monashenvironmentalengineeringsociety/",
+      instagram: "https://www.instagram.com/mees_monashuni",
+      linkedin:
+        "https://www.linkedin.com/company/monash-environmental-engineering-society-mees",
+    },
   },
 
   {
@@ -986,10 +1020,13 @@ export const clubsData: ClubData[] = [
       "Our mission is to celebrate our Sri Lankan heritage and share our culture with our wider community. Along with this, our main focus is to give back to those in need both locally and internationally. We run various charity events throughout the year such as sporting events, concerts and many more.",
     category: ["Cultural"],
     links: {
+      website: "https://clubs.msa.monash.edu/organisation/7203/",
       club: "https://clubs.msa.monash.edu/organisation/7203/",
     },
-    logoUrl:
-      "/clubs/monash/muslcc.png",
+    logoUrl: "/clubs/monash/muslcc.png",
+    socials: {
+      facebook: "https://www.facebook.com/MuslccMonash",
+    },
   },
 
   {
@@ -1005,8 +1042,11 @@ export const clubsData: ClubData[] = [
     links: {
       club: "https://clubs.msa.monash.edu/organisation/7148/",
     },
-    logoUrl:
-      "/clubs/monash/mecc.png",
+    logoUrl: "/clubs/monash/mecc.png",
+    socials: {
+      facebook: "https://www.facebook.com/monash.mecc",
+      instagram: "https://www.instagram.com/mecc_monash",
+    },
   },
 
   {
@@ -1020,9 +1060,96 @@ export const clubsData: ClubData[] = [
       "Our club is for everyone that misses Myanmar, wants to meet wholesome new people, or would like to appreciate our culture! We will be your home away from home!",
     category: ["Cultural"],
     links: {
+      website: "https://umsaunimelb.wixsite.com/umsa",
       club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/7245/",
     },
-    logoUrl:
-      "/clubs/unimelb/msa.png",
+    logoUrl: "/clubs/unimelb/msa.png",
+    socials: {
+      facebook: "https://www.facebook.com/umsa.unimelb",
+      instagram: "https://www.instagram.com/mysa.unimelb",
+    },
+  },
+
+  {
+    id: "mupa",
+    name: "MUPA",
+    full_name: "Melbourne University Psychology Association",
+    location: "Melbourne, Australia",
+    description:
+      "MUPA is the official student-run association for psychology students at the University of Melbourne, providing academic support, networking opportunities, and social events.",
+    fullDescription:
+      "The Melbourne University Psychology Association (MUPA) is the official student-run association representing psychology students at the University of Melbourne. We aim to enhance the university experience of psychology students by providing academic support, professional development opportunities, and social events. Whether you're majoring in psychology, considering it as a career path, or simply interested in the field, MUPA welcomes all students to join our vibrant community. We host workshops, guest speaker events, networking nights, and social gatherings throughout the year.",
+    category: ["Science"],
+    links: {
+      website: "https://www.mupaunimelb.com/",
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/mupa/",
+    },
+    logoUrl: "/clubs/unimelb/mupa.png",
+    socials: {
+      facebook: "https://www.facebook.com/MUPAUnimelb",
+      instagram: "https://www.instagram.com/mupa_unimelb",
+    },
+  },
+
+  {
+    id: "momu",
+    name: "MoMU",
+    full_name: "Malaysians of Melbourne University",
+    location: "Melbourne, Australia",
+    description:
+      "MoMU is a vibrant community that celebrates Malaysian culture and brings together Malaysian students at the University of Melbourne.",
+    fullDescription:
+      "Malaysians of Melbourne University (MoMU) is one of the largest and most active cultural clubs at the University of Melbourne. We are a community of Malaysian students and friends who celebrate our shared heritage while embracing the multicultural environment of Melbourne. MoMU organizes a wide range of events throughout the year including cultural festivals, sports competitions, networking sessions, and social gatherings. Whether you're Malaysian, have Malaysian heritage, or are simply interested in Malaysian culture, you're welcome to join our family. We aim to make your university experience memorable while keeping you connected to home.",
+    category: ["Cultural"],
+    links: {
+      website: "https://www.momumomu.org/",
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/7141/",
+    },
+    logoUrl: "/clubs/unimelb/momu.png",
+    socials: {
+      facebook: "https://www.facebook.com/momumomu/",
+      instagram: "https://www.instagram.com/momuians",
+      linkedin: "https://www.linkedin.com/company/malaysians-of-melbourne-university-momu/",
+    },
+  },
+
+  {
+    id: "oxfam",
+    name: "Oxfam UniMelb",
+    full_name: "Oxfam University of Melbourne",
+    location: "Melbourne, Australia",
+    description:
+      "Oxfam UniMelb is a student-run club dedicated to raising awareness about global poverty and social justice issues while supporting Oxfam's mission.",
+    fullDescription:
+      "Oxfam University of Melbourne is a student-run volunteer group affiliated with Oxfam Australia, one of the world's leading humanitarian organizations. We are passionate about fighting inequality and poverty, and work to raise awareness about social justice issues affecting communities around the world. Our club organizes fundraising events, advocacy campaigns, educational workshops, and volunteer opportunities. We believe that young people have the power to create positive change, and we provide a platform for students to get involved in meaningful social action. Join us to make a difference in the fight against global poverty and injustice.",
+    category: ["Cultural"],
+    links: {
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/7309/",
+    },
+    logoUrl: "/clubs/unimelb/oxfam.png",
+    socials: {
+      facebook: "https://www.facebook.com/OxfamMU",
+      instagram: "https://www.instagram.com/oxfamunimelb",
+    },
+  },
+
+  {
+    id: "muhfh",
+    name: "MUHFH",
+    full_name: "Melbourne University Habitat for Humanity",
+    location: "Melbourne, Australia",
+    description:
+      "MUHFH is a student-led organization working to eliminate poverty housing and homelessness through volunteer projects and fundraising initiatives.",
+    fullDescription:
+      "Melbourne University Habitat for Humanity (MUHFH) is a campus chapter of Habitat for Humanity, a global non-profit organization dedicated to building homes, communities, and hope. We are a group of passionate students committed to addressing housing poverty and homelessness both locally and internationally. Throughout the year, we organize volunteering opportunities, fundraising events, awareness campaigns, and our signature Global Village Trip where students travel overseas to help build homes for families in need. MUHFH provides students with the opportunity to make a tangible difference in people's lives while developing leadership skills and forming lifelong friendships. No building experience is necessary - just bring your enthusiasm and willingness to help!",
+    category: ["Cultural"],
+    links: {
+      club: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/6877/",
+    },
+    logoUrl: "/clubs/unimelb/muhfh.png",
+    socials: {
+      facebook: "https://www.facebook.com/hfh.unimelb",
+      instagram: "https://www.instagram.com/muhfh/?hl=en",
+    },
   },
 ];
