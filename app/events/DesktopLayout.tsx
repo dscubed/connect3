@@ -4,15 +4,17 @@ import { EventDetailPanel } from "@/components/events/EventDetailPanel";
 import EventsHeader from "@/components/events/HeaderSection";
 import EventFilters from "@/components/events/EventFilters";
 import { EventListCard } from "@/components/events/EventListCard";
-import { HostedEvent } from "@/types/events/event";
+import { EventCategory, HostedEvent } from "@/types/events/event";
 import { useEventsWithInfiniteScroll } from "@/hooks/useEventsWithInfiniteScroll";
 import { useEffect, useRef, useState } from "react";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 
 export default function DesktopLayout() {
   const eventListRef = useRef<HTMLDivElement>(null);
-  const { events, error, isLoading, isValidating, setSize } = useEventsWithInfiniteScroll(eventListRef);
+  const { events, error, isLoading, isValidating } = useEventsWithInfiniteScroll(eventListRef);
   const [selectedEvent, setSelectedEvent] = useState<HostedEvent | null>(null);
+  const [search, setSearch] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<EventCategory | "All">("All");
   const [loaded, setLoaded] = useState<boolean>(false);
 
   useEffect(() => {
@@ -37,22 +39,28 @@ export default function DesktopLayout() {
     )
   }
 
+  // perform better filtering by name
+  const filtered = events.filter(event => {
+    const searchPredicate = search.trim() === "" ||
+     event.name.toLowerCase().includes(search.toLowerCase())
+    return searchPredicate
+  }).map(event => ({ ...event, weight: event.name.toLowerCase().indexOf(search.toLowerCase())}))
+  .sort((a, b) => a.weight - b.weight);
+
   return (
-    <div className="hidden lg:flex flex-1 overflow-hidden">
-      {/* Left Panel - Club List */}
+    <div className="flex flex-1 overflow-hidden">
+      {/* Left Panel - Event List */}
       <div className="w-80 xl:w-96 border-r border-white/10 bg-black/50 backdrop-blur-sm overflow-hidden flex flex-col">
-        {/* Header */}
         <EventsHeader eventCount={events.length} isLoading={isValidating} />
-        {/* Search and Category Filter */}
-        {/* <EventFilters
+        <EventFilters
           search={search}
           setSearch={setSearch}
           selectedCategory={selectedCategory}
           setSelectedCategory={setSelectedCategory}
-        /> */}
+        />
 
-        <div className="hidden invisible lg:block lg:visible flex-1 overflow-y-auto p-5 space-y-3 scrollbar-hide" ref={eventListRef}>
-          {events.map((event: HostedEvent) => (
+        <div className="flex-1 overflow-y-auto p-5 space-y-3 scrollbar-hide" ref={eventListRef}>
+          {filtered.map((event: HostedEvent) => (
             <EventListCard 
               key={event.id}
               event={event} 
@@ -78,7 +86,7 @@ export default function DesktopLayout() {
         </div>
       </div>
 
-      {/* Right Panel - Club Details */}
+      {/* Right Panel - Event Details */}
       <div className="flex-1 bg-black overflow-hidden">
         <div className="h-full overflow-y-auto p-6 lg:p-8 scrollbar-hide">
           <AnimatePresence mode="wait">

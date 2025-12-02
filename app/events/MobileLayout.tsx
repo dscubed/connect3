@@ -11,7 +11,7 @@ import { CubeLoader } from "@/components/ui/CubeLoader";
 export default function MobileLayout() {
   const eventListRef = useRef<HTMLDivElement>(null);
   const [showDetails, setShowDetails] = useState(false);
-  const { events, error, isLoading, isValidating, setSize } = useEventsWithInfiniteScroll(eventListRef);
+  const { events, error, isLoading, isValidating } = useEventsWithInfiniteScroll(eventListRef);
   const [selectedEvent, setSelectedEvent] = useState<HostedEvent | null>(null);
 
   const handleEventSelect = (event: HostedEvent) => {
@@ -34,7 +34,6 @@ export default function MobileLayout() {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Mobile: Show either list or details */}
       <div className="flex-1 overflow-hidden">
         <AnimatePresence mode="wait">
           {!showDetails ? (
@@ -45,7 +44,6 @@ export default function MobileLayout() {
               exit={ { opacity: 0, x: -20 } }
               className="h-full flex flex-col bg-black/50 backdrop-blur-sm"
             >
-              {/* Header */}
               <EventsHeader eventCount={events.length} isLoading={isValidating} />
 
               {/* Search and Category Filter */}

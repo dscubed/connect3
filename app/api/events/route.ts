@@ -29,10 +29,6 @@ export async function GET(request: NextRequest) {
             .select("*")
             .order("created_at", { ascending: false })
 
-        if (search) {
-            query = query.ilike("name", `%${search}%`)
-        }
-
         if (cursor) {
             query = query.lt("created_at", cursor);
         }
