@@ -1,26 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuthStore } from "@/stores/authStore";
-
-interface SearchResults {
-  result: string;
-  matches: {
-    user_id: string;
-    full_name: string;
-    avatar_url?: string;
-    files: { file_id: string; description: string }[];
-  }[];
-  followUps: string;
-}
-
-interface ChatMessage {
-  id: string;
-  query: string;
-  chatroom_id: string;
-  content: SearchResults | null;
-  created_at: string;
-  user_id: string;
-  status: "pending" | "processing" | "completed" | "failed";
-}
+import { ChatMessage, SearchResults } from "../types";
 
 export function useTransformMessages(messages: ChatMessage[]) {
   const [transformedMessages, setTransformedMessages] = useState<ChatMessage[]>(
