@@ -7,7 +7,7 @@ export function useChatroom(chatroomId: string | null) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { user, makeAuthenticatedRequest } = useAuthStore();
+  const { user, makeAuthenticatedRequest, getSupabaseClient } = useAuthStore();
 
   // Run AI Search for a message
   const triggerSearch = useCallback(
@@ -47,19 +47,25 @@ export function useChatroom(chatroomId: string | null) {
       if (!query.trim() || !chatroomId || !user) return;
 
       try {
-        // Add message and update state to pending
-        const addRes = await makeAuthenticatedRequest(
-          "/api/chatrooms/addMessage",
-          {
-            method: "POST",
-            body: JSON.stringify({ chatroomId, query, userId: user.id }),
-          }
-        );
-        const addData = await addRes.json();
+        // Add message to supabase
+        const supabase = getSupabaseClient();
+        const addRes = await supabase
+          .from("chatmessages")
+          .insert({
+            chatroom_id: chatroomId,
+            query: query,
+            content: null, // Will be populated by background search
+            user_id: user.id,
+            status: "pending", // Initial status
+          })
+          .select()
+          .single();
+        const addData = addRes.data;
 
-        if (!addData.success) return;
+        if (!addData) return;
 
-        const newMessage = addData.message;
+        // Update local state
+        const newMessage = addData as ChatMessage;
         setMessages((prev) => [...prev, newMessage]);
 
         // Trigger AI Search
@@ -68,7 +74,7 @@ export function useChatroom(chatroomId: string | null) {
         console.error("Send message error:", error);
       }
     },
-    [chatroomId, user, makeAuthenticatedRequest, triggerSearch]
+    [chatroomId, user, getSupabaseClient, triggerSearch]
   );
 
   // Load Chatroom Messages
@@ -81,13 +87,16 @@ export function useChatroom(chatroomId: string | null) {
     const load = async () => {
       setIsLoading(true);
       try {
-        const res = await makeAuthenticatedRequest(
-          `/api/chatrooms/getMessages?chatroomId=${chatroomId}`
-        );
-        const data = await res.json();
+        const supabase = getSupabaseClient();
 
-        if (data.success) {
-          const loadedMessages = data.messages as ChatMessage[];
+        const { data: messages, error } = await supabase
+          .from("chatmessages")
+          .select("*")
+          .eq("chatroom_id", chatroomId)
+          .order("created_at", { ascending: true });
+
+        if (!error && messages) {
+          const loadedMessages = messages as ChatMessage[];
           setMessages(loadedMessages);
 
           // Check first message for pending status (Fresh from Home Page)
@@ -104,7 +113,7 @@ export function useChatroom(chatroomId: string | null) {
     };
 
     load();
-  }, [chatroomId, user, makeAuthenticatedRequest, triggerSearch]);
+  }, [chatroomId, user, getSupabaseClient, triggerSearch]);
 
   return { messages, isLoading, addNewMessage };
 }

@@ -24,7 +24,7 @@ export function SearchBar() {
         toast.info("Creating guest session...");
         const supabase = useAuthStore.getState().getSupabaseClient();
         const { error } = await supabase.auth.signInAnonymously();
-        console.log("🚀 Guest session created:", error);
+        console.log("Guest session created:", error);
         if (error) {
           toast.error("Failed to create guest session. Please try again.");
           setCreatingChatroom(false);
@@ -32,9 +32,14 @@ export function SearchBar() {
         }
       }
 
-      console.log("🚀 Creating chatroom for query:", searchQuery);
+      console.log("Creating chatroom for query:", searchQuery);
+      const createResponse = await createChatroom(searchQuery);
 
-      const { chatroomId } = await createChatroom(searchQuery);
+      if (!createResponse) {
+        setCreatingChatroom(false);
+        return;
+      }
+      const { chatroomId } = createResponse;
 
       // Navigate immediately
       router.push(`/search?chatroom=${chatroomId}`);
