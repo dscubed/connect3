@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Sidebar from "@/components/sidebar/Sidebar";
 import { CubeLoader } from "@/components/ui/CubeLoader";
@@ -8,34 +8,12 @@ import SearchInput from "@/components/search/SearchInput";
 import ShareButton from "@/components/search/ShareButton";
 import { UserProfile } from "@/components/search/UserProfile/UserProfile";
 import { useAuthStore } from "@/stores/authStore";
-import { useChatroomData } from "@/components/search/hooks/useChatroomData";
-import { useSearch } from "@/components/search/hooks/useSearch";
 import { ChunkData } from "@/components/profile/chunks/ChunkUtils";
-
-interface MessageContent {
-  result: string;
-  matches: {
-    user_id: string;
-    full_name: string;
-    files: { file_id: string; description: string }[];
-  }[];
-  followUps: string;
-}
-
-interface ChatMessage {
-  id: string;
-  query: string;
-  chatroom_id: string;
-  content: MessageContent | null;
-  created_at: string;
-  user_id: string;
-  status: "pending" | "processing" | "completed" | "failed";
-}
+import { useChatroom } from "@/components/search/hooks/useChatroom";
 
 export default function SearchPageContent() {
   const [mounted, setMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [, setIsLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<{
     id: string;
     name: string;
@@ -47,16 +25,12 @@ export default function SearchPageContent() {
     chunkLoading?: boolean;
   } | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [chatroomId, setChatroomId] = useState<string | null>(null);
-  const [allMessages, setAllMessages] = useState<ChatMessage[]>([]);
 
-  const {
-    user,
-    loading: isAuthLoading,
-    makeAuthenticatedRequest,
-  } = useAuthStore();
+  const { makeAuthenticatedRequest } = useAuthStore();
+
   const searchParams = useSearchParams();
-  const chatroomParam = mounted ? searchParams?.get("chatroom") || "" : "";
+  const chatroomId = mounted ? searchParams?.get("chatroom") || null : null;
+  const { messages, addNewMessage } = useChatroom(chatroomId);
 
   // Handler for message thread users
   const handleMessageUserClick = (user: {
@@ -70,6 +44,11 @@ export default function SearchPageContent() {
     setSelectedUser({ ...user, chunkLoading: true, chunks: [] });
     setProfileOpen(true);
   };
+
+  // Ensure component is mounted (for Next.js SSR)
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Fetch chunks when selectedUser changes
   useEffect(() => {
@@ -97,63 +76,6 @@ export default function SearchPageContent() {
       fetchChunks();
     }
   }, [selectedUser?.id, selectedUser?.chunkLoading, makeAuthenticatedRequest]);
-
-  // 1. Simplified Data Loading Hook
-  const { loadChatroomData } = useChatroomData({
-    onMessagesLoaded: useCallback((messages) => {
-      setAllMessages(messages as ChatMessage[]);
-    }, []),
-    onLoadingChange: setIsLoading,
-  });
-
-  // 2. Simplified Search Hook (Direct UI Updates)
-  const { handleNewSearch } = useSearch({
-    chatroomId,
-    user,
-    onMessageAdded: useCallback((newMessage: ChatMessage) => {
-      // Add the pending message immediately
-      setAllMessages((prev) => [...prev, newMessage]);
-      console.log("✅ New message added locally:", newMessage.id);
-    }, []),
-    onMessageUpdated: useCallback((updatedMessage: ChatMessage) => {
-      // Update the message when AI finishes
-      setAllMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === updatedMessage.id ? { ...msg, ...updatedMessage } : msg
-        )
-      );
-    }, []),
-  });
-
-  // Ensure component is mounted (for Next.js SSR)
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Main effect to handle URL parameters and initialization
-  useEffect(() => {
-    if (!mounted) return;
-
-    const initializeSearch = async () => {
-      if (isAuthLoading) {
-        return;
-      }
-
-      if (!user) {
-        setIsLoading(false);
-        return;
-      }
-
-      if (chatroomParam) {
-        setChatroomId(chatroomParam);
-        await loadChatroomData(chatroomParam);
-      } else {
-        setIsLoading(false);
-      }
-    };
-
-    initializeSearch();
-  }, [mounted, chatroomParam, user, isAuthLoading, loadChatroomData]);
 
   if (!mounted) {
     return (
@@ -183,10 +105,10 @@ export default function SearchPageContent() {
             }}
           >
             {/* All Messages Thread */}
-            {allMessages.length > 0 && (
+            {messages.length > 0 && (
               <div className="w-full max-w-none">
                 <MessageList
-                  messages={allMessages}
+                  messages={messages}
                   onUserClick={handleMessageUserClick}
                 />
               </div>
@@ -195,7 +117,7 @@ export default function SearchPageContent() {
 
           {/* Fixed search bar at bottom */}
           <div className="w-full px-4">
-            <SearchInput onSearch={handleNewSearch} chatroomId={chatroomId} />
+            <SearchInput onSearch={addNewMessage} chatroomId={chatroomId} />
           </div>
         </main>
       </div>

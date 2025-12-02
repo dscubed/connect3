@@ -3,10 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuthStore } from "@/stores/authStore";
-import {
-  createChatroom,
-  triggerBackgroundSearch,
-} from "@/lib/chatrooms/chatroomUtils";
+import { createChatroom } from "@/lib/chatrooms/chatroomUtils";
 
 export function SearchBar() {
   const [query, setQuery] = useState("");
@@ -37,13 +34,10 @@ export function SearchBar() {
 
       console.log("🚀 Creating chatroom for query:", searchQuery);
 
-      const { chatroomId, messageId } = await createChatroom(searchQuery);
+      const { chatroomId } = await createChatroom(searchQuery);
 
       // Navigate immediately
       router.push(`/search?chatroom=${chatroomId}`);
-
-      // Trigger background search (fire and forget)
-      triggerBackgroundSearch(messageId);
     } catch (error) {
       console.error("❌ Error creating chatroom:", error);
       toast.error("Failed to create chatroom. Please try again.");
