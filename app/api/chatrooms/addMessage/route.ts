@@ -92,6 +92,7 @@ export async function POST(request: NextRequest) {
         content: null, // Will be populated by background search
         created_at: message.created_at,
         user_id: message.user_id,
+        status: message.status,
       },
     });
   } catch (error) {

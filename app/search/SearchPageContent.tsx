@@ -8,7 +8,6 @@ import SearchInput from "@/components/search/SearchInput";
 import ShareButton from "@/components/search/ShareButton";
 import { UserProfile } from "@/components/search/UserProfile/UserProfile";
 import { useAuthStore } from "@/stores/authStore";
-import { useRealtimeSubscription } from "@/components/search/hooks/useRealtimeSubscription";
 import { useChatroomData } from "@/components/search/hooks/useChatroomData";
 import { useSearch } from "@/components/search/hooks/useSearch";
 import { ChunkData } from "@/components/profile/chunks/ChunkUtils";
@@ -36,7 +35,6 @@ interface ChatMessage {
 export default function SearchPageContent() {
   const [mounted, setMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  //   const [isLoading, setIsLoading] = useState(true);
   const [, setIsLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<{
     id: string;
@@ -60,7 +58,7 @@ export default function SearchPageContent() {
   const searchParams = useSearchParams();
   const chatroomParam = mounted ? searchParams?.get("chatroom") || "" : "";
 
-  // Handler for message thread users (enhanced format)
+  // Handler for message thread users
   const handleMessageUserClick = (user: {
     id: string;
     name: string;
@@ -100,37 +98,31 @@ export default function SearchPageContent() {
     }
   }, [selectedUser?.id, selectedUser?.chunkLoading, makeAuthenticatedRequest]);
 
-  // Custom hooks for cleaner logic separation
-  const { subscribeToChatroom, unsubscribe } = useRealtimeSubscription({
-    onMessageUpdate: useCallback((updatedMessage) => {
-      setAllMessages((prevMessages) =>
-        prevMessages.map((msg) =>
-          msg.id === updatedMessage.id
-            ? { ...msg, ...(updatedMessage as ChatMessage) }
-            : msg
-        )
-      );
-    }, []),
-    onNewMessage: useCallback((newMessage) => {
-      setAllMessages((prevMessages) => [
-        ...prevMessages,
-        newMessage as ChatMessage,
-      ]);
-    }, []),
-    onLoadingChange: setIsLoading,
-  });
-
+  // 1. Simplified Data Loading Hook
   const { loadChatroomData } = useChatroomData({
     onMessagesLoaded: useCallback((messages) => {
       setAllMessages(messages as ChatMessage[]);
     }, []),
     onLoadingChange: setIsLoading,
-    subscribeToChatroom,
   });
 
+  // 2. Simplified Search Hook (Direct UI Updates)
   const { handleNewSearch } = useSearch({
     chatroomId,
     user,
+    onMessageAdded: useCallback((newMessage: ChatMessage) => {
+      // Add the pending message immediately
+      setAllMessages((prev) => [...prev, newMessage]);
+      console.log("✅ New message added locally:", newMessage.id);
+    }, []),
+    onMessageUpdated: useCallback((updatedMessage: ChatMessage) => {
+      // Update the message when AI finishes
+      setAllMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === updatedMessage.id ? { ...msg, ...updatedMessage } : msg
+        )
+      );
+    }, []),
   });
 
   // Ensure component is mounted (for Next.js SSR)
@@ -138,50 +130,30 @@ export default function SearchPageContent() {
     setMounted(true);
   }, []);
 
-  // Main effect to handle URL parameters
+  // Main effect to handle URL parameters and initialization
   useEffect(() => {
-    if (!mounted) return; // Wait until mounted to avoid SSR issues
+    if (!mounted) return;
 
     const initializeSearch = async () => {
-      // Wait for auth to finish loading
       if (isAuthLoading) {
-        console.log("⏳ Auth still loading...");
         return;
       }
 
-      // Check if user exists after loading is done
       if (!user) {
-        console.log("❌ No user found after auth loaded");
         setIsLoading(false);
         return;
       }
 
-      console.log("✅ User authenticated:", user.id);
-
       if (chatroomParam) {
-        console.log("📂 Using chatroom-based search:", chatroomParam);
         setChatroomId(chatroomParam);
         await loadChatroomData(chatroomParam);
       } else {
-        console.log("❌ No chatroom parameter provided");
         setIsLoading(false);
       }
     };
 
     initializeSearch();
-
-    // Cleanup subscription on unmount or when chatroom changes
-    return () => {
-      unsubscribe();
-    };
-  }, [
-    mounted,
-    chatroomParam,
-    user,
-    isAuthLoading,
-    loadChatroomData,
-    unsubscribe,
-  ]);
+  }, [mounted, chatroomParam, user, isAuthLoading, loadChatroomData]);
 
   if (!mounted) {
     return (
