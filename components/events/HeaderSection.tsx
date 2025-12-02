@@ -1,4 +1,9 @@
-export default function EventsHeader({ eventCount }: { eventCount: number } ) {
+interface HeaderSectionProps {
+  eventCount: number;
+  isLoading: boolean; 
+}
+
+export default function EventsHeader({ eventCount, isLoading }: HeaderSectionProps ) {
   return (
     <div className="pl-20 sm:ml-0 border-b border-white/10 p-4 sm:p-6 lg:p-7 flex-shrink-0 bg-black/30">
       <div className="flex items-center gap-3 mb-2 sm:mb-3">
@@ -8,7 +13,7 @@ export default function EventsHeader({ eventCount }: { eventCount: number } ) {
         </h1>
       </div>
       <p className="text-white/50 text-xs sm:text-sm font-medium">
-        {eventCount} events available
+        {isLoading ? "Loading events" : `${eventCount} events available` } 
       </p>
     </div>
   )

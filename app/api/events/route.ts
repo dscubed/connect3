@@ -7,14 +7,9 @@ const supabase = createClient(
   process.env.SUPABASE_SECRET_KEY!
 );
 
-interface RouteParameters {
-    params: Promise<{ eventId: string }>;
-}
-
 /**
- * Paginated retrieval of many events
+ * Cursor based paginated retrieval of many events
  * @param request 
- * @param param1 
  * @returns 
  */
 export async function GET(request: NextRequest) {
@@ -26,18 +21,23 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const cursor = searchParams.get("cursor");
     const limit = parseInt(searchParams.get("limit") || "10");
-
+    const search = searchParams.get("search");
+     
     try {
         let query = supabase
             .from("events")
             .select("*")
             .order("created_at", { ascending: false })
-            .limit(limit + 1)
 
-        // if cursor is provided take only items before it
+        if (search) {
+            query = query.ilike("name", `%${search}%`)
+        }
+
         if (cursor) {
             query = query.lt("created_at", cursor);
         }
+
+        query = query.limit(limit + 1);
 
         const { data, error } = await query;
 
@@ -45,13 +45,11 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        // check if more pages exist
-        const hasNext = data.length > limit; 
+        const morePagesExist = data.length > limit; 
 
-        // if it does remove the final item and use its timestamp as the cursor
-        const events = hasNext ? data.slice(0, limit) : data;
-        const newCursor = hasNext ? data[limit - 1].created_at : null;
-        
+        // if it more pages exist remove the final item and use its timestamp as the cursor
+        const events = morePagesExist ? data.slice(0, limit) : data;
+        const newCursor = morePagesExist ? data[limit - 1].created_at : null;
         return NextResponse.json({ events: events, cursor: newCursor });
     } catch (error) {
         return NextResponse.json({ error: error }, { status: 500 });

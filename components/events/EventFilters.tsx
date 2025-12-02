@@ -43,7 +43,7 @@ export default function EventFilters({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-full max-h-56 overflow-y-auto scrollbar-hide">
-          {categoryOptions.slice(0, 5).map((cat) => (
+          {categoryOptions.map((cat) => (
             <DropdownMenuItem
               key={cat}
               onClick={() => setSelectedCategory(cat)}
@@ -52,20 +52,6 @@ export default function EventFilters({
               {cat}
             </DropdownMenuItem>
           ))}
-          {categoryOptions.length > 5 && (
-            <>
-              <div className="border-t border-white/10 my-1" />
-              {categoryOptions.slice(5).map((cat) => (
-                <DropdownMenuItem
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={cat === selectedCategory ? "font-bold" : ""}
-                >
-                  {cat}
-                </DropdownMenuItem>
-              ))}
-            </>
-          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
