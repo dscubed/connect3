@@ -6,6 +6,8 @@ import { zodTextFormat } from "openai/helpers/zod.mjs";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
 import { SearchResults } from "@/components/search/types";
 
+// Allow up to 5 minutes for execution (Vercel Pro/Hobby with Fluid Compute)
+export const maxDuration = 300;
 export const config = {
   runtime: "edge",
 };
@@ -27,19 +29,12 @@ const supabase = createClient(
   process.env.SUPABASE_SECRET_KEY!
 );
 
-// --- User details interface ---
-export interface UserDetails {
-  id: string;
-  full_name: string;
-  avatar_url: string;
-}
-
 export async function POST(req: NextRequest) {
   try {
     // Authenticate user
     const authResult = await authenticateRequest(req);
     if (authResult instanceof NextResponse) {
-      return authResult; // Return error response
+      return authResult;
     }
 
     const user = authResult.user;
@@ -74,16 +69,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // If already completed, return cached
-    if (message.status === "completed" && message.content) {
-      return NextResponse.json({
-        success: true,
-        content: message.content,
-        status: "completed",
-        cached: true,
-      });
-    }
-
     // Mark as processing
     await supabase
       .from("chatmessages")
@@ -97,8 +82,8 @@ export async function POST(req: NextRequest) {
       .from("chatmessages")
       .select("query, content, created_at")
       .eq("chatroom_id", message.chatroom_id)
-      .eq("status", "completed") // only finished messages
-      .lte("created_at", message.created_at) // messages before this one
+      .eq("status", "completed")
+      .lte("created_at", message.created_at)
       .order("created_at", { ascending: true });
 
     if (historyError) {
@@ -109,7 +94,6 @@ export async function POST(req: NextRequest) {
 
     // collect all user_ids that appear in matches
     const allUserIds = new Set<string>();
-
     for (const row of recentHistory) {
       const c = row.content as SearchResults | null;
       if (c?.matches) {
@@ -120,18 +104,15 @@ export async function POST(req: NextRequest) {
     }
 
     let userNameMap: Record<string, string> = {};
-
     if (allUserIds.size > 0) {
-      const { data: profiles, error: profilesError } = await supabase
-        .from("profiles") // adjust table name if needed
+      const { data: profiles } = await supabase
+        .from("profiles")
         .select("id, first_name, last_name")
         .in("id", Array.from(allUserIds));
 
-      if (profilesError) {
-        console.error("❌ Error fetching user names:", profilesError);
-      } else {
+      if (profiles) {
         userNameMap = Object.fromEntries(
-          (profiles ?? []).map((p) => [
+          profiles.map((p) => [
             p.id,
             `${p.first_name} ${p.last_name ? p.last_name : ""}`.trim(),
           ])
@@ -144,53 +125,35 @@ export async function POST(req: NextRequest) {
       userNameMap: Record<string, string>
     ): string {
       const parts: string[] = [];
+      if (content.result) parts.push(content.result);
 
-      // main answer
-      if (content.result) {
-        parts.push(content.result);
-      }
-
-      // previously retrieved files with user names
       const fileLines: string[] = [];
-
       for (const group of content.matches ?? []) {
         const displayName =
           userNameMap[group.user_id] || `User ${group.user_id.slice(0, 8)}`;
-
         for (const file of group.files ?? []) {
           fileLines.push(`- ${displayName}: ${file.description}`);
         }
       }
-
       if (fileLines.length > 0) {
         parts.push("Previously retrieved files:", ...fileLines);
       }
-
-      // previous follow-up
       if (content.followUps) {
         parts.push(`Previous follow-up suggestion: ${content.followUps}`);
       }
-
       return parts.join("\n");
     }
 
-    // Build history messages as proper {role, content} messages
     const historyMessages = recentHistory.flatMap((row) => {
       const msgs: { role: "user" | "assistant"; content: string }[] = [];
-
-      if (row.query) {
-        msgs.push({ role: "user", content: row.query });
-      }
-
+      if (row.query) msgs.push({ role: "user", content: row.query });
       const c = row.content as SearchResults | null;
-
       if (c && typeof c === "object") {
         const assistantText = renderAssistantHistory(c, userNameMap);
         if (assistantText.trim().length > 0) {
           msgs.push({ role: "assistant", content: assistantText });
         }
       }
-
       return msgs;
     });
 
@@ -198,12 +161,13 @@ export async function POST(req: NextRequest) {
     const userVectorStoreId = process.env.OPENAI_USER_VECTOR_STORE_ID;
     const openaiApiKey = process.env.OPENAI_API_KEY;
     const orgVectorStoreId = process.env.OPENAI_ORG_VECTOR_STORE_ID;
+
     if (!userVectorStoreId || !openaiApiKey || !orgVectorStoreId) {
       return NextResponse.json({ error: "Missing env vars" }, { status: 500 });
     }
     const openai = new OpenAI({ apiKey: openaiApiKey });
 
-    const messagesForOpenAI = [
+    const llmMessages = [
       {
         role: "system" as const,
         content: `You are a vector store assistant. Rules:
@@ -234,7 +198,7 @@ export async function POST(req: NextRequest) {
 
     const apiResponse = await openai.responses.parse({
       model: "gpt-4o-mini",
-      input: messagesForOpenAI,
+      input: llmMessages,
       tools: [
         {
           type: "file_search",
@@ -246,32 +210,16 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Check OpenAI parsing result
     if (!apiResponse.output_parsed) {
-      await supabase
-        .from("chatmessages")
-        .update({ status: "failed" })
-        .eq("id", messageId);
-      return NextResponse.json(
-        { error: "Failed to parse search results" },
-        { status: 502 }
-      );
+      throw new Error("Failed to parse search results");
     }
 
-    // Validate parsed output with Zod
     const parsed = QueryResultSchema.safeParse(apiResponse.output_parsed);
     if (!parsed.success) {
-      await supabase
-        .from("chatmessages")
-        .update({ status: "failed" })
-        .eq("id", messageId);
-      return NextResponse.json(
-        { error: "Invalid search result format" },
-        { status: 502 }
-      );
+      throw new Error("Invalid search result format");
     }
 
-    // Group matches by userId and collect userIds
+    // Group matches by userId
     const matches = parsed.data.matches;
     const userMap = new Map<
       string,
@@ -279,31 +227,21 @@ export async function POST(req: NextRequest) {
     >();
 
     for (const match of matches) {
-      // Fetch from openai_files to get user_id
-      const { data: fileData, error: fileError } = await supabase
+      const { data: fileData } = await supabase
         .from("user_files")
         .select("openai_file_id, user_id")
         .eq("openai_file_id", match.file_id)
         .single();
-      if (fileError || !fileData) {
-        console.error(
-          "❌ Error fetching file data for match:",
-          match,
-          fileError
-        );
-        continue; // Skip this match if error occurs
-      }
-      const userId = fileData.user_id;
-      if (userId) {
-        const existing = userMap.get(userId) || [];
-        userMap.set(userId, [
+
+      if (fileData?.user_id) {
+        const existing = userMap.get(fileData.user_id) || [];
+        userMap.set(fileData.user_id, [
           ...existing,
           { file_id: match.file_id, description: match.description },
         ]);
       }
     }
 
-    // Convert userMap to array format
     const userResults = Array.from(userMap.entries()).map(
       ([user_id, files]) => ({
         user_id,
@@ -311,10 +249,7 @@ export async function POST(req: NextRequest) {
       })
     );
 
-    // Get chatroom_id fetched earlier
-    const chatroom_id = message.chatroom_id;
-
-    // Prepare user_matches rows
+    // Insert user_matches
     const userMatchesRows = [];
     for (const match of userResults) {
       const { user_id, files } = match;
@@ -323,71 +258,62 @@ export async function POST(req: NextRequest) {
         userMatchesRows.push({
           user_id,
           openai_file_id: file.file_id,
-          chatroom_id: chatroom_id,
+          chatroom_id: message.chatroom_id,
           chatmessage_id: messageId,
           queried_by: user.id,
         });
       }
     }
 
-    // Bulk insert into user_matches table
     if (userMatchesRows.length > 0) {
-      const { error: userMatchesError } = await supabase
-        .from("user_matches")
-        .insert(userMatchesRows);
-
-      if (userMatchesError) {
-        console.error("❌ Error inserting user_matches:", userMatchesError);
-        // Optionally handle/log error, but don't fail the main request
-      }
+      await supabase.from("user_matches").insert(userMatchesRows);
     }
 
     // Update message content and status
-    const { error: updateError } = await supabase
+    const finalContent = {
+      result: parsed.data.result,
+      matches: userResults,
+      followUps: parsed.data.followUps,
+    };
+
+    const { data: updatedMessage, error: updateError } = await supabase
       .from("chatmessages")
       .update({
-        content: {
-          result: parsed.data.result,
-          matches: userResults,
-          followUps: parsed.data.followUps,
-        },
+        content: finalContent,
         status: "completed",
       })
-      .eq("id", messageId);
+      .eq("id", messageId)
+      .select()
+      .single();
 
     if (updateError) {
-      await supabase
-        .from("chatmessages")
-        .update({ status: "failed" })
-        .eq("id", messageId);
-      return NextResponse.json(
-        { error: "Failed to update message content" },
-        { status: 500 }
-      );
+      throw new Error("Failed to update message content");
     }
 
+    // Return the updated message object
     return NextResponse.json({
       success: true,
-      content: {
-        result: parsed.data.result,
-        matches: userResults,
-        followUps: parsed.data.followUps,
-      },
-      status: "completed",
-      cached: false,
+      message: updatedMessage,
     });
   } catch (error) {
     console.error("runSearch error:", error);
-    // Mark as failed
-    if (req.method === "POST") {
-      const { messageId } = await req.json().catch(() => ({}));
-      if (messageId) {
+
+    // Mark as failed if we have a messageId
+    try {
+      const body = await req
+        .clone()
+        .json()
+        .catch(() => ({}));
+      if (body.messageId) {
         await supabase
           .from("chatmessages")
           .update({ status: "failed" })
-          .eq("id", messageId);
+          .eq("id", body.messageId);
       }
+    } catch (e) {
+      console.error("Failed to mark message as failed:", e);
     }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
