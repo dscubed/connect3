@@ -49,6 +49,8 @@ export default function MessageList({
     );
   }
 
+  console.log("All messages:", transformedMessages);
+
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       {transformedMessages.map((message, index) => (
