@@ -4,6 +4,7 @@ import OpenAI from "openai";
 import { z } from "zod";
 import { zodTextFormat } from "openai/helpers/zod.mjs";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
+import { SearchResults } from "@/components/search/types";
 
 export const config = {
   runtime: "edge",
@@ -58,7 +59,7 @@ export async function POST(req: NextRequest) {
     // Fetch message row
     const { data: message, error: fetchError } = await supabase
       .from("chatmessages")
-      .select("query, content, status, user_id, chatroom_id")
+      .select("query, content, status, user_id, chatroom_id, created_at")
       .eq("id", messageId)
       .single();
 
@@ -89,6 +90,110 @@ export async function POST(req: NextRequest) {
       .update({ status: "processing" })
       .eq("id", messageId);
 
+    // Fetch last 5 completed messages in this chatroom (for history)
+    const RECENT_LIMIT = 5;
+
+    const { data: historyRows, error: historyError } = await supabase
+      .from("chatmessages")
+      .select("query, content, created_at")
+      .eq("chatroom_id", message.chatroom_id)
+      .eq("status", "completed") // only finished messages
+      .lte("created_at", message.created_at) // messages before this one
+      .order("created_at", { ascending: true });
+
+    if (historyError) {
+      console.error("❌ Error fetching history:", historyError);
+    }
+
+    const recentHistory = (historyRows ?? []).slice(-RECENT_LIMIT);
+
+    // collect all user_ids that appear in matches
+    const allUserIds = new Set<string>();
+
+    for (const row of recentHistory) {
+      const c = row.content as SearchResults | null;
+      if (c?.matches) {
+        for (const group of c.matches) {
+          if (group.user_id) allUserIds.add(group.user_id);
+        }
+      }
+    }
+
+    let userNameMap: Record<string, string> = {};
+
+    if (allUserIds.size > 0) {
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles") // adjust table name if needed
+        .select("id, first_name, last_name")
+        .in("id", Array.from(allUserIds));
+
+      if (profilesError) {
+        console.error("❌ Error fetching user names:", profilesError);
+      } else {
+        userNameMap = Object.fromEntries(
+          (profiles ?? []).map((p) => [
+            p.id,
+            `${p.first_name} ${p.last_name ? p.last_name : ""}`.trim(),
+          ])
+        );
+      }
+    }
+
+    function renderAssistantHistory(
+      content: SearchResults,
+      userNameMap: Record<string, string>
+    ): string {
+      const parts: string[] = [];
+
+      // main answer
+      if (content.result) {
+        parts.push(content.result);
+      }
+
+      // previously retrieved files with user names
+      const fileLines: string[] = [];
+
+      for (const group of content.matches ?? []) {
+        const displayName =
+          userNameMap[group.user_id] || `User ${group.user_id.slice(0, 8)}`;
+
+        for (const file of group.files ?? []) {
+          fileLines.push(`- ${displayName}: ${file.description}`);
+        }
+      }
+
+      if (fileLines.length > 0) {
+        parts.push("Previously retrieved files:", ...fileLines);
+      }
+
+      // previous follow-up
+      if (content.followUps) {
+        parts.push(`Previous follow-up suggestion: ${content.followUps}`);
+      }
+
+      return parts.join("\n");
+    }
+
+    // Build history messages as proper {role, content} messages
+    const historyMessages = recentHistory.flatMap((row) => {
+      const msgs: { role: "user" | "assistant"; content: string }[] = [];
+
+      if (row.query) {
+        msgs.push({ role: "user", content: row.query });
+      }
+
+      const c = row.content as SearchResults | null;
+
+      if (c && typeof c === "object") {
+        const assistantText = renderAssistantHistory(c, userNameMap);
+        if (assistantText.trim().length > 0) {
+          msgs.push({ role: "assistant", content: assistantText });
+        }
+      }
+
+      return msgs;
+    });
+
     // Run OpenAI vector search
     const userVectorStoreId = process.env.OPENAI_USER_VECTOR_STORE_ID;
     const openaiApiKey = process.env.OPENAI_API_KEY;
@@ -98,20 +203,18 @@ export async function POST(req: NextRequest) {
     }
     const openai = new OpenAI({ apiKey: openaiApiKey });
 
-    const apiResponse = await openai.responses.parse({
-      model: "gpt-4o-mini",
-      input: [
-        {
-          role: "system",
-          content: `You are a vector store assistant. Rules:
+    const messagesForOpenAI = [
+      {
+        role: "system" as const,
+        content: `You are a vector store assistant. Rules:
 1. When a user queries, always provide:
    - result: 2-3 sentence summary of relevant content.
    - matches: an array of objects containing:
        * file_id: the actual file_id from the vector store attributes. FORMAT: "file-...", NO .TXT
-       * description: short description of the content and how it relates to the query and describes the user don't mention document
-   - followUps: a single natural language question to continue the conversation
-2. Ignore file_name. Never generate it.
-3. Only include files actually returned by the vector store with attributes.
+       * description: short description of the content and how it relates to the query (do not mention the word "document")
+   - followUps: a single natural language question to continue the conversation.
+2. Ignore file_name entirely.
+3. Only include files actually returned by the vector store.
 4. Return valid JSON strictly in this format:
 {
   "result": "...",
@@ -120,11 +223,18 @@ export async function POST(req: NextRequest) {
   ],
   "followUps": "..."
 }
-5. If you cannot find results, return an empty matches array but still include result and followUps.
-`,
-        },
-        { role: "user", content: `Query: ${message.query}` },
-      ],
+5. If you cannot find results, return an empty matches array but still include result and followUps.`,
+      },
+      ...historyMessages,
+      {
+        role: "user" as const,
+        content: `Query: ${message.query}`,
+      },
+    ];
+
+    const apiResponse = await openai.responses.parse({
+      model: "gpt-4o-mini",
+      input: messagesForOpenAI,
       tools: [
         {
           type: "file_search",
