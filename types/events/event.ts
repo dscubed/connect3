@@ -1,4 +1,5 @@
 export type HostedEvent = {
+    push(arg0: { weight: number; id: number; name: string; start: Date; end: Date; description: string; type: EventCategory[]; thumbnailUrl?: string; }): unknown;
     id: number;
     name: string; 
     start: Date;

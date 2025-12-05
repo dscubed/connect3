@@ -39,13 +39,30 @@ export default function DesktopLayout() {
     )
   }
 
-  // perform better filtering by name
-  const filtered = events.filter(event => {
-    const searchPredicate = search.trim() === "" ||
-     event.name.toLowerCase().includes(search.toLowerCase())
-    return searchPredicate
-  }).map(event => ({ ...event, weight: event.name.toLowerCase().indexOf(search.toLowerCase())}))
-  .sort((a, b) => a.weight - b.weight);
+  const searchLowered = search.toLowerCase().trim();
+
+  // perform event filtering by name
+  const filtered = events.reduce((accumulator: any[], event) => {
+    const eventNameLower = event.name.toLowerCase();
+     if (searchLowered === "" || eventNameLower.includes(searchLowered)) {
+      if (selectedCategory === "All") {
+        accumulator.push({
+          ...event,
+          weight: searchLowered === "" ? 0 : eventNameLower.indexOf(searchLowered)
+        });
+      } else if (!!event.type && event.type.includes(selectedCategory)) {
+        console.log("Found");
+        accumulator.push({
+          ...event,
+          weight: searchLowered === "" ? 0 : eventNameLower.indexOf(searchLowered)
+        });
+      }
+    }
+    
+    return accumulator;
+  }, []).sort((a, b) => a.weight - b.weight);
+
+
 
   return (
     <div className="flex flex-1 overflow-hidden">
@@ -68,6 +85,11 @@ export default function DesktopLayout() {
               onClick={() => handleEventSelect(event)}
             />
           ))}
+          {filtered.length === 0 && (
+            <div className="p-4 text-sm text-white/60">
+              No events found.
+            </div>
+          )} 
 
           {/* {filteredClubs.map((club) => (
             <ClubListCard
@@ -77,11 +99,7 @@ export default function DesktopLayout() {
               onClick={() => setSelectedClub(club)}
             />
           ))}
-          {filteredClubs.length === 0 && (
-            <div className="p-4 text-sm text-white/60">
-              No clubs match your search / filter.
-            </div>
-          )} */}
+          */}
 
         </div>
       </div>
