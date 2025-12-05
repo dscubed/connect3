@@ -21,7 +21,6 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const cursor = searchParams.get("cursor");
     const limit = parseInt(searchParams.get("limit") || "10");
-    const search = searchParams.get("search");
      
     try {
         let query = supabase

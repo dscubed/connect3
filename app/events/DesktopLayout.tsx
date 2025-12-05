@@ -58,11 +58,8 @@ export default function DesktopLayout() {
         });
       }
     }
-    
     return accumulator;
   }, []).sort((a, b) => a.weight - b.weight);
-
-
 
   return (
     <div className="flex flex-1 overflow-hidden">
@@ -75,7 +72,6 @@ export default function DesktopLayout() {
           selectedCategory={selectedCategory}
           setSelectedCategory={setSelectedCategory}
         />
-
         <div className="flex-1 overflow-y-auto p-5 space-y-3 scrollbar-hide" ref={eventListRef}>
           {filtered.map((event: HostedEvent) => (
             <EventListCard 
@@ -90,17 +86,6 @@ export default function DesktopLayout() {
               No events found.
             </div>
           )} 
-
-          {/* {filteredClubs.map((club) => (
-            <ClubListCard
-              key={club.id}
-              club={club}
-              isSelected={selectedClub.id === club.id}
-              onClick={() => setSelectedClub(club)}
-            />
-          ))}
-          */}
-
         </div>
       </div>
 
@@ -108,7 +93,7 @@ export default function DesktopLayout() {
       <div className="flex-1 bg-black overflow-hidden">
         <div className="h-full overflow-y-auto p-6 lg:p-8 scrollbar-hide">
           <AnimatePresence mode="wait">
-            <EventDetailPanel event={selectedEvent} />
+            {selectedEvent && <EventDetailPanel event={selectedEvent} /> }
           </AnimatePresence>
         </div>
       </div>

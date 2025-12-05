@@ -1,30 +1,24 @@
-import React from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import {
-  Building2,
+  Calendar,
   MapPin,
   Globe,
   ExternalLink,
   ChevronLeft,
 } from "lucide-react";
-import { FaInstagram, FaLinkedin, FaFacebook, FaDiscord } from "react-icons/fa";
 import { HostedEvent } from "@/types/events/event";
-
-const socialsIconMap: { [key: string]: React.ElementType } = {
-  instagram: FaInstagram,
-  linkedin: FaLinkedin,
-  facebook: FaFacebook,
-  discord: FaDiscord,
-};
-
+import useSWR from "swr";
 interface EventDetailPanelProps {
-  event: HostedEvent | null;
+  event: HostedEvent;
   onBack?: () => void;
 }
 
 export function EventDetailPanel({ event, onBack }: EventDetailPanelProps){
-  if (!event ) return null;
+  const { data, error, isLoading } = useSWR(
+    event.creator_profile_id ? `/api/users/${event.creator_profile_id}` : null,
+    (url) => fetch(url).then(res => res.json())
+  );
 
   return (
     <motion.div
@@ -60,7 +54,7 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps){
                   className="object-contain max-h-16 sm:max-h-20 rounded-lg grayscale"
                 />
               ) : (
-                <Building2 className="w-16 h-16 sm:w-20 sm:h-20 text-white/80" />
+                <Calendar className="w-16 h-16 sm:w-20 sm:h-20 text-white/80" />
               )}
             </div>
           </div>
@@ -68,6 +62,12 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps){
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2 sm:mb-3 leading-tight">
               {event.name}
             </h1>
+            <p className="text-white/50">{isLoading 
+              ? "Fetching creator..." 
+              : error 
+              ? "Hosted By: Unknown" 
+              : `Hosted By: ${data.user.full_name || 'Unknown'}`}
+            </p>
           </div>
         </div>
         {/* Social Media Icons */}
@@ -84,8 +84,6 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps){
       </div>
 
       {/* Links */}
-      
-
         {/* <div className="space-y-3">
           {club.links.website && (
             <a

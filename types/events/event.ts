@@ -7,6 +7,7 @@ export type HostedEvent = {
     description: string; 
     type: EventCategory[];
     thumbnailUrl?: string;
+    creator_profile_id: string;
 }
 
 // could change to a way that users can add their own categories but 
