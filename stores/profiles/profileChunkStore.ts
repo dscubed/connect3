@@ -102,6 +102,13 @@ export const useProfileChunkStore = create<ProfileChunkStore>((set) => ({
       }),
     });
 
+     // Auto-generate TLDR after adding a chunk
+     await makeAuthenticatedRequest("/api/profiles/auto-generate-tldr", {
+      method: "POST",
+      body: JSON.stringify({ userId: user.id }),
+    });
+  
+
     set((state) => {
       const next = { ...state.addingChunks };
       delete next[category];
@@ -152,6 +159,13 @@ export const useProfileChunkStore = create<ProfileChunkStore>((set) => ({
           chunks: state.chunks.filter((chunk) => chunk.id !== chunkId),
           deleting: { ...state.deleting, [chunkId]: false },
         }));
+
+        // Auto-generate TLDR after deletion
+        await makeAuthenticatedRequest("/api/profiles/auto-generate-tldr", {
+          method: "POST",
+          body: JSON.stringify({ userId: user.id }),
+        });
+  
       } else {
         // Deletion failed, clear deleting state
         set((state) => {

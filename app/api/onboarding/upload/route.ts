@@ -60,6 +60,18 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    await fetch(
+      `${process.env.NEXT_PUBLIC_SITE_URL}/api/profiles/auto-generate-tldr`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: req.headers.get("authorization") || "",
+        },
+        body: JSON.stringify({ userId: chunkedData.userId }),
+      }
+    );
+
     return NextResponse.json({
       success: true,
       uploadedChunks: uploadResults.length,

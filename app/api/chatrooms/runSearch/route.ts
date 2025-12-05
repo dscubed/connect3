@@ -75,6 +75,21 @@ export async function POST(req: NextRequest) {
       .update({ status: "processing" })
       .eq("id", messageId);
 
+    // --- NEW: Fetch user profile tldr ---
+    const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("tldr")
+    .eq("id", message.user_id)
+    .single();
+
+    if (profileError) {
+    console.error("❌ Error fetching profile tldr:", profileError);
+    }
+
+    const userTldr =
+    profile?.tldr ??
+    "No profile summary is available; assume a generic university student.";
+
     // Fetch last 5 completed messages in this chatroom (for history)
     const RECENT_LIMIT = 5;
 
@@ -171,30 +186,39 @@ export async function POST(req: NextRequest) {
       {
         role: "system" as const,
         content: `You are a vector store assistant. Rules:
-1. When a user queries, always provide:
-   - result: 2-3 sentence summary of relevant content.
-   - matches: an array of objects containing:
-       * file_id: the actual file_id from the vector store attributes. FORMAT: "file-...", NO .TXT
-       * description: short description of the content and how it relates to the query (do not mention the word "document")
-   - followUps: a single natural language question to continue the conversation.
-2. Ignore file_name entirely.
-3. Only include files actually returned by the vector store.
-4. Return valid JSON strictly in this format:
-{
-  "result": "...",
-  "matches": [
-    {"file_id": "...", "description": "..."}
-  ],
-  "followUps": "..."
-}
-5. If you cannot find results, return an empty matches array but still include result and followUps.`,
+    1. When a user queries, always provide:
+       - result: 2-3 sentence summary of relevant content.
+       - matches: an array of objects containing:
+           * file_id: the real file_id from vector store attributes. FORMAT: "file-...", NO .TXT
+           * description: short description of the content and how it relates to the query
+       - followUps: a single natural language question.
+    2. Ignore file_name entirely.
+    3. Only include files actually returned by the vector store.
+    4. Return valid JSON strictly in this format:
+    {
+      "result": "...",
+      "matches": [
+        {"file_id": "...", "description": "..."}
+      ],
+      "followUps": "..."
+    }
+    5. If you cannot find results, return empty matches but still include result and followUps.
+    6. Prefer files belonging to other users over the querying user.
+    7. The profile summary must NEVER be used as retrieval input or query expansion.
+    8. Retrieval must embed ONLY the raw user query, not biography, skills, awards, or TLDR.`,
+      },
+      {
+        role: "system",
+        content: `User Profile Summary (for personalisation ONLY, NEVER for retrieval):
+    ${userTldr}`,
       },
       ...historyMessages,
       {
-        role: "user" as const,
-        content: `Query: ${message.query}`,
+        role: "user",
+        content: message.query,
       },
     ];
+    
 
     const apiResponse = await openai.responses.parse({
       model: "gpt-4o-mini",
@@ -242,7 +266,10 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const userResults = Array.from(userMap.entries()).map(
+    // Build userResults EXCLUDING the current user
+    const userResults = Array.from(userMap.entries())
+    .filter(([user_id]) => user_id !== user.id)
+    .map(
       ([user_id, files]) => ({
         user_id,
         files,
@@ -253,7 +280,6 @@ export async function POST(req: NextRequest) {
     const userMatchesRows = [];
     for (const match of userResults) {
       const { user_id, files } = match;
-      if (user_id === user.id) continue;
       for (const file of files) {
         userMatchesRows.push({
           user_id,
