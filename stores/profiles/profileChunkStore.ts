@@ -92,7 +92,7 @@ export const useProfileChunkStore = create<ProfileChunkStore>((set) => ({
       .single();
     console.log("Insert response:", response);
 
-    await makeAuthenticatedRequest("/api/profiles/uploadChunk", {
+    await makeAuthenticatedRequest("/api/vector-store/uploadChunk", {
       method: "POST",
       body: JSON.stringify({
         rowId: response.data?.id,
