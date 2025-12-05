@@ -9,9 +9,10 @@ export async function GET(request: NextRequest, { params }: RouteParameters) {
     const { userId } = await params;
     try {
         const user = await fetchUserDetails(userId);
+        console.log(user);
         if (!!user) {
             return NextResponse.json(
-                { user: user },
+                user,
                 { status: 200},
             )
         }

@@ -15,11 +15,23 @@ interface EventDetailPanelProps {
 }
 
 export function EventDetailPanel({ event, onBack }: EventDetailPanelProps){
-  const { data, error, isLoading } = useSWR(
+  const { data: creator, error: creatorError, isLoading: isLoadingCreator } = useSWR(
     event.creator_profile_id ? `/api/users/${event.creator_profile_id}` : null,
     (url) => fetch(url).then(res => res.json())
   );
 
+  const { data: collaborators, error: collaboratorError, isLoading: isLoadingCollaborators } = useSWR(
+    event.id ? `/api/events/${event.id}/collaborators` : null,
+    (url) => fetch(url).then(res => res.json())    
+  )
+
+  let organiserString = "";
+  if (!isLoadingCollaborators && !isLoadingCreator) {
+    const collaboratorNames = collaborators.map((collaborator: any) => collaborator.first_name + ' ' + collaborator.last_name);
+    const formatted = collaboratorNames.join(", ");
+    organiserString = `${creator.full_name}, ${formatted}`;
+  }
+  
   return (
     <motion.div
       key={event.id}
@@ -62,15 +74,16 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps){
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2 sm:mb-3 leading-tight">
               {event.name}
             </h1>
-            <p className="text-white/50">{isLoading 
-              ? "Fetching creator..." 
-              : error 
-              ? "Hosted By: Unknown" 
-              : `Hosted By: ${data.user.full_name || 'Unknown'}`}
-            </p>
+            <span className="text-white/70">{isLoadingCreator || isLoadingCollaborators
+              ? <p>Fetching organisers...</p>
+              : creatorError || collaboratorError 
+              ? <p>Hosted By: Unknown</p>
+              : <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                Hosted By: {organiserString || 'Unknown'}
+              </motion.div> }
+            </span>
           </div>
         </div>
-        {/* Social Media Icons */}
       </div>
 
       {/* Main Content */}
