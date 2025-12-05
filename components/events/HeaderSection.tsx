@@ -1,3 +1,5 @@
+import { motion } from "framer-motion";
+
 interface HeaderSectionProps {
   eventCount: number;
   isLoading: boolean; 
@@ -12,9 +14,15 @@ export default function EventsHeader({ eventCount, isLoading }: HeaderSectionPro
           Events
         </h1>
       </div>
-      <p className="text-white/50 text-xs sm:text-sm font-medium">
-        {isLoading ? "Loading events" : `${eventCount} events available` } 
-      </p>
+      <span className="text-white/50 text-xs sm:text-sm font-medium">
+        {isLoading ?
+          <p>Loading events...</p>
+          :
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            {eventCount} events available
+          </motion.div>
+        }
+      </span>
     </div>
   )
 }

@@ -4,14 +4,17 @@ import { useEventsWithInfiniteScroll } from "@/hooks/useEventsWithInfiniteScroll
 import EventsHeader from "@/components/events/HeaderSection";
 import EventFilters from "@/components/events/EventFilters";
 import { EventListCard } from "@/components/events/EventListCard";
-import { HostedEvent } from "@/types/events/event";
+import { EventCategory, HostedEvent } from "@/types/events/event";
 import { EventDetailPanel } from "@/components/events/EventDetailPanel";
 import { CubeLoader } from "@/components/ui/CubeLoader";
+import { filterEvents } from "@/lib/events/eventUtils";
 
 export default function MobileLayout() {
   const eventListRef = useRef<HTMLDivElement>(null);
   const [showDetails, setShowDetails] = useState(false);
   const { events, error, isLoading, isValidating } = useEventsWithInfiniteScroll(eventListRef);
+  const [search, setSearch] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<EventCategory | "All">("All");
   const [selectedEvent, setSelectedEvent] = useState<HostedEvent | null>(null);
 
   const handleEventSelect = (event: HostedEvent) => {
@@ -25,12 +28,14 @@ export default function MobileLayout() {
 
   if (isLoading) {
     return ( 
-      <div className="min-h-screen flex flex-col justify-center items-center bg-black">
+      <div className="min-h-screen w-full flex flex-col justify-center items-center bg-black">
         <CubeLoader size={32} />
         <p>Loading events...</p>
       </div> 
     )
   }
+
+  const filtered = filterEvents(events, search, selectedCategory === "All" ? null : selectedCategory);
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
@@ -45,18 +50,14 @@ export default function MobileLayout() {
               className="h-full flex flex-col bg-black/50 backdrop-blur-sm"
             >
               <EventsHeader eventCount={events.length} isLoading={isValidating} />
-
-              {/* Search and Category Filter */}
-
-              {/* <EventFilters
+              <EventFilters
                 search={search}
                 setSearch={setSearch}
                 selectedCategory={selectedCategory}
                 setSelectedCategory={setSelectedCategory}
-              /> */}
-
+              />
               <div className="flex-1 overflow-y-auto  p-4 sm:p-5 space-y-3 scrollbar-hide" ref={eventListRef}>
-                {events.map((event: HostedEvent) => (
+                {filtered.map((event: HostedEvent) => (
                   <EventListCard 
                     key={event.id}
                     event={event} 
@@ -75,15 +76,18 @@ export default function MobileLayout() {
               className="h-full bg-black overflow-hidden"
             >
               <div className="h-full overflow-y-auto p-4 sm:p-6 scrollbar-hide">
-                <EventDetailPanel
-                  event={selectedEvent}
-                  onBack={handleBackToList}
-                />
+                {
+                  selectedEvent && 
+                  <EventDetailPanel
+                    event={selectedEvent}
+                    onBack={handleBackToList}
+                  />
+                }
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-        </div>         
-      </div>
+      </div>         
+    </div>
   ) 
 }

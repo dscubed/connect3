@@ -2,13 +2,11 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import {
   Calendar,
-  MapPin,
-  Globe,
-  ExternalLink,
   ChevronLeft,
 } from "lucide-react";
 import { HostedEvent } from "@/types/events/event";
 import useSWR from "swr";
+
 interface EventDetailPanelProps {
   event: HostedEvent;
   onBack?: () => void;
@@ -74,7 +72,11 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps){
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2 sm:mb-3 leading-tight">
               {event.name}
             </h1>
-            <span className="text-white/70">{isLoadingCreator || isLoadingCollaborators
+            <p className="text-white/70 text-xs sm:text-sm line-clamp-2 leading-relaxed">
+              { new Date(event.start).toLocaleDateString() } - { new Date(event.end).toLocaleDateString() }
+            </p>
+            {/* organiser information */}
+            <span className="text-white/70 text-sm md:text-md">{isLoadingCreator || isLoadingCollaborators
               ? <p>Fetching organisers...</p>
               : creatorError || collaboratorError 
               ? <p>Hosted By: Unknown</p>
@@ -89,7 +91,7 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps){
       {/* Main Content */}
       <div className="bg-white/[0.04] rounded-xl sm:rounded-2xl border border-white/10 p-4 sm:p-6 lg:p-7 mb-4 sm:mb-6 shadow-lg shadow-black/5">
         <h2 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">
-          About
+          Description
         </h2>
         <p className="text-white/70 leading-relaxed text-sm sm:text-[15px]">
           {event.description}

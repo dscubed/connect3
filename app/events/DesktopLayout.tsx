@@ -8,6 +8,7 @@ import { EventCategory, HostedEvent } from "@/types/events/event";
 import { useEventsWithInfiniteScroll } from "@/hooks/useEventsWithInfiniteScroll";
 import { useEffect, useRef, useState } from "react";
 import { CubeLoader } from "@/components/ui/CubeLoader";
+import { filterEvents } from "@/lib/events/eventUtils";
 
 export default function DesktopLayout() {
   const eventListRef = useRef<HTMLDivElement>(null);
@@ -32,34 +33,15 @@ export default function DesktopLayout() {
 
   if (isLoading) {
     return ( 
-      <div className="min-h-screen flex flex-col justify-center items-center bg-black">
+      <div className="min-h-screen w-full flex flex-col justify-center items-center bg-black">
         <CubeLoader size={32} />
         <p>Loading events...</p>
       </div> 
     )
   }
 
-  const searchLowered = search.toLowerCase().trim();
-
-  // perform event filtering by name
-  const filtered = events.reduce((accumulator: any[], event) => {
-    const eventNameLower = event.name.toLowerCase();
-     if (searchLowered === "" || eventNameLower.includes(searchLowered)) {
-      if (selectedCategory === "All") {
-        accumulator.push({
-          ...event,
-          weight: searchLowered === "" ? 0 : eventNameLower.indexOf(searchLowered)
-        });
-      } else if (!!event.type && event.type.includes(selectedCategory)) {
-        console.log("Found");
-        accumulator.push({
-          ...event,
-          weight: searchLowered === "" ? 0 : eventNameLower.indexOf(searchLowered)
-        });
-      }
-    }
-    return accumulator;
-  }, []).sort((a, b) => a.weight - b.weight);
+  // perform event filtering by name and category
+  const filtered = filterEvents(events, search, selectedCategory === "All" ? null : selectedCategory);
 
   return (
     <div className="flex flex-1 overflow-hidden">

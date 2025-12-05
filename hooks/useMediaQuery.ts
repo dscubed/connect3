@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 const IS_SERVER = typeof window === 'undefined'
 
 /**
- * Custom hook for conditional rendering based on breakpoints
- * rather than using Tailwind breakpoints
+ * Custom hook for breakpoint conditional rendering
+ * instead of using Tailwind breakpoints
  * Sourced from https://usehooks-ts.com/react-hook/use-media-query
  * @param query eg "(width <= 600px)"
  * @returns 
