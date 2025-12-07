@@ -21,7 +21,7 @@ export default function EventFilters({
   selectedCategory,
   setSelectedCategory,
 }: EventFiltersProps) {
-  const categoryOptions = ["networking", "study", "fun", "workshop", "competition", "panel", "miscellaneous"] as const;
+  const categoryOptions = ["All", "networking", "study", "fun", "workshop", "competition", "panel", "miscellaneous"] as const;
   return (
     <div className="p-4 flex-row gap-4 flex w-full">
       {/* Search Input */}
