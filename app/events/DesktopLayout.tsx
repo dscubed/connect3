@@ -9,6 +9,7 @@ import { useEventsWithInfiniteScroll } from "@/hooks/useEventsWithInfiniteScroll
 import { useEffect, useRef, useState } from "react";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import { filterEvents } from "@/lib/events/eventUtils";
+import { toast } from "sonner";
 
 export default function DesktopLayout() {
   const eventListRef = useRef<HTMLDivElement>(null);
@@ -30,6 +31,10 @@ export default function DesktopLayout() {
   const handleEventSelect = (event: HostedEvent) => {
     setSelectedEvent(event);
   };
+
+  if (error) {
+    toast.error("Could not get events");
+  }
 
   if (isLoading) {
     return ( 

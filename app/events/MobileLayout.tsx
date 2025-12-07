@@ -8,6 +8,7 @@ import { EventCategory, HostedEvent } from "@/types/events/event";
 import { EventDetailPanel } from "@/components/events/EventDetailPanel";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import { filterEvents } from "@/lib/events/eventUtils";
+import { toast } from "sonner";
 
 export default function MobileLayout() {
   const eventListRef = useRef<HTMLDivElement>(null);
@@ -25,6 +26,10 @@ export default function MobileLayout() {
   const handleBackToList = () => {
     setShowDetails(false);
   };
+
+  if (error) {
+    toast.error("Could not get events");
+  }
 
   if (isLoading) {
     return ( 

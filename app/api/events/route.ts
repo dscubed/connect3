@@ -1,4 +1,3 @@
-import { authenticateRequest } from "@/lib/api/auth-middleware";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -13,11 +12,6 @@ const supabase = createClient(
  * @returns 
  */
 export async function GET(request: NextRequest) {
-    // const authResult = await authenticateRequest(request);
-    // if (authResult instanceof NextResponse) {
-    //     return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
-    // }  
-
     const searchParams = request.nextUrl.searchParams;
     const cursor = searchParams.get("cursor");
     const limit = parseInt(searchParams.get("limit") || "10");

@@ -10,7 +10,7 @@ interface RouteParameters {
     params: Promise<{ eventId: string }>;
 }
 
-export async function GET(request: NextRequest,{ params }: RouteParameters) {
+export async function GET(request: NextRequest, { params }: RouteParameters) {
     const COLLABORATOR_LIMIT = 5; // enforce on frontend perhaps 
 
     const { eventId } = await params;

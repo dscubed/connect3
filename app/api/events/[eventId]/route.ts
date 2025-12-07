@@ -1,4 +1,3 @@
-import { authenticateRequest } from "@/lib/api/auth-middleware";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -18,11 +17,6 @@ interface RouteParameters {
  * @returns 
  */
 export async function GET(request: NextRequest, { params }: RouteParameters) {
-    // const authResult = await authenticateRequest(request);
-    // if (authResult instanceof NextResponse) {
-    //     return NextResponse.json({ error: "Unauthenticated" }, { status: 401 });
-    // } 
-
     const { eventId } = await params;
     try {
         const { data: event, error } = await supabase

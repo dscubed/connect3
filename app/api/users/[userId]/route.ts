@@ -18,7 +18,7 @@ export async function GET(request: NextRequest, { params }: RouteParameters) {
         }
     } catch (error) {
        return NextResponse.json(
-        { error: "Could not find user" },
+        { error: `Could not find user: ${error}` },
         { status: 404 }
       ); 
     }
