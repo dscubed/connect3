@@ -71,6 +71,15 @@ export default function MobileLayout() {
                   />
                 ))}
               </div>
+              {filtered.length === 0 && (
+                <div className="p-4 text-sm text-white/60">
+                  No events found.
+                </div>
+              )} 
+
+              { isValidating && <div className="flex justify-center">
+                <CubeLoader size={32} />
+              </div> }
             </motion.div>
           ) : (
             <motion.div
