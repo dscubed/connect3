@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     // --- NEW: Fetch user profile tldr ---
     const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("tldr")
+    .select("tldr_internal")
     .eq("id", message.user_id)
     .single();
 
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
     }
 
     const userTldr =
-    profile?.tldr ??
+    profile?.tldr_internal ??
     "No profile summary is available; assume a generic university student.";
 
     // Fetch last 5 completed messages in this chatroom (for history)

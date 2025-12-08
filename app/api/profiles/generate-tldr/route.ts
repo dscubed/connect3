@@ -59,18 +59,21 @@ export async function POST(request: NextRequest) {
     const summaries = (chunks ?? [])
       .map((c, i) => `Chunk ${i + 1}: ${c.summary_text}`)
       .join("\n");
-    const prompt = `
-    Summarize the following profile chunks into a concise TLDR
-    Make it 2-3 sentences, focus on any recent skills and experience and anything notable.
-    Sentences should be short and concise and have one or two references no more.
-    You don't have to reference every single chunk
-
-    ${currentTldr ? `Current TLDR: ${currentTldr}` : ""}
-    
-    ${userPrompt ? `User's Instructions: ${userPrompt}` : ""}
-
-    -DON'T GENERATE ANY OTHER TEXT, MARKDOWNS, ETC. JUST THE RAW TEXT
-    `;
+      const prompt = `
+      You are refining a student's profile summary ("TLDR") using their profile chunks.
+      
+      - Keep it 2–3 sentences.
+      - Use clear, professional tone.
+      - Emphasise recent skills, projects, roles, and notable awards.
+      - You may rewrite the current TLDR for clarity, but keep key meaning.
+      
+      Current TLDR (may be empty):
+      ${currentTldr || "(none provided)"}
+      
+      ${userPrompt ? `User's additional instructions: ${userPrompt}` : ""}
+      
+      Now produce the improved TLDR only as plain text (no bullets, no markdown).
+      `;
 
     // Use OpenAI responses API for structured output
     const response = await openai.responses.create({

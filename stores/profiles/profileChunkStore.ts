@@ -106,6 +106,7 @@ export const useProfileChunkStore = create<ProfileChunkStore>((set) => ({
      await makeAuthenticatedRequest("/api/profiles/auto-generate-tldr", {
       method: "POST",
       body: JSON.stringify({ userId: user.id }),
+      headers: { "Content-Type": "application/json" },
     });
   
 
@@ -164,6 +165,7 @@ export const useProfileChunkStore = create<ProfileChunkStore>((set) => ({
         await makeAuthenticatedRequest("/api/profiles/auto-generate-tldr", {
           method: "POST",
           body: JSON.stringify({ userId: user.id }),
+          headers: { "Content-Type": "application/json" },
         });
   
       } else {

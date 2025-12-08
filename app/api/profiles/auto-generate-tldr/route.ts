@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
-import { regenerateTldr } from "@/lib/users/regenerateTldr";
+import { regenerateTldrInternal } from "@/lib/users/regenerateTldrInternal";
 
 export async function POST(req: NextRequest) {
   const auth = await authenticateRequest(req);
@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
   }
 
   // background, don’t block UI
-  regenerateTldr(userId).catch(console.error);
+  regenerateTldrInternal(userId).catch(console.error);
 
   return NextResponse.json({ success: true });
 }
