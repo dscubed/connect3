@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       const prompt = `
       You are refining a student's profile summary ("TLDR") using their profile chunks.
       
-      - Keep it 2–3 sentences.
+      - Keep it 2-3 sentences.
       - Use clear, professional tone.
       - Emphasise recent skills, projects, roles, and notable awards.
       - You may rewrite the current TLDR for clarity, but keep key meaning.
