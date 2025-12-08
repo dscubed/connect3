@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion"
 import { useRef, useState } from "react";
-import { useEventsWithInfiniteScroll } from "@/hooks/useEventsWithInfiniteScroll";
 import EventsHeader from "@/components/events/HeaderSection";
 import EventFilters from "@/components/events/EventFilters";
 import { EventListCard } from "@/components/events/EventListCard";
@@ -9,11 +8,12 @@ import { EventDetailPanel } from "@/components/events/EventDetailPanel";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import { filterEvents } from "@/lib/events/eventUtils";
 import { toast } from "sonner";
+import useInfiniteScroll from "@/hooks/useInfiniteScroll";
 
 export default function MobileLayout() {
   const eventListRef = useRef<HTMLDivElement>(null);
   const [showDetails, setShowDetails] = useState(false);
-  const { events, error, isLoading, isValidating } = useEventsWithInfiniteScroll(eventListRef);
+  const { items: events, error, isLoading, isValidating } = useInfiniteScroll<HostedEvent>(eventListRef, "/api/events");
   const [search, setSearch] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<EventCategory | "All">("All");
   const [selectedEvent, setSelectedEvent] = useState<HostedEvent | null>(null);

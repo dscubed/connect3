@@ -44,7 +44,7 @@ export async function GET(request: NextRequest, { params }: RouteParameters) {
     const events = morePagesExist ? data.slice(0, limit) : data;
     const newCursor = morePagesExist ? data[limit - 1].created_at : null;
 
-    return NextResponse.json({ events, cursor: newCursor });
+    return NextResponse.json({ items: events, cursor: newCursor });
   } catch (error) {
     return NextResponse.json({ error: error }, { status: 500 });
   }
