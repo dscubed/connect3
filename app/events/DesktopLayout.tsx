@@ -9,13 +9,11 @@ import { useEffect, useRef, useState } from "react";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import { filterEvents } from "@/lib/events/eventUtils";
 import { toast } from "sonner";
-import { useEventsWithInfiniteScroll } from "@/hooks/useEventsWithInfiniteScroll";
 import useInfiniteScroll from "@/hooks/useInfiniteScroll";
 
 export default function DesktopLayout() {
   const eventListRef = useRef<HTMLDivElement>(null);
   const { items: events, error, isLoading, isValidating } = useInfiniteScroll<HostedEvent>(eventListRef, "/api/events");
-  // const { events, error, isLoading, isValidating } = useEventsWithInfiniteScroll(eventListRef);
   const [selectedEvent, setSelectedEvent] = useState<HostedEvent | null>(null);
   const [search, setSearch] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<EventCategory | "All">("All");
