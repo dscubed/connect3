@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
         // if it more pages exist remove the final item and use its timestamp as the cursor
         const events = morePagesExist ? data.slice(0, limit) : data;
         const newCursor = morePagesExist ? data[limit - 1].created_at : null;
-        return NextResponse.json({ events: events, cursor: newCursor });
+        return NextResponse.json({ items: events, cursor: newCursor });
     } catch (error) {
         return NextResponse.json({ error: error }, { status: 500 });
     }

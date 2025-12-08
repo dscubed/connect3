@@ -35,5 +35,4 @@ export async function GET(request: NextRequest, { params }: RouteParameters) {
     } catch (error) {
         return NextResponse.json({ error: error }, { status: 500 });
     }
-
 }

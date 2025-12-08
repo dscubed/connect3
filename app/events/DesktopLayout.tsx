@@ -5,15 +5,17 @@ import EventsHeader from "@/components/events/HeaderSection";
 import EventFilters from "@/components/events/EventFilters";
 import { EventListCard } from "@/components/events/EventListCard";
 import { EventCategory, HostedEvent } from "@/types/events/event";
-import { useEventsWithInfiniteScroll } from "@/hooks/useEventsWithInfiniteScroll";
 import { useEffect, useRef, useState } from "react";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import { filterEvents } from "@/lib/events/eventUtils";
 import { toast } from "sonner";
+import { useEventsWithInfiniteScroll } from "@/hooks/useEventsWithInfiniteScroll";
+import useInfiniteScroll from "@/hooks/useInfiniteScroll";
 
 export default function DesktopLayout() {
   const eventListRef = useRef<HTMLDivElement>(null);
-  const { events, error, isLoading, isValidating } = useEventsWithInfiniteScroll(eventListRef);
+  const { items: events, error, isLoading, isValidating } = useInfiniteScroll<HostedEvent>(eventListRef, "/api/events");
+  // const { events, error, isLoading, isValidating } = useEventsWithInfiniteScroll(eventListRef);
   const [selectedEvent, setSelectedEvent] = useState<HostedEvent | null>(null);
   const [search, setSearch] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<EventCategory | "All">("All");
@@ -46,6 +48,7 @@ export default function DesktopLayout() {
   }
 
   // perform event filtering by name and category
+  console.log(events);
   const filtered = filterEvents(events, search, selectedCategory === "All" ? null : selectedCategory);
 
   return (
