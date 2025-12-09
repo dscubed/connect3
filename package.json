@@ -2,6 +2,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:https": "next dev --experimental-https --experimental-https-key ./localhost-key.pem --experimental-https-cert ./localhost.pem",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
