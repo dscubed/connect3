@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 import { runSearch } from "@/lib/search/agent";
 import { generateResponse } from "@/lib/search/response";
+import { authenticateRequest } from "@/lib/api/auth-middleware";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -14,6 +15,18 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 export type SSEEmitter = (type: string, data: unknown) => Promise<void>;
 
 export async function POST(req: NextRequest) {
+  const authResult = await authenticateRequest(req);
+  if (authResult instanceof NextResponse) {
+    return authResult;
+  }
+  const user = authResult.user;
+  if (!user) {
+    return NextResponse.json(
+      { success: false, error: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
   const { messageId } = await req.json();
 
   if (!messageId) {
@@ -29,12 +42,16 @@ export async function POST(req: NextRequest) {
     .select("id, status")
     .eq("id", messageId)
     .eq("status", "pending")
+    .eq("user_id", user.id)
     .single();
 
   if (messageError || !messageData) {
     console.error("Message fetch error:", messageError);
     return NextResponse.json(
-      { success: false, error: "Message not found or not pending" },
+      {
+        success: false,
+        error: "Message not found or not pending or unauthorized",
+      },
       { status: 404 }
     );
   }
