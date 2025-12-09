@@ -2,48 +2,33 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { ChatMessage } from "../types";
+import { useSearchStream } from "./useStreamSearch";
+import { EntityFilterOptions } from "@/components/home/hooks/useSearch";
 
 export function useChatroom(chatroomId: string | null) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { user, makeAuthenticatedRequest, getSupabaseClient } = useAuthStore();
+  const { user, getSupabaseClient } = useAuthStore();
+  const { connectStream, closeStream } = useSearchStream(setMessages);
+
+  // For testing: log message progress updates
+  useEffect(() => {
+    console.log("Chatroom Messages :", messages);
+  }, [messages]);
 
   // Run AI Search for a message
   const triggerSearch = useCallback(
-    async (messageId: string) => {
-      try {
-        const res = await makeAuthenticatedRequest("/api/chatrooms/runSearch", {
-          method: "POST",
-          body: JSON.stringify({ messageId }),
-        });
-        const data = await res.json();
-
-        // Update state with result
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === messageId
-              ? data.success
-                ? data.message
-                : { ...msg, status: "failed" }
-              : msg
-          )
-        );
-      } catch (error) {
-        console.error("Search error:", error);
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === messageId ? { ...msg, status: "failed" } : msg
-          )
-        );
-      }
+    (messageId: string) => {
+      // Just connect to the stream - all handling is in useSearchStream
+      connectStream(messageId);
     },
-    [makeAuthenticatedRequest]
+    [connectStream]
   );
 
   // Add New Message from Chatroom
   const addNewMessage = useCallback(
-    async (query: string) => {
+    async (query: string, selectedEntityFilters: EntityFilterOptions) => {
       if (!query.trim() || !chatroomId || !user) return;
 
       try {
@@ -57,6 +42,9 @@ export function useChatroom(chatroomId: string | null) {
             content: null, // Will be populated by background search
             user_id: user.id,
             status: "pending", // Initial status
+            users: selectedEntityFilters.users,
+            organisations: selectedEntityFilters.organisations,
+            // events: selectedEntityFilters.events, TODO: Once finished
           })
           .select()
           .single();
@@ -113,7 +101,11 @@ export function useChatroom(chatroomId: string | null) {
     };
 
     load();
-  }, [chatroomId, user, getSupabaseClient, triggerSearch]);
+    // Cleanup on unmount
+    return () => {
+      closeStream();
+    };
+  }, [chatroomId, user, getSupabaseClient, triggerSearch, closeStream]);
 
   return { messages, isLoading, addNewMessage };
 }

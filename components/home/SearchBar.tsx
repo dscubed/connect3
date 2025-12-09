@@ -4,13 +4,21 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuthStore } from "@/stores/authStore";
 import { createChatroom } from "@/lib/chatrooms/chatroomUtils";
+import { EntityFilterOptions } from "./hooks/useSearch";
 
-export function SearchBar() {
+interface SearchBarProps {
+  containerClassName?: string;
+}
+
+export function SearchBar({ containerClassName }: SearchBarProps) {
   const [query, setQuery] = useState("");
   const [creatingChatroom, setCreatingChatroom] = useState(false);
   const router = useRouter();
 
-  const handleSearch = async (searchQuery: string) => {
+  const handleSearch = async (
+    searchQuery: string,
+    selectedEntityFilters: EntityFilterOptions
+  ) => {
     if (!searchQuery.trim()) {
       toast.error("Please enter a search query.");
       return;
@@ -33,7 +41,10 @@ export function SearchBar() {
       }
 
       console.log("Creating chatroom for query:", searchQuery);
-      const createResponse = await createChatroom(searchQuery);
+      const createResponse = await createChatroom(
+        searchQuery,
+        selectedEntityFilters
+      );
 
       if (!createResponse) {
         setCreatingChatroom(false);
@@ -56,6 +67,7 @@ export function SearchBar() {
       setQuery={setQuery}
       disabled={creatingChatroom}
       onSubmit={handleSearch}
+      containerClassName={containerClassName}
     />
   );
 }

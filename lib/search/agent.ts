@@ -11,7 +11,8 @@ const MAX_ITERATIONS = 3;
 export const runSearch = async (
   chatroomId: string,
   openai: OpenAI,
-  supabase: SupabaseClient
+  supabase: SupabaseClient,
+  emit: (event: string, data: Record<string, unknown>) => void
 ): Promise<{ query: string; state: AgentState }> => {
   // Initialize agent state
   const state: AgentState = {
@@ -31,6 +32,10 @@ export const runSearch = async (
 
   // Get context summary and initial queries
   console.log("Analysing context...");
+  emit("status", {
+    step: "context",
+    message: "start",
+  });
   const { contextSummary, query } = await analyseContext(
     chatroomId,
     supabase,
@@ -39,11 +44,19 @@ export const runSearch = async (
   state.summary = contextSummary.summary;
   state.newQueries = contextSummary.queries;
   console.log(`Gathered Context: ${state.summary}`);
+  emit("status", {
+    step: "context",
+    message: `Gathered Context: ${state.summary}`,
+  });
 
   // Main Loop
   while (state.newQueries.length > 0 && state.iteration < state.maxIterations) {
     state.iteration += 1;
     console.log(`Iteration ${state.iteration}: Searching ${state.newQueries}`);
+    emit("status", {
+      step: `searching`,
+      queries: state.newQueries,
+    });
 
     // Search vector stores
     const searchResults = await searchVectorStores(
@@ -53,6 +66,10 @@ export const runSearch = async (
       openai
     );
     console.log("Search finished, refining results...");
+    emit("status", {
+      step: `searching`,
+      message: "end",
+    });
     state.pastQueries.push(...state.newQueries);
     state.newQueries = [];
 
@@ -76,6 +93,10 @@ export const runSearch = async (
 
     // Validate and refine results
     console.log("Refining search results...");
+    emit("status", {
+      step: `refining`,
+      message: "start",
+    });
     const { validEntities, invalidEntities } = await refineSearchResults(
       Object.values(entities),
       supabase,
@@ -86,6 +107,10 @@ export const runSearch = async (
     state.entities.push(...validEntities);
     state.invalidEntities.push(...invalidEntities);
     console.log(`Refinement finished ${validEntities.length} results found`);
+    emit("status", {
+      step: `refining`,
+      message: `Refinement finished ${validEntities.length} results found`,
+    });
 
     // Update seen entities
     for (const entity of validEntities) {
@@ -94,9 +119,17 @@ export const runSearch = async (
 
     // Reason and plan next steps
     console.log("Reasoning next steps...");
+    emit("status", {
+      step: `reasoning`,
+      message: "start",
+    });
     const { reasoning, newQueries } = await reasonAndPlan(state, query, openai);
     console.log(`Reasoned: ${reasoning}`);
     state.newQueries = newQueries;
+    emit("status", {
+      step: `reasoning`,
+      message: `${reasoning}`,
+    });
   }
   return { query, state };
 };

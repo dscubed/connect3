@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { createClient } from "@/lib/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
-interface Profile {
+export interface Profile {
   id: string;
   first_name: string;
   last_name: string;

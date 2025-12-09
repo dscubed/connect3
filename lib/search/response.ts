@@ -2,6 +2,7 @@ import z from "zod";
 import { AgentState, EntityResult, QueryResult, SearchResponse } from "./type";
 import { OpenAI } from "openai";
 import { zodTextFormat } from "openai/helpers/zod.mjs";
+import { partialParseResponse } from "./streamParser";
 
 const formatEntitiesSummary = (entities: EntityResult[]): string => {
   if (entities.length === 0) {
@@ -32,33 +33,45 @@ const SearchResponseSchema = z.object({
 export const generateResponse = async (
   query: string,
   state: AgentState,
-  openai: OpenAI
+  openai: OpenAI,
+  emit: (event: string, data: Record<string, unknown>) => void
 ): Promise<SearchResponse> => {
+  // Create a map which maps its entity IDs to EntityResults\
+  const entityMap = new Map<string, EntityResult>();
+  for (const entity of state.entities) {
+    entityMap.set(entity.id, entity);
+  }
+
   console.log("Generating response for user...");
+  emit("status", {
+    step: "generating",
+    message: "start",
+  });
 
   const prompt = `You are to summarise the search results for a user query. 
     
     Structure of JSON response:
-    {{
+    {
         "summary": "A brief summary of the search results.",
         "results": [
-            {{
+            {
                 "header": "Optional header for this result section",
                 "text": "Detailed text about this result section.",
                 "entity_ids": [ // List ids of entities found in this section ]
-            }}
+            }
         ],
         "followUps": "Suggested follow-up questions or actions for the user."
-    }}
+    }
 
     Results should be ranked from most relevant to least relevant.
     Each separate result section should have a separation of concerns.
     Only use sections for complex queries with each section addressing a different part of the query.
     If the query is simple, return a single result section summarising all findings.
     `;
+
   const entities_summary = formatEntitiesSummary(state.entities);
 
-  const response = await openai.responses.parse({
+  const stream = await openai.responses.create({
     model: "gpt-5-mini",
     reasoning: {
       effort: "low",
@@ -70,26 +83,47 @@ export const generateResponse = async (
       { role: "user", content: `User Query: ${query}` },
     ],
     text: { format: zodTextFormat(SearchResponseSchema, "search_response") },
+    stream: true,
   });
 
-  if (!response.output_parsed) {
-    throw new Error("Failed to parse search response");
+  // Accumulate streamed text
+  let textContent = "";
+  for await (const event of stream) {
+    if (event.type === "response.output_text.delta" && "delta" in event) {
+      textContent += event.delta;
+      const partial = partialParseResponse(textContent, entityMap);
+      emit("response", { partial });
+    }
   }
 
-  // Convert to SearchResposne format
+  // Parse JSON and validate with zod
+  let parsed;
+  try {
+    parsed = JSON.parse(textContent);
+  } catch {
+    throw new Error(`Failed to parse JSON response: ${textContent}`);
+  }
+
+  const validated = SearchResponseSchema.safeParse(parsed);
+  if (!validated.success) {
+    throw new Error(`Invalid response schema: ${validated.error.message}`);
+  }
+
+  // Convert to SearchResponse format
   const searchResults: QueryResult[] = [];
-  for (const result of response.output_parsed.results) {
+  for (const result of validated.data.results) {
     searchResults.push({
       header: result.header ?? undefined,
       text: result.text,
-      matches: state.entities.filter((entity) =>
-        result.entity_ids.includes(entity.id)
-      ),
+      matches: result.entity_ids
+        .map((id) => entityMap.get(id))
+        .filter(Boolean) as EntityResult[],
     });
   }
+
   return {
-    summary: response.output_parsed.summary,
+    summary: validated.data.summary,
     results: searchResults,
-    followUps: response.output_parsed.followUps,
+    followUps: validated.data.followUps,
   };
 };

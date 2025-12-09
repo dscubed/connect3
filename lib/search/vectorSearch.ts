@@ -56,7 +56,6 @@ const searchSingleVectorStore = async (
           value: Array.from(search_filter.entityIds),
         }
       : undefined;
-  console.log("Filters applied:", filters);
 
   const response = await openai.vectorStores.search(search_filter.vsId, {
     query: queries,
@@ -69,13 +68,6 @@ const searchSingleVectorStore = async (
     max_num_results: 15,
   });
 
-  for (const item of response.data) {
-    if (search_filter.entityIds.has(item.file_id)) {
-      console.log(
-        `Filter not working duplicate file ID: ${item.file_id} found`
-      );
-    }
-  }
   const results: SearchResult[] = response.data.map((item) => ({
     file_id: item.file_id,
     text: item.content[0].text,
