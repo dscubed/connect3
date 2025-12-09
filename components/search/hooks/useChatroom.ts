@@ -19,7 +19,7 @@ export function useChatroom(chatroomId: string | null) {
       await connectStream(messageId);
       // Trigger search API call
       console.log("Running search for message:", messageId);
-      await makeAuthenticatedRequest("/api/test/run-search", {
+      await makeAuthenticatedRequest("/api/chatrooms/runSearch", {
         method: "POST",
         body: JSON.stringify({ messageId }),
       });
