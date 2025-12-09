@@ -221,3 +221,58 @@ export async function fetchNewPosts(account: InstagramAccount, ctx: RequestConte
     `Finished processing ${account_name}. Inserted ${postsInserted} new posts.`
   );
 }
+
+export async function refreshPostMediaUrl(
+  mediaId: string,
+  accessToken: string,
+  ctx: RequestContext
+): Promise<boolean> {
+  console.log(`Refreshing media URL for post ${mediaId}...`);
+
+  if (ctx.totalRequests >= MAX_REQUESTS_ALLOWED) {
+    console.log("Rate limit reached, cannot refresh media URL.");
+    return false;
+  }
+
+  const url = new URL(`${INSTAGRAM_API_BASE}/${mediaId}`);
+  url.searchParams.append("fields", "media_url,permalink");
+  url.searchParams.append("access_token", accessToken);
+
+  try {
+    const response = await fetch(url.toString());
+    ctx.totalRequests++;
+
+    if (response.ok) {
+      const data = await response.json();
+      const newMediaUrl = data.media_url || data.permalink;
+
+      if (newMediaUrl) {
+        // Update DB
+        const { error } = await supabase
+          .from("instagram_posts")
+          .update({
+            media_url: newMediaUrl,
+          })
+          .eq("media_id", mediaId);
+
+        if (error) {
+          console.error(`Error updating media URL in DB: ${error.message}`);
+          return false;
+        }
+
+        console.log(`Successfully refreshed media URL for post ${mediaId}.`);
+        return true;
+      } else {
+        console.log(`No media_url found for post ${mediaId}.`);
+        return false;
+      }
+    } else {
+      const errorText = await response.text();
+      console.error(`Failed to refresh media URL: ${errorText}`);
+      return false;
+    }
+  } catch (error) {
+    console.error(`Error refreshing media URL: ${error}`);
+    return false;
+  }
+}
