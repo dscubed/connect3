@@ -12,7 +12,7 @@ export const runSearch = async (
   chatroomId: string,
   openai: OpenAI,
   supabase: SupabaseClient,
-  emit: (event: string, data: Record<string, unknown>) => void
+  emit: (event: string, data: unknown) => void
 ): Promise<{ query: string; state: AgentState }> => {
   // Initialize agent state
   const state: AgentState = {
@@ -28,50 +28,62 @@ export const runSearch = async (
     pastQueries: [],
     iteration: 0,
     maxIterations: MAX_ITERATIONS,
+    progress: {
+      iterations: [],
+    },
   };
 
   // Get context summary and initial queries
   console.log("Analysing context...");
-  emit("status", {
-    step: "context",
-    message: "start",
-  });
+
+  state.progress.context = { start: new Date() };
+  emit("progress", state.progress);
   const { contextSummary, query } = await analyseContext(
     chatroomId,
     supabase,
     openai
   );
+
+  // Update state with context summary and queries
   state.summary = contextSummary.summary;
   state.newQueries = contextSummary.queries;
   console.log(`Gathered Context: ${state.summary}`);
-  emit("status", {
-    step: "context",
-    message: `Gathered Context: ${state.summary}`,
-  });
+
+  // Update progress
+  state.progress.context.end = new Date();
+  state.progress.context.data = state.summary;
+  emit("progress", state.progress);
 
   // Main Loop
   while (state.newQueries.length > 0 && state.iteration < state.maxIterations) {
     state.iteration += 1;
     console.log(`Iteration ${state.iteration}: Searching ${state.newQueries}`);
-    emit("status", {
-      step: `searching`,
-      queries: state.newQueries,
-    });
+
+    // Update progress
+    state.progress.iterations.push({});
+    const currentIterationProgress =
+      state.progress.iterations[state.iteration - 1];
+
+    currentIterationProgress.searching = {
+      start: new Date(),
+      data: state.newQueries,
+    };
+    emit("progress", state.progress);
 
     // Search vector stores
     const searchResults = await searchVectorStores(
-      state.newQueries,
+      state.newQueries.slice(0, 5),
       { users: true, organisations: true },
       state.seenEntities,
       openai
     );
-    console.log("Search finished, refining results...");
-    emit("status", {
-      step: `searching`,
-      message: "end",
-    });
+
+    // Update state and progress
     state.pastQueries.push(...state.newQueries);
     state.newQueries = [];
+
+    currentIterationProgress.searching.end = new Date();
+    emit("progress", state.progress);
 
     // Group results by entity
     const entities = {} as Record<string, EntityGroup>;
@@ -93,10 +105,8 @@ export const runSearch = async (
 
     // Validate and refine results
     console.log("Refining search results...");
-    emit("status", {
-      step: `refining`,
-      message: "start",
-    });
+    currentIterationProgress.refining = { start: new Date() };
+    emit("progress", state.progress);
     const { validEntities, invalidEntities } = await refineSearchResults(
       Object.values(entities),
       supabase,
@@ -104,13 +114,15 @@ export const runSearch = async (
       contextSummary.summary,
       openai
     );
+
+    // Update state and progress
     state.entities.push(...validEntities);
     state.invalidEntities.push(...invalidEntities);
     console.log(`Refinement finished ${validEntities.length} results found`);
-    emit("status", {
-      step: `refining`,
-      message: `Refinement finished ${validEntities.length} results found`,
-    });
+
+    currentIterationProgress.refining.end = new Date();
+    currentIterationProgress.refining.data = validEntities.length;
+    emit("progress", state.progress);
 
     // Update seen entities
     for (const entity of validEntities) {
@@ -119,17 +131,16 @@ export const runSearch = async (
 
     // Reason and plan next steps
     console.log("Reasoning next steps...");
-    emit("status", {
-      step: `reasoning`,
-      message: "start",
-    });
+    currentIterationProgress.reasoning = { start: new Date() };
+    emit("progress", state.progress);
     const { reasoning, newQueries } = await reasonAndPlan(state, query, openai);
     console.log(`Reasoned: ${reasoning}`);
     state.newQueries = newQueries;
-    emit("status", {
-      step: `reasoning`,
-      message: `${reasoning}`,
-    });
+
+    // Update progress
+    currentIterationProgress.reasoning.data = reasoning;
+    currentIterationProgress.reasoning.end = new Date();
+    emit("progress", state.progress);
   }
   return { query, state };
 };

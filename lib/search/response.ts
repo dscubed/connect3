@@ -34,7 +34,7 @@ export const generateResponse = async (
   query: string,
   state: AgentState,
   openai: OpenAI,
-  emit: (event: string, data: Record<string, unknown>) => void
+  emit: (event: string, data: unknown) => void
 ): Promise<SearchResponse> => {
   // Create a map which maps its entity IDs to EntityResults\
   const entityMap = new Map<string, EntityResult>();
@@ -43,10 +43,8 @@ export const generateResponse = async (
   }
 
   console.log("Generating response for user...");
-  emit("status", {
-    step: "generating",
-    message: "start",
-  });
+  state.progress.generating = true;
+  emit("progress", state.progress);
 
   const prompt = `You are to summarise the search results for a user query. 
     

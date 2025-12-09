@@ -9,29 +9,39 @@ export function SearchProgressIndicator({
     return <div className="flex flex-col space-y-4">Starting Search...</div>;
   }
 
-  // Find the current step index
-  const currentActionIndex = progress.actions.findIndex(
-    (a) => !a.refining && !a.reasoning
-  );
+  // Helper function for converting 2 dates to a duration string
+  const formatDuration = (start: Date, end: Date) => {
+    const endDate = new Date(end);
+    const startDate = new Date(start);
+    const durationMs = endDate.getTime() - startDate.getTime();
+    const seconds = Math.floor((durationMs / 1000) % 60);
+    const minutes = Math.floor(durationMs / (1000 * 60));
+    return `${minutes}m ${seconds}s`;
+  };
 
   return (
     <div className="flex flex-col space-y-4">
+      {/* Context */}
       {progress.context &&
-        (progress.context === "start" ? (
+        (!progress.context.end ? (
           <div className="animate-pulse text-white/70">
             Analyzing Context...
           </div>
         ) : (
-          <div className="flex flex-col space-y-2">
-            <div className="text-white/70">Context Analyzed:</div>
-            <div className="text-white/90 italic">{progress.context}</div>
-          </div>
+          <>
+            <div className="text-white/30">
+              {`Thought for: ${formatDuration(
+                progress.context.start,
+                progress.context.end
+              )}`}
+            </div>
+            <div className="text-white/30">{progress.context.data}</div>
+          </>
         ))}
-      {progress.actions.map((action, index) => {
+
+      {progress.iterations.map((iteration, index) => {
         // Determine if this is the current step
-        const isCurrent =
-          index === currentActionIndex ||
-          (currentActionIndex === -1 && index === progress.actions.length - 1);
+        const isCurrent = index === progress.iterations.length - 1;
 
         // Classes for faded vs. active
         const faded = "text-white/30";
@@ -40,34 +50,44 @@ export function SearchProgressIndicator({
 
         return (
           <div key={index}>
-            {action.searching && (
+            {/* Searching */}
+            {iteration.searching && Array.isArray(iteration.searching.data) && (
               <div className={`flex flex-col ${isCurrent ? active : faded}`}>
                 <div>Searching...</div>
-                {action.searching.map((query, qIndex) => (
-                  <div key={qIndex} className={isCurrent ? pulse : ""}>
-                    {query}
+                {iteration.searching.data.map(
+                  (query: string, qIndex: number) => (
+                    <div key={qIndex} className={isCurrent ? pulse : ""}>
+                      {query}
+                    </div>
+                  )
+                )}
+                {iteration.searching.end ? (
+                  <div className={`italic ${isCurrent ? active : faded}`}>
+                    Search Finished
                   </div>
-                ))}
+                ) : null}
               </div>
             )}
-            {action.refining &&
-              (action.refining === "start" ? (
+
+            {/* Refining */}
+            {iteration.refining &&
+              (!iteration.refining.end ? (
                 <div className={isCurrent ? pulse : faded}>
                   Refining Results...
                 </div>
               ) : (
                 <div className={`italic ${isCurrent ? active : faded}`}>
-                  {action.refining}
+                  Refining returned {iteration.refining.data} results
                 </div>
               ))}
-            {action.reasoning &&
-              (action.reasoning === "start" ? (
+            {iteration.reasoning &&
+              (!iteration.reasoning.end ? (
                 <div className={isCurrent ? pulse : faded}>
                   Reasoning Next Steps...
                 </div>
               ) : (
                 <div className={`italic ${isCurrent ? active : faded}`}>
-                  {action.reasoning}
+                  {iteration.reasoning.data}
                 </div>
               ))}
           </div>

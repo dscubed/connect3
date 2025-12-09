@@ -11,10 +11,9 @@ const supabase = createClient(
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
-export type SSEEmitter = (type: string, data: Record<string, unknown>) => void;
+export type SSEEmitter = (type: string, data: unknown) => Promise<void>;
 
 export async function POST(req: NextRequest) {
-  const encoder = new TextEncoder();
   const { messageId } = await req.json();
 
   if (!messageId) {
@@ -24,76 +23,78 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const stream = new ReadableStream({
-    async start(controller) {
-      const emit: SSEEmitter = (type, data) => {
-        controller.enqueue(
-          encoder.encode(`data: ${JSON.stringify({ type, ...data })}\n\n`)
-        );
-      };
+  // Check if message exists and is pending
+  const { data: messageData, error: messageError } = await supabase
+    .from("chatmessages")
+    .select("id, status")
+    .eq("id", messageId)
+    .eq("status", "pending")
+    .single();
 
-      try {
-        emit("status", { step: "started", message: "Starting search..." });
-        const { error: processingUpdateError } = await supabase
-          .from("chatmessages")
-          .update({ status: "processing" })
-          .eq("id", messageId);
-        if (processingUpdateError) {
-          console.error(
-            "Failed to update message status:",
-            processingUpdateError
-          );
-        }
+  if (messageError || !messageData) {
+    console.error("Message fetch error:", messageError);
+    return NextResponse.json(
+      { success: false, error: "Message not found or not pending" },
+      { status: 404 }
+    );
+  }
 
-        const { query, state } = await runSearch(
-          messageId,
-          openai,
-          supabase,
-          emit
-        );
-        const response = await generateResponse(query, state, openai, emit);
+  const channel = supabase.channel(`message:${messageId}`);
+  console.log("Creating channel for message ID:", channel.state);
 
-        emit("done", {
-          success: true,
-          contextSummary: state.summary,
-          query,
-          entities: state.entities,
-          invalidEntities: state.invalidEntities,
-          response,
-        });
+  const emit: SSEEmitter = async (type, data) => {
+    // console.log("Emitting event:", type, data);
+    await channel.send({
+      type: "broadcast",
+      event: type,
+      payload: data,
+    });
+  };
 
-        const { error: completeUpdateError } = await supabase
-          .from("chatmessages")
-          .update({
-            status: "completed",
-            content: response,
-          })
-          .eq("id", messageId);
+  try {
+    await emit("status", { step: "started", message: "Starting search..." });
+    const { error: processingUpdateError } = await supabase
+      .from("chatmessages")
+      .update({ status: "processing" })
+      .eq("id", messageId);
+    if (processingUpdateError) {
+      console.error("Failed to update message status:", processingUpdateError);
+      throw new Error("Failed to update message status");
+    }
 
-        if (completeUpdateError) {
-          console.error(
-            "Failed to update message status:",
-            completeUpdateError
-          );
-        }
-      } catch (error) {
-        console.error("Run search error:", error);
-        emit("error", { message: String(error) });
-        supabase
-          .from("chatmessages")
-          .update({ status: "failed" })
-          .eq("id", messageId);
-      } finally {
-        controller.close();
-      }
-    },
-  });
+    const { query, state } = await runSearch(messageId, openai, supabase, emit);
+    const response = await generateResponse(query, state, openai, emit);
 
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      Connection: "keep-alive",
-    },
-  });
+    await emit("done", {
+      success: true,
+      response,
+    });
+
+    const { error: completeUpdateError } = await supabase
+      .from("chatmessages")
+      .update({
+        status: "completed",
+        content: response,
+      })
+      .eq("id", messageId);
+
+    if (completeUpdateError) {
+      console.error("Failed to update message status:", completeUpdateError);
+      throw new Error("Failed to update message status");
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Run search error:", error);
+    await emit("error", { message: String(error) });
+    await supabase
+      .from("chatmessages")
+      .update({ status: "failed" })
+      .eq("id", messageId);
+
+    return NextResponse.json(
+      { success: false, error: String(error) },
+      { status: 500 }
+    );
+  }
 }

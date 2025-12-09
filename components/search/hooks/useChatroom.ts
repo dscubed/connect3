@@ -9,21 +9,22 @@ export function useChatroom(chatroomId: string | null) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { user, getSupabaseClient } = useAuthStore();
+  const { user, getSupabaseClient, makeAuthenticatedRequest } = useAuthStore();
   const { connectStream, closeStream } = useSearchStream(setMessages);
-
-  // For testing: log message progress updates
-  useEffect(() => {
-    console.log("Chatroom Messages :", messages);
-  }, [messages]);
 
   // Run AI Search for a message
   const triggerSearch = useCallback(
-    (messageId: string) => {
-      // Just connect to the stream - all handling is in useSearchStream
-      connectStream(messageId);
+    async (messageId: string) => {
+      // Connect to stream
+      await connectStream(messageId);
+      // Trigger search API call
+      console.log("Running search for message:", messageId);
+      await makeAuthenticatedRequest("/api/test/run-search", {
+        method: "POST",
+        body: JSON.stringify({ messageId }),
+      });
     },
-    [connectStream]
+    [connectStream, makeAuthenticatedRequest]
   );
 
   // Add New Message from Chatroom
@@ -92,6 +93,13 @@ export function useChatroom(chatroomId: string | null) {
           if (firstMsg?.status === "pending") {
             triggerSearch(firstMsg.id);
           }
+
+          // Check last message for processing status (Ongoing) to reconnect stream
+          const lastMsg = loadedMessages[loadedMessages.length - 1];
+          if (lastMsg?.status === "processing") {
+            await connectStream(lastMsg.id);
+            console.log("Reconnected stream for ongoing message");
+          }
         }
       } catch (e) {
         console.error("Failed to load chatroom:", e);
@@ -105,7 +113,14 @@ export function useChatroom(chatroomId: string | null) {
     return () => {
       closeStream();
     };
-  }, [chatroomId, user, getSupabaseClient, triggerSearch, closeStream]);
+  }, [
+    chatroomId,
+    user,
+    getSupabaseClient,
+    triggerSearch,
+    closeStream,
+    connectStream,
+  ]);
 
   return { messages, isLoading, addNewMessage };
 }

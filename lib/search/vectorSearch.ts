@@ -68,13 +68,23 @@ const searchSingleVectorStore = async (
     max_num_results: 15,
   });
 
-  const results: SearchResult[] = response.data.map((item) => ({
-    file_id: item.file_id,
-    text: item.content[0].text,
-    name: item.attributes ? String(item.attributes.name) : "unknown",
-    type: item.attributes ? (item.attributes.type as EntityType) : "user",
-    id: item.attributes ? String(item.attributes.id) : "unknown",
-    score: item.score,
-  }));
+  const results: SearchResult[] = response.data.map((item) => {
+    const attributes = item.attributes as Record<string, string> | null;
+    if (!attributes) {
+      console.error("Missing attributes in vector store item:", item);
+    }
+
+    return {
+      file_id: item.file_id,
+      text: item.content[0].text,
+      name: attributes && attributes.name ? String(attributes.name) : "unknown",
+      type:
+        attributes && attributes.type
+          ? (attributes.type as EntityType)
+          : "user",
+      id: attributes && attributes.id ? String(attributes.id) : "unknown",
+      score: item.score,
+    };
+  });
   return results;
 };

@@ -31,14 +31,24 @@ export interface ChatMessage {
   progress?: SearchProgress;
 }
 
-export interface SearchAction {
-  searching?: string[];
-  refining?: string;
-  reasoning?: string;
+export interface SearchProgress {
+  context?: {
+    start: Date;
+    data?: string;
+    end?: Date;
+  };
+  iterations: SearchIteration[];
+  generating?: boolean;
 }
 
-export interface SearchProgress {
-  context?: string;
-  actions: SearchAction[];
-  generating: boolean;
+interface SearchAction {
+  start: Date;
+  data?: string | string[] | number;
+  end?: Date;
+}
+
+interface SearchIteration {
+  searching?: SearchAction;
+  refining?: SearchAction;
+  reasoning?: SearchAction;
 }

@@ -1,3 +1,5 @@
+import { SearchProgress } from "@/components/search/types";
+
 export type EntityType = "user" | "organisation";
 
 export interface AgentState {
@@ -17,6 +19,9 @@ export interface AgentState {
   // Iteration
   iteration: number;
   maxIterations: number;
+
+  // Progress Tracking
+  progress: SearchProgress;
 }
 
 // Context Types
