@@ -48,6 +48,10 @@ export const runSearch = async (
   state.summary = contextSummary.summary;
   state.newQueries = contextSummary.queries;
   console.log(`Gathered Context: ${state.summary}`);
+  console.log(`Entity Types: users=${contextSummary.entityTypes.users}, organisations=${contextSummary.entityTypes.organisations}`);
+
+  // Store entity type filter for use in iterations
+  const entityTypeFilter = contextSummary.entityTypes;
 
   // Update progress
   state.progress.context.end = new Date();
@@ -70,10 +74,10 @@ export const runSearch = async (
     };
     emit("progress", state.progress);
 
-    // Search vector stores
+    // Search vector stores with detected entity types
     const searchResults = await searchVectorStores(
       state.newQueries.slice(0, 5),
-      { users: true, organisations: true },
+      entityTypeFilter,
       state.seenEntities,
       openai
     );

@@ -7,6 +7,10 @@ import { zodTextFormat } from "openai/helpers/zod.mjs";
 const ContextSummarySchema = z.object({
   summary: z.string(),
   queries: z.array(z.string()),
+  entityTypes: z.object({
+    users: z.boolean(),
+    organisations: z.boolean(),
+  }),
 });
 
 export type ContextSummary = z.infer<typeof ContextSummarySchema>;
@@ -21,22 +25,60 @@ export const analyseContext = async (
     supabase
   );
 
-  const systemPrompt = `Analyse the user's query, provide context.
+  const systemPrompt = `Analyse the user's query, provide context, and determine entity types.
+
+ENTITY TYPE DETECTION:
+- Set "users: true" if query is about: people, individuals, students, contacts, someone, who, member
+- Set "organisations: true" if query is about: clubs, societies, organizations, groups, teams, companies
+- BOTH can be true if query is ambiguous (e.g., "tech at unimelb" could be people OR clubs)
+- DEFAULT to BOTH true if unclear - better to over-search than miss results
+
+QUERY REWRITING:
 ONLY if the user's query is vague or ambiguous/follow up, rewrite the query.
 IF the query is clear, return it as is.
 Queries shouldn't be questions but short phrases like "computing clubs unimelb".
+
 Summary should be only 1-2 sentences max and describe the user's intent with any assumptions made.
 If user is requesting specific entities (e.g. clubs, organisations), include that in the summary.
 
-EXAMPLE:
+EXAMPLES:
+
+Query: "Who goes to unimelb?"
+- summary: The user wants to find people/students attending University of Melbourne
+- queries: ["students unimelb", "people university of melbourne"]
+- entityTypes: { users: true, organisations: false }
+
+Query: "What clubs should I join at unimelb?"
+- summary: The user is seeking club recommendations at University of Melbourne
+- queries: ["clubs university of melbourne", "societies unimelb"]
+- entityTypes: { users: false, organisations: true }
+
+Query: "Who can I talk to about data science at unimelb?"
+- summary: User wants both people in data science AND data science organizations at unimelb
+- queries: ["data science unimelb", "data science students", "data science clubs"]
+- entityTypes: { users: true, organisations: true }
+
+Query: "Find me CISSA contact info"
+- summary: User wants contact information for CISSA club
+- queries: ["CISSA contact", "CISSA unimelb"]
+- entityTypes: { users: false, organisations: true }
+
+Query: "Connect me to data science students"
+- summary: User wants to connect with other students interested in data science
+- queries: ["data science students", "data science community"]
+- entityTypes: { users: true, organisations: false }
+
 Query: "Yes" -> Look at chat history to find context.
 - summary: The user is confirming their interest in learning more about tech clubs at University of Melbourne based on previous discussion. Clubs previously discussed include DSCubed, HackMelbourne and CISSA.
 - queries: ["DSCubed unimelb", "HackMelbourne", "CISSA"]
-** USE SPECIFIC ENTITIY NAMES IF AVAILABLE **
+- entityTypes: { users: false, organisations: true }
 
-Query: "What clubs should I join" -> Look at user info to find context.
-- summary: The user is seeking recommendations for clubs to join. Based on their information the user is likely interested in tech and sports clubs at University of Melbourne.
-- queries: ["tech clubs university of melbourne", "sports clubs university of melbourne"]
+Query: "What about tech?" -> Ambiguous without context
+- summary: User is interested in tech but unclear if seeking people, organizations, or both
+- queries: ["tech unimelb"]
+- entityTypes: { users: true, organisations: true }
+
+** USE SPECIFIC ENTITY NAMES IF AVAILABLE IN CHAT HISTORY **
 `;
 
   const response = await openai.responses.parse({

@@ -31,25 +31,42 @@ export const searchVectorStores = async (
     };
   }
 
+  // Combine queries into a single search string
+  const combinedQuery = queries.join(" ");
+  console.log(`Searching with combined query: "${combinedQuery}"`);
+
   // Search each vector store in parallel
   const allResults: SearchResult[] = [];
 
   await Promise.all(
-    Object.values(searchFilters).map(async (filter) => {
-      const results = await searchSingleVectorStore(queries, filter, openai);
+    Object.entries(searchFilters).map(async ([type, filter]) => {
+      console.log(`Searching ${type} vector store: ${filter.vsId}`);
+      const results = await searchSingleVectorStore(combinedQuery, filter, openai);
+      console.log(`Found ${results.length} results in ${type} vector store`);
       allResults.push(...results);
     })
   );
+
+  console.log(`Total results: ${allResults.length}`);
   return allResults;
 };
 
 const searchSingleVectorStore = async (
-  queries: string[],
+  query: string,
   search_filter: SearchFilter,
   openai: OpenAI
 ): Promise<SearchResult[]> => {
-  const filters =
-    search_filter.entityIds.size > 0
+  try {
+    // Hybrid approach: Only use API filter if exclusion set is small
+    // Large exclusion sets cause performance issues with nin filters
+    const useApiFilter = search_filter.entityIds.size > 0 && search_filter.entityIds.size < 50;
+    const requestedResults = useApiFilter ? 15 : 20;
+
+    console.log(`Entity exclusion set size: ${search_filter.entityIds.size}, using API filter: ${useApiFilter}`);
+
+    // Build filter if safe to use
+    // @ts-expect-error: OpenAI nin type is supported but SDK is out of date
+    const filters = useApiFilter
       ? {
           type: "nin",
           key: "id",
@@ -57,34 +74,51 @@ const searchSingleVectorStore = async (
         }
       : undefined;
 
-  const response = await openai.vectorStores.search(search_filter.vsId, {
-    query: queries,
-    rewrite_query: true,
-    ranking_options: {
-      score_threshold: 0.2,
-    },
-    // @ts-expect-error: OpenAI nin type is supported but SDK is out of date
-    filters,
-    max_num_results: 15,
-  });
+    const response = await openai.vectorStores.search(search_filter.vsId, {
+      query: query,
+      rewrite_query: false,
+      ranking_options: {
+        score_threshold: 0.2,
+      },
+      ...(filters && { filters }),
+      max_num_results: requestedResults,
+    });
 
-  const results: SearchResult[] = response.data.map((item) => {
-    const attributes = item.attributes as Record<string, string> | null;
-    if (!attributes) {
-      console.error("Missing attributes in vector store item:", item);
-    }
+    console.log(`Raw API response: ${response.data.length} items`);
 
-    return {
-      file_id: item.file_id,
-      text: item.content[0].text,
-      name: attributes && attributes.name ? String(attributes.name) : "unknown",
-      type:
-        attributes && attributes.type
-          ? (attributes.type as EntityType)
-          : "user",
-      id: attributes && attributes.id ? String(attributes.id) : "unknown",
-      score: item.score,
-    };
-  });
-  return results;
+    // Always apply in-memory filter as safety net
+    const results: SearchResult[] = response.data
+      .filter((item) => {
+        const attributes = item.attributes as Record<string, string> | null;
+        const id = attributes?.id ? String(attributes.id) : null;
+
+        if (id && search_filter.entityIds.has(id)) {
+          console.log(`Filtering out seen entity: ${id}`);
+          return false;
+        }
+
+        return true;
+      })
+      .slice(0, 15) // Always trim to 15
+      .map((item) => {
+        const attributes = item.attributes as Record<string, string> | null;
+        if (!attributes) {
+          console.error("Missing attributes in vector store item:", item);
+        }
+
+        return {
+          file_id: item.file_id,
+          text: item.content[0].text,
+          name: attributes?.name ? String(attributes.name) : "unknown",
+          type: attributes?.type ? (attributes.type as EntityType) : "user",
+          id: attributes?.id ? String(attributes.id) : "unknown",
+          score: item.score,
+        };
+      });
+
+    return results;
+  } catch (error) {
+    console.error("Vector store search error:", error);
+    throw error;
+  }
 };
