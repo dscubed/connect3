@@ -1,17 +1,11 @@
 import { motion } from "framer-motion";
-import { SearchResults } from "../types";
-import { UserProfile } from "../types";
-import MatchResults from "../MatchResult/MatchResults";
-import PeopleList from "../PeopleList/PeopleList";
+import { SearchResponse } from "@/lib/search/type";
+import { QueryResult } from "./QueryResult";
 
 export function CompletedResponse({
   content,
-  onUserClick,
 }: {
-  content: SearchResults;
-  userProfiles: Map<string, UserProfile>;
-  profilesLoading: boolean;
-  onUserClick?: (user: UserProfile) => void;
+  content: Partial<SearchResponse>;
 }) {
   return (
     <motion.div
@@ -21,40 +15,31 @@ export function CompletedResponse({
       transition={{ duration: 0.8 }}
     >
       {/* Result */}
-      <motion.p
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
-        {content.result}
-      </motion.p>
+      {content.summary && (
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          {content.summary}
+        </motion.p>
+      )}
 
-      {/* User matches */}
-      {(content.matches || []).map((match, userIndex) => {
-        return (
-          <MatchResults
-            key={`user-${userIndex}`}
-            match={match}
-            userIndex={userIndex}
-          />
-        );
+      {/* Results */}
+      {(content.results || []).map((result, userIndex) => {
+        return <QueryResult key={userIndex} result={result} />;
       })}
 
       {/* Follow-up questions */}
-      <motion.p
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 1.2 }}
-      >
-        {content.followUps}
-      </motion.p>
-
-      {/* People section */}
-      <PeopleList
-        isVisible={content.matches && content.matches.length > 0}
-        searchMatches={content.matches}
-        onUserClick={onUserClick || (() => {})}
-      />
+      {content.followUps && (
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 1.2 }}
+        >
+          {content.followUps}
+        </motion.p>
+      )}
     </motion.div>
   );
 }

@@ -34,18 +34,6 @@ export function useSignUp() {
       return;
     }
 
-    // if (params.accountType == "organisation") {
-    //   const orgEmails = process.env.NEXT_PUBLIC_ORGANISATION_EMAILS;
-    //   const allowedEmails = JSON.parse(orgEmails || "[]") as string[];
-    //   if (!allowedEmails.includes(params.email)) {
-    //     toast.error(
-    //       `${params.email} is not a registered organisation email yet. Please contact us for collaboration 😊.`
-    //     );
-    //     setIsSigningUp(false);
-    //     return;
-    //   }
-    // }
-
     try {
       let anonymousId = null;
       if (user?.is_anonymous) {

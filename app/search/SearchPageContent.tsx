@@ -3,13 +3,13 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Sidebar from "@/components/sidebar/Sidebar";
 import { CubeLoader } from "@/components/ui/CubeLoader";
-import MessageList from "@/components/search/Messages/MessageList";
-import SearchInput from "@/components/search/SearchInput";
+import { MessageList } from "@/components/search/Messages/MessageList";
 import ShareButton from "@/components/search/ShareButton";
 import { UserProfile } from "@/components/search/UserProfile/UserProfile";
 import { useAuthStore } from "@/stores/authStore";
 import { ChunkData } from "@/components/profile/chunks/ChunkUtils";
 import { useChatroom } from "@/components/search/hooks/useChatroom";
+import { ChatRoomSearchBar } from "@/components/search/ChatroomSearchBar";
 
 export default function SearchPageContent() {
   const [mounted, setMounted] = useState(false);
@@ -30,7 +30,7 @@ export default function SearchPageContent() {
 
   const searchParams = useSearchParams();
   const chatroomId = mounted ? searchParams?.get("chatroom") || null : null;
-  const { messages, addNewMessage } = useChatroom(chatroomId);
+  const { messages, addNewMessage, inFlight } = useChatroom(chatroomId);
 
   // Handler for message thread users
   const handleMessageUserClick = (user: {
@@ -117,7 +117,11 @@ export default function SearchPageContent() {
 
           {/* Fixed search bar at bottom */}
           <div className="w-full px-4">
-            <SearchInput onSearch={addNewMessage} chatroomId={chatroomId} />
+            <ChatRoomSearchBar
+              chatroomId={chatroomId}
+              addNewMessage={addNewMessage}
+              inFlight={inFlight}
+            />
           </div>
         </main>
       </div>
