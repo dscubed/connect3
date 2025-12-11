@@ -25,60 +25,59 @@ export const analyseContext = async (
     supabase
   );
 
-  const systemPrompt = `Analyse the user's query, provide context, and determine entity types.
+  const systemPrompt = `Analyse the user's query, provide context, and determine what entity types to search.
 
-ENTITY TYPE DETECTION:
-- Set "users: true" if query is about: people, individuals, students, contacts, someone, who, member
-- Set "organisations: true" if query is about: clubs, societies, organizations, groups, teams, companies
-- BOTH can be true if query is ambiguous (e.g., "tech at unimelb" could be people OR clubs)
-- DEFAULT to BOTH true if unclear - better to over-search than miss results
+ENTITY TYPE DETECTION (CRITICAL):
+- Set "users: true" if the query is about PEOPLE: students, individuals, contacts, someone, who, person, people, find someone
+- Set "organisations: true" if the query is about GROUPS: clubs, societies, organizations, groups, teams, club, society, organization
+- BOTH can be true if ambiguous or if the query could benefit from both (e.g., "tech at unimelb", "who can I contact about X")
+- DEFAULT: When unclear, prefer BOTH true - it's better to search widely than miss results
 
 QUERY REWRITING:
 ONLY if the user's query is vague or ambiguous/follow up, rewrite the query.
 IF the query is clear, return it as is.
 Queries shouldn't be questions but short phrases like "computing clubs unimelb".
-
 Summary should be only 1-2 sentences max and describe the user's intent with any assumptions made.
 If user is requesting specific entities (e.g. clubs, organisations), include that in the summary.
 
 EXAMPLES:
 
-Query: "Who goes to unimelb?"
-- summary: The user wants to find people/students attending University of Melbourne
-- queries: ["students unimelb", "people university of melbourne"]
+Query: "find data science students in unimelb"
+- summary: The user is searching for individuals/students studying data science at University of Melbourne.
+- queries: ["data science students unimelb", "data science university of melbourne"]
 - entityTypes: { users: true, organisations: false }
 
-Query: "What clubs should I join at unimelb?"
-- summary: The user is seeking club recommendations at University of Melbourne
-- queries: ["clubs university of melbourne", "societies unimelb"]
+Query: "what clubs should I join"
+- summary: The user is seeking recommendations for clubs to join at University of Melbourne.
+- queries: ["tech clubs university of melbourne", "sports clubs university of melbourne"]
 - entityTypes: { users: false, organisations: true }
 
-Query: "Who can I talk to about data science at unimelb?"
-- summary: User wants both people in data science AND data science organizations at unimelb
-- queries: ["data science unimelb", "data science students", "data science clubs"]
+Query: "who can I contact about machine learning?"
+- summary: User wants both ML experts/people AND ML organizations/clubs that could provide ML contacts.
+- queries: ["machine learning contact unimelb", "machine learning experts", "ML clubs"]
 - entityTypes: { users: true, organisations: true }
 
-Query: "Find me CISSA contact info"
-- summary: User wants contact information for CISSA club
-- queries: ["CISSA contact", "CISSA unimelb"]
+Query: "CISSA"
+- summary: User is asking about CISSA, which is a computing club/organization at university.
+- queries: ["CISSA", "CISSA unimelb"]
 - entityTypes: { users: false, organisations: true }
 
-Query: "Connect me to data science students"
-- summary: User wants to connect with other students interested in data science
-- queries: ["data science students", "data science community"]
+Query: "tech people at unimelb"
+- summary: User explicitly wants people involved in technology at University of Melbourne.
+- queries: ["tech unimelb", "technology students university of melbourne"]
 - entityTypes: { users: true, organisations: false }
+
+Query: "find founder clubs in unimelb"
+- summary: User is looking for founder/entrepreneurship clubs at University of Melbourne.
+- queries: ["founders clubs unimelb", "entrepreneurship clubs university of melbourne"]
+- entityTypes: { users: false, organisations: true }
 
 Query: "Yes" -> Look at chat history to find context.
 - summary: The user is confirming their interest in learning more about tech clubs at University of Melbourne based on previous discussion. Clubs previously discussed include DSCubed, HackMelbourne and CISSA.
 - queries: ["DSCubed unimelb", "HackMelbourne", "CISSA"]
 - entityTypes: { users: false, organisations: true }
 
-Query: "What about tech?" -> Ambiguous without context
-- summary: User is interested in tech but unclear if seeking people, organizations, or both
-- queries: ["tech unimelb"]
-- entityTypes: { users: true, organisations: true }
-
-** USE SPECIFIC ENTITY NAMES IF AVAILABLE IN CHAT HISTORY **
+** USE SPECIFIC ENTITY NAMES IF AVAILABLE **
 `;
 
   const response = await openai.responses.parse({
