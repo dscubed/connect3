@@ -10,22 +10,29 @@ interface ChatRoomSearchBarProps {
   ) => void;
 }
 
+interface ChatRoomSearchBarProps {
+  chatroomId: string | null;
+  addNewMessage: (
+    query: string,
+    selectedEntityFilters: EntityFilterOptions
+  ) => void;
+  inFlight?: boolean;
+}
+
 export function ChatRoomSearchBar({
   chatroomId,
   addNewMessage,
+  inFlight = false,
 }: ChatRoomSearchBarProps) {
   const [query, setQuery] = useState("");
-  const [addingMessage, setAddingMessage] = useState(false);
 
   const handleSubmit = async (
     query: string,
     selectedEntityFilters: EntityFilterOptions
   ) => {
-    if (query.trim() === "") return;
-    setAddingMessage(true);
+    if (query.trim() === "" || inFlight) return;
     setQuery("");
     addNewMessage(query, selectedEntityFilters);
-    setAddingMessage(false);
   };
 
   if (!chatroomId) return null;
@@ -34,7 +41,8 @@ export function ChatRoomSearchBar({
     <SearchBarUI
       query={query}
       setQuery={setQuery}
-      disabled={addingMessage}
+      disabled={inFlight}
+      isLoading={inFlight}
       onSubmit={handleSubmit}
     />
   );

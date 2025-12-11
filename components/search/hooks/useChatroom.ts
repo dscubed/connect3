@@ -8,6 +8,7 @@ import { EntityFilterOptions } from "@/components/home/hooks/useSearch";
 export function useChatroom(chatroomId: string | null) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [inFlight, setInFlight] = useState(false); // Request-in-flight lock
 
   const { user, getSupabaseClient, makeAuthenticatedRequest } = useAuthStore();
   const { connectStream, closeStream } = useSearchStream(setMessages);
@@ -15,22 +16,33 @@ export function useChatroom(chatroomId: string | null) {
   // Run AI Search for a message
   const triggerSearch = useCallback(
     async (messageId: string) => {
-      // Connect to stream
-      await connectStream(messageId);
-      // Trigger search API call
-      console.log("Running search for message:", messageId);
-      await makeAuthenticatedRequest("/api/chatrooms/runSearch", {
-        method: "POST",
-        body: JSON.stringify({ messageId }),
-      });
+      // Prevent simultaneous requests
+      if (inFlight) {
+        console.log("Search already in flight, ignoring request");
+        return;
+      }
+
+      setInFlight(true);
+      try {
+        // Connect to stream
+        await connectStream(messageId);
+        // Trigger search API call
+        console.log("Running search for message:", messageId);
+        await makeAuthenticatedRequest("/api/chatrooms/runSearch", {
+          method: "POST",
+          body: JSON.stringify({ messageId }),
+        });
+      } finally {
+        setInFlight(false);
+      }
     },
-    [connectStream, makeAuthenticatedRequest]
+    [connectStream, makeAuthenticatedRequest, inFlight]
   );
 
   // Add New Message from Chatroom
   const addNewMessage = useCallback(
     async (query: string, selectedEntityFilters: EntityFilterOptions) => {
-      if (!query.trim() || !chatroomId || !user) return;
+      if (!query.trim() || !chatroomId || !user || inFlight) return;
 
       try {
         // Add message to supabase
@@ -63,7 +75,7 @@ export function useChatroom(chatroomId: string | null) {
         console.error("Send message error:", error);
       }
     },
-    [chatroomId, user, getSupabaseClient, triggerSearch]
+    [chatroomId, user, getSupabaseClient, triggerSearch, inFlight]
   );
 
   // Load Chatroom Messages
@@ -122,5 +134,5 @@ export function useChatroom(chatroomId: string | null) {
     connectStream,
   ]);
 
-  return { messages, isLoading, addNewMessage };
+  return { messages, isLoading, addNewMessage, inFlight };
 }

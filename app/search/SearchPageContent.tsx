@@ -30,7 +30,7 @@ export default function SearchPageContent() {
 
   const searchParams = useSearchParams();
   const chatroomId = mounted ? searchParams?.get("chatroom") || null : null;
-  const { messages, addNewMessage } = useChatroom(chatroomId);
+  const { messages, addNewMessage, inFlight } = useChatroom(chatroomId);
 
   // Handler for message thread users
   const handleMessageUserClick = (user: {
@@ -120,6 +120,7 @@ export default function SearchPageContent() {
             <ChatRoomSearchBar
               chatroomId={chatroomId}
               addNewMessage={addNewMessage}
+              inFlight={inFlight}
             />
           </div>
         </main>

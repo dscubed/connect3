@@ -92,7 +92,13 @@ const searchSingleVectorStore = async (
         const attributes = item.attributes as Record<string, string> | null;
         const id = attributes?.id ? String(attributes.id) : null;
 
-        if (id && search_filter.entityIds.has(id)) {
+        // Skip items without valid IDs
+        if (!id) {
+          console.warn("Skipping item without valid ID:", item);
+          return false;
+        }
+
+        if (search_filter.entityIds.has(id)) {
           console.log(`Filtering out seen entity: ${id}`);
           return false;
         }

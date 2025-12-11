@@ -15,6 +15,7 @@ interface SearchBarUIProps {
     selectedEntityFilters: EntityFilterOptions
   ) => void;
   disabled?: boolean;
+  isLoading?: boolean;
   containerClassName?: string;
 }
 
@@ -26,6 +27,7 @@ const SearchBarUIComponent: React.FC<SearchBarUIProps> = ({
   setQuery,
   onSubmit,
   disabled = false,
+  isLoading = false,
   containerClassName = DEFAULT_CONTAINER_CLASSNAME,
 }) => {
   const {
@@ -42,7 +44,7 @@ const SearchBarUIComponent: React.FC<SearchBarUIProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (disabled) return;
+    if (disabled || isLoading) return;
     onSubmit?.(localQuery, selectedEntityFilters);
     setQuery(localQuery);
   };
@@ -51,7 +53,7 @@ const SearchBarUIComponent: React.FC<SearchBarUIProps> = ({
     <form onSubmit={handleSubmit} className="w-full">
       <div
         className={`mx-auto max-w-2xl flex flex-col items-center ${containerClassName} transition-all ${
-          disabled ? "opacity-50 pointer-events-none grayscale" : ""
+          disabled || isLoading ? "opacity-50 pointer-events-none grayscale" : ""
         }`}
       >
         <div className="flex w-full items-center gap-3 py-2">
@@ -60,7 +62,7 @@ const SearchBarUIComponent: React.FC<SearchBarUIProps> = ({
             placeholder="Ask me anything..."
             value={localQuery}
             onChange={(e) => handleChange(e.target.value)}
-            disabled={disabled}
+            disabled={disabled || isLoading}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -70,7 +72,8 @@ const SearchBarUIComponent: React.FC<SearchBarUIProps> = ({
           />
         </div>
         <SearchBarActions
-          searchDisabled={disabled || isSearching || localQuery.trim() === ""}
+          searchDisabled={disabled || isSearching || isLoading || localQuery.trim() === ""}
+          isLoading={isLoading}
           selectedEntityFilters={selectedEntityFilters}
           handleEntityFilterClick={handleEntityFilterClick}
           selectedCount={selectedCount}

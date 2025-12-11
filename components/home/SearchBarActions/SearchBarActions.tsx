@@ -6,7 +6,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Fragment } from "react";
-import { ArrowUp, Check, ChevronDown, Settings2 } from "lucide-react";
+import { ArrowUp, Check, ChevronDown, Settings2, Square, Loader2 } from "lucide-react";
 import { EntityFilterOptions } from "../hooks/useSearch";
 
 const FILTER_OPTIONS = [
@@ -33,6 +33,7 @@ const FILTER_OPTIONS = [
 
 interface SearchBarActionsProps {
   searchDisabled: boolean;
+  isLoading?: boolean;
   selectedEntityFilters: EntityFilterOptions;
   handleEntityFilterClick: (selectedFilter: keyof EntityFilterOptions) => void;
   selectedCount: number;
@@ -40,6 +41,7 @@ interface SearchBarActionsProps {
 
 export function SearchBarActions({
   searchDisabled,
+  isLoading = false,
   selectedEntityFilters,
   handleEntityFilterClick,
   selectedCount,
@@ -77,7 +79,7 @@ export function SearchBarActions({
                         option.id as keyof typeof selectedEntityFilters
                       )
                     }
-                    onSelect={(e) => e.preventDefault()} // Add this line
+                    onSelect={(e) => e.preventDefault()}
                     className="flex items-center gap-3 py-2 cursor-pointer"
                   >
                     <div className="flex-1">
@@ -100,7 +102,11 @@ export function SearchBarActions({
           disabled={searchDisabled}
           className="flex flex-row items-center gap-2 rounded-xl px-3 py-1.5 bg-white text-black text-sm font-medium cursor-pointer hover:bg-white/90 transition-all hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <ArrowUp className="inline-block h-4 w-4" />
+          {isLoading ? (
+            <Loader2 className="inline-block h-4 w-4 animate-spin" />
+          ) : (
+            <ArrowUp className="inline-block h-4 w-4" />
+          )}
         </button>
       </div>
     </div>
