@@ -15,14 +15,12 @@ export default function EventsSection() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-32">
+      <div>
         <CubeLoader size={60} />
         <span className="text-white/70">Loading events...</span>
       </div>
     );
   }
-
-  console.log(events);
 
   return (
     <motion.div

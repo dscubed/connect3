@@ -33,7 +33,7 @@ export async function fetchUserDetails(
 
     const userDetails = {
       id: user.id,
-      full_name: `${user.first_name} ${user.last_name}`,
+      full_name: `${user.first_name}${user.last_name ? ` ${user.last_name}` : ""}`,
       avatar_url: user.avatar_url || "",
     };
 

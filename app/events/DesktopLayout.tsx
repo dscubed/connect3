@@ -46,7 +46,6 @@ export default function DesktopLayout() {
   }
 
   // perform event filtering by name and category
-  console.log(events);
   const filtered = filterEvents(events, search, selectedCategory === "All" ? null : selectedCategory);
 
   return (

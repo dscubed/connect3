@@ -2,9 +2,11 @@ import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import AddEventForm from "./AddEventForm";
+import { useAuthStore } from "@/stores/authStore";
 import { HostedEvent } from "@/types/events/event";
 
 export default function EventFormHeader() {
+  const { makeAuthenticatedRequest } = useAuthStore();
   const [addingEvent, setAddingEvent] = useState<boolean>(false);
 
   const handleAddButtonClick = () => {
@@ -14,10 +16,23 @@ export default function EventFormHeader() {
   const handleFormCancel = () => {
     setAddingEvent(false);
   }
-  
-  const handleFormSubmit = (event: Omit<HostedEvent, 'id' | "push">) => {
-    console.log("Submitted!!");
-    console.log(event);
+
+  const handleFormSubmit = async (eventData: Omit<HostedEvent, 'id' | "push">) => {
+    const eventId = crypto.randomUUID();
+    const response = await makeAuthenticatedRequest(`/api/events/${eventId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(eventData),
+    });
+
+    if (response.ok) {
+      console.log("Event created successfully!");
+      handleFormCancel();
+    } else {
+      console.error("Failed to create event:", response.status);
+    }
   }
 
   return (

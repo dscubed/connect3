@@ -25,8 +25,8 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps){
 
   let organiserString = "";
   if (!isLoadingCollaborators && !isLoadingCreator) {
-    const collaboratorNames = collaborators.map((collaborator: { first_name: string, last_name: string }) => 
-      collaborator.first_name + ' ' + collaborator.last_name
+    const collaboratorNames = collaborators.map((collaborator: { first_name: string }) => 
+      collaborator.first_name
     );
     const formatted = collaboratorNames.join(", ");
     organiserString = `${creator.full_name}, ${formatted}`;

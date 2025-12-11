@@ -81,7 +81,7 @@ export default function ProfilePage() {
               <ChunksSection userId={user.id} />
 
               {/* Events form for organisations only */}
-              {  profile.account_type === "organisation" &&  <EventsSection userId={user.id} /> }
+              {  profile.account_type === "organisation" &&  <EventsSection /> }
             </div>
           </div>
         </main>
