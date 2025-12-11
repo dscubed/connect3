@@ -65,8 +65,9 @@ const searchSingleVectorStore = async (
     console.log(`Entity exclusion set size: ${search_filter.entityIds.size}, using API filter: ${useApiFilter}`);
 
     // Build filter if safe to use
-    // @ts-expect-error: OpenAI nin type is supported but SDK is out of date
-    const filters = useApiFilter
+    // OpenAI SDK type is out of date but 'nin' is supported at runtime
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const filters: any = useApiFilter
       ? {
           type: "nin",
           key: "id",

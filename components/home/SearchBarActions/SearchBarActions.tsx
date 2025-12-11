@@ -6,7 +6,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Fragment } from "react";
-import { ArrowUp, Check, ChevronDown, Settings2, Square, Loader2 } from "lucide-react";
+import { ArrowUp, Check, ChevronDown, Settings2, Loader2 } from "lucide-react";
 import { EntityFilterOptions } from "../hooks/useSearch";
 
 const FILTER_OPTIONS = [
