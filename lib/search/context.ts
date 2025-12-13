@@ -3,6 +3,19 @@ import OpenAI from "openai";
 import { ResponseInput } from "openai/resources/responses/responses.mjs";
 import z from "zod";
 import { zodTextFormat } from "openai/helpers/zod.mjs";
+import { SearchResponse } from "./type";
+
+const EntityReferenceSchema = z.object({
+  id: z.string(),
+  type: z.enum(["user", "organisation"]),
+  name: z.string().nullable(),
+});
+
+const EntityIntentSchema = z.object({
+  action: z.enum(["include", "exclude"]),
+  reason: z.string(),
+  entities: z.array(EntityReferenceSchema),
+});
 
 const ContextSummarySchema = z.object({
   summary: z.string(),
@@ -11,6 +24,7 @@ const ContextSummarySchema = z.object({
     users: z.boolean(),
     organisations: z.boolean(),
   }),
+  entityIntents: z.array(EntityIntentSchema).nullable(),
 });
 
 export type ContextSummary = z.infer<typeof ContextSummarySchema>;
@@ -32,6 +46,12 @@ ENTITY TYPE DETECTION (CRITICAL):
 - Set "organisations: true" if the query is about GROUPS: clubs, societies, organizations, groups, teams, club, society, organization
 - BOTH can be true if ambiguous or if the query could benefit from both (e.g., "tech at unimelb", "who can I contact about X")
 - DEFAULT: When unclear, prefer BOTH true - it's better to search widely than miss results
+
+ENTITY INTENT DETECTION:
+When the user references entities from chat history, detect their intent:
+- "include" action: User wants MORE info about specific entities ("tell me more about X", "what about X", "details on X")
+- "exclude" action: User wants DIFFERENT entities, NOT the ones mentioned ("find other", "find more like", "similar to", "alternatives to")
+Use entity IDs from chat history when available. Format: [type:id] name
 
 QUERY REWRITING:
 ONLY if the user's query is vague or ambiguous/follow up, rewrite the query.
@@ -77,7 +97,13 @@ Query: "Yes" -> Look at chat history to find context.
 - queries: ["DSCubed unimelb", "HackMelbourne", "CISSA"]
 - entityTypes: { users: false, organisations: true }
 
-** USE SPECIFIC ENTITY NAMES IF AVAILABLE **
+Query: "tell me more about CISSA" (with [organisation:abc123] CISSA in history)
+- entityIntents: [{ action: "include", reason: "User wants more details", entities: [{ id: "abc123", type: "organisation", name: "CISSA" }] }]
+
+Query: "find other clubs" (with entities in history)
+- entityIntents: [{ action: "exclude", reason: "User wants different results", entities: [...all from history] }]
+
+** USE SPECIFIC ENTITY NAMES AND IDs IF AVAILABLE **
 `;
 
   const response = await openai.responses.parse({
@@ -158,13 +184,23 @@ const getContext = async (chatmessageId: string, supabase: SupabaseClient) => {
   };
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const contentToString = (content: any): string => {
-  // TODO: Update when SearchResponse type is finalized
+const contentToString = (content: SearchResponse | null): string => {
   if (!content) return "";
-  if (content.result && typeof content.result === "string") {
-    return content.result;
-  } else {
-    return content.summary ?? JSON.stringify(content).slice(0, 500);
+
+  let output = content.summary ?? "";
+
+  // Append entity info for AI to reference by ID
+  if (content.results) {
+    const entities: string[] = [];
+    for (const result of content.results) {
+      for (const match of result.matches ?? []) {
+        entities.push(`[${match.type}:${match.id}] ${match.name}`);
+      }
+    }
+    if (entities.length > 0) {
+      output += "\n\nEntities mentioned:\n" + entities.join("\n");
+    }
   }
+
+  return output;
 };

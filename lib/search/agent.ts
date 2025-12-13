@@ -49,6 +49,9 @@ export const runSearch = async (
   state.newQueries = contextSummary.queries;
   console.log(`Gathered Context: ${state.summary}`);
   console.log(`Entity Types: users=${contextSummary.entityTypes.users}, organisations=${contextSummary.entityTypes.organisations}`);
+  if (contextSummary.entityIntents?.length) {
+    console.log(`Entity Intents:`, JSON.stringify(contextSummary.entityIntents, null, 2));
+  }
 
   // Store entity type filter for use in iterations
   const entityTypeFilter = contextSummary.entityTypes;
