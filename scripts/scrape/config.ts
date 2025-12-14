@@ -9,21 +9,38 @@ export type SiteConfig = {
 };
 
 export const SITES: SiteConfig[] = [
-  {
-    siteId: "umsu",
-    baseUrl: "https://umsu.unimelb.edu.au",
-    seeds: ["https://umsu.unimelb.edu.au/"],
-    allowPrefixes: [
-      "https://umsu.unimelb.edu.au/",
-    ],
-    denySubstrings: [
-      "/wp-admin",
-      "/search",
-      "#",
-      "mailto:",
-      "tel:",
-    ],
-    maxPages: 200,
-    delayMs: 800,
-  },
+    {
+        siteId: "umsu",
+        baseUrl: "https://umsu.unimelb.edu.au",
+        seeds: [
+          "https://umsu.unimelb.edu.au/",
+          "https://umsu.unimelb.edu.au/about/",
+          "https://umsu.unimelb.edu.au/services/",
+          "https://umsu.unimelb.edu.au/support/",
+          "https://umsu.unimelb.edu.au/clubs/",
+        ],
+        allowPrefixes: [
+          "https://umsu.unimelb.edu.au/",
+        ],
+        denySubstrings: [
+          "/photos/",
+          "/advertclick/",
+          "/login/",
+          "/pagestylesheet/",
+          "/stylesheet/",
+          "/skins/",
+          "/resourcehandler/",
+          "/edit/",
+          "/search/",
+          "/asset/",
+          "/account/",
+          "/Shibboleth.sso",
+          "/sso/",
+          "mailto:",
+          "tel:",
+          "#",
+        ],
+        maxPages: 150,
+        delayMs: 800, // polite crawl
+      }      
 ];
