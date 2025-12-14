@@ -4,7 +4,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "scrape:kb": "tsx scripts/scrape/index.ts"
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
