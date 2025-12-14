@@ -1,27 +1,33 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 export async function GET() {
   const appId = process.env.INSTAGRAM_APP_ID;
   const redirectUri = `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/instagram/callback`;
   
-  // Scopes required for Instagram Business API
-  // instagram_basic: to read basic profile info
-  // instagram_manage_insights: to read insights (optional but good for future)
-  // pages_show_list: to list pages the user manages (needed to find the linked IG account)
-  // pages_read_engagement: to read content posted to the page
-  // business_management: often required for token access
+  // Scopes required for Instagram Basic Display API
+  // instagram_basic: to read basic profile info and media
+  // instagram_graph_user_profile: to read user profile
   const scope = [
     "instagram_basic",
-    "pages_show_list",
-    "pages_read_engagement",
-    "business_management" // Sometimes needed, check if strictly required
+    // "instagram_graph_user_profile"
   ].join(",");
 
-  // State parameter to prevent CSRF (optional but recommended)
-  // For simplicity in this MVP, we might skip complex state validation or use a simple random string
-  const state = Math.random().toString(36).substring(7);
+  // State parameter to prevent CSRF
+  // const state = Math.random().toString(36).substring(7);
+  
+  // Store state in cookie for verification in callback
+  // const cookieStore = await cookies();
+  // cookieStore.set("instagram_auth_state", state, { 
+  //   httpOnly: true, 
+  //   secure: process.env.NODE_ENV === "production",
+  //   maxAge: 60 * 5 // 5 minutes
+  // });
 
-  const url = `https://www.facebook.com/v24.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}&response_type=code`;
+  // Instagram Basic Display API Authorization URL
+  // const url = `https://api.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}&response_type=code`;
+  const url = `https://api.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=code`;
+  console.log(url);
 
   return NextResponse.json({ url });
 }
