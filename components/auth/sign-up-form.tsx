@@ -1,3 +1,4 @@
+// components/auth/sign-up-form.tsx
 "use client";
 
 import { cn } from "@/lib/utils";
@@ -16,7 +17,6 @@ import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useSignUp } from "./hooks/useSignup";
 
-// Remove the props interface since useSignUp handles the state
 export function SignUpForm({
   className,
   ...props
@@ -34,12 +34,6 @@ export function SignUpForm({
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Submitting sign up form", {
-      email,
-      firstName,
-      lastName,
-      accountType,
-    });
     handleEmailSignUp({
       email,
       password,
@@ -50,139 +44,197 @@ export function SignUpForm({
     });
   };
 
+  const purple = "bg-[#8F5BFF] hover:bg-[#7b4ae6]";
+
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Sign up</CardTitle>
-          <CardDescription>Create a new account</CardDescription>
+    <div className={cn("flex flex-col", className)} {...props}>
+      <Card className="border-0 shadow-none p-0 bg-transparent">
+        <CardHeader className="px-0 pb-4">
+          <CardTitle className="text-3xl font-semibold tracking-tight text-black">
+            Create an account
+          </CardTitle>
+          <CardDescription className="mt-1 text-sm text-gray-700">
+            Already have an account?{" "}
+            <Link
+              href="/auth/login"
+              className="font-semibold text-[#8F5BFF] hover:underline"
+            >
+              Log in
+            </Link>
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+
+        <CardContent className="px-0 pt-0">
           <form onSubmit={onSubmit}>
-            <div className="flex flex-col gap-4">
-              {/* Tabs for account type */}
-              <div className="flex gap-2">
-                <Button
+            <div className="flex flex-col gap-5">
+              {/* user / organisation toggle */}
+              <div className="inline-flex items-center rounded-full bg-gray-100 p-1 text-xs font-medium">
+                <button
                   type="button"
-                  variant={accountType === "user" ? "default" : "outline"}
                   onClick={() => setAccountType("user")}
-                  className="flex-1"
+                  className={cn(
+                    "flex-1 rounded-full px-4 py-2 transition",
+                    accountType === "user"
+                      ? "bg-white text-gray-900 shadow-sm"
+                      : "text-gray-500"
+                  )}
                 >
                   User
-                </Button>
-                <Button
+                </button>
+                <button
                   type="button"
-                  variant={
-                    accountType === "organisation" ? "default" : "outline"
-                  }
                   onClick={() => {
                     setAccountType("organisation");
                     setLastName("");
                   }}
-                  className="flex-1"
+                  className={cn(
+                    "flex-1 rounded-full px-4 py-2 transition",
+                    accountType === "organisation"
+                      ? "bg-white text-gray-900 shadow-sm"
+                      : "text-gray-500"
+                  )}
                 >
                   Organisation
-                </Button>
+                </button>
               </div>
-              <div className="flex gap-2">
-                <div className="flex-1 grid gap-2">
-                  <Label htmlFor="first-name">
+
+              {/* name row */}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-1">
+                  <Label
+                    htmlFor="first-name"
+                    className="text-sm font-medium text-black"
+                  >
                     {accountType === "user"
-                      ? "First Name"
-                      : "Organisation Name"}
+                      ? "First name"
+                      : "Organisation name"}
                   </Label>
                   <Input
                     id="first-name"
                     type="text"
                     placeholder={
                       accountType === "user"
-                        ? "First Name"
-                        : "Organisation Name"
+                        ? "First name"
+                        : "Organisation name"
                     }
                     required
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
+                    className="h-12 rounded-full border-2 border-gray-200 px-4 text-sm text-black placeholder:text-gray-400 focus-visible:ring-[#8F5BFF]"
                   />
                 </div>
+
                 {accountType === "user" && (
-                  <div className="flex-1 grid gap-2">
-                    <Label htmlFor="last-name">Last Name</Label>
+                  <div className="grid gap-1">
+                    <Label
+                      htmlFor="last-name"
+                      className="text-sm font-medium text-black"
+                    >
+                      Last name
+                    </Label>
                     <Input
                       id="last-name"
                       type="text"
-                      placeholder="Last Name"
+                      placeholder="Last name"
                       required
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
+                      className="h-12 rounded-full border-2 border-gray-200 px-4 text-sm text-black placeholder:text-gray-400 focus-visible:ring-[#8F5BFF]"
                     />
                   </div>
                 )}
               </div>
-              {/* ...existing code for email, password, etc... */}
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+
+              {/* email */}
+              <div className="grid gap-1">
+                <Label
+                  htmlFor="email"
+                  className="text-sm font-medium text-black"
+                >
+                  Email
+                </Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="you@example.com"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="h-12 rounded-full border-2 border-gray-200 px-4 text-sm text-black placeholder:text-gray-400 focus-visible:ring-[#8F5BFF]"
                 />
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
+
+              {/* password */}
+              <div className="grid gap-1">
+                <Label
+                  htmlFor="password"
+                  className="text-sm font-medium text-black"
+                >
+                  Enter your password
+                </Label>
                 <Input
                   id="password"
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="h-12 rounded-full border-2 border-gray-200 px-4 text-sm text-black placeholder:text-gray-400 focus-visible:ring-[#8F5BFF]"
                 />
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="repeat-password">Repeat Password</Label>
+
+              {/* repeat password */}
+              <div className="grid gap-1">
+                <Label
+                  htmlFor="repeat-password"
+                  className="text-sm font-medium text-black"
+                >
+                  Repeat password
+                </Label>
                 <Input
                   id="repeat-password"
                   type="password"
                   required
                   value={repeatPassword}
                   onChange={(e) => setRepeatPassword(e.target.value)}
+                  className="h-12 rounded-full border-2 border-gray-200 px-4 text-sm text-black placeholder:text-gray-400 focus-visible:ring-[#8F5BFF]"
                 />
               </div>
-              <div className="flex flex-col gap-2">
-                <Button type="submit" className="w-full" disabled={isSigningUp}>
-                  {isSigningUp ? "Creating an account..." : "Sign up"}
-                </Button>
-                {accountType === "user" && (
-                  <>
-                    <div className="relative my-2 flex items-center">
-                      <span className="w-full border-t border-gray-300" />
-                      <span className="mx-2 text-xs text-gray-500">or</span>
-                      <span className="w-full border-t border-gray-300" />
-                    </div>
-                    <Button
-                      type="button"
-                      className="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 hover:bg-gray-100 text-gray-700"
-                      onClick={handleGoogleSignUp}
-                      disabled={isSigningUp}
-                      aria-label="Sign up with Google"
-                    >
-                      <span>Sign up with </span>
-                      <FcGoogle size={20} />
-                      {isSigningUp && (
-                        <span className="ml-2">Redirecting...</span>
-                      )}
-                    </Button>
-                  </>
+
+              {/* main CTA */}
+              <Button
+                type="submit"
+                className={cn(
+                  "mt-1 h-12 w-full rounded-full text-sm font-semibold text-white",
+                  purple
                 )}
+                disabled={isSigningUp}
+              >
+                {isSigningUp ? "Creating account..." : "Create account"}
+              </Button>
+
+              {/* divider */}
+              <div className="flex items-center gap-3 text-xs text-gray-400">
+                <span className="h-px flex-1 bg-gray-200" />
+                <span>Or register with</span>
+                <span className="h-px flex-1 bg-gray-200" />
               </div>
-            </div>
-            <div className="mt-4 text-center text-sm">
-              Already have an account?{" "}
-              <Link href="/auth/login" className="underline underline-offset-4">
-                Login
-              </Link>
+
+              {/* Google (always visible) */}
+              <Button
+                type="button"
+                onClick={handleGoogleSignUp}
+                disabled={isSigningUp}
+                aria-label="Sign up with Google"
+                className="h-12 w-full rounded-full border border-gray-200 bg-white text-sm font-medium text-gray-800 hover:bg-gray-50 flex items-center justify-center gap-2"
+              >
+                <FcGoogle size={20} />
+                <span>Sign up with Google</span>
+                {isSigningUp && (
+                  <span className="ml-1 text-xs text-gray-500">
+                    Redirecting...
+                  </span>
+                )}
+              </Button>
             </div>
           </form>
         </CardContent>

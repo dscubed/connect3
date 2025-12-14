@@ -1,8 +1,11 @@
+// app/auth/sign-up/page.tsx
 "use client";
+
 import { SignUpForm } from "@/components/auth/sign-up-form";
 import LoadingIndicator from "@/components/ui/LoadingSpinner";
 import { useAuthStore } from "@/stores/authStore";
 import AlreadyAuthenticatedDialog from "@/components/auth/AlreadyAuthenticatedDialog";
+import { AuthCharacters } from "@/components/auth/AuthCharacters";
 
 export default function Page() {
   const user = useAuthStore((state) => state.user);
@@ -11,11 +14,24 @@ export default function Page() {
 
   return (
     <>
-      <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-        <div className="w-full max-w-sm">
-          {loading ? <LoadingIndicator /> : <SignUpForm />}
+      <main className="flex min-h-svh w-full items-center justify-center bg-gradient-to-br from-[#f0e5ff] via-[#f7e9ff] to-[#ffd6e0] px-4 py-8 md:px-8 md:py-12">
+        <div className="w-full max-w-6xl">
+          <div className="rounded-[32px] bg-white shadow-[0_18px_45px_rgba(0,0,0,0.08)] px-6 py-8 md:px-12 md:py-10">
+            <div className="flex flex-col gap-10 md:flex-row md:items-center md:justify-between">
+              {/* left: form */}
+              <div className="w-full max-w-md">
+                {loading ? <LoadingIndicator /> : <SignUpForm />}
+              </div>
+
+              {/* right: characters */}
+              <div className="mt-8 hidden flex-1 justify-center md:flex">
+                <AuthCharacters />
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </main>
+
       {user && !user.is_anonymous && !loading && (
         <AlreadyAuthenticatedDialog
           onboardingCompleted={profile?.onboarding_completed}
