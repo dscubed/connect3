@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 interface FileDescriptionProps {
   file: {
     file_id: string;
-    description: string;
+    summary: string;
   };
   delay: number;
 }
@@ -21,7 +21,7 @@ export default function FileDescription({ file, delay }: FileDescriptionProps) {
         delay,
       }}
     >
-      {file.description}
+      {file.summary}
     </motion.p>
   );
 }

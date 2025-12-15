@@ -19,7 +19,6 @@ const SearchSection: React.FC<SearchSectionProps> = ({
       query={query}
       setQuery={setQuery}
       onSubmit={onSearch}
-      placeholder="Search by skills, vibes, or ideas (e.g. 'Ex amazon intern')…"
       disabled={creatingChatroom}
     />
   </div>

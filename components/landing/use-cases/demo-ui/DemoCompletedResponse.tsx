@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { DemoQuery, MappedMatchDetails } from "../types";
 import DemoPeopleList from "./DemoPeopleList";
 import { demoUsers, UserDetails } from "../sample-data/DemoUsers";
-import MatchResults from "@/components/search/MatchResult/MatchResults";
 
 export default function DemoCompletedResponse({ query }: { query: DemoQuery }) {
   const { response } = query;
@@ -39,9 +38,9 @@ export default function DemoCompletedResponse({ query }: { query: DemoQuery }) {
       </motion.p>
 
       {/* User matches - Pass mapped data */}
-      {mappedMatches.map((match, userIndex) => (
+      {/* {mappedMatches.map((match, userIndex) => (
         <MatchResults key={match.user_id} match={match} userIndex={userIndex} />
-      ))}
+      ))} */}
 
       {/* Follow-up questions */}
       <motion.p

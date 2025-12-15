@@ -101,9 +101,10 @@ export async function POST(request: NextRequest) {
     await openai.vectorStores.files.update(file.id, {
       vector_store_id: vectorStoreId,
       attributes: {
-        userId: userId,
-        uploadedBy: userName || "",
+        id: userId,
         category: category || "General",
+        name: userName || "",
+        type: isOrgUser ? "organisation" : "user",
       },
     });
 

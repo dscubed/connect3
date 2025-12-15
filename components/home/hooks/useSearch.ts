@@ -1,7 +1,14 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
+
+// Entity filter options for dropdown
+export interface EntityFilterOptions {
+  events: boolean;
+  organisations: boolean;
+  users: boolean;
+}
 
 export function useSearch({
-  initialQuery = '',
+  initialQuery = "",
   onSearchChange,
 }: {
   initialQuery: string;

@@ -1,21 +1,34 @@
 import React from "react";
-import { ArrowUp } from "lucide-react";
-import { useSearch } from "@/components/home/hooks/useSearch";
+import {
+  EntityFilterOptions,
+  useSearch,
+} from "@/components/home/hooks/useSearch";
+import { TextArea } from "../ui/TextArea";
+import { SearchBarActions } from "./SearchBarActions/SearchBarActions";
+import { useEntityFilter } from "./SearchBarActions/hooks/useEntityFilter";
 
 interface SearchBarUIProps {
   query: string;
   setQuery: (q: string) => void;
-  placeholder?: string;
-  onSubmit?: (query: string) => void;
+  onSubmit?: (
+    query: string,
+    selectedEntityFilters: EntityFilterOptions
+  ) => void;
   disabled?: boolean;
+  isLoading?: boolean;
+  containerClassName?: string;
 }
+
+const DEFAULT_CONTAINER_CLASSNAME =
+  "rounded-2xl bg-white/5 border border-white/10 px-4 py-3 backdrop-blur shadow-xl shadow-white/5 hover:shadow-white/10";
 
 const SearchBarUIComponent: React.FC<SearchBarUIProps> = ({
   query,
   setQuery,
   onSubmit,
-  // placeholder = "Search...",
   disabled = false,
+  isLoading = false,
+  containerClassName = DEFAULT_CONTAINER_CLASSNAME,
 }) => {
   const {
     query: localQuery,
@@ -26,39 +39,45 @@ const SearchBarUIComponent: React.FC<SearchBarUIProps> = ({
     onSearchChange: setQuery,
   });
 
+  const { selectedEntityFilters, handleEntityFilterClick, selectedCount } =
+    useEntityFilter();
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (disabled) return;
-    onSubmit?.(localQuery);
-    setQuery(localQuery); // Ensure immediate update on submit
+    if (disabled || isLoading) return;
+    onSubmit?.(localQuery, selectedEntityFilters);
+    setQuery(localQuery);
   };
 
   return (
     <form onSubmit={handleSubmit} className="w-full">
       <div
-        className={`mx-auto max-w-2xl flex items-center gap-2 rounded-2xl bg-white/5 border border-white/10 px-4 py-3 backdrop-blur shadow-xl shadow-white/5 hover:shadow-white/10 transition-all ${
-          disabled ? "opacity-50 pointer-events-none grayscale" : ""
+        className={`mx-auto max-w-2xl flex flex-col items-center ${containerClassName} transition-all ${
+          disabled || isLoading ? "opacity-50 pointer-events-none grayscale" : ""
         }`}
       >
-        <input
-          className="w-full bg-transparent outline-none text-sm placeholder:text-white/40"
-          placeholder={"Ask me anything..."}
-          value={localQuery}
-          onChange={(e) => handleChange(e.target.value)}
-          disabled={disabled}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleSubmit(e);
-            }
-          }}
+        <div className="flex w-full items-center gap-3 py-2">
+          <TextArea
+            className="w-full bg-transparent outline-none text-sm placeholder:text-white/40 max-h-32 scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-transparent focus:scrollbar-thumb-white/50 transition-all resize-none text-white"
+            placeholder="Ask me anything..."
+            value={localQuery}
+            onChange={(e) => handleChange(e.target.value)}
+            disabled={disabled || isLoading}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit(e);
+              }
+            }}
+          />
+        </div>
+        <SearchBarActions
+          searchDisabled={disabled || isSearching || isLoading || localQuery.trim() === ""}
+          isLoading={isLoading}
+          selectedEntityFilters={selectedEntityFilters}
+          handleEntityFilterClick={handleEntityFilterClick}
+          selectedCount={selectedCount}
         />
-        <button
-          type="submit"
-          disabled={disabled || isSearching || localQuery.trim() === ""}
-          className="flex flex-row items-center gap-2 rounded-xl px-3 py-1.5 bg-white text-black text-sm font-medium cursor-pointer hover:bg-white/90 transition-all hover:scale-105 shadow-lg"
-        >
-          <ArrowUp className="inline-block h-4 w-4" />
-        </button>
       </div>
     </form>
   );
