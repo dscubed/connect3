@@ -61,11 +61,11 @@ export function ClubDetailPanel({
           <div className="flex-1 text-left min-w-0">
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 sm:mb-3 leading-tight">
               {club.name}
-              <p className="font-normal text-xs sm:text-sm md:text-base mb-1 sm:mb-2 truncate overflow-hidden whitespace-nowrap">
+              <p className="font-normal text-xs text-muted sm:text-sm md:text-base mb-1 sm:mb-2 truncate overflow-hidden whitespace-nowrap">
                 {club.full_name || club.name}
               </p>
             </h1>
-            <p className="flex flex-row items-center justify-start text-base sm:text-lg mb-1.5 sm:mb-2">
+            <p className="flex flex-row text-muted items-center justify-start text-base sm:text-lg mb-1.5 sm:mb-2">
               <MapPin className="inline-block w-4 h-4 mr-2" />
               {club.location}
             </p>
@@ -76,7 +76,7 @@ export function ClubDetailPanel({
       {/* Main Content */}
       <div className="sm:rounded-2xl p-4 sm:p-6 lg:p-7 mb-4 sm:mb-6">
         <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">About</h2>
-        <p className="leading-relaxed text-sm sm:text-base">
+        <p className="leading-relaxed text-sm sm:text-base text-muted">
           {club.fullDescription}
         </p>
       </div>

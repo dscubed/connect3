@@ -33,10 +33,6 @@ export default function Home() {
               <HeroSection />
               <SearchBar />
             </div>
-            {/* Bottom Section */}
-            {/* <div className="flex-[1] h-1/2 flex flex-col items-start w-full justify-end mb-12">
-              <QuickInfoSection />
-            </div> */}
           </div>
         </main>
       </div>
