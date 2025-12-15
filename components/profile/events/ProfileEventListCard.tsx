@@ -8,7 +8,7 @@ interface ProfileEventListCardProps {
   event: HostedEvent
 }
 
-export default function ProfileEventListCard({ index, event }: ProfileEventListCardProps) {
+export default function ProfileEventListCard({ event }: ProfileEventListCardProps) {
   return (
     <motion.div
       className="relative cursor-pointer rounded-xl sm:rounded-2xl border transition-all duration-300 bg-white/[0.08] border-white/20 shadow-xl shadow-black/10"

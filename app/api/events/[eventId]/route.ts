@@ -60,7 +60,6 @@ export async function POST(request: NextRequest, { params }: RouteParameters) {
         end,
         description,
         type,
-        thumbnailUrl,
         creator_profile_id,
         collaborators 
     } = validatedBody;

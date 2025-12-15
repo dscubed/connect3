@@ -9,9 +9,10 @@ import { useAuthStore } from "@/stores/authStore";
 
 export default function EventsSection() {
   const { user } = useAuthStore();
-  if (!user) return;
+  
   const eventDisplayRef = useRef<HTMLDivElement | null>(null);
-  const { items: events, error, isLoading, isValidating } = useInfiniteScroll<HostedEvent>(eventDisplayRef, `/api/users/${user.id}/events`);
+  const { items: events, isLoading, isValidating } = useInfiniteScroll<HostedEvent>(eventDisplayRef, user ? `/api/users/${user.id}/events` : null);
+  if (!user) return;
   if (isLoading) {
     return (
       <div>

@@ -12,7 +12,7 @@ interface PaginatedResponse<T> {
  * @param endpoint api endpoint in the form "/api/your-endpoint"
  * @param limit how many items to load per revalidation
  */
-export default function useInfiniteScroll<T>(listRef: RefObject<HTMLDivElement | null>, endpoint: string, limit?: number) {
+export default function useInfiniteScroll<T>(listRef: RefObject<HTMLDivElement | null>, endpoint: string | null, limit?: number) {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
     const getKey = (pageIndex: number, previousPageData: PaginatedResponse<T> | null): string | null => {
         const baseUrl = process.env.NODE_ENV !== "production" ? "http://localhost:3000" : "https://connect3.app";
@@ -32,7 +32,7 @@ export default function useInfiniteScroll<T>(listRef: RefObject<HTMLDivElement |
         setSize, 
         error, 
         isValidating, 
-        isLoading } = useSWRInfinite<PaginatedResponse<T>>(getKey, fetcher);
+        isLoading } = useSWRInfinite<PaginatedResponse<T>>(endpoint ? getKey : () => void fetcher);
 
     const items: T[] = data ? data.flatMap(d => d.items) : [];
     const handleScroll = useCallback(() => {
