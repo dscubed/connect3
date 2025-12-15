@@ -16,7 +16,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0B0B0C] text-white">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="flex items-center gap-4">
           <CubeLoader size={32} />
           <p>Loading profile...</p>
@@ -27,7 +27,7 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0B0B0C] text-white">
+      <div className="min-h-screen flex items-center justify-center">
         <p>Please log in to view your profile.</p>
       </div>
     );
@@ -35,14 +35,14 @@ export default function ProfilePage() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0B0B0C] text-white">
+      <div className="min-h-screen flex items-center justify-center">
         <p>Profile not found.</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0B0C] text-white relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden">
       <div className="flex relative z-10">
         <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
 
@@ -54,7 +54,7 @@ export default function ProfilePage() {
               scrollbarColor: "rgba(255,255,255,0.3) transparent",
             }}
           >
-            <CoverImage coverImageUrl={profile.cover_image_url ?? null} />
+            <CoverImage />
 
             <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8">
               <motion.div

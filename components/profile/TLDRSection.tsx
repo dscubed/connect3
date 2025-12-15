@@ -1,8 +1,10 @@
 "use client";
 import { Zap, Loader2 } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/stores/authStore";
+import { Button } from "../ui/button";
+import { TextArea } from "../ui/TextArea";
 
 interface TLDRSectionProps {
   tldr: string | null;
@@ -15,24 +17,6 @@ export default function TLDRSection({ tldr }: TLDRSectionProps) {
   const { makeAuthenticatedRequest, user, updateProfile } = useAuthStore();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-
-  // Auto-expand textarea height as user types
-  const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height =
-        textareaRef.current.scrollHeight + "px";
-    }
-    setUserPrompt(e.target.value);
-  };
-
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height =
-        textareaRef.current.scrollHeight + "px";
-    }
-  }, [userPrompt, showPromptInput]);
 
   const handleGenerateTLDR = async () => {
     setShowPromptInput(false); // Hide input immediately when generating
@@ -68,22 +52,22 @@ export default function TLDRSection({ tldr }: TLDRSectionProps) {
     <div className="mb-12">
       <div className="relative">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-semibold text-white">tldr</h2>
+          <h2 className="text-2xl font-semibold">tldr</h2>
           <div className="relative">
-            <button
+            <Button
               ref={buttonRef}
               onClick={() => setShowPromptInput(true)}
-              className="p-2 rounded border border-white/20 bg-black/10 hover:bg-black/20 transition flex items-center gap-1"
+              className="p-2 rounded-2xl border border-white/20 bg-background hover:bg-background/80 transition flex items-center gap-1 text-foreground/70 hover:text-foreground hover:scale-105"
               disabled={isLoading}
               title="Generate TLDR from your chunks"
             >
-              <Zap className="h-4 w-4 text-white" />
-              <span className="text-xs text-white/70">Generate</span>
-            </button>
+              <Zap className="h-4 w-4" />
+              <span className="text-xs">Generate</span>
+            </Button>
             {/* Floating dropdown input just below the button */}
             {showPromptInput && (
               <div
-                className="absolute left-0 mt-2 min-w-[380px] bg-[#18181b] border border-white/20 rounded-lg shadow-lg p-3 flex flex-col gap-2 z-50"
+                className="bg-background absolute left-0 mt-2 min-w-[380px] border border-white/20 rounded-lg shadow-lg p-3 flex flex-col gap-2 z-50"
                 style={{
                   top: buttonRef.current
                     ? buttonRef.current.offsetHeight + 8
@@ -93,11 +77,11 @@ export default function TLDRSection({ tldr }: TLDRSectionProps) {
                     : 280,
                 }}
               >
-                <textarea
+                <TextArea
                   ref={textareaRef}
-                  className="bg-black/30 text-white border border-white/20 rounded p-2 outline-none resize-none block w-full"
+                  className="bg-transparent border border-foreground/20 rounded p-2 outline-none resize-none block w-full placeholder:text-foreground/40 text-foreground"
                   value={userPrompt}
-                  onChange={handlePromptChange}
+                  onChange={(e) => setUserPrompt(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
                       e.preventDefault();
@@ -116,7 +100,7 @@ export default function TLDRSection({ tldr }: TLDRSectionProps) {
                 />
                 <div className="flex gap-2 justify-end">
                   <button
-                    className="px-3 py-1 rounded bg-neutral-800 text-white text-xs"
+                    className="px-3 py-1 rounded bg-white text-black text-xs"
                     onClick={handleCancel}
                     disabled={isLoading}
                     type="button"
@@ -124,7 +108,7 @@ export default function TLDRSection({ tldr }: TLDRSectionProps) {
                     Cancel
                   </button>
                   <button
-                    className="px-3 py-1 rounded bg-white text-black text-xs flex items-center justify-center"
+                    className="px-3 py-1 rounded bg-foreground text-background text-xs flex items-center justify-center"
                     onClick={handleGenerateTLDR}
                     disabled={isLoading}
                     type="button"
@@ -140,12 +124,12 @@ export default function TLDRSection({ tldr }: TLDRSectionProps) {
             )}
           </div>
         </div>
-        <p className="text-white/70 leading-relaxed text-lg">
+        <p className="text-black/60 leading-relaxed text-lg">
           {isLoading ? (
-            <span className="text-white/40 italic">Generating TLDR...</span>
+            <span className="text-black/60 italic">Generating TLDR...</span>
           ) : (
             tldr || (
-              <span className="text-white/40 italic">
+              <span className="text-black/60 italic">
                 Click the lightning icon to generate your TLDR!
               </span>
             )

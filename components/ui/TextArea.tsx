@@ -34,7 +34,7 @@ export const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
         value={value}
         onChange={handleChange}
         className={cn(
-          "w-full bg-transparent outline-none resize-none overflow-y-auto",
+          "w-full bg-transparent outline-none resize-none overflow-y-auto max-h-60",
           className
         )}
         rows={1}

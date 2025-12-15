@@ -24,7 +24,7 @@ export default function ChunksSection({ userId }: ChunksSectionProps) {
     return (
       <div className="flex flex-col items-center justify-center h-32">
         <CubeLoader size={60} />
-        <span className="text-white/70">Loading chunks...</span>
+        <span className="text-muted">Loading chunks...</span>
       </div>
     );
   }

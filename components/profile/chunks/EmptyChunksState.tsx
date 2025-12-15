@@ -18,14 +18,12 @@ export function EmptyChunksState({
       transition={{ duration: 0.6, delay: 0.4 }}
     >
       <div className="text-center py-12">
-        <div className="text-white/40 text-lg mb-2">
-          No highlights added yet
-        </div>
-        <div className="text-white/30 text-sm">
+        {onboardingCompleted && <AddCategoryButton />}
+        <div className="text-muted text-lg mb-2">No highlights added yet</div>
+        <div className="text-muted text-sm">
           {onboardingCompleted ? (
             <>
-              <div className="mb-8">Start adding your chunks below</div>
-              <AddCategoryButton />
+              <div className="mb-8">Start adding your chunks</div>
             </>
           ) : (
             <div className="flex flex-col items-center gap-6">
