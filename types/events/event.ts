@@ -1,13 +1,14 @@
 export type HostedEvent = {
     push(arg0: { weight: number; id: number; name: string; start: Date; end: Date; description: string; type: EventCategory[]; thumbnailUrl?: string; }): unknown;
-    id: number;
-    name: string; 
+    id: string;
+    name: string;
     start: Date;
-    end: Date; 
-    description: string; 
+    end: Date;
+    description: string;
     type: EventCategory[];
     thumbnailUrl?: string;
     creator_profile_id: string;
+    collaborators?: string[];
 }
 
 // could change to a way that users can add their own categories but 
@@ -18,4 +19,4 @@ export type EventCategory = "networking" |
                             "workshop" | 
                             "competition" | 
                             "panel" |
-                            "miscellaneous"
+                            "miscellaneous";

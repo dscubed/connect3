@@ -60,7 +60,7 @@ export default function DesktopLayout() {
           setSelectedCategory={setSelectedCategory}
         />
         <div className="flex-1 overflow-y-auto p-5 space-y-3 scrollbar-hide" ref={eventListRef}>
-          {filtered.map((event: HostedEvent) => (
+          {filtered.map((event) => (
             <EventListCard 
               key={event.id}
               event={event} 

@@ -5,12 +5,15 @@ import { toast } from "sonner";
 import { useAuthStore } from "@/stores/authStore";
 import { createChatroom } from "@/lib/chatrooms/chatroomUtils";
 
-export function SearchBar() {
+export function SearchBar({ containerClassName }: SearchBarProps) {
   const [query, setQuery] = useState("");
   const [creatingChatroom, setCreatingChatroom] = useState(false);
   const router = useRouter();
 
-  const handleSearch = async (searchQuery: string) => {
+  const handleSearch = async (
+    searchQuery: string,
+    selectedEntityFilters: EntityFilterOptions
+  ) => {
     if (!searchQuery.trim()) {
       toast.error("Please enter a search query.");
       return;
@@ -56,6 +59,7 @@ export function SearchBar() {
       setQuery={setQuery}
       disabled={creatingChatroom}
       onSubmit={handleSearch}
+      containerClassName={containerClassName}
     />
   );
 }

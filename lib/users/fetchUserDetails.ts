@@ -15,10 +15,9 @@ export async function fetchUserDetails(
   userId: string
 ): Promise<UserDetails | null> {
   try {
-    // Use Supabase directly instead of fetch
     const { data: user, error } = await supabase
       .from("profiles")
-      .select("id, first_name, last_name, avatar_url")
+      .select("id, first_name, last_name, avatar_url, account_type")
       .eq("id", userId)
       .single();
 
@@ -31,9 +30,16 @@ export async function fetchUserDetails(
       return null;
     }
 
+    let full_name: string;
+    if (user.account_type === "organisation") {
+      full_name = user.first_name || "Organisation";
+    } else {
+      full_name = `${user.first_name} ${user.last_name}`;
+    }
+
     const userDetails = {
       id: user.id,
-      full_name: `${user.first_name} ${user.last_name}`,
+      full_name: `${user.first_name}${user.last_name ? ` ${user.last_name}` : ""}`,
       avatar_url: user.avatar_url || "",
     };
 

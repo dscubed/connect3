@@ -1,3 +1,4 @@
+import { EntityFilterOptions } from "@/components/home/hooks/useSearch";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
 

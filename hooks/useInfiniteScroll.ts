@@ -58,9 +58,9 @@ export default function useInfiniteScroll<T>(listRef: RefObject<HTMLDivElement |
         listRef.current?.addEventListener("scroll", handleScroll);
         const refCopy = listRef.current;
         return () => {
-        if (refCopy) {
-            refCopy.removeEventListener("scroll", handleScroll);
-        }
+            if (refCopy) {
+                refCopy.removeEventListener("scroll", handleScroll);
+            }
         };
     }, [handleScroll, isLoading]);
     

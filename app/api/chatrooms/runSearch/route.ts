@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
-import { z } from "zod";
-import { zodTextFormat } from "openai/helpers/zod.mjs";
+import { runSearch } from "@/lib/search/agent";
+import { generateResponse } from "@/lib/search/response";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
 import { SearchResults } from "@/components/search/types";
 
@@ -42,14 +42,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { messageId } = await req.json();
+  const { messageId } = await req.json();
 
-    if (!messageId) {
-      return NextResponse.json(
-        { error: "Message ID is required" },
-        { status: 400 }
-      );
-    }
+  if (!messageId) {
+    return NextResponse.json(
+      { success: false, error: "Missing messageId" },
+      { status: 400 }
+    );
+  }
 
     // Fetch message row
     const { data: message, error: fetchError } = await supabase
@@ -281,6 +281,7 @@ export async function POST(req: NextRequest) {
       .update({
         content: finalContent,
         status: "completed",
+        content: response,
       })
       .eq("id", messageId)
       .select()
@@ -315,7 +316,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: "Internal server error" },
+      { success: false, error: String(error) },
       { status: 500 }
     );
   }
