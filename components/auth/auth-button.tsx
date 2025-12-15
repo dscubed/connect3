@@ -10,13 +10,13 @@ export function AuthButton() {
   const { user, profile, loading } = useAuthStore();
 
   if (loading) {
-    return <div className="text-xs text-white/60">Loading...</div>;
+    return <div className="text-xs">Loading...</div>;
   }
 
   return user && !user.is_anonymous ? (
     <div className="flex items-center gap-2">
       <Link href="/profile" className="flex-shrink-0">
-        <div className="relative w-8 h-8 rounded-full overflow-hidden ring-1 ring-white/20 hover:ring-white/40 transition-all hover:scale-105">
+        <div className="relative w-8 h-8 rounded-full overflow-hidden ring-1 ring-black/20 hover:ring-black/40 transition-all hover:scale-105">
           {profile?.avatar_url ? (
             <Image
               src={profile.avatar_url}
@@ -32,7 +32,7 @@ export function AuthButton() {
           )}
         </div>
       </Link>
-      <span className="text-sm font-medium text-white hidden sm:block">
+      <span className="text-sm font-medium hidden sm:block">
         {profile?.first_name || "User"}
       </span>
       <div className="ml-2">
@@ -43,13 +43,13 @@ export function AuthButton() {
     <div className="flex gap-2">
       <Link
         href="/auth/login"
-        className="px-4 md:px-5 py-1.5 text-sm rounded-lg border border-white/20 hover:border-white/30 hover:bg-white/5 transition-all hover:scale-105 text-white"
+        className="px-4 md:px-5 py-1.5 text-sm rounded-lg border border-foreground/20 hover:border-foreground/30 transition-all hover:scale-105 bg-background text-foreground"
       >
         log in
       </Link>
       <Link
         href="/auth/sign-up"
-        className="px-4 md:px-5 py-1.5 text-sm rounded-lg bg-white text-black font-medium hover:bg-white/90 transition-all hover:scale-105 shadow-md"
+        className="px-4 md:px-5 py-1.5 text-sm rounded-lg bg-secondary text-secondary-foreground font-medium hover:bg-secondary/60 transition-all hover:scale-105 shadow-md"
       >
         sign up
       </Link>

@@ -61,7 +61,7 @@ export default function ClubsPage() {
   };
 
   return (
-    <div className="flex h-screen bg-black overflow-hidden">
+    <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
       <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
 
@@ -76,7 +76,7 @@ export default function ClubsPage() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                className="h-full flex flex-col bg-black/50 backdrop-blur-sm"
+                className="h-full flex flex-col backdrop-blur-sm"
               >
                 {/* Header */}
                 <ClubsHeader clubCount={clubsData.length} />
@@ -113,7 +113,7 @@ export default function ClubsPage() {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
-                className="h-full bg-black overflow-hidden"
+                className="h-full overflow-hidden"
               >
                 <div className="h-full overflow-y-auto p-4 sm:p-6 scrollbar-hide">
                   <ClubDetailPanel
@@ -129,7 +129,7 @@ export default function ClubsPage() {
         {/* Desktop: Side by side layout */}
         <div className="hidden lg:flex flex-1 overflow-hidden">
           {/* Left Panel - Club List */}
-          <div className="w-80 xl:w-96 border-r border-white/10 bg-black/50 backdrop-blur-sm overflow-hidden flex flex-col">
+          <div className="w-80 xl:w-96 border-r border-black/10 backdrop-blur-sm overflow-hidden flex flex-col">
             {/* Header */}
             <ClubsHeader clubCount={clubsData.length} />
 
@@ -161,7 +161,7 @@ export default function ClubsPage() {
           </div>
 
           {/* Right Panel - Club Details */}
-          <div className="flex-1 bg-black overflow-hidden">
+          <div className="flex-1 overflow-hidden">
             <div className="h-full overflow-y-auto p-6 lg:p-8 scrollbar-hide">
               <AnimatePresence mode="wait">
                 <ClubDetailPanel club={selectedClub} />

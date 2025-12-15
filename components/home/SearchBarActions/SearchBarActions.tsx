@@ -49,7 +49,7 @@ export function SearchBarActions({
   return (
     <div className="flex w-full justify-between">
       <div>
-        <div className="border border-gray-500/50 rounded-md px-2 py-2 text-white hover:bg-zinc-400 hover:text-black transition-all">
+        <div className="border border-gray-500/50 rounded-md px-2 py-2 hover:bg-zinc-400 hover:text-black transition-all">
           <Settings2 className="h-4 w-4" />
         </div>
       </div>
@@ -58,7 +58,7 @@ export function SearchBarActions({
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/10 transition-all"
+              className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-sm hover:text-white hover:bg-white/10 transition-all"
             >
               {selectedCount} Selected
               <ChevronDown className="h-4 w-4 opacity-50" />
@@ -100,7 +100,7 @@ export function SearchBarActions({
         <button
           type="submit"
           disabled={searchDisabled}
-          className="flex flex-row items-center gap-2 rounded-xl px-3 py-1.5 bg-white text-black text-sm font-medium cursor-pointer hover:bg-white/90 transition-all hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex flex-row items-center gap-2 rounded-xl px-3 py-1.5 text-background bg-foreground text-sm font-medium cursor-pointer hover:bg-foreground/90 transition-all hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <Loader2 className="inline-block h-4 w-4 animate-spin" />

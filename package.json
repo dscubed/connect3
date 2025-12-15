@@ -17,6 +17,7 @@
     "@supabase/supabase-js": "^2.56.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "fast-average-color": "^9.5.0",
     "framer-motion": "^12.23.12",
     "install": "^0.13.0",
     "lucide-react": "^0.511.0",
