@@ -12,7 +12,6 @@ export default function EventsSection() {
   if (!user) return;
   const eventDisplayRef = useRef<HTMLDivElement | null>(null);
   const { items: events, error, isLoading, isValidating } = useInfiniteScroll<HostedEvent>(eventDisplayRef, `/api/users/${user.id}/events`);
-
   if (isLoading) {
     return (
       <div>
