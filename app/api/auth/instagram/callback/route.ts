@@ -83,7 +83,7 @@ export async function GET(request: Request) {
 
     // 5. Redirect Success
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_SITE_URL}/clubs?success=instagram_connected`
+      `${process.env.NEXT_PUBLIC_SITE_URL}/?success=instagram_connected`
     );
 
   } catch (err: any) {
