@@ -10,23 +10,23 @@ export async function GET() {
   // instagram_graph_user_profile: to read user profile
   const scope = [
     "instagram_basic",
-    // "instagram_graph_user_profile"
+    "instagram_graph_user_profile"
   ].join(",");
 
   // State parameter to prevent CSRF
-  // const state = Math.random().toString(36).substring(7);
+  const state = Math.random().toString(36).substring(7);
   
   // Store state in cookie for verification in callback
-  // const cookieStore = await cookies();
-  // cookieStore.set("instagram_auth_state", state, { 
-  //   httpOnly: true, 
-  //   secure: process.env.NODE_ENV === "production",
-  //   maxAge: 60 * 5 // 5 minutes
-  // });
+  const cookieStore = await cookies();
+  cookieStore.set("instagram_auth_state", state, { 
+    httpOnly: true, 
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 60 * 5 // 5 minutes
+  });
 
   // Instagram Basic Display API Authorization URL
-  // const url = `https://api.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}&response_type=code`;
-  const url = `https://api.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=code`;
+  const url = `https://api.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}&response_type=code`;
+  // const url = `https://api.instagram.com/oauth/authorize?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=code`;
   console.log(url);
 
   return NextResponse.json({ url });

@@ -31,7 +31,7 @@ export async function GET(request: Request) {
   // We can be strict about state verification to prevent CSRF
   if (!storedState || state !== storedState) {
      console.warn("State mismatch or missing in Instagram callback");
-     // You might want to fail here in production, but for now we'll log it.
+     // TODO fail here in production
   }
   // Clear state cookie
   cookieStore.delete("instagram_auth_state");
@@ -90,24 +90,4 @@ export async function GET(request: Request) {
       `${process.env.NEXT_PUBLIC_SITE_URL}/clubs?error=server_error&description=${encodeURIComponent(err.message)}`
     );
   }
-}        },
-        { onConflict: "ig_user_id" }
-      );
-
-    if (dbError) {
-      console.error("DB Error:", dbError);
-      throw new Error("Failed to save account to database.");
-    }
-
-    return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_SITE_URL}/clubs?success=instagram_linked`
-    );
-  } catch (err: any) {
-    console.error("Instagram Linking Error:", err);
-    return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_SITE_URL}/clubs?error=linking_failed&message=${encodeURIComponent(
-        err.message
-      )}`
-    );
-  }
-}
+}   

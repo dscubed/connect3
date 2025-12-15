@@ -10,10 +10,6 @@ import {
 
 // Main Handler
 export async function GET(request: Request) {
-  // Verify secret if needed 
-  // const authHeader = request.headers.get('authorization');
-  // if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) { ... }
-
   const ctx: RequestContext = { totalRequests: 0 };
   console.log(`Starting batch run at ${new Date().toISOString()}`);
 

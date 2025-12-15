@@ -58,23 +58,7 @@ export async function refreshLongLivedToken(accessToken: string) {
 export async function seedAccount(igUserId: string, shortLivedToken: string) {
     console.log(`Seeding account for User ID: ${igUserId}`);
 
-    // 1. Fetch Account Name (Username) using the short-lived token
-    // We need to do this before exchange because sometimes exchange invalidates the short token? 
-    // Or just good practice to verify user first.
-    const userUrl = getInstagramApiUrl(`${igUserId}?fields=username,account_type&access_token=${shortLivedToken}`);
-    const userResponse = await fetch(userUrl);
-    
-    if (!userResponse.ok) {
-         const errorText = await userResponse.text();
-         console.error(`Failed to fetch user info: ${errorText}`);
-         throw new Error(`Failed to fetch user info: ${errorText}`);
-    }
-    
-    const userData = await userResponse.json();
-    const accountName = userData.username || 'Instagram User';
-    console.log(`Fetched account name: ${accountName}`);
-
-    // 2. Exchange for Long-Lived Token
+    // 1. Exchange for Long-Lived Token first
     console.log('Exchanging short-lived token for long-lived token...');
     const longLivedData = await exchangeForLongLivedToken(shortLivedToken);
     const longLivedToken = longLivedData.access_token;
@@ -83,9 +67,25 @@ export async function seedAccount(igUserId: string, shortLivedToken: string) {
     const expiresAt = new Date(Date.now() + expiresIn * 1000);
     console.log(`Token exchanged. Expires in ${expiresIn} seconds (at ${expiresAt.toISOString()})`);
 
+    // 2. Fetch Account Name using long-lived token 
+    console.log('Fetching account name from Instagram...');
+    const userUrl = getInstagramApiUrl(`${igUserId}?fields=username,account_type&access_token=${longLivedToken}`);
+    const userResponse = await fetch(userUrl);
+
+    if (!userResponse.ok) {
+      const errorText = await userResponse.text();
+      console.error(`Failed to fetch user info: ${errorText}`);
+      throw new Error(`Failed to fetch user info: ${errorText}`);
+    }
+
+    const userData = await userResponse.json();
+    const accountName = userData.username || "Unknown";
+    console.log(`Fetched account name: ${accountName}`);
+
+    
     // 3. Upsert into Database
     const { error } = await supabaseAdmin
-        .table('instagram_accounts')
+        .from('instagram_accounts')
         .upsert({
             ig_user_id: igUserId,
             account_name: accountName,
