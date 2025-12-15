@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Clock, Calendar, UsersRound, Home } from "lucide-react";
+import { Menu, X, Calendar, UsersRound, Home } from "lucide-react";
 import { SidebarLink } from "./SidebarLink";
 import { usePathname } from "next/navigation";
 import SidebarHeader from "./SidebarHeader";
@@ -15,7 +15,6 @@ const sidebarLinks = [
   { icon: Home, label: "Home", href: "/" },
   { icon: Calendar, label: "Events", href: undefined },
   { icon: UsersRound, label: "Clubs", href: "/clubs" },
-  { icon: Clock, label: "History", href: undefined },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ open, onOpenChange }) => {
