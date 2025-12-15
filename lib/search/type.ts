@@ -92,7 +92,7 @@ export interface ReasoningOutput {
 }
 
 // Response Generation
-export interface QueryResult {
+export interface ResultSection {
   header?: string;
   text: string;
   matches: EntityResult[];
@@ -100,6 +100,6 @@ export interface QueryResult {
 
 export interface SearchResponse {
   summary: string;
-  results: QueryResult[];
+  results: ResultSection[];
   followUps: string;
 }

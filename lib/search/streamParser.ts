@@ -1,4 +1,4 @@
-import { EntityResult, QueryResult, SearchResponse } from "./type";
+import { EntityResult, ResultSection, SearchResponse } from "./type";
 
 type PartialResult = {
   header?: string | null;
@@ -108,7 +108,7 @@ export const partialParseResponse = (
     const parsedResults = parsePartialResults(resultsMatch[1]);
     if (parsedResults.length > 0) {
       response.results = parsedResults.map(
-        (r): QueryResult => ({
+        (r): ResultSection => ({
           header: r.header ?? undefined,
           text: r.text ?? "",
           matches: entityMap

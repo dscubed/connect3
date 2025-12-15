@@ -79,14 +79,14 @@ export default function SearchPageContent() {
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-[#0B0B0C] text-white flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <CubeLoader size={48} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen w-full bg-[#0B0B0C] text-white relative overflow-hidden">
+    <div className="min-h-screen w-full relative overflow-hidden">
       <div className="flex relative z-10 w-full">
         <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
 

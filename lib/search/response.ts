@@ -1,5 +1,10 @@
 import z from "zod";
-import { AgentState, EntityResult, QueryResult, SearchResponse } from "./type";
+import {
+  AgentState,
+  EntityResult,
+  ResultSection,
+  SearchResponse,
+} from "./type";
 import { OpenAI } from "openai";
 import { zodTextFormat } from "openai/helpers/zod.mjs";
 import { partialParseResponse } from "./streamParser";
@@ -108,7 +113,7 @@ export const generateResponse = async (
   }
 
   // Convert to SearchResponse format
-  const searchResults: QueryResult[] = [];
+  const searchResults: ResultSection[] = [];
   for (const result of validated.data.results) {
     searchResults.push({
       header: result.header ?? undefined,
