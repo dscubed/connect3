@@ -2,7 +2,10 @@ import { EntityFilterOptions } from "@/components/home/hooks/useSearch";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
 
-export const createChatroom = async (query: string) => {
+export const createChatroom = async (
+  query: string,
+  selectedEntityFilters: EntityFilterOptions
+) => {
   const { user, getSupabaseClient } = useAuthStore.getState();
 
   if (!user) {
@@ -39,6 +42,9 @@ export const createChatroom = async (query: string) => {
       content: null,
       user_id: userId,
       status: "pending",
+      organisations: selectedEntityFilters.organisations,
+      users: selectedEntityFilters.users,
+      // events: selectedEntityFilters.events, TODO: once implemented
     })
     .select()
     .single();

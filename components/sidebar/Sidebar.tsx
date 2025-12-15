@@ -13,7 +13,7 @@ interface SidebarProps {
 
 const sidebarLinks = [
   { icon: Home, label: "Home", href: "/" },
-  { icon: Calendar, label: "Events", href: "/events" },
+  { icon: Calendar, label: "Events", href: undefined },
   { icon: UsersRound, label: "Clubs", href: "/clubs" },
   { icon: Clock, label: "History", href: undefined },
 ];

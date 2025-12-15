@@ -4,6 +4,11 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuthStore } from "@/stores/authStore";
 import { createChatroom } from "@/lib/chatrooms/chatroomUtils";
+import { EntityFilterOptions } from "./hooks/useSearch";
+
+interface SearchBarProps {
+  containerClassName?: string;
+}
 
 export function SearchBar({ containerClassName }: SearchBarProps) {
   const [query, setQuery] = useState("");
@@ -36,7 +41,10 @@ export function SearchBar({ containerClassName }: SearchBarProps) {
       }
 
       console.log("Creating chatroom for query:", searchQuery);
-      const createResponse = await createChatroom(searchQuery);
+      const createResponse = await createChatroom(
+        searchQuery,
+        selectedEntityFilters
+      );
 
       if (!createResponse) {
         setCreatingChatroom(false);
