@@ -17,6 +17,7 @@ export interface Profile {
   cover_image_url?: string;
   status?: string;
   account_type?: "user" | "organisation";
+  instagram_connected?: boolean;
 }
 
 interface AuthState {
@@ -44,8 +45,18 @@ async function fetchProfile(
     .select("*")
     .eq("id", userId)
     .single();
-  if (!error) set({ profile });
-  else set({ profile: null });
+  if (!error) {
+    // Check for connected Instagram account
+    const { data: igAccount } = await supabase
+      .from("instagram_accounts")
+      .select("id")
+      .eq("profile_id", userId)
+      .single();
+
+    set({ profile: { ...profile, instagram_connected: !!igAccount } });
+  } else {
+    set({ profile: null });
+  }
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({

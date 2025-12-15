@@ -6,9 +6,22 @@ import AnimatedParticles from "@/components/AnimatedParticles";
 import QuickInfoSection from "@/components/home/QuickInfoSection";
 import { AuthButton } from "@/components/auth/auth-button";
 import { SearchBar } from "@/components/home/SearchBar";
+import { useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (searchParams.get("success") === "instagram_connected") {
+      toast.success("Instagram account connected successfully!");
+      // Remove the query param
+      router.replace("/");
+    }
+  }, [searchParams, router]);
 
   return (
     <div className="min-h-screen bg-[#0B0B0C] text-white relative overflow-hidden">
