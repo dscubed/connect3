@@ -55,7 +55,7 @@ export async function refreshLongLivedToken(accessToken: string) {
   };
 }
 
-export async function seedAccount(igUserId: string, shortLivedToken: string) {
+export async function seedAccount(igUserId: string, shortLivedToken: string, profileId: string) {
     console.log(`Seeding account for User ID: ${igUserId}`);
 
     // 1. Exchange for Long-Lived Token first
@@ -93,6 +93,7 @@ export async function seedAccount(igUserId: string, shortLivedToken: string) {
             token_expires_at: expiresAt.toISOString(),
             priority: 2,
             updated_at: new Date().toISOString(),
+            profile_id: profileId,
         }, { onConflict: 'ig_user_id' });
 
     if (error) {

@@ -79,7 +79,7 @@ export async function GET(request: Request) {
     const igUserId = tokenData.user_id; // Basic Display returns user_id here
 
     // 4. Seed Account (Fetch info, Exchange for Long-Lived, Save to DB)
-    await seedAccount(igUserId.toString(), shortLivedToken);
+    await seedAccount(igUserId.toString(), shortLivedToken, user.id);
 
     // 5. Redirect Success
     return NextResponse.redirect(
