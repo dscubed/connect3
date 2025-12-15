@@ -12,7 +12,8 @@
   background: rgba(0,0,0,0.2);
 }
 [data-sonner-toast] {
-  background: #222 !important; /* or any solid color you prefer */
+  background: rgb(var(--background)) !important; /* or any solid color you prefer */
+  color: rgb(var(--foreground)) !important;
 }
 
 @layer base {
