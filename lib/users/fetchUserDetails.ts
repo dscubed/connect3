@@ -2,7 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SECRET_KEY!
+  process.env.SUPABASE_SECRET_KEY!,
 );
 
 export interface UserDetails {
@@ -39,7 +39,7 @@ export async function fetchUserDetails(
 
     const userDetails = {
       id: user.id,
-      full_name,
+      full_name: `${user.first_name}${user.last_name ? ` ${user.last_name}` : ""}`,
       avatar_url: user.avatar_url || "",
     };
 

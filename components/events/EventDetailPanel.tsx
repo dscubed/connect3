@@ -1,0 +1,163 @@
+import { motion } from "framer-motion";
+import Image from "next/image";
+import {
+  Calendar,
+  ChevronLeft,
+} from "lucide-react";
+import { HostedEvent } from "@/types/events/event";
+import useSWR from "swr";
+
+interface EventDetailPanelProps {
+  event: HostedEvent;
+  onBack?: () => void;
+}
+
+export function EventDetailPanel({ event, onBack }: EventDetailPanelProps){
+  const { data: creator, error: creatorError, isLoading: isLoadingCreator } = useSWR(
+    event.creator_profile_id ? `/api/users/${event.creator_profile_id}` : null,
+    (url) => fetch(url).then(res => res.json())
+  );
+
+  const { data: collaborators, error: collaboratorError, isLoading: isLoadingCollaborators } = useSWR(
+    event.id ? `/api/events/${event.id}/collaborators` : null,
+    (url) => fetch(url).then(res => res.json())    
+  )
+
+  let organiserString = "";
+  if (!isLoadingCollaborators && !isLoadingCreator) {
+    const collaboratorNames = collaborators.map((collaborator: { first_name: string }) => 
+      collaborator.first_name
+    );
+    const formatted = collaboratorNames.join(", ");
+    organiserString = `${creator.full_name}, ${formatted}`;
+  }
+  
+  return (
+    <motion.div
+      key={event.id}
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 20 }}
+      transition={{ duration: 0.3 }}
+      className="h-full overflow-y-auto scrollbar-hide"
+    >
+      {/* Mobile Back Button */}
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="lg:hidden mt-12 flex items-center gap-2 text-white/60 hover:text-white mb-4 p-2 -ml-2 rounded-lg hover:bg-white/5 transition-colors"
+        >
+          <ChevronLeft className="w-5 h-5" />
+          <span className="text-sm">Back to clubs</span>
+        </button>
+      )}
+
+      {/* Header with Logo */}
+      <div className="relative rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/[0.08] to-white/[0.03] p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6 border border-white/15 shadow-xl shadow-black/10">
+        <div className="flex flex-row items-center sm:items-start gap-6">
+          <div className="rounded-xl sm:rounded-2xl p-3 sm:p-4 flex-shrink-0 border-2 border-white/20 bg-white/5 shadow-lg shadow-black/10 mx-auto sm:mx-0">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
+              {event.thumbnailUrl ? (
+                <Image
+                  src={event.thumbnailUrl}
+                  alt={`${event.name} logo`}
+                  width={80}
+                  height={80}
+                  className="object-contain max-h-16 sm:max-h-20 rounded-lg grayscale"
+                />
+              ) : (
+                <Calendar className="w-16 h-16 sm:w-20 sm:h-20 text-white/80" />
+              )}
+            </div>
+          </div>
+          <div className="flex-1 text-left min-w-0">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2 sm:mb-3 leading-tight">
+              {event.name}
+            </h1>
+            <p className="text-white/70 text-xs sm:text-sm line-clamp-2 leading-relaxed">
+              { new Date(event.start).toLocaleDateString() } - { new Date(event.end).toLocaleDateString() }
+            </p>
+            {/* organiser information */}
+            <span className="text-white/70 text-sm md:text-md">{isLoadingCreator || isLoadingCollaborators
+              ? <p>Fetching organisers...</p>
+              : creatorError || collaboratorError 
+              ? <p>Hosted By: Unknown</p>
+              : <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                Hosted By: {organiserString || 'Unknown'}
+              </motion.div> }
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="bg-white/[0.04] rounded-xl sm:rounded-2xl border border-white/10 p-4 sm:p-6 lg:p-7 mb-4 sm:mb-6 shadow-lg shadow-black/5">
+        <h2 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">
+          Description
+        </h2>
+        <p className="text-white/70 leading-relaxed text-sm sm:text-[15px]">
+          {event.description}
+        </p>
+      </div>
+
+      {/* Links */}
+        {/* <div className="space-y-3">
+          {club.links.website && (
+            <a
+              href={club.links.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between p-3 sm:p-4 rounded-lg sm:rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-white/20 transition-all group shadow-sm hover:shadow-md shadow-black/5"
+            >
+              <div className="flex items-center gap-3">
+                <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-white/60" />
+                <span className="text-white/90 font-medium text-sm sm:text-base">
+                  Official Website
+                </span>
+              </div>
+              <ExternalLink className="w-4 h-4 text-white/40 group-hover:text-white/80 transition-colors" />
+            </a>
+          )}
+          {club.links.club && (
+            <a
+              href={club.links.club}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between p-3 sm:p-4 rounded-lg sm:rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-white/20 transition-all group shadow-sm hover:shadow-md shadow-black/5"
+            >
+              <div className="flex items-center gap-3">
+                <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-white/60" />
+                <span className="text-white/90 font-medium text-sm sm:text-base">
+                  Club Page
+                </span>
+              </div>
+              <ExternalLink className="w-4 h-4 text-white/40 group-hover:text-white/80 transition-colors" />
+            </a>
+          )} */}
+
+          {/* <h1 className="text-white/90 font-bold text-md sm:text-lg mb-2">
+            Socials
+          </h1>
+          <div className="flex items-center gap-3 text-white/70 mt-3 ml-3"> */}
+            {/* Map club socials to their links and icons */}
+
+            {/* {club.socials &&
+              Object.entries(club.socials).map(([platform, link]) => {
+                const Icon = socialsIconMap[platform];
+                return (
+                  Icon && (
+                    <a
+                      key={platform}
+                      href={link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-white transition-colors"
+                    >
+                      <Icon className="w-5 h-5" />
+                    </a>
+                  )
+                );
+              })} */}
+    </motion.div>
+  );
+}

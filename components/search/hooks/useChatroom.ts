@@ -2,47 +2,49 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { ChatMessage } from "../types";
-import { useSearchStream } from "./useStreamSearch";
-import { EntityFilterOptions } from "@/components/home/hooks/useSearch";
 
 export function useChatroom(chatroomId: string | null) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [inFlight, setInFlight] = useState(false); // Request-in-flight lock
 
-  const { user, getSupabaseClient, makeAuthenticatedRequest } = useAuthStore();
-  const { connectStream, closeStream } = useSearchStream(setMessages);
+  const { user, makeAuthenticatedRequest, getSupabaseClient } = useAuthStore();
 
   // Run AI Search for a message
   const triggerSearch = useCallback(
     async (messageId: string) => {
-      // Prevent simultaneous requests
-      if (inFlight) {
-        console.log("Search already in flight, ignoring request");
-        return;
-      }
-
-      setInFlight(true);
       try {
-        // Connect to stream
-        await connectStream(messageId);
-        // Trigger search API call
-        console.log("Running search for message:", messageId);
-        await makeAuthenticatedRequest("/api/chatrooms/runSearch", {
+        const res = await makeAuthenticatedRequest("/api/chatrooms/runSearch", {
           method: "POST",
           body: JSON.stringify({ messageId }),
         });
-      } finally {
-        setInFlight(false);
+        const data = await res.json();
+
+        // Update state with result
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === messageId
+              ? data.success
+                ? data.message
+                : { ...msg, status: "failed" }
+              : msg
+          )
+        );
+      } catch (error) {
+        console.error("Search error:", error);
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === messageId ? { ...msg, status: "failed" } : msg
+          )
+        );
       }
     },
-    [connectStream, makeAuthenticatedRequest, inFlight]
+    [makeAuthenticatedRequest]
   );
 
   // Add New Message from Chatroom
   const addNewMessage = useCallback(
-    async (query: string, selectedEntityFilters: EntityFilterOptions) => {
-      if (!query.trim() || !chatroomId || !user || inFlight) return;
+    async (query: string) => {
+      if (!query.trim() || !chatroomId || !user) return;
 
       try {
         // Add message to supabase
@@ -55,9 +57,6 @@ export function useChatroom(chatroomId: string | null) {
             content: null, // Will be populated by background search
             user_id: user.id,
             status: "pending", // Initial status
-            users: selectedEntityFilters.users,
-            organisations: selectedEntityFilters.organisations,
-            // events: selectedEntityFilters.events, TODO: Once finished
           })
           .select()
           .single();
@@ -75,7 +74,7 @@ export function useChatroom(chatroomId: string | null) {
         console.error("Send message error:", error);
       }
     },
-    [chatroomId, user, getSupabaseClient, triggerSearch, inFlight]
+    [chatroomId, user, getSupabaseClient, triggerSearch]
   );
 
   // Load Chatroom Messages
@@ -105,13 +104,6 @@ export function useChatroom(chatroomId: string | null) {
           if (firstMsg?.status === "pending") {
             triggerSearch(firstMsg.id);
           }
-
-          // Check last message for processing status (Ongoing) to reconnect stream
-          const lastMsg = loadedMessages[loadedMessages.length - 1];
-          if (lastMsg?.status === "processing") {
-            await connectStream(lastMsg.id);
-            console.log("Reconnected stream for ongoing message");
-          }
         }
       } catch (e) {
         console.error("Failed to load chatroom:", e);
@@ -121,18 +113,7 @@ export function useChatroom(chatroomId: string | null) {
     };
 
     load();
-    // Cleanup on unmount
-    return () => {
-      closeStream();
-    };
-  }, [
-    chatroomId,
-    user,
-    getSupabaseClient,
-    triggerSearch,
-    closeStream,
-    connectStream,
-  ]);
+  }, [chatroomId, user, getSupabaseClient, triggerSearch]);
 
-  return { messages, isLoading, addNewMessage, inFlight };
+  return { messages, isLoading, addNewMessage };
 }

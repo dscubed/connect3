@@ -13,6 +13,16 @@ export function MessageList({ messages, onUserClick }: MessageListProps) {
     return null;
   }
 
+  if (isTransforming && transformedMessages.length === 0) {
+    return (
+      <div className="max-w-4xl mx-auto text-center py-8">
+        <p className="text-white/60">Loading messages...</p>
+      </div>
+    );
+  }
+
+  console.log("All messages:", transformedMessages);
+
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       {messages.map((message, index) => (
