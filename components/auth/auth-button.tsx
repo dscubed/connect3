@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { LogoutButton } from "./logout-button";
 import { useAuthStore } from "@/stores/authStore";
+import { ConnectInstagramButton } from "@/components/home/ConnectInstagramButton";
 
 export function AuthButton() {
   const { user, profile, loading } = useAuthStore();
@@ -15,6 +16,9 @@ export function AuthButton() {
 
   return user && !user.is_anonymous ? (
     <div className="flex items-center gap-2">
+      {profile?.account_type === "organisation" && !profile?.instagram_connected && (
+        <ConnectInstagramButton />
+      )}
       <Link href="/profile" className="flex-shrink-0">
         <div className="relative w-8 h-8 rounded-full overflow-hidden ring-1 ring-white/20 hover:ring-white/40 transition-all hover:scale-105">
           {profile?.avatar_url ? (

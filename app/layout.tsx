@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { AuthInitializer } from "@/components/auth/AuthInitializer";
 import { Toaster } from "@/components/ui/sonner";
+import Script from "next/script";
 import "./globals.css";
 
 const defaultUrl = process.env.VERCEL_URL
@@ -28,6 +29,28 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <Script
+          id="facebook-sdk-init"
+          strategy="beforeInteractive"
+        >
+          {`
+            window.fbAsyncInit = function() {
+              FB.init({
+                appId: '${process.env.NEXT_PUBLIC_INSTAGRAM_APP_ID}',
+                cookie: true,
+                xfbml: true,
+                version: 'v21.0'
+              });
+            };
+          `}
+        </Script>
+        <Script
+          id="facebook-sdk"
+          strategy="lazyOnload"
+          src="https://connect.facebook.net/en_US/sdk.js"
+        />
+      </head>
       <body className={`${geistSans.className} antialiased`}>
         <AuthInitializer />
         <ThemeProvider
