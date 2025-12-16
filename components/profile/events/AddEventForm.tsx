@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Textarea } from "@/components/ui/textarea";
+import { TextArea } from "@/components/ui/TextArea";
 import { EventCategory, HostedEvent, EventPricing, EventLocationType, EventCity } from "@/types/events/event";
 import { useAuthStore } from "@/stores/authStore";
 import CollaboratorForm from "./CollaboratorForm";
@@ -199,7 +199,7 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
       </div>
       <div className="grid gap-2">
         <Label htmlFor="description">Description</Label>
-        <Textarea 
+        <TextArea 
           id="description"
           onChange={(e) => setDescription(e.target.value)} 
           required disabled={isSubmitting} 
