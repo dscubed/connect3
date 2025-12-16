@@ -30,6 +30,10 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
     const [pricing, setPricing] = useState<EventPricing>("free");
     const [cities, setCities] = useState<EventCity[]>([]);
     const [locationType, setLocationType] = useState<EventLocationType>("physical");
+    const [bookingLinks, setBookingLinks] = useState<string[]>([""]);
+    const [pricing, setPricing] = useState<EventPricing>("free");
+    const [cities, setCities] = useState<EventCity[]>([]);
+    const [locationType, setLocationType] = useState<EventLocationType>("physical");
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
     useEffect(() => {
@@ -58,6 +62,20 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
      "competition",
      "panel",
      "miscellaneous"
+   ] as const;
+
+   const eventCities: EventCity[] = [
+     "melbourne",
+     "sydney",
+     "perth",
+     "canberra",
+     "adelaide",
+     "gold-coast",
+     "newcaste",
+     "hobart",
+     "brisbane",
+     "darwin",
+     "geelong"
    ] as const;
 
    const eventCities: EventCity[] = [
@@ -107,9 +125,35 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
      }
    };
 
+   const handleCityChange = (city: EventCity, checked: boolean) => {
+     if (checked) {
+       setCities([...cities, city]);
+     } else {
+       setCities(cities.filter(c => c !== city));
+     }
+   };
+
+   const handleBookingLinkChange = (index: number, value: string) => {
+     const newLinks = [...bookingLinks];
+     newLinks[index] = value;
+     setBookingLinks(newLinks);
+   };
+
+   const addBookingLinkField = () => {
+     setBookingLinks([...bookingLinks, ""]);
+   };
+
+   const removeBookingLinkField = (index: number) => {
+     if (bookingLinks.length > 1) {
+       const newLinks = bookingLinks.filter((_, i) => i !== index);
+       setBookingLinks(newLinks);
+     }
+   };
+
    if (!user) return null;
 
    const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     e.preventDefault();
      setIsSubmitting(true);
      
@@ -122,6 +166,10 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
         description,
         type,
         collaborators: collaborators.map(c => c.id),
+        booking_link: bookingLinks.filter(link => link.trim() !== ""),
+        pricing,
+        city: cities,
+        location_type: locationType,
         booking_link: bookingLinks.filter(link => link.trim() !== ""),
         pricing,
         city: cities,
@@ -196,11 +244,61 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
             disabled={isSubmitting}
           />
         </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <Label htmlFor="start">Start Date</Label>
+          <Input
+            id="start"
+            type="date"
+            value={start}
+            onChange={(e) => setStart(e.target.value)}
+            required
+            disabled={isSubmitting}
+          />
+        </div>
+        <div>
+          <Label htmlFor="end">End Date</Label>
+          <Input
+            id="end"
+            type="date"
+            value={end}
+            onChange={(e) => setEnd(e.target.value)}
+            required
+            disabled={isSubmitting}
+          />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <Label htmlFor="startTime">Start Time</Label>
+          <Input
+            id="startTime"
+            type="time"
+            value={startTime}
+            onChange={(e) => setStartTime(e.target.value)}
+            required
+            disabled={isSubmitting}
+          />
+        </div>
+        <div>
+          <Label htmlFor="endTime">End Time</Label>
+          <Input
+            id="endTime"
+            type="time"
+            value={endTime}
+            onChange={(e) => setEndTime(e.target.value)}
+            required
+            disabled={isSubmitting}
+          />
+        </div>
       </div>
       <div className="grid gap-2">
         <Label htmlFor="description">Description</Label>
         <TextArea 
           id="description"
+          onChange={(e) => setDescription(e.target.value)} 
+          required disabled={isSubmitting} 
+          value={description}
           onChange={(e) => setDescription(e.target.value)} 
           required disabled={isSubmitting} 
           value={description}
@@ -226,6 +324,105 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
         </div>
        </div>
 
+       {/* Booking Links Section */}
+       <div className="grid gap-2">
+         <Label>Booking Links</Label>
+         {bookingLinks.map((link, index) => (
+           <div key={index} className="flex gap-2 items-center">
+             <Input
+               type="url"
+               placeholder="https://eventbrite.com.au/"
+               value={link}
+               onChange={(e) => handleBookingLinkChange(index, e.target.value)}
+               disabled={isSubmitting}
+             />
+             {bookingLinks.length > 1 && (
+               <Button 
+                 type="button" 
+                 variant="outline" 
+                 size="sm" 
+                 onClick={() => removeBookingLinkField(index)}
+                 disabled={isSubmitting}
+               >
+                 Remove
+               </Button>
+             )}
+           </div>
+         ))}
+         <Button 
+           type="button" 
+           variant="outline" 
+           size="sm" 
+           onClick={addBookingLinkField}
+           disabled={isSubmitting}
+         >
+           Add Another Booking Link
+         </Button>
+       </div>
+
+       {/* Pricing Section */}
+       <div className="grid gap-2">
+         <Label>Pricing</Label>
+         <RadioGroup 
+           value={pricing} 
+           onValueChange={(value: EventPricing) => setPricing(value)}
+           className="flex space-x-4"
+           disabled={isSubmitting}
+         >
+           <div className="flex items-center space-x-2">
+             <RadioGroupItem value="free" id="free" />
+             <Label htmlFor="free">Free</Label>
+           </div>
+           <div className="flex items-center space-x-2">
+             <RadioGroupItem value="paid" id="paid" />
+             <Label htmlFor="paid">Paid</Label>
+           </div>
+         </RadioGroup>
+       </div>
+
+       {/* Cities Section */}
+       <div className="grid gap-2">
+         <Label>Cities</Label>
+         <div className="flex flex-wrap gap-2">
+           {eventCities.map((city) => (
+             <div key={city} className="flex items-center space-x-2">
+               <Checkbox
+                 id={city}
+                 checked={cities.includes(city)}
+                 onCheckedChange={(checked) => handleCityChange(city, checked as boolean)}
+                 disabled={isSubmitting}
+               />
+               <Label htmlFor={city} className="capitalize">
+                 {city.replace('-', ' ')}
+               </Label>
+             </div>
+           ))}
+         </div>
+       </div>
+
+       {/* Location Type Section */}
+       <div className="grid gap-2">
+         <Label>Location Type</Label>
+         <RadioGroup 
+           value={locationType} 
+           onValueChange={(value: EventLocationType) => setLocationType(value)}
+           className="flex space-x-4"
+           disabled={isSubmitting}
+         >
+           <div className="flex items-center space-x-2">
+             <RadioGroupItem value="physical" id="physical" />
+             <Label htmlFor="physical">Physical</Label>
+           </div>
+           <div className="flex items-center space-x-2">
+             <RadioGroupItem value="virtual" id="virtual" />
+             <Label htmlFor="virtual">Virtual</Label>
+           </div>
+         </RadioGroup>
+       </div>
+
+       {/* Collaborators Form */}
+       <CollaboratorForm collaborators={collaborators} setCollaborators={setCollaborators} disabled={isSubmitting} />
+       
        {/* Booking Links Section */}
        <div className="grid gap-2">
          <Label>Booking Links</Label>
