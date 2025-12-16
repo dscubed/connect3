@@ -9,7 +9,14 @@ import {
 } from "@/lib/instagram/ingest";
 
 // Main Handler
-export async function GET(request: Request) {
+export async function POST(request: Request) {
+  const authHeader = request.headers.get("authorization");
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return new Response("Unauthorized", {
+      status: 401,
+    });
+  }
+
   const ctx: RequestContext = { totalRequests: 0 };
   console.log(`Starting batch run at ${new Date().toISOString()}`);
 
