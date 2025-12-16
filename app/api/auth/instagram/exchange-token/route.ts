@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { supabase as adminSupabase } from "@/lib/instagram/ingest";
+import { supabaseAdmin } from "@/lib/instagram/auth";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
     const igUsername = igAccount.username || igAccount.name;
 
     // 4. Save to Supabase using Admin Client (bypassing RLS)
-    const { error: dbError } = await adminSupabase
+    const { error: dbError } = await supabaseAdmin
       .from("instagram_accounts")
       .upsert(
         {
