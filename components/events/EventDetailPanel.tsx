@@ -100,7 +100,7 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps){
             {/* event location */}
             <p className="text-white/70 text-xs sm:text-sm line-clamp-2 loading-relaxed flex gap-1 items-center">
               <MapPin className="size-4 text-white/70" />
-                {event.city.map((city, index) => 
+                {event.city.map((city) => 
                   city.charAt(0).toUpperCase() + city.replace('-', ' ').slice(1)
                 ).join(', ')}
                 {' | '}
