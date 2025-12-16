@@ -9,6 +9,7 @@ import ProfilePicture from "@/components/profile/ProfilePicture";
 import UserDetails from "@/components/profile/UserDetails";
 import TLDRSection from "@/components/profile/TLDRSection";
 import ChunksSection from "@/components/profile/chunks/ChunksSection";
+import { ChunkProvider } from "@/components/profile/chunks/hooks/ChunkProvider";
 
 export default function ProfilePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -78,7 +79,9 @@ export default function ProfilePage() {
               <TLDRSection tldr={profile.tldr || null} />
 
               {/* Chunks Section */}
-              <ChunksSection userId={user.id} />
+              <ChunkProvider>
+                <ChunksSection />
+              </ChunkProvider>
             </div>
           </div>
         </main>

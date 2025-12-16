@@ -3,7 +3,7 @@ import {
   EntityFilterOptions,
   useSearch,
 } from "@/components/home/hooks/useSearch";
-import { TextArea } from "../ui/TextArea";
+import { Textarea } from "../ui/TextArea";
 import { SearchBarActions } from "./SearchBarActions/SearchBarActions";
 import { useEntityFilter } from "./SearchBarActions/hooks/useEntityFilter";
 
@@ -53,11 +53,13 @@ const SearchBarUIComponent: React.FC<SearchBarUIProps> = ({
     <form onSubmit={handleSubmit} className="w-full">
       <div
         className={`mx-auto max-w-2xl flex flex-col items-center ${containerClassName} transition-all ${
-          disabled || isLoading ? "opacity-50 pointer-events-none grayscale" : ""
+          disabled || isLoading
+            ? "opacity-50 pointer-events-none grayscale"
+            : ""
         }`}
       >
         <div className="flex w-full items-center gap-3 py-2">
-          <TextArea
+          <Textarea
             className="w-full bg-transparent outline-none text-sm placeholder:text-white/40 max-h-32 scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-transparent focus:scrollbar-thumb-white/50 transition-all resize-none text-white"
             placeholder="Ask me anything..."
             value={localQuery}
@@ -72,7 +74,9 @@ const SearchBarUIComponent: React.FC<SearchBarUIProps> = ({
           />
         </div>
         <SearchBarActions
-          searchDisabled={disabled || isSearching || isLoading || localQuery.trim() === ""}
+          searchDisabled={
+            disabled || isSearching || isLoading || localQuery.trim() === ""
+          }
           isLoading={isLoading}
           selectedEntityFilters={selectedEntityFilters}
           handleEntityFilterClick={handleEntityFilterClick}
