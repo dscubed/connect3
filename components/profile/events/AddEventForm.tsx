@@ -111,6 +111,7 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
 
    const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.preventDefault();
      setIsSubmitting(true);
      
      try {
@@ -199,12 +200,12 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
       </div>
       <div className="grid gap-2">
         <Label htmlFor="description">Description</Label>
-        <TextArea 
+        <TextArea
           id="description"
           onChange={(e) => setDescription(e.target.value)} 
           required disabled={isSubmitting} 
           value={description}
-          placeholder="Enter event description"
+          placeholder="Enter event description"    
         />
       </div>
       <div className="grid gap-2">
