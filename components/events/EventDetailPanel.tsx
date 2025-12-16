@@ -78,7 +78,17 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps){
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2 sm:mb-3 leading-tight">
               {event.name}
             </h1>
-            <p className="text-white/70 text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
+            <div className="flex flex-col gap-1">
+              {/* organiser information */}
+              <span className="text-white/70 text-sm md:text-md">{isLoadingCreator || isLoadingCollaborators
+                ? <p>Fetching organisers...</p>
+                : creatorError || collaboratorError 
+                ? <p>Hosted By: Unknown</p>
+                : <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  Hosted By: {organiserString || 'Unknown'}
+                </motion.div> }
+              </span>
+              <p className="text-white/70 text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
               <Calendar className="size-4" /> 
               { new Date(event.start).toLocaleDateString() } - { new Date(event.end).toLocaleDateString() }
             </p>
@@ -86,15 +96,23 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps){
               <Clock className="size-4" />
               { new Date(event.start).toLocaleTimeString([], {timeStyle: 'short'}) } - { new Date(event.end).toLocaleTimeString([], {timeStyle: 'short'}) }
             </p>
-            {/* organiser information */}
-            <span className="text-white/70 text-sm md:text-md">{isLoadingCreator || isLoadingCollaborators
-              ? <p>Fetching organisers...</p>
-              : creatorError || collaboratorError 
-              ? <p>Hosted By: Unknown</p>
-              : <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                Hosted By: {organiserString || 'Unknown'}
-              </motion.div> }
-            </span>
+
+            {/* event location */}
+            <p className="text-white/70 text-xs sm:text-sm line-clamp-2 loading-relaxed flex gap-1 items-center">
+              <MapPin className="size-4 text-white/70" />
+                {event.city.map((city, index) => 
+                  city.charAt(0).toUpperCase() + city.replace('-', ' ').slice(1)
+                ).join(', ')}
+                {' | '}
+                {event.location_type === 'virtual' ? 'Online' : 'In-Person'}
+            </p>
+
+            {/* event pricing */}
+            <p className="text-white/70 text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
+              <DollarSign className="size-4 text-white/70"/>
+              {event.pricing === 'free' ? 'Free' : 'Paid'}
+            </p>
+            </div>
           </div>
         </div>
       </div>
@@ -104,51 +122,13 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps){
         <h2 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">
           About
         </h2>
-        <p className="text-white/70 leading-relaxed text-sm sm:text-[15px]">
+        <p className="text-white/70 leading-relaxed text-sm sm:text-[15px] whitespace-pre-wrap">
           {event.description}
         </p>
       </div>
 
       {/* Event Details */}
       <div className="space-y-4 mb-6">
-        {/* Location Type and Cities */}
-        <div className="bg-white/[0.04] rounded-xl sm:rounded-2xl border border-white/10 p-4 sm:p-6 shadow-lg shadow-black/5">
-          <h2 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">
-            Location
-          </h2>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-white/60" />
-              <span className="text-white/90 font-medium text-sm sm:text-base">
-                {event.location_type === 'virtual' ? 'Virtual Event' : 'Physical Event'}
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {event.city.map((city, index) => (
-                <span 
-                  key={index} 
-                  className="px-3 py-1 rounded-full bg-white/10 text-white/80 text-xs"
-                >
-                  {city.replace('-', ' ')}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Pricing */}
-        <div className="bg-white/[0.04] rounded-xl sm:rounded-2xl border border-white/10 p-4 sm:p-6 shadow-lg shadow-black/5">
-          <h2 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">
-            Pricing
-          </h2>
-          <div className="flex items-center gap-2">
-            <DollarSign className="w-4 h-4 text-white/60" />
-            <span className="text-white/90 font-medium text-sm sm:text-base">
-              {event.pricing === 'free' ? 'Free' : 'Paid'}
-            </span>
-          </div>
-        </div>
-
         {/* Booking Links */}
         {event.booking_link && event.booking_link.length > 0 && (
           <div className="bg-white/[0.04] rounded-xl sm:rounded-2xl border border-white/10 p-4 sm:p-6 shadow-lg shadow-black/5">
@@ -174,65 +154,6 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps){
           </div>
         )}
       </div>
-
-      {/* Links */}
-        {/* <div className="space-y-3">
-          {club.links.website && (
-            <a
-              href={club.links.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-between p-3 sm:p-4 rounded-lg sm:rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-white/20 transition-all group shadow-sm hover:shadow-md shadow-black/5"
-            >
-              <div className="flex items-center gap-3">
-                <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-white/60" />
-                <span className="text-white/90 font-medium text-sm sm:text-base">
-                  Official Website
-                </span>
-              </div>
-              <ExternalLink className="w-4 h-4 text-white/40 group-hover:text-white/80 transition-colors" />
-            </a>
-          )}
-          {club.links.club && (
-            <a
-              href={club.links.club}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-between p-3 sm:p-4 rounded-lg sm:rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-white/20 transition-all group shadow-sm hover:shadow-md shadow-black/5"
-            >
-              <div className="flex items-center gap-3">
-                <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-white/60" />
-                <span className="text-white/90 font-medium text-sm sm:text-base">
-                  Club Page
-                </span>
-              </div>
-              <ExternalLink className="w-4 h-4 text-white/40 group-hover:text-white/80 transition-colors" />
-            </a>
-          )} */}
-
-          {/* <h1 className="text-white/90 font-bold text-md sm:text-lg mb-2">
-            Socials
-          </h1>
-          <div className="flex items-center gap-3 text-white/70 mt-3 ml-3"> */}
-            {/* Map club socials to their links and icons */}
-
-            {/* {club.socials &&
-              Object.entries(club.socials).map(([platform, link]) => {
-                const Icon = socialsIconMap[platform];
-                return (
-                  Icon && (
-                    <a
-                      key={platform}
-                      href={link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-white transition-colors"
-                    >
-                      <Icon className="w-5 h-5" />
-                    </a>
-                  )
-                );
-              })} */}
     </motion.div>
   );
 }
