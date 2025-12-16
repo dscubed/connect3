@@ -54,7 +54,7 @@ export async function POST(request: Request) {
 
     // Find the first page with an IG business account
     const pageWithIg = pagesData.data.find(
-      (p: { instagram_business_account: any }) => p.instagram_business_account
+      (p: { instagram_business_account: unknown }) => p.instagram_business_account
     );
 
     if (!pageWithIg) {
