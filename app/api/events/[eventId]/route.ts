@@ -41,7 +41,7 @@ export async function POST(request: NextRequest, { params }: RouteParameters) {
     const authResult = await authenticateRequest(request);
     if (authResult instanceof NextResponse) {
         console.error("Unauthenticated");
-      return authResult; // Return error response
+        return authResult; 
     } 
 
     const { eventId } = await params;

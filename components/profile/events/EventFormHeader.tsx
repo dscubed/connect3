@@ -4,6 +4,7 @@ import { useState } from "react";
 import AddEventForm from "./AddEventForm";
 import { useAuthStore } from "@/stores/authStore";
 import { HostedEvent } from "@/types/events/event";
+import { toast } from "sonner";
 
 export default function EventFormHeader() {
   const { makeAuthenticatedRequest } = useAuthStore();
@@ -19,7 +20,9 @@ export default function EventFormHeader() {
 
   const handleFormSubmit = async (eventData: Omit<HostedEvent, 'id' | "push">) => {
     const eventId = crypto.randomUUID();
-    const response = await makeAuthenticatedRequest(`/api/events/${eventId}`, {
+
+    // create event in database 
+    const dbResponse = await makeAuthenticatedRequest(`/api/events/${eventId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -27,11 +30,27 @@ export default function EventFormHeader() {
       body: JSON.stringify(eventData),
     });
 
-    if (response.ok) {
-      console.log("Event created successfully!");
+    if (dbResponse.ok) {
+      toast.success("Successfully added event");
+      // optimistically update ui by closing form while vector store is being populated
       handleFormCancel();
     } else {
-      console.error("Failed to create event:", response.status);
+      toast.error("Failed to create event");
+      return;
+    }
+
+    const vectorStoreResponse = await makeAuthenticatedRequest(`/api/vector-store/events/${eventId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(eventData)
+    });
+
+    if (vectorStoreResponse.ok) {
+      console.log("Added event to vector store");
+    } else {
+      toast.error("Failed to add event to vector store");
     }
   }
 
