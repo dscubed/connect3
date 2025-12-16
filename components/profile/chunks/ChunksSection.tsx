@@ -1,19 +1,21 @@
 "use client";
 import { useChunkContext } from "./hooks/ChunkProvider";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChunkActions } from "./ChunkActions";
 import { ChunksDisplay } from "./display/ChunksDisplay";
+import { useAuthStore } from "@/stores/authStore";
 
 export default function ChunksSection() {
   const { fetchChunks } = useChunkContext();
-  const [fetched, setFetched] = useState(false);
+  const profile = useAuthStore((state) => state.profile);
+  const fetchedRef = useRef(false);
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    if (fetched) return;
+    if (fetchedRef.current || !profile) return;
     fetchChunks();
-    setFetched(true);
-  }, [fetchChunks, fetched]);
+    fetchedRef.current = true;
+  }, [fetchChunks, profile]);
 
   return (
     <div className="w-full flex flex-col gap-6 mb-24">

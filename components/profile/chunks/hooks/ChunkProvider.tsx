@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import { AllCategories, CategoryOrderData } from "../ChunkUtils";
 import { useAuthStore } from "@/stores/authStore";
+import { toast } from "sonner";
 
 export interface ProfileChunk {
   id: string;
@@ -62,7 +63,8 @@ const ChunkContext = createContext<ChunkContextType | undefined>(undefined);
 export function ChunkProvider({ children }: { children: ReactNode }) {
   const [chunks, setChunks] = useState<ProfileChunk[]>([]);
   const [categoryOrder, setCategoryOrder] = useState<CategoryOrderData[]>([]);
-  const { profile, getSupabaseClient } = useAuthStore.getState();
+  const { profile, getSupabaseClient, makeAuthenticatedRequest } =
+    useAuthStore.getState();
   const [loadingChunks, setLoadingChunks] = useState<boolean>(true);
   const [savingChunks, setSavingChunks] = useState<boolean>(false);
 
@@ -181,9 +183,11 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
 
   const fetchChunks = useCallback(async () => {
     setLoadingChunks(true);
-
     try {
-      if (!profile || loadingChunks) return;
+      if (!profile) {
+        return;
+      }
+
       const { data: chunksData, error: chunksError } = await supabase
         .from("profile_chunks")
         .select("id, text, category, order")
@@ -221,7 +225,7 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoadingChunks(false);
     }
-  }, [profile, supabase, loadingChunks]);
+  }, [profile, supabase]);
 
   // Reset chunks to last fetched state
   const reset = () => {
@@ -230,7 +234,7 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
   };
 
   const saveChunks = async () => {
-    if (!profile) return;
+    if (!profile || savingChunks) return;
     setSavingChunks(true);
 
     // Identify deleted chunks/categories
@@ -310,11 +314,39 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
       // Update prev states to current
       setPrevChunks(chunks);
       setPrevCategoryOrder(categoryOrder);
+
+      // run vector store upload
+      await uploadChunksToVectorStore();
     } catch (error) {
       console.error("Failed to save chunks:", error);
     } finally {
       setSavingChunks(false);
     }
+  };
+
+  // upload to vector store
+  const uploadChunksToVectorStore = async () => {
+    const response = await makeAuthenticatedRequest(
+      "/api/vector-store/uploadProfile",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: profile?.id,
+          orderedCategoryChunks,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      console.error("Failed to upload profile to vector store");
+      throw new Error("Vector store upload failed");
+    }
+
+    toast.success("Profile saved successfully!");
+    return await response.json();
   };
 
   return (
