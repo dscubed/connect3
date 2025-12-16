@@ -1,7 +1,7 @@
 "use client";
 import Sidebar from "@/components/sidebar/Sidebar";
 import HeroSection from "@/components/home/HeroSection";
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import AnimatedParticles from "@/components/AnimatedParticles";
 import QuickInfoSection from "@/components/home/QuickInfoSection";
 import { AuthButton } from "@/components/auth/auth-button";
@@ -9,7 +9,7 @@ import { SearchBar } from "@/components/home/SearchBar";
 import { useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
-export default function Home() {
+function HomeContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const searchParams = useSearchParams();
@@ -64,5 +64,13 @@ export default function Home() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <HomeContent />
+    </Suspense>
   );
 }
