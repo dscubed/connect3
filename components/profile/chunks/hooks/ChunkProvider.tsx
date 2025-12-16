@@ -29,9 +29,14 @@ export interface CategoryChunks {
 }
 
 type ChunkContextType = {
-  chunks: ProfileChunk[];
+  // Display state
   orderedCategoryChunks: CategoryChunks[];
+
+  // Current State
+  chunks: ProfileChunk[];
   setChunks: React.Dispatch<React.SetStateAction<ProfileChunk[]>>;
+
+  // Actions
   addChunk: (category: AllCategories, text: string) => void;
   updateChunk: (id: string, data: Partial<ProfileChunk>) => void;
   removeChunk: (id: string) => void;
@@ -41,8 +46,13 @@ type ChunkContextType = {
     fromIndex: number,
     toIndex: number
   ) => void;
+  reset: () => void;
+
+  // Loading states
   loadingChunks: boolean;
   savingChunks: boolean;
+
+  // Data operations
   fetchChunks: () => Promise<void>;
   saveChunks: () => Promise<void>;
 };
@@ -55,6 +65,12 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
   const { profile, getSupabaseClient } = useAuthStore.getState();
   const [loadingChunks, setLoadingChunks] = useState<boolean>(true);
   const [savingChunks, setSavingChunks] = useState<boolean>(false);
+
+  // Track last fetched state to identify deleted chunks/categories
+  const [prevChunks, setPrevChunks] = useState<ProfileChunk[]>([]);
+  const [prevCategoryOrder, setPrevCategoryOrder] = useState<
+    CategoryOrderData[]
+  >([]);
 
   const supabase = getSupabaseClient();
 
@@ -193,8 +209,13 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
         throw new Error("No chunk data found");
       }
 
+      // Set fetched data to current state
       setChunks(chunksData as ProfileChunk[]);
       setCategoryOrder(categoryOrderData as CategoryOrderData[]);
+
+      // Set fetched data to prev state for tracking
+      setPrevChunks(chunksData as ProfileChunk[]);
+      setPrevCategoryOrder(categoryOrderData as CategoryOrderData[]);
     } catch (error) {
       console.error("Failed to load chunks:", error);
     } finally {
@@ -202,10 +223,42 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
     }
   }, [profile, supabase, loadingChunks]);
 
+  // Reset chunks to last fetched state
+  const reset = () => {
+    setChunks(prevChunks);
+    setCategoryOrder(prevCategoryOrder);
+  };
+
   const saveChunks = async () => {
     if (!profile) return;
     setSavingChunks(true);
+
+    // Identify deleted chunks/categories
+    const deletedChunkIds = prevChunks
+      .filter((prevChunk) => !chunks.find((chunk) => chunk.id === prevChunk.id))
+      .map((chunk) => chunk.id);
+    const deletedCategories = prevCategoryOrder.filter(
+      (prevCat) =>
+        !categoryOrder.find((cat) => cat.category === prevCat.category)
+    );
+
     try {
+      // Delete removed categories
+      if (deletedCategories.length > 0) {
+        const { error: delCatError } = await supabase
+          .from("profile_chunk_categories")
+          .delete()
+          .eq("profile_id", profile.id)
+          .in(
+            "category",
+            deletedCategories.map((cat) => cat.category)
+          );
+        if (delCatError) {
+          console.error("Error deleting categories:", delCatError);
+          throw delCatError;
+        }
+      }
+
       // Upsert categories
       const { error: categoryError } = await supabase
         .from("profile_chunk_categories")
@@ -221,6 +274,20 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
         console.error("Error saving category order:", categoryError);
         throw categoryError;
       }
+
+      // Delete removed chunks
+      if (deletedChunkIds.length > 0) {
+        const { error: delChunkError } = await supabase
+          .from("profile_chunks")
+          .delete()
+          .eq("profile_id", profile.id)
+          .in("id", deletedChunkIds);
+        if (delChunkError) {
+          console.error("Error deleting chunks:", delChunkError);
+          throw delChunkError;
+        }
+      }
+
       // Upsert chunks
       const { error: chunksError } = await supabase
         .from("profile_chunks")
@@ -234,6 +301,7 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
           })),
           { onConflict: "id" }
         );
+
       if (chunksError) {
         console.error("Error saving chunks:", chunksError);
         throw chunksError;
@@ -252,6 +320,7 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
         setChunks,
         addChunk,
         updateChunk,
+        reset,
         removeChunk,
         moveCategory,
         moveChunk,
