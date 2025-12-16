@@ -54,7 +54,7 @@ export async function POST(request: Request) {
 
     // Find the first page with an IG business account
     const pageWithIg = pagesData.data.find(
-      (p: any) => p.instagram_business_account
+      (p: { instagram_business_account: any }) => p.instagram_business_account
     );
 
     if (!pageWithIg) {
@@ -90,10 +90,11 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ success: true });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Instagram Linking Error:", err);
+    const errorMessage = err instanceof Error ? err.message : "Failed to link Instagram account";
     return NextResponse.json(
-      { error: err.message || "Failed to link Instagram account" },
+      { error: errorMessage },
       { status: 500 }
     );
   }

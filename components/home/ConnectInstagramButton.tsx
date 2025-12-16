@@ -20,7 +20,7 @@ export function ConnectInstagramButton() {
       } else {
         throw new Error("Failed to get OAuth URL");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
       toast.error("Failed to initiate Instagram connection. Please try again.");
       setLoading(false);
