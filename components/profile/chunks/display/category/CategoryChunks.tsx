@@ -3,12 +3,12 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { useDnd } from "./hooks/useDnD";
-import { AllCategories, ChunkInput } from "./ChunkUtils";
-import { ChunkEntry } from "./hooks/ChunkProvider";
-import { ChunkItem } from "./display/ChunkItem";
+import { useDnd } from "../../hooks/useDnD";
+import { AllCategories, ChunkInput } from "../../ChunkUtils";
+import { ChunkEntry } from "../../hooks/ChunkProvider";
+import { ChunkItem } from "../chunks/ChunkItem";
 import { ChunkEditor } from "../ChunkEditor";
-import { SortableChunk } from "./SortableChunk";
+import { SortableChunk } from "../chunks/SortableChunk";
 
 interface CategoryChunksProps {
   chunks: ChunkEntry[];
