@@ -36,20 +36,19 @@ export function LoginForm({
   };
 
   const busy = isLoading || isLoggingIn;
-  const purple = "bg-[#8F5BFF] hover:bg-[#7b4ae6]";
 
   return (
     <div className={cn("flex flex-col", className)} {...props}>
       <Card className="border-0 shadow-none p-0 bg-transparent">
         <CardHeader className="px-0 pb-4">
-          <CardTitle className="text-3xl font-semibold tracking-tight text-black">
+          <CardTitle className="text-3xl font-semibold tracking-tight text-secondary-foreground">
             Log in
           </CardTitle>
-          <CardDescription className="mt-1 text-sm text-gray-700">
+          <CardDescription className="mt-1 text-sm text-muted">
             Don&apos;t have an account?{" "}
             <Link
               href="/auth/sign-up"
-              className="font-semibold text-[#8F5BFF] hover:underline"
+              className="font-semibold text-foreground hover:underline"
             >
               Sign up
             </Link>
@@ -74,22 +73,19 @@ export function LoginForm({
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="h-12 rounded-full border-2 border-gray-200 px-4 text-sm text-black placeholder:text-gray-400 focus-visible:ring-[#8F5BFF]"
+                  className="h-12 rounded-full border-2 border-muted/20 px-4 text-sm placeholder:text-muted focus-visible:ring-foreground"
                 />
               </div>
 
               {/* password */}
               <div className="grid gap-1">
                 <div className="flex items-center justify-between">
-                  <Label
-                    htmlFor="password"
-                    className="text-sm font-medium text-black"
-                  >
+                  <Label htmlFor="password" className="text-sm font-medium ">
                     Password
                   </Label>
                   <Link
                     href="/auth/forgot-password"
-                    className="text-xs font-medium text-[#8F5BFF] hover:underline"
+                    className="text-xs font-medium text-foreground hover:underline"
                   >
                     Forgot password?
                   </Link>
@@ -100,7 +96,7 @@ export function LoginForm({
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="h-12 rounded-full border-2 border-gray-200 px-4 text-sm text-black placeholder:text-gray-400 focus-visible:ring-[#8F5BFF]"
+                  className="h-12 rounded-full border-2 border-muted/20 px-4 text-sm placeholder:text-muted focus-visible:ring-foreground"
                 />
               </div>
 
@@ -109,7 +105,7 @@ export function LoginForm({
                 type="submit"
                 className={cn(
                   "mt-1 h-12 w-full rounded-full text-sm font-semibold text-white",
-                  purple
+                  "bg-foreground hover:bg-foreground/70"
                 )}
                 disabled={busy}
               >
@@ -117,10 +113,10 @@ export function LoginForm({
               </Button>
 
               {/* divider */}
-              <div className="flex items-center gap-3 text-xs text-gray-400">
-                <span className="h-px flex-1 bg-gray-200" />
+              <div className="flex items-center gap-3 text-xs text-muted/70">
+                <span className="h-px flex-1 bg-muted/20" />
                 <span>Or login with</span>
-                <span className="h-px flex-1 bg-gray-200" />
+                <span className="h-px flex-1 bg-muted/20" />
               </div>
 
               {/* Google */}
@@ -129,12 +125,12 @@ export function LoginForm({
                 onClick={handleGoogleLogin}
                 disabled={busy}
                 aria-label="Login with Google"
-                className="h-12 w-full rounded-full border border-gray-200 bg-white text-sm font-medium text-gray-800 hover:bg-gray-50 flex items-center justify-center gap-2"
+                className="h-12 w-full rounded-full border border-muted/20 bg-white text-sm font-medium text-muted hover:bg-muted/10 flex items-center justify-center gap-2"
               >
                 <FcGoogle size={20} />
                 <span>Login with Google</span>
                 {busy && (
-                  <span className="ml-1 text-xs text-gray-500">
+                  <span className="ml-1 text-xs text-muted">
                     Redirecting...
                   </span>
                 )}

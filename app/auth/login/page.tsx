@@ -19,12 +19,17 @@ export default function Page() {
         {loading ? (
           <LoadingIndicator />
         ) : (
-          <LoginForm onLoggingInChange={setIsLoggingIn} isLoading={isLoggingIn} />
+          <LoginForm
+            onLoggingInChange={setIsLoggingIn}
+            isLoading={isLoggingIn}
+          />
         )}
       </AuthShell>
 
       {!isLoggingIn && user && !user.is_anonymous && (
-        <AlreadyAuthenticatedDialog onboardingCompleted={profile?.onboarding_completed} />
+        <AlreadyAuthenticatedDialog
+          onboardingCompleted={profile?.onboarding_completed}
+        />
       )}
     </>
   );

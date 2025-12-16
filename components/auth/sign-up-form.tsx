@@ -44,7 +44,7 @@ export function SignUpForm({
     });
   };
 
-  const purple = "bg-[#8F5BFF] hover:bg-[#7b4ae6]";
+  const purple = "bg-foreground hover:bg-foreground/70";
 
   return (
     <div className={cn("flex flex-col", className)} {...props}>
@@ -53,11 +53,11 @@ export function SignUpForm({
           <CardTitle className="text-3xl font-semibold tracking-tight text-black">
             Create an account
           </CardTitle>
-          <CardDescription className="mt-1 text-sm text-gray-700">
+          <CardDescription className="mt-1 text-sm text-muted">
             Already have an account?{" "}
             <Link
               href="/auth/login"
-              className="font-semibold text-[#8F5BFF] hover:underline"
+              className="font-semibold text-foreground hover:underline"
             >
               Log in
             </Link>
@@ -68,15 +68,15 @@ export function SignUpForm({
           <form onSubmit={onSubmit}>
             <div className="flex flex-col gap-5">
               {/* user / organisation toggle */}
-              <div className="inline-flex items-center rounded-full bg-gray-100 p-1 text-xs font-medium">
+              <div className="inline-flex items-center rounded-full bg-muted/10 p-1 text-xs font-medium">
                 <button
                   type="button"
                   onClick={() => setAccountType("user")}
                   className={cn(
                     "flex-1 rounded-full px-4 py-2 transition",
                     accountType === "user"
-                      ? "bg-white text-gray-900 shadow-sm"
-                      : "text-gray-500"
+                      ? "bg-white text-black shadow-sm"
+                      : "text-muted/70"
                   )}
                 >
                   User
@@ -90,8 +90,8 @@ export function SignUpForm({
                   className={cn(
                     "flex-1 rounded-full px-4 py-2 transition",
                     accountType === "organisation"
-                      ? "bg-white text-gray-900 shadow-sm"
-                      : "text-gray-500"
+                      ? "bg-white text-black shadow-sm"
+                      : "text-muted/70"
                   )}
                 >
                   Organisation
@@ -99,7 +99,11 @@ export function SignUpForm({
               </div>
 
               {/* name row */}
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div
+                className={`grid gap-3 sm:grid-cols-2 ${
+                  accountType === "user" ? "" : "sm:grid-cols-1"
+                }`}
+              >
                 <div className="grid gap-1">
                   <Label
                     htmlFor="first-name"
@@ -120,7 +124,7 @@ export function SignUpForm({
                     required
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    className="h-12 rounded-full border-2 border-gray-200 px-4 text-sm text-black placeholder:text-gray-400 focus-visible:ring-[#8F5BFF]"
+                    className="h-12 rounded-full border-2 border-muted/20 px-4 text-sm text-black placeholder:text-muted focus-visible:ring-foreground"
                   />
                 </div>
 
@@ -139,7 +143,7 @@ export function SignUpForm({
                       required
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
-                      className="h-12 rounded-full border-2 border-gray-200 px-4 text-sm text-black placeholder:text-gray-400 focus-visible:ring-[#8F5BFF]"
+                      className="h-12 rounded-full border-2 border-muted/20 px-4 text-sm text-black placeholder:text-muted focus-visible:ring-foreground"
                     />
                   </div>
                 )}
@@ -160,7 +164,7 @@ export function SignUpForm({
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="h-12 rounded-full border-2 border-gray-200 px-4 text-sm text-black placeholder:text-gray-400 focus-visible:ring-[#8F5BFF]"
+                  className="h-12 rounded-full border-2 border-muted/20 px-4 text-sm text-black placeholder:text-muted focus-visible:ring-foreground"
                 />
               </div>
 
@@ -178,7 +182,7 @@ export function SignUpForm({
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="h-12 rounded-full border-2 border-gray-200 px-4 text-sm text-black placeholder:text-gray-400 focus-visible:ring-[#8F5BFF]"
+                  className="h-12 rounded-full border-2 border-muted/20 px-4 text-sm text-black placeholder:text-muted focus-visible:ring-foreground"
                 />
               </div>
 
@@ -196,7 +200,7 @@ export function SignUpForm({
                   required
                   value={repeatPassword}
                   onChange={(e) => setRepeatPassword(e.target.value)}
-                  className="h-12 rounded-full border-2 border-gray-200 px-4 text-sm text-black placeholder:text-gray-400 focus-visible:ring-[#8F5BFF]"
+                  className="h-12 rounded-full border-2 border-muted/20 px-4 text-sm text-black placeholder:text-muted focus-visible:ring-foreground"
                 />
               </div>
 
@@ -213,10 +217,10 @@ export function SignUpForm({
               </Button>
 
               {/* divider */}
-              <div className="flex items-center gap-3 text-xs text-gray-400">
-                <span className="h-px flex-1 bg-gray-200" />
+              <div className="flex items-center gap-3 text-xs text-muted">
+                <span className="h-px flex-1 bg-muted/20" />
                 <span>Or register with</span>
-                <span className="h-px flex-1 bg-gray-200" />
+                <span className="h-px flex-1 bg-muted/20" />
               </div>
 
               {/* Google (always visible) */}
@@ -225,12 +229,12 @@ export function SignUpForm({
                 onClick={handleGoogleSignUp}
                 disabled={isSigningUp}
                 aria-label="Sign up with Google"
-                className="h-12 w-full rounded-full border border-gray-200 bg-white text-sm font-medium text-gray-800 hover:bg-gray-50 flex items-center justify-center gap-2"
+                className="h-12 w-full rounded-full border border-muted/20 bg-white text-sm font-medium text-muted hover:bg-muted/10 flex items-center justify-center gap-2"
               >
                 <FcGoogle size={20} />
                 <span>Sign up with Google</span>
                 {isSigningUp && (
-                  <span className="ml-1 text-xs text-gray-500">
+                  <span className="ml-1 text-xs text-muted">
                     Redirecting...
                   </span>
                 )}
