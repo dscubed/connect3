@@ -1,7 +1,7 @@
 import { Trash } from "lucide-react";
-import { ChunkEditor } from "./ChunkEditor";
-import { ChunkEntry, useChunkContext } from "./hooks/ChunkProvider";
-import { AllCategories, ChunkInput } from "./ChunkUtils";
+import { ChunkEditor } from "../ChunkEditor";
+import { ChunkEntry, useChunkContext } from "../../hooks/ChunkProvider";
+import { AllCategories, ChunkInput } from "../../ChunkUtils";
 import { Dispatch, SetStateAction } from "react";
 
 export function ChunkItem({

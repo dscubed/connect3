@@ -306,6 +306,10 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
         console.error("Error saving chunks:", chunksError);
         throw chunksError;
       }
+
+      // Update prev states to current
+      setPrevChunks(chunks);
+      setPrevCategoryOrder(categoryOrder);
     } catch (error) {
       console.error("Failed to save chunks:", error);
     } finally {

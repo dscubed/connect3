@@ -1,8 +1,8 @@
 import { Textarea } from "@/components/ui/TextArea";
-import { useChunkContext } from "./hooks/ChunkProvider";
+import { useChunkContext } from "../hooks/ChunkProvider";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AllCategories, ChunkInput } from "./ChunkUtils";
+import { AllCategories, ChunkInput } from "../ChunkUtils";
 
 export function ChunkEditor({
   cancel,

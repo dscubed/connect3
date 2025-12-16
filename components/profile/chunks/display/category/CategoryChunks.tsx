@@ -6,8 +6,8 @@ import {
 import { useDnd } from "./hooks/useDnD";
 import { AllCategories, ChunkInput } from "./ChunkUtils";
 import { ChunkEntry } from "./hooks/ChunkProvider";
-import { ChunkItem } from "./ChunkItem";
-import { ChunkEditor } from "./ChunkEditor";
+import { ChunkItem } from "./display/ChunkItem";
+import { ChunkEditor } from "../ChunkEditor";
 import { SortableChunk } from "./SortableChunk";
 
 interface CategoryChunksProps {
