@@ -9,6 +9,7 @@ import ProfilePicture from "@/components/profile/ProfilePicture";
 import UserDetails from "@/components/profile/UserDetails";
 import TLDRSection from "@/components/profile/TLDRSection";
 import ChunksSection from "@/components/profile/chunks/ChunksSection";
+import EventsSection from "@/components/profile/events/EventsSection";
 
 export default function ProfilePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -45,7 +46,6 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-[#0B0B0C] text-white relative overflow-hidden">
       <div className="flex relative z-10">
         <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
-
         <main className="flex-1 pt-16 md:pt-0 relative">
           <div
             className="h-screen overflow-y-auto"
@@ -79,6 +79,9 @@ export default function ProfilePage() {
 
               {/* Chunks Section */}
               <ChunksSection userId={user.id} />
+
+              {/* Events form for organisations only */}
+              {  profile.account_type === "organisation" &&  <EventsSection /> }
             </div>
           </div>
         </main>
