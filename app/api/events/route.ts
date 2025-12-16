@@ -16,7 +16,6 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const cursor = searchParams.get("cursor");
     const limit = parseInt(searchParams.get("limit") || "10");
-     
     try {
         let query = supabase
             .from("events")
@@ -61,7 +60,11 @@ export async function POST(request: NextRequest) {
         type,
         thumbnailUrl,
         creator_profile_id,
-        collaborators } = createEventBodySchema.parse(body);
+        collaborators,
+        booking_link,
+        pricing,
+        city,
+        location_type } = createEventBodySchema.parse(body);
 
     try {
         const { data: event, error: eventError } = await supabase
@@ -75,6 +78,10 @@ export async function POST(request: NextRequest) {
                 type,
                 thumbnail_url: thumbnailUrl,
                 creator_profile_id,
+                booking_link,
+                pricing,
+                city,
+                location_type,
             })
             .select()
             .single();

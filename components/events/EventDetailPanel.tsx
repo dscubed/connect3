@@ -3,6 +3,10 @@ import Image from "next/image";
 import {
   Calendar,
   ChevronLeft,
+  Clock,
+  MapPin,
+  DollarSign,
+  Link as LinkIcon,
 } from "lucide-react";
 import { HostedEvent } from "@/types/events/event";
 import useSWR from "swr";
@@ -48,7 +52,7 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps){
           className="lg:hidden mt-12 flex items-center gap-2 text-white/60 hover:text-white mb-4 p-2 -ml-2 rounded-lg hover:bg-white/5 transition-colors"
         >
           <ChevronLeft className="w-5 h-5" />
-          <span className="text-sm">Back to clubs</span>
+          <span className="text-sm">Back to events</span>
         </button>
       )}
 
@@ -74,8 +78,13 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps){
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2 sm:mb-3 leading-tight">
               {event.name}
             </h1>
-            <p className="text-white/70 text-xs sm:text-sm line-clamp-2 leading-relaxed">
+            <p className="text-white/70 text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
+              <Calendar className="size-4" /> 
               { new Date(event.start).toLocaleDateString() } - { new Date(event.end).toLocaleDateString() }
+            </p>
+            <p className="text-white/70 text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
+              <Clock className="size-4" />
+              { new Date(event.start).toLocaleTimeString([], {timeStyle: 'short'}) } - { new Date(event.end).toLocaleTimeString([], {timeStyle: 'short'}) }
             </p>
             {/* organiser information */}
             <span className="text-white/70 text-sm md:text-md">{isLoadingCreator || isLoadingCollaborators
@@ -93,11 +102,77 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps){
       {/* Main Content */}
       <div className="bg-white/[0.04] rounded-xl sm:rounded-2xl border border-white/10 p-4 sm:p-6 lg:p-7 mb-4 sm:mb-6 shadow-lg shadow-black/5">
         <h2 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">
-          Description
+          About
         </h2>
         <p className="text-white/70 leading-relaxed text-sm sm:text-[15px]">
           {event.description}
         </p>
+      </div>
+
+      {/* Event Details */}
+      <div className="space-y-4 mb-6">
+        {/* Location Type and Cities */}
+        <div className="bg-white/[0.04] rounded-xl sm:rounded-2xl border border-white/10 p-4 sm:p-6 shadow-lg shadow-black/5">
+          <h2 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">
+            Location
+          </h2>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-white/60" />
+              <span className="text-white/90 font-medium text-sm sm:text-base">
+                {event.location_type === 'virtual' ? 'Virtual Event' : 'Physical Event'}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {event.city.map((city, index) => (
+                <span 
+                  key={index} 
+                  className="px-3 py-1 rounded-full bg-white/10 text-white/80 text-xs"
+                >
+                  {city.replace('-', ' ')}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Pricing */}
+        <div className="bg-white/[0.04] rounded-xl sm:rounded-2xl border border-white/10 p-4 sm:p-6 shadow-lg shadow-black/5">
+          <h2 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">
+            Pricing
+          </h2>
+          <div className="flex items-center gap-2">
+            <DollarSign className="w-4 h-4 text-white/60" />
+            <span className="text-white/90 font-medium text-sm sm:text-base">
+              {event.pricing === 'free' ? 'Free' : 'Paid'}
+            </span>
+          </div>
+        </div>
+
+        {/* Booking Links */}
+        {event.booking_link && event.booking_link.length > 0 && (
+          <div className="bg-white/[0.04] rounded-xl sm:rounded-2xl border border-white/10 p-4 sm:p-6 shadow-lg shadow-black/5">
+            <h2 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">
+              Booking Links
+            </h2>
+            <div className="space-y-2">
+              {event.booking_link.map((link, index) => (
+                <a
+                  key={index}
+                  href={link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 p-3 rounded-lg bg-white/[0.08] hover:bg-white/[0.12] border border-white/10 hover:border-white/20 transition-all group shadow-sm hover:shadow-md shadow-black/5"
+                >
+                  <LinkIcon className="w-4 h-4 text-white/60" />
+                  <span className="text-white/90 text-sm sm:text-base truncate">
+                    {link}
+                  </span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Links */}

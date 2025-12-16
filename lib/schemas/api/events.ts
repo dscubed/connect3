@@ -10,6 +10,22 @@ const eventCategorySchema = z.enum([
   'miscellaneous',
 ]);
 
+const eventPricingSchema = z.enum(['free', 'paid']);
+const eventLocationTypeSchema = z.enum(['virtual', 'physical']);
+const eventCitySchema = z.enum([
+  'melbourne',
+  'sydney',
+  'perth',
+  'canberra',
+  'adelaide',
+  'gold-coast',
+  'newcaste',
+  'hobart',
+  'brisbane',
+  'darwin',
+  'geelong',
+]);
+
 export const createEventBodySchema = z.object({
     id: z.string().uuid(),
     name: z.string(),
@@ -20,4 +36,8 @@ export const createEventBodySchema = z.object({
     thumbnailUrl: z.string().url().optional(),
     creator_profile_id: z.string().uuid(),
     collaborators: z.array(z.string().uuid()).optional(),
+    booking_link: z.array(z.string().url()),
+    pricing: eventPricingSchema,
+    city: z.array(eventCitySchema),
+    location_type: eventLocationTypeSchema,
 });

@@ -23,7 +23,7 @@ export async function GET(request: NextRequest, { params }: RouteParameters) {
     try {
         const { data: event, error } = await supabase
             .from("events")
-            .select("id, name, description, start, end, type")
+            .select("*")
             .eq("id", eventId)
             .single();
 
@@ -61,7 +61,11 @@ export async function POST(request: NextRequest, { params }: RouteParameters) {
         description,
         type,
         creator_profile_id,
-        collaborators 
+        collaborators,
+        booking_link,
+        pricing,
+        city,
+        location_type
     } = validatedBody;
 
     console.log("Inserting document");
@@ -77,6 +81,10 @@ export async function POST(request: NextRequest, { params }: RouteParameters) {
                 description,
                 type,
                 creator_profile_id,
+                booking_link,
+                pricing,
+                city,
+                location_type,
             })
             .select()
             .single();

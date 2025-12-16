@@ -15,8 +15,11 @@ interface PaginatedResponse<T> {
 export default function useInfiniteScroll<T>(listRef: RefObject<HTMLDivElement | null>, endpoint: string | null, limit?: number) {
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
     const getKey = (pageIndex: number, previousPageData: PaginatedResponse<T> | null): string | null => {
+        if (!endpoint) return null;
+
         const baseUrl = process.env.NODE_ENV !== "production" ? "http://localhost:3000" : "https://connect3.app";
         const setLimit = limit ?? 10;
+        console.log(`${baseUrl}${endpoint}?limit=${setLimit}`);
 
         if (pageIndex === 0) {
             return `${baseUrl}${endpoint}?limit=${setLimit}`;
@@ -32,9 +35,9 @@ export default function useInfiniteScroll<T>(listRef: RefObject<HTMLDivElement |
         setSize, 
         error, 
         isValidating, 
-        isLoading } = useSWRInfinite<PaginatedResponse<T>>(endpoint ? getKey : () => void fetcher);
+        isLoading } = useSWRInfinite<PaginatedResponse<T>>(getKey, fetcher);
 
-    const items: T[] = data ? data.flatMap(d => d.items) : [];
+    const items: T[] = !!data ? data.flatMap(d => d.items) : [];
     const handleScroll = useCallback(() => {
         if (!listRef.current) {
             return;
