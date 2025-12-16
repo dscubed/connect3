@@ -93,6 +93,37 @@
   display: none;  /* Chrome, Safari, Opera */
 }
 
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease;
+  }
+  .animate-fade-out {
+    animation: fadeOut 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+}
+
 .animated-gradient {
     background-color: hsla(0, 0%, 0%, 1);
     background-image: radial-gradient(circle at 85% 80%, hsla(266.99999999999983, 1%, 8%, 0.7) 9%, transparent 55%), radial-gradient(circle at 60% 24%, hsla(335.9999999999997, 2%, 15%, 0.6) 5%, transparent 72%), radial-gradient(circle at 13% 82%, hsla(53.999999999999886, 0%, 0%, 0.3) 5%, transparent 52%), radial-gradient(circle at 24% 7%, hsla(299, 4%, 25%, 0.8) 13%, transparent 68%);

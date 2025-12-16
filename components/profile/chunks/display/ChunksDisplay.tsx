@@ -65,7 +65,7 @@ export function ChunksDisplay({ isEditing }: { isEditing: boolean }) {
             </SortableContext>
           </DndContext>
           {isEditing && (
-            <div className="flex flex-col gap-2 items-center justify-center w-full">
+            <div className="flex flex-col gap-2 items-center justify-center w-full animate-fade-in">
               <AddCategoryButton />
             </div>
           )}

@@ -39,7 +39,7 @@ export function AddCategoryButton() {
   }
 
   return (
-    <div className="w-full flex flex-col items-start gap-2">
+    <div className="w-full flex flex-col items-start gap-2 ">
       {!profile || loading ? (
         <Spinner className="h-4 w-4" />
       ) : (
