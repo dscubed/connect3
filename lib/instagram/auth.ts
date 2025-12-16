@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase Admin Client (Service Role)
 // We use the service role key to bypass RLS when managing system-wide instagram accounts
-const supabaseAdmin = createClient(
+export const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
