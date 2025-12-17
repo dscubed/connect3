@@ -25,6 +25,7 @@ export default function AlreadyAuthenticatedDialog({
   return (
     <Dialog open={true}>
       <DialogContent
+        showCloseButton={false}
         forceMount={true}
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}

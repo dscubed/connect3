@@ -3,31 +3,14 @@ import { LinksDisplay } from "./links/LinksDisplay";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { EditLinkButton } from "./links/EditLinkButton";
-
-export type LinkTypes =
-  | "linkedin"
-  | "github"
-  | "instagram"
-  | "facebook"
-  | "discord"
-  | "discord-server"
-  | "x"
-  | "youtube"
-  | "website"
-  | "tiktok"
-  | "reddit"
-  | "wechat"
-  | "xiaohongshu";
-
-export type LinkItem = {
-  type: LinkTypes;
-  details: string;
-};
+import { EditModal } from "./links/EditModal";
+import { LinkItem } from "./links/LinksUtils";
 
 export function LinksSection() {
   const { profile, loading, getSupabaseClient } = useAuthStore.getState();
   const [linkData, setLinkData] = useState<LinkItem[]>([]);
   const [fetched, setFetched] = useState(false);
+  const [displayEditModal, setDisplayEditModal] = useState(false);
 
   const supabase = getSupabaseClient();
 
@@ -36,12 +19,12 @@ export function LinksSection() {
     const fetchLinks = async () => {
       const { data, error } = await supabase
         .from("profile-links")
-        .select("type, details");
+        .select("id, type, details");
       if (error || !data) {
         toast.error(`Error fetching links: ${error.message}`);
         return;
       }
-      setLinkData(data);
+      setLinkData(data as LinkItem[]);
       setFetched(true);
       console.log("Fetched links:", data);
     };
@@ -52,11 +35,18 @@ export function LinksSection() {
     <div className="w-full flex flex-col gap-6 mb-12">
       <div className="flex gap-2 items-center">
         <h1 className="text-2xl font-semibold">Links</h1>
-        <EditLinkButton />
+        <EditLinkButton onClick={() => setDisplayEditModal(true)} />
       </div>
 
       {/* Links content goes here */}
       <LinksDisplay links={linkData} />
+
+      <EditModal
+        open={displayEditModal}
+        onOpenChange={setDisplayEditModal}
+        links={linkData}
+        setLinks={setLinkData}
+      />
     </div>
   );
 }
