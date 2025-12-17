@@ -6,14 +6,12 @@ import {
 } from "@/components/ui/dialog";
 import { LinkItem, LinkType } from "./LinksUtils";
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
-import { LinkTypes } from "./LinksUtils";
-import { cn } from "@/lib/utils";
 import { LinksDisplay } from "./LinksDisplay";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
+import { LinkTypeInput } from "./LinkTypeInput";
 
 interface EditModalProps {
   links: LinkItem[];
@@ -134,9 +132,9 @@ export function EditModal({
           <LinksDisplay links={links} editFunctions={editFunctions} />
           {/* Add Links */}
           {addingLink ? (
-            <div>
+            <div className="animate-fade-in">
               {/* Inputs */}
-              <div className="flex gap-2 p-2 rounded-md mb-2">
+              <div className="flex gap-2 py-2 rounded-md mb-2">
                 <LinkTypeInput
                   addingState={addingLink}
                   setAddingState={setAddingLink}
@@ -159,12 +157,13 @@ export function EditModal({
                 />
               </div>
               {/* Actions */}
-              <div className="flex gap-2">
+              <div className="flex gap-2 animate-fade-in">
                 <Button variant="default" onClick={() => addLink()}>
                   Add Link
                 </Button>
                 <Button
-                  variant="outline"
+                  variant="ghost"
+                  className="border border-foreground/60"
                   onClick={() => setAddingLink(undefined)}
                 >
                   Cancel
@@ -174,10 +173,10 @@ export function EditModal({
           ) : (
             <div className="flex justify-between items-center mt-4">
               <Button
-                className="w-fit h-fit"
+                className="w-fit h-fit animate-fade-in"
                 onClick={() => setAddingLink({ typeInput: "", details: "" })}
               >
-                <p>Add Link</p> <PlusCircle className="!size-5" />
+                Add Link
               </Button>
               <Button
                 onClick={() =>
@@ -185,6 +184,7 @@ export function EditModal({
                   saveToSupabase()
                 }
                 disabled={saving}
+                className="animate-fade-in"
               >
                 {saving ? "Saving..." : "Save Changes"}
               </Button>
@@ -195,113 +195,3 @@ export function EditModal({
     </Dialog>
   );
 }
-
-type LinkTypeInputProps = {
-  addingState: AddingState;
-  setAddingState: (state: AddingState) => void;
-};
-
-const LinkTypeInput = ({ addingState, setAddingState }: LinkTypeInputProps) => {
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [highlightedIndex, setHighlightedIndex] = useState(-1);
-
-  // Filter options based on input
-  const filteredOptions = Object.entries(LinkTypes).filter(([, details]) =>
-    details.label.toLowerCase().includes(addingState.typeInput.toLowerCase())
-  );
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!showDropdown) return;
-
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setHighlightedIndex((prev) =>
-        prev < filteredOptions.length - 1 ? prev + 1 : prev
-      );
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : -1));
-    } else if (e.key === "Enter" && highlightedIndex >= 0) {
-      e.preventDefault();
-      const [key, details] = filteredOptions[highlightedIndex];
-      setAddingState({
-        ...addingState,
-        typeInput: details.label,
-        type: key as LinkType,
-      });
-      setShowDropdown(false);
-    } else if (e.key === "Escape") {
-      setShowDropdown(false);
-    }
-  };
-
-  return (
-    <div className="relative">
-      <div className="flex items-center gap-2">
-        {addingState.type &&
-          LinkTypes[addingState.type]?.icon &&
-          (() => {
-            const Icon = LinkTypes[addingState.type].icon;
-            return (
-              <span className="absolute left-2">
-                <Icon />
-              </span>
-            );
-          })()}
-        <Input
-          placeholder="Link Type"
-          className={cn(
-            `${
-              addingState.type && !!LinkTypes[addingState.type]?.icon
-                ? "pl-8"
-                : ""
-            }`,
-            "w-32"
-          )}
-          value={addingState.typeInput}
-          onChange={(e) => {
-            setAddingState({
-              ...addingState,
-              typeInput: e.target.value,
-              type: undefined,
-            });
-            setShowDropdown(true);
-            setHighlightedIndex(-1);
-          }}
-          onFocus={() => setShowDropdown(true)}
-          onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-          onKeyDown={handleKeyDown}
-        />
-      </div>
-      {showDropdown && filteredOptions.length > 0 && (
-        <div className="absolute z-10 w-fit bg-white border border-gray-200 rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto scrollbar-hide">
-          {filteredOptions.map(([key, details], index) => {
-            const Icon = details.icon;
-            return (
-              <Button
-                key={key}
-                variant="ghost"
-                className={`w-full justify-start ${
-                  highlightedIndex === index ? "bg-gray-100" : ""
-                }`}
-                onMouseDown={(e) => e.preventDefault()}
-                onMouseEnter={() => setHighlightedIndex(index)}
-                onClick={() => {
-                  setAddingState({
-                    ...addingState,
-                    typeInput: details.label,
-                    type: key as LinkType,
-                  });
-                  setShowDropdown(false);
-                }}
-              >
-                <Icon className="mr-5" />
-                {details.label}
-              </Button>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-};

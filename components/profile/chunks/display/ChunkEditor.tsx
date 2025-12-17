@@ -53,7 +53,7 @@ export function ChunkEditor({
     <div>
       <div className="flex items-baseline justify-center gap-2 w-full">
         <span
-          className="inline-block w-2 h-2 bg-white rounded-full"
+          className="inline-block w-2 h-2 bg-black rounded-full"
           aria-hidden="true"
         />
         <div className="flex w-full items-end gap-2">

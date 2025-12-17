@@ -61,13 +61,13 @@ export function ChunkItem({
         <SortableChunk key={chunk.id} chunk={chunk}>
           <div className="flex items-baseline gap-2 rounded-lg w-full hover:bg-white/20 transition-all">
             <span
-              className="inline-block w-2 h-2 bg-white rounded-full"
+              className="inline-block w-2 h-2 bg-black rounded-full"
               aria-hidden="true"
             />
             <span className="flex-1 p-2 text-base">{chunk.text}</span>
             <Fade
               show={isEditing}
-              className="p-1 text-white/70 hover:text-red-500 transition-colors"
+              className="p-1 text-muted hover:text-red-500 transition-colors"
             >
               <button
                 type="button"

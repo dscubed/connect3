@@ -36,6 +36,12 @@ export type LinkItem = {
   details: string;
 };
 
+export interface AddingState {
+  typeInput: string;
+  type?: LinkType;
+  details: string;
+}
+
 interface LinkDetails {
   icon: IconType;
   label: string;
