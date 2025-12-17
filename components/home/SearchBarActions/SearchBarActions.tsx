@@ -1,50 +1,13 @@
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Fragment } from "react";
-import { ArrowUp, Check, ChevronDown, Settings2, Loader2 } from "lucide-react";
-import { EntityFilterOptions } from "../hooks/useSearch";
-
-const FILTER_OPTIONS = [
-  {
-    id: "events",
-    label: "Events",
-    description: "Workshops, Networking Events, etc.",
-  },
-  {
-    id: "organisations",
-    label: "Organisations",
-    description: "Student clubs, social groups, etc.",
-  },
-  {
-    id: "users",
-    label: "Users",
-    description: "Discover other fellow students",
-  },
-] as {
-  id: string;
-  label: string;
-  description: string;
-}[];
+import { ArrowUp, Settings2, Loader2 } from "lucide-react";
 
 interface SearchBarActionsProps {
   searchDisabled: boolean;
   isLoading?: boolean;
-  selectedEntityFilters: EntityFilterOptions;
-  handleEntityFilterClick: (selectedFilter: keyof EntityFilterOptions) => void;
-  selectedCount: number;
 }
 
 export function SearchBarActions({
   searchDisabled,
   isLoading = false,
-  selectedEntityFilters,
-  handleEntityFilterClick,
-  selectedCount,
 }: SearchBarActionsProps) {
   return (
     <div className="flex w-full justify-between">
@@ -54,49 +17,6 @@ export function SearchBarActions({
         </div>
       </div>
       <div className="flex flex-row gap-4 items-center">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-sm hover:text-white hover:bg-white/10 transition-all"
-            >
-              {selectedCount} Selected
-              <ChevronDown className="h-4 w-4 opacity-50" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {FILTER_OPTIONS.map((option, index) => {
-              const isSelected =
-                selectedEntityFilters[
-                  option.id as keyof typeof selectedEntityFilters
-                ];
-              return (
-                <Fragment key={option.id}>
-                  {index === 1 && <DropdownMenuSeparator />}
-                  <DropdownMenuItem
-                    onClick={() =>
-                      handleEntityFilterClick(
-                        option.id as keyof typeof selectedEntityFilters
-                      )
-                    }
-                    onSelect={(e) => e.preventDefault()}
-                    className="flex items-center gap-3 py-2 cursor-pointer"
-                  >
-                    <div className="flex-1">
-                      <h1 className="text-sm font-medium">{option.label}</h1>
-                      <p className="text-xs text-gray-400">
-                        {option.description}
-                      </p>
-                    </div>
-                    <div className="h-full w-4 rounded flex items-center justify-center">
-                      {isSelected && <Check className="h-4 w-4 text-white" />}
-                    </div>
-                  </DropdownMenuItem>
-                </Fragment>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
         <button
           type="submit"
           disabled={searchDisabled}

@@ -1,19 +1,13 @@
 import React from "react";
-import {
-  EntityFilterOptions,
-  useSearch,
-} from "@/components/home/hooks/useSearch";
+import { useSearch } from "@/components/home/hooks/useSearch";
 import { Textarea } from "../ui/TextArea";
 import { SearchBarActions } from "./SearchBarActions/SearchBarActions";
-import { useEntityFilter } from "./SearchBarActions/hooks/useEntityFilter";
+import { cn } from "@/lib/utils";
 
 interface SearchBarUIProps {
   query: string;
   setQuery: (q: string) => void;
-  onSubmit?: (
-    query: string,
-    selectedEntityFilters: EntityFilterOptions
-  ) => void;
+  onSubmit?: (query: string) => void;
   disabled?: boolean;
   isLoading?: boolean;
   containerClassName?: string;
@@ -39,13 +33,10 @@ const SearchBarUIComponent: React.FC<SearchBarUIProps> = ({
     onSearchChange: setQuery,
   });
 
-  const { selectedEntityFilters, handleEntityFilterClick, selectedCount } =
-    useEntityFilter();
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (disabled || isLoading) return;
-    onSubmit?.(localQuery, selectedEntityFilters);
+    onSubmit?.(localQuery);
     setQuery(localQuery);
   };
 
@@ -60,7 +51,11 @@ const SearchBarUIComponent: React.FC<SearchBarUIProps> = ({
       >
         <div className="flex w-full items-center gap-3 py-2">
           <Textarea
-            className="w-full bg-transparent outline-none text-sm max-h-32 scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-transparent focus:scrollbar-thumb-white/50 transition-all resize-none placeholder:text-foreground/50"
+            className={cn(
+              "w-full bg-transparent text-sm transition-all placeholder:text-foreground/50",
+              "scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-transparent focus:scrollbar-thumb-white/50",
+              "max-h-32 outline-none resize-none focus-visible:ring-0 border-none min-h-0"
+            )}
             placeholder="Ask me anything..."
             value={localQuery}
             onChange={(e) => handleChange(e.target.value)}
@@ -78,9 +73,6 @@ const SearchBarUIComponent: React.FC<SearchBarUIProps> = ({
             disabled || isSearching || isLoading || localQuery.trim() === ""
           }
           isLoading={isLoading}
-          selectedEntityFilters={selectedEntityFilters}
-          handleEntityFilterClick={handleEntityFilterClick}
-          selectedCount={selectedCount}
         />
       </div>
     </form>
