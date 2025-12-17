@@ -30,7 +30,7 @@ export default function SearchPageContent() {
 
   const searchParams = useSearchParams();
   const chatroomId = mounted ? searchParams?.get("chatroom") || null : null;
-  const { messages, addNewMessage, inFlight } = useChatroom(chatroomId);
+  const { messages, addNewMessage, inFlight, chatroomTitle } = useChatroom(chatroomId);
 
   // Handler for message thread users
   const handleMessageUserClick = (user: {
@@ -90,9 +90,17 @@ export default function SearchPageContent() {
       <div className="flex relative z-10 w-full">
         <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
 
-        <main className="flex-1 min-w-0 pt-16 md:pt-0 relative flex flex-col h-screen">
-          {/* Share button */}
-          <ShareButton chatroomId={chatroomId} />
+        <main className="flex-1 min-w-0 pt-16 md:pt-0 relative flex flex-col h-screen">          
+          {/* Top header */}
+          <div className="flex items-center justify-between px-4 py-3 ">
+            {/* Chatroom title */}
+            <div className="text-lg font-medium text-white truncate max-w-[70%]">
+              {chatroomTitle ?? "New chat"}
+            </div>
+
+            {/* Share button */}
+            <ShareButton chatroomId={chatroomId} />
+          </div>
 
           {/* Scrollable content area */}
           <div

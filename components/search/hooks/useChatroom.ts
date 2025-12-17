@@ -10,6 +10,8 @@ export function useChatroom(chatroomId: string | null) {
   const [isLoading, setIsLoading] = useState(true);
   const [inFlight, setInFlight] = useState(false); // Request-in-flight lock
 
+  const [chatroomTitle, setChatroomTitle] = useState<string | null>(null);
+
   const { user, getSupabaseClient, makeAuthenticatedRequest } = useAuthStore();
   const { connectStream, closeStream } = useSearchStream(setMessages);
 
@@ -90,6 +92,14 @@ export function useChatroom(chatroomId: string | null) {
       try {
         const supabase = getSupabaseClient();
 
+        const { data: chatroom } = await supabase
+          .from("chatrooms")
+          .select("title")
+          .eq("id", chatroomId)
+          .single();
+
+        setChatroomTitle(chatroom?.title ?? null);
+
         const { data: messages, error } = await supabase
           .from("chatmessages")
           .select("*")
@@ -105,7 +115,7 @@ export function useChatroom(chatroomId: string | null) {
           if (firstMsg?.status === "pending") {
             triggerSearch(firstMsg.id);
 
-            // NEW: generate chatroom title in the background
+            // generate chatroom title in the background
             makeAuthenticatedRequest("/api/chatrooms/generateTitle", {
               method: "POST",
               body: JSON.stringify({
@@ -143,5 +153,5 @@ export function useChatroom(chatroomId: string | null) {
     connectStream,
   ]);
 
-  return { messages, isLoading, addNewMessage, inFlight };
+  return { messages, isLoading, addNewMessage, inFlight, chatroomTitle };
 }
