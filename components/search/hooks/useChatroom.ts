@@ -104,6 +104,15 @@ export function useChatroom(chatroomId: string | null) {
           const firstMsg = loadedMessages[0];
           if (firstMsg?.status === "pending") {
             triggerSearch(firstMsg.id);
+
+            // NEW: generate chatroom title in the background
+            makeAuthenticatedRequest("/api/chatrooms/generateTitle", {
+              method: "POST",
+              body: JSON.stringify({
+                chatroomId,
+                firstMessage: firstMsg.query,
+              }),
+            });
           }
 
           // Check last message for processing status (Ongoing) to reconnect stream
