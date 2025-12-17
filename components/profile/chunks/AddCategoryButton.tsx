@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChunkEditor } from "./display/ChunkEditor";
 import { Fade } from "@/components/ui/Fade";
+import { Button } from "@/components/ui/button";
 
 export function AddCategoryButton() {
   const { profile, loading } = useAuthStore.getState();
@@ -47,15 +48,19 @@ export function AddCategoryButton() {
         <DropdownMenu>
           <DropdownMenuTrigger
             asChild
-            className="hover:bg-white/10 rounded-md px-2 py-1 cursor-pointer transition-all"
+            className="rounded-md px-2 py-1 cursor-pointer transition-all focus-visible:ring-0 focus-visible::outline-none"
           >
-            {selectedCategory ? (
-              <h1 className="text-lg font-semibold mb-2">{selectedCategory}</h1>
-            ) : (
-              <div className="flex gap-2 items-center align-center ">
-                <h1 className="text-lg font-semibold"> Add Category </h1>
-              </div>
-            )}
+            <Button variant="ghost">
+              {selectedCategory ? (
+                <h1 className="text-lg font-semibold mb-2">
+                  {selectedCategory}
+                </h1>
+              ) : (
+                <div className="flex gap-2 items-center align-center ">
+                  <h1 className="text-lg font-semibold"> Add Category </h1>
+                </div>
+              )}
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             side="top"

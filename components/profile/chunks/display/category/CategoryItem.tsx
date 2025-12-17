@@ -4,6 +4,7 @@ import { CategoryChunks } from "./CategoryChunks";
 import { ChunkEntry, useChunkContext } from "../../hooks/ChunkProvider";
 import { AllCategories, ChunkInput } from "../../ChunkUtils";
 import { Fade } from "@/components/ui/Fade";
+import { Button } from "@/components/ui/button";
 
 interface CategoryItemProps {
   category: AllCategories;
@@ -40,25 +41,28 @@ export function CategoryItem({
             >
               <Fade
                 show={isEditing}
-                className="absolute left-0 mr-1 text-white/50 hover:cursor-grab"
+                className="absolute left-0 mr-1 hover:cursor-grab"
               >
-                <GripVertical />
+                <GripVertical className="h-5 w-5" />
               </Fade>
               {category}
             </h1>
             <Fade
               show={isEditing}
-              className="cursor-pointer hover:text-white/70 transition-colors"
+              className="flex items-center cursor-pointer transition-colors"
             >
-              <PlusCircle
-                className="h-5 w-5"
+              <Button
                 onClick={() => {
                   setNewChunks((prev) => ({
                     ...prev,
                     [category]: { text: "", category },
                   }));
                 }}
-              />
+                variant={"ghost"}
+                className="px-2 py-1 h-fit"
+              >
+                <PlusCircle className="!size-5" />
+              </Button>
             </Fade>
           </div>
           {/* Category Chunks */}

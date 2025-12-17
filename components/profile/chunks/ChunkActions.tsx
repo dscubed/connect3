@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useChunkContext } from "./hooks/ChunkProvider";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export function ChunkActions() {
   const {
@@ -20,7 +21,7 @@ export function ChunkActions() {
   } = useChunkContext();
   return (
     <div className="flex gap-4">
-      <div className="flex gap-8">
+      <div className="flex gap-2">
         {isEditing ? (
           <>
             {/* Save and Cancel for Editing */}
@@ -62,9 +63,9 @@ export function ChunkActions() {
         )}
       </div>
       {/* Separator */}
-      <div className="border-l border-white/20 h-full py-4 self-center" />
+      <div className="border-l-2 border-secondary-foreground/20 h-full py-4 self-center" />
       {/* Resume Upload and AI Chat */}
-      <div className="flex gap-8">
+      <div className="flex gap-2">
         <ActionButton icon={FileUp} label="Resume" />
         <ActionButton icon={MessageCircle} label="Chat" />
       </div>
@@ -84,20 +85,21 @@ const ActionButton = ({
   disabled?: boolean;
 }) => {
   return (
-    <button
+    <Button
       type="button"
+      variant={"ghost"}
       onClick={onClick}
       aria-label={label}
       disabled={disabled}
       className={cn(
-        "flex flex-col items-center border-none p-0 m-0 transition-all min-w-8",
-        disabled
-          ? "text-white/30 cursor-not-allowed"
-          : "hover:scale-105 text-white hover:text-white/70 cursor-pointer"
+        "border-none h-fit min-w-16",
+        disabled ? "cursor-not-allowed" : "hover:scale-105 cursor-pointer"
       )}
     >
-      <Icon className="h-5 w-5 cursor-pointer transition-colors" />
-      <span className="text-xs mt-1">{label}</span>
-    </button>
+      <div className="flex flex-col items-center transition-all">
+        <Icon className="h-5 w-5 cursor-pointer transition-colors" />
+        <span className="text-xs mt-1">{label}</span>
+      </div>
+    </Button>
   );
 };
