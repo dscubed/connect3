@@ -3,7 +3,7 @@ import {
   EntityFilterOptions,
   useSearch,
 } from "@/components/home/hooks/useSearch";
-import { TextArea } from "../ui/TextArea";
+import { Textarea } from "../ui/TextArea";
 import { SearchBarActions } from "./SearchBarActions/SearchBarActions";
 import { useEntityFilter } from "./SearchBarActions/hooks/useEntityFilter";
 
@@ -59,7 +59,7 @@ const SearchBarUIComponent: React.FC<SearchBarUIProps> = ({
         }`}
       >
         <div className="flex w-full items-center gap-3 py-2">
-          <TextArea
+          <Textarea
             className="w-full bg-transparent outline-none text-sm max-h-32 scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-transparent focus:scrollbar-thumb-white/50 transition-all resize-none placeholder:text-foreground/50"
             placeholder="Ask me anything..."
             value={localQuery}

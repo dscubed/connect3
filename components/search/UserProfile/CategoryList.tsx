@@ -2,17 +2,17 @@ import { CategorySection } from "./CategorySection";
 import type { ChunkData } from "@/components/profile/chunks/ChunkUtils";
 
 interface CategoryListProps {
-  groupedChunks: Record<string, ChunkData[]>;
+  orderedCategories: { category: string; chunks: ChunkData[] }[];
 }
 
-export function CategoryList({ groupedChunks }: CategoryListProps) {
+export function CategoryList({ orderedCategories }: CategoryListProps) {
   return (
     <div className="space-y-6">
-      {Object.entries(groupedChunks).map(([category, categoryChunks], idx) => (
+      {orderedCategories.map(({ category, chunks }, idx) => (
         <CategorySection
           key={category}
           category={category}
-          chunks={categoryChunks}
+          chunks={chunks}
           index={idx}
         />
       ))}

@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/stores/authStore";
 import { Button } from "../ui/button";
-import { TextArea } from "../ui/TextArea";
+import { Textarea } from "../ui/TextArea";
 
 interface TLDRSectionProps {
   tldr: string | null;
@@ -77,7 +77,7 @@ export default function TLDRSection({ tldr }: TLDRSectionProps) {
                     : 280,
                 }}
               >
-                <TextArea
+                <Textarea
                   ref={textareaRef}
                   className="bg-transparent border border-foreground/20 rounded p-2 outline-none resize-none block w-full placeholder:text-foreground/40 text-foreground"
                   value={userPrompt}

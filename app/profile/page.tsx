@@ -10,6 +10,7 @@ import UserDetails from "@/components/profile/UserDetails";
 import TLDRSection from "@/components/profile/TLDRSection";
 import ChunksSection from "@/components/profile/chunks/ChunksSection";
 import EventsSection from "@/components/profile/events/EventsSection";
+import { ChunkProvider } from "@/components/profile/chunks/hooks/ChunkProvider";
 
 export default function ProfilePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -77,11 +78,13 @@ export default function ProfilePage() {
               {/* TLDR Section */}
               <TLDRSection tldr={profile.tldr || null} />
 
-              {/* Chunks Section */}
-              <ChunksSection userId={user.id} />
-
               {/* Events form for organisations only */}
-              {  profile.account_type === "organisation" &&  <EventsSection /> }
+              {profile.account_type === "organisation" && <EventsSection />}
+
+              {/* Chunks Section */}
+              <ChunkProvider>
+                <ChunksSection />
+              </ChunkProvider>
             </div>
           </div>
         </main>
