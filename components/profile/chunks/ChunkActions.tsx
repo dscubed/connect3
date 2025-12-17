@@ -92,7 +92,7 @@ const ActionButton = ({
       aria-label={label}
       disabled={disabled}
       className={cn(
-        "border-none h-fit min-w-16",
+        "border-none h-fit min-w-16 px-2 py-1",
         disabled ? "cursor-not-allowed" : "hover:scale-105 cursor-pointer"
       )}
     >

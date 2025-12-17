@@ -5,10 +5,12 @@ import { CSS } from "@dnd-kit/utilities";
 export function SortableChunk({
   chunk,
   children,
+  show,
   ...props
 }: {
   chunk: ChunkEntry;
   children: React.ReactNode;
+  show: boolean;
 }) {
   const {
     attributes,
@@ -26,15 +28,18 @@ export function SortableChunk({
     cursor: "grab",
   };
 
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      {...props}
-    >
-      {children}
-    </div>
-  );
+  if (show)
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+
+  return <>{children}</>;
 }

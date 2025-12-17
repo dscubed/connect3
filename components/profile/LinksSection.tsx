@@ -32,7 +32,7 @@ export function LinksSection() {
   }, [profile, loading, supabase, fetched]);
 
   return (
-    <div className="w-full flex flex-col gap-6 mb-12">
+    <div className="w-full flex flex-col gap-2 mb-12">
       <div className="flex gap-2 items-center">
         <h2 className="text-2xl font-semibold">Links</h2>
         <EditLinkButton onClick={() => setDisplayEditModal(true)} />
