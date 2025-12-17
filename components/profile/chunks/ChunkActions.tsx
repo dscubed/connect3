@@ -9,14 +9,15 @@ import {
 import { useChunkContext } from "./hooks/ChunkProvider";
 import { cn } from "@/lib/utils";
 
-export function ChunkActions({
-  isEditing,
-  setIsEditing,
-}: {
-  isEditing: boolean;
-  setIsEditing: (editing: boolean) => void;
-}) {
-  const { reset, saveChunks, fetchChunks, savingChunks } = useChunkContext();
+export function ChunkActions() {
+  const {
+    reset,
+    saveChunks,
+    fetchChunks,
+    savingChunks,
+    isEditing,
+    setIsEditing,
+  } = useChunkContext();
   return (
     <div className="flex gap-4">
       <div className="flex gap-8">

@@ -19,22 +19,26 @@ export function ChunkEditor({
 
   if (chunk.category === null) return null;
 
+  const submit = () => {
+    if (chunk.text.trim() === "") return;
+    // If chunkId is provided, we're editing an existing chunk
+    if (chunkId) {
+      setChunks((prev) =>
+        prev.map((c) =>
+          c.id === chunkId ? { ...c, text: chunk.text.trim() } : c
+        )
+      );
+    } else {
+      addChunk(chunk.category!, chunk.text.trim());
+    }
+    setChunk({ text: "", category: null });
+    cancel();
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      if (chunk.text.trim() === "") return;
-      // If chunkId is provided, we're editing an existing chunk
-      if (chunkId) {
-        setChunks((prev) =>
-          prev.map((c) =>
-            c.id === chunkId ? { ...c, text: chunk.text.trim() } : c
-          )
-        );
-      } else {
-        addChunk(chunk.category!, chunk.text.trim());
-      }
-      setChunk({ text: "", category: null });
-      cancel();
+      submit();
     }
     if (e.key === "Escape") {
       cancel();
@@ -46,28 +50,47 @@ export function ChunkEditor({
   };
 
   return (
-    <div className="flex items-baseline justify-center gap-2 w-full">
-      <span
-        className="inline-block w-2 h-2 bg-white rounded-full"
-        aria-hidden="true"
-      />
-      <div className="flex w-full items-end gap-2">
-        <Textarea
-          className="flex-1 p-2 min-h-0 border-none outline-none focus-visible:ring-0 focus:ring-0 resize-none"
-          placeholder={CATEGORY_PLACEHOLDERS[chunk.category]}
-          onKeyDown={handleKeyDown}
-          onChange={handleChange}
-          value={chunk.text}
-          rows={1}
+    <div>
+      <div className="flex items-baseline justify-center gap-2 w-full">
+        <span
+          className="inline-block w-2 h-2 bg-white rounded-full"
+          aria-hidden="true"
         />
-        <Button
-          type="button"
-          variant="ghost"
-          className="h-10 px-2 py-1 text-xs flex items-end"
-          style={{ pointerEvents: "auto" }}
-        >
-          <Sparkles className="h-4 w-4" /> Enhance
-        </Button>
+        <div className="flex w-full items-end gap-2">
+          <Textarea
+            className="flex-1 p-2 min-h-0 border-none outline-none focus-visible:ring-0 focus:ring-0 resize-none md:text-md"
+            placeholder={CATEGORY_PLACEHOLDERS[chunk.category]}
+            onKeyDown={handleKeyDown}
+            onChange={handleChange}
+            value={chunk.text}
+            rows={1}
+          />
+          <div className="items-end min-h-10">
+            <Button
+              type="button"
+              variant="ghost"
+              className="px-2 py-1 text-xs flex"
+              style={{ pointerEvents: "auto" }}
+            >
+              <Sparkles className="h-4 w-4" /> Enhance
+            </Button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="ghost"
+            onClick={() => {
+              cancel();
+            }}
+          >
+            Cancel
+          </Button>
+          <Button variant="ghost" onClick={() => submit()}>
+            Save
+          </Button>
+        </div>
       </div>
     </div>
   );

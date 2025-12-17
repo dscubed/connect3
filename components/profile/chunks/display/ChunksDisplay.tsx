@@ -9,14 +9,14 @@ import { CategoryItem } from "./category/CategoryItem";
 import { AddCategoryButton } from "../AddCategoryButton";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import { Sparkles } from "lucide-react";
+import { Fade } from "@/components/ui/Fade";
 
-export function ChunksDisplay({ isEditing }: { isEditing: boolean }) {
-  const { orderedCategoryChunks, loadingChunks } = useChunkContext();
+export function ChunksDisplay() {
+  const { orderedCategoryChunks, loadingChunks, setEditChunks, isEditing } =
+    useChunkContext();
   const [newChunks, setNewChunks] = useState<Record<AllCategories, ChunkInput>>(
     {} as Record<AllCategories, ChunkInput>
   );
-  const [editChunks, setEditChunks] = useState<Record<string, ChunkInput>>({});
-
   const { handleCategoryDragEnd, sensors, categoryIds } = useDnd();
 
   // Reset newChunks when exiting edit mode
@@ -25,7 +25,7 @@ export function ChunksDisplay({ isEditing }: { isEditing: boolean }) {
       setNewChunks({} as Record<AllCategories, ChunkInput>);
       setEditChunks({});
     }
-  }, [isEditing]);
+  }, [isEditing, setEditChunks]);
 
   if (loadingChunks) {
     return (
@@ -40,7 +40,11 @@ export function ChunksDisplay({ isEditing }: { isEditing: boolean }) {
       {orderedCategoryChunks.length === 0 && !isEditing ? (
         <EmptyChunksState />
       ) : (
-        <div className="flex flex-col gap-2 min-h-32 justify-center items-center w-full">
+        <div
+          className={`flex flex-col gap-2 min-h-32 items-center w-full ${
+            !isEditing ? "mb-16 justify-start" : "justify-center"
+          }`}
+        >
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
@@ -55,20 +59,18 @@ export function ChunksDisplay({ isEditing }: { isEditing: boolean }) {
                   key={category}
                   category={category}
                   chunks={chunks}
-                  isEditing={isEditing}
                   newChunks={newChunks}
                   setNewChunks={setNewChunks}
-                  editChunks={editChunks}
-                  setEditChunks={setEditChunks}
                 />
               ))}
             </SortableContext>
           </DndContext>
-          {isEditing && (
-            <div className="flex flex-col gap-2 items-center justify-center w-full animate-fade-in">
-              <AddCategoryButton />
-            </div>
-          )}
+          <Fade
+            show={isEditing}
+            className="flex flex-col gap-2 items-center justify-center w-full"
+          >
+            <AddCategoryButton />
+          </Fade>
         </div>
       )}
     </div>

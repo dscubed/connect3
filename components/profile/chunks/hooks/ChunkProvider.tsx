@@ -7,7 +7,7 @@ import React, {
   useCallback,
   useEffect,
 } from "react";
-import { AllCategories, CategoryOrderData } from "../ChunkUtils";
+import { AllCategories, CategoryOrderData, ChunkInput } from "../ChunkUtils";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
 
@@ -36,6 +36,16 @@ type ChunkContextType = {
   // Current State
   chunks: ProfileChunk[];
   setChunks: React.Dispatch<React.SetStateAction<ProfileChunk[]>>;
+  // Loading states
+  loadingChunks: boolean;
+  savingChunks: boolean;
+  // Editing states
+  editChunks: Record<string, ChunkInput>;
+  setEditChunks: React.Dispatch<
+    React.SetStateAction<Record<string, ChunkInput>>
+  >;
+  isEditing: boolean;
+  setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
 
   // Actions
   addChunk: (category: AllCategories, text: string) => void;
@@ -49,10 +59,6 @@ type ChunkContextType = {
   ) => void;
   reset: () => void;
 
-  // Loading states
-  loadingChunks: boolean;
-  savingChunks: boolean;
-
   // Data operations
   fetchChunks: () => Promise<void>;
   saveChunks: () => Promise<void>;
@@ -65,6 +71,10 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
   const [categoryOrder, setCategoryOrder] = useState<CategoryOrderData[]>([]);
   const { profile, getSupabaseClient, makeAuthenticatedRequest } =
     useAuthStore.getState();
+  const [editChunks, setEditChunks] = useState<Record<string, ChunkInput>>({});
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+
+  // loading states
   const [loadingChunks, setLoadingChunks] = useState<boolean>(true);
   const [savingChunks, setSavingChunks] = useState<boolean>(false);
 
@@ -76,7 +86,7 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
 
   const supabase = getSupabaseClient();
 
-  // Initialise categoryChunks map based on category and chunk orders
+  // set categoryChunks map based on category and chunk orders
   const orderedCategoryChunks = useMemo(() => {
     return categoryOrder.map(({ category }) => ({
       category,
@@ -99,6 +109,7 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
     );
   }, [chunks]);
 
+  // Add a new chunk
   const addChunk = (category: AllCategories, text: string) => {
     if (!profile) return;
 
@@ -125,8 +136,8 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  // Update chunk by Id
   const updateChunk = (id: string, data: Partial<ProfileChunk>) => {
-    // Update chunk by id
     setChunks((prev) =>
       prev.map((chunk) => (chunk.id === id ? { ...chunk, ...data } : chunk))
     );
@@ -136,6 +147,7 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
     setChunks((prev) => prev.filter((chunk) => chunk.id !== id));
   };
 
+  // Move Logic
   const moveCategory = (fromIndex: number, toIndex: number) => {
     if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) return;
     setCategoryOrder((prev) => {
@@ -181,6 +193,7 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  // Fetch chunks from Supabase
   const fetchChunks = useCallback(async () => {
     setLoadingChunks(true);
     try {
@@ -352,17 +365,25 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
   return (
     <ChunkContext.Provider
       value={{
+        // States
         chunks,
         setChunks,
-        addChunk,
-        updateChunk,
-        reset,
-        removeChunk,
-        moveCategory,
-        moveChunk,
         orderedCategoryChunks,
         loadingChunks,
         savingChunks,
+        editChunks,
+        setEditChunks,
+        isEditing,
+        setIsEditing,
+        // Actions
+        addChunk,
+        updateChunk,
+        removeChunk,
+        reset,
+        // Moving
+        moveChunk,
+        moveCategory,
+        // Data operations
         fetchChunks,
         saveChunks,
       }}

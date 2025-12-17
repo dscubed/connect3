@@ -1,32 +1,26 @@
 import { GripVertical, PlusCircle } from "lucide-react";
 import { SortableCategory } from "./SortableCategory";
 import { CategoryChunks } from "./CategoryChunks";
-import { ChunkEntry } from "../../hooks/ChunkProvider";
+import { ChunkEntry, useChunkContext } from "../../hooks/ChunkProvider";
 import { AllCategories, ChunkInput } from "../../ChunkUtils";
+import { Fade } from "@/components/ui/Fade";
 
 interface CategoryItemProps {
   category: AllCategories;
   chunks: ChunkEntry[];
-  isEditing: boolean;
   newChunks: Record<AllCategories, ChunkInput>;
   setNewChunks: React.Dispatch<
     React.SetStateAction<Record<AllCategories, ChunkInput>>
-  >;
-  editChunks: Record<string, ChunkInput>;
-  setEditChunks: React.Dispatch<
-    React.SetStateAction<Record<string, ChunkInput>>
   >;
 }
 
 export function CategoryItem({
   category,
   chunks,
-  isEditing,
   newChunks,
   setNewChunks,
-  editChunks,
-  setEditChunks,
 }: CategoryItemProps) {
+  const { isEditing } = useChunkContext();
   return (
     <SortableCategory key={category} id={category}>
       {({ attributes, listeners, setNodeRef, style }) => (
@@ -37,21 +31,27 @@ export function CategoryItem({
         >
           {/* Category Header (Drag Handle) */}
           <div
-            className="flex items-center mb-2 gap-2 hover:bg-white/10 py-1 rounded-md w-full"
+            className="flex items-center align-center mb-2 gap-2 hover:bg-white/10 rounded-md w-full"
             {...(isEditing ? { ...attributes, ...listeners } : {})}
           >
             <h1
-              className={`text-lg font-semibold relative flex items-center justify-center transition-all duration-300
+              className={`relative text-lg font-semibold flex items-center justify-center transition-all duration-300
                 ${isEditing ? "pl-6" : "p-0"}`}
             >
-              {isEditing && (
-                <GripVertical className="absolute left-0 h-5 w-5 mr-1 text-white/50 hover:cursor-grab animate-fade-in" />
-              )}
+              <Fade
+                show={isEditing}
+                className="absolute left-0 mr-1 text-white/50 hover:cursor-grab"
+              >
+                <GripVertical />
+              </Fade>
               {category}
             </h1>
-            {isEditing && (
+            <Fade
+              show={isEditing}
+              className="cursor-pointer hover:text-white/70 transition-colors"
+            >
               <PlusCircle
-                className="h-5 w-5 cursor-pointer hover:text-white/70 transition-colors animate-fade-in"
+                className="h-5 w-5"
                 onClick={() => {
                   setNewChunks((prev) => ({
                     ...prev,
@@ -59,17 +59,14 @@ export function CategoryItem({
                   }));
                 }}
               />
-            )}
+            </Fade>
           </div>
           {/* Category Chunks */}
           <CategoryChunks
             chunks={chunks}
             category={category}
-            isEditing={isEditing}
             newChunks={newChunks}
             setNewChunks={setNewChunks}
-            editChunks={editChunks}
-            setEditChunks={setEditChunks}
           />
         </div>
       )}

@@ -114,9 +114,19 @@ async function removeProfileFromVectorStore(
   vectorStoreId: string
 ) {
   // Remove from vector store
-  const { deleted } = await openai.vectorStores.files.delete(openaiFileId, {
-    vector_store_id: vectorStoreId,
-  });
+  const { deleted: vsFileDeleted } = await openai.vectorStores.files.delete(
+    openaiFileId,
+    {
+      vector_store_id: vectorStoreId,
+    }
+  );
+
+  // Remove from OpenAI files
+  const { deleted: openaiFileDeleted } = await openai.files.delete(
+    openaiFileId
+  );
+
+  const deleted = vsFileDeleted && openaiFileDeleted;
 
   if (!deleted) {
     throw new Error("Failed to delete file from vector store");

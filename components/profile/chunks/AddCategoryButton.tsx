@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChunkEditor } from "./display/ChunkEditor";
+import { Fade } from "@/components/ui/Fade";
 
 export function AddCategoryButton() {
   const { profile, loading } = useAuthStore.getState();
@@ -39,16 +40,19 @@ export function AddCategoryButton() {
   }
 
   return (
-    <div className="w-full flex flex-col items-start gap-2 ">
+    <div className="w-full flex flex-col items-start gap-2 mb-12">
       {!profile || loading ? (
         <Spinner className="h-4 w-4" />
       ) : (
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          <DropdownMenuTrigger
+            asChild
+            className="hover:bg-white/10 rounded-md px-2 py-1 cursor-pointer transition-all"
+          >
             {selectedCategory ? (
               <h1 className="text-lg font-semibold mb-2">{selectedCategory}</h1>
             ) : (
-              <div className="flex gap-2 items-center align-center cursor-pointer">
+              <div className="flex gap-2 items-center align-center ">
                 <h1 className="text-lg font-semibold"> Add Category </h1>
               </div>
             )}
@@ -64,6 +68,7 @@ export function AddCategoryButton() {
             ) : (
               categoriesList.map((category) => (
                 <DropdownMenuItem
+                  className="text-base"
                   key={category}
                   onClick={() => setSelectedCategory(category)}
                 >
@@ -74,13 +79,13 @@ export function AddCategoryButton() {
           </DropdownMenuContent>
         </DropdownMenu>
       )}
-      {selectedCategory && (
+      <Fade show={!!selectedCategory} className="w-full">
         <ChunkEditor
           chunk={{ ...chunk, category: selectedCategory }}
           setChunk={setChunk}
           cancel={() => setSelectedCategory(null)}
         />
-      )}
+      </Fade>
     </div>
   );
 }

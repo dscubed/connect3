@@ -8,18 +8,13 @@ import { AllCategories, ChunkInput } from "../../ChunkUtils";
 import { ChunkEntry } from "../../hooks/ChunkProvider";
 import { ChunkItem } from "../chunks/ChunkItem";
 import { ChunkEditor } from "../ChunkEditor";
-import { SortableChunk } from "../chunks/SortableChunk";
+import { Fade } from "@/components/ui/Fade";
 
 interface CategoryChunksProps {
   chunks: ChunkEntry[];
   newChunks: Record<AllCategories, ChunkInput>;
-  isEditing: boolean;
   setNewChunks: React.Dispatch<
     React.SetStateAction<Record<AllCategories, ChunkInput>>
-  >;
-  editChunks: Record<string, ChunkInput>;
-  setEditChunks: React.Dispatch<
-    React.SetStateAction<Record<string, ChunkInput>>
   >;
   category: AllCategories;
 }
@@ -27,11 +22,8 @@ interface CategoryChunksProps {
 export function CategoryChunks({
   chunks,
   category,
-  isEditing,
   newChunks,
   setNewChunks,
-  editChunks,
-  setEditChunks,
 }: CategoryChunksProps) {
   const { sensors, handleChunkDragEnd } = useDnd();
   return (
@@ -45,38 +37,15 @@ export function CategoryChunks({
           items={chunks.map((chunk) => chunk.id)}
           strategy={verticalListSortingStrategy}
         >
-          {isEditing ? (
-            <>
-              {chunks.map((chunk) => (
-                <SortableChunk key={chunk.id} chunk={chunk}>
-                  <ChunkItem
-                    chunk={chunk}
-                    category={category}
-                    isEditing={isEditing}
-                    editChunks={editChunks}
-                    setEditChunks={setEditChunks}
-                  />
-                </SortableChunk>
-              ))}
-            </>
-          ) : (
-            <>
-              {chunks.map((chunk) => (
-                <ChunkItem
-                  key={chunk.id}
-                  chunk={chunk}
-                  category={category}
-                  isEditing={isEditing}
-                  editChunks={editChunks}
-                  setEditChunks={setEditChunks}
-                />
-              ))}
-            </>
-          )}
+          <>
+            {chunks.map((chunk) => (
+              <ChunkItem key={chunk.id} chunk={chunk} category={category} />
+            ))}
+          </>
         </SortableContext>
       </DndContext>
-      {newChunks[category] && (
-        <li>
+      <li>
+        <Fade show={newChunks[category] !== undefined} className="w-full">
           <ChunkEditor
             chunk={newChunks[category] || { text: "", category }}
             setChunk={(chunk) =>
@@ -93,8 +62,8 @@ export function CategoryChunks({
               })
             }
           />
-        </li>
-      )}
+        </Fade>
+      </li>
     </ul>
   );
 }
