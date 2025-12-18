@@ -76,23 +76,22 @@ export default function TLDRSection({ tldr }: TLDRSectionProps) {
           <div className="flex items-center gap-2">
             {/* Edit / Save toggle button */}
             <Button
+              type="button"
               variant="ghost"
               size="sm"
-              type="button"
               onClick={handleEditOrSave}
               disabled={isSaving}
-              className="gap-1 rounded-2xl bg-background/60 hover:bg-background/80 border border-foreground/20 text-foreground/80"
+              className="px-2 py-1 text-xs flex items-center gap-1"
             >
               {isSaving ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span className="text-xs">Saving...</span>
+                  <span>Saving...</span>
                 </>
               ) : (
-                <span className="text-xs">{isEditing ? "Save" : "Edit"}</span>
+                <span>{isEditing ? "Save" : "Edit"}</span>
               )}
             </Button>
-
             {/* NEW: AI Enhance dialog (chat-style) */}
             <AiEnhanceDialog
               initialText={localTldr}
