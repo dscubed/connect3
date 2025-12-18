@@ -1,7 +1,7 @@
 // Setup type definitions for built-in Supabase Runtime APIs
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 
-const MAX_REQUESTS_ALLOWED = 75;
+const MAX_REQUESTS_ALLOWED = 25;
 const INSTAGRAM_API_BASE = "https://graph.instagram.com";
 
 interface InstagramAccount {
