@@ -244,11 +244,13 @@ async function fetchNewPosts(
           break;
         }
 
+        let finalMediaUrl = await uploadIntoStorage(supabase, post, ig_user_id, account_name);
+
         const postRecord = {
           media_id: post.id,
           ig_user_id: ig_user_id,
           caption: post.caption,
-          media_url: post.media_url || post.permalink,
+          media_url: finalMediaUrl,
           timestamp: post.timestamp,
           created_at: new Date().toISOString(),
         };
@@ -285,4 +287,45 @@ async function fetchNewPosts(
   }
 
   return postsInserted;
+}
+
+
+async function uploadIntoStorage(
+  supabase: any,
+  post: InstagramPost,
+  ig_user_id: string,
+  account_name: string
+): Promise<string | undefined> {
+  let finalMediaUrl = post.media_url || post.permalink;
+
+  if (post.media_type === "IMAGE" && post.media_url) {
+    try {
+      const imageResponse = await fetch(post.media_url);
+      if (imageResponse.ok) {
+        const imageBlob = await imageResponse.blob();
+        const filePath = `${ig_user_id}/${post.id}.jpg`;
+        const { error: uploadError } = await supabase.storage
+          .from('instagram_images')
+          .upload(filePath, imageBlob, {
+            contentType: 'image/jpeg',
+            upsert: true
+          });
+        if (!uploadError) {
+          const { data: publicUrlData } = supabase.storage
+            .from('instagram_images')
+            .getPublicUrl(filePath);
+          finalMediaUrl = publicUrlData.publicUrl;
+        } else {
+          console.error({ event: 'image_upload_error', account: account_name, post_id: post.id, error: uploadError.message });
+        }
+      } else {
+        console.error({ event: 'image_download_error', account: account_name, post_id: post.id, status: imageResponse.status });
+      }
+    } catch (error) {
+      console.error({ event: 'image_processing_exception', account: account_name, post_id: post.id, error: error });
+    }
+  }
+
+
+  return finalMediaUrl;
 }
