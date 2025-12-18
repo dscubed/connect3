@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
       .from("instagram_accounts")
       .select("*")
       .order("priority", { ascending: false })
-      .order("last_synced_at", { ascending: true });
+      .order("last_synced_at", { ascending: true, nullsFirst: true });
 
     if (error) throw error;
 
@@ -204,6 +204,8 @@ async function fetchNewPosts(
   const lastSyncedDate = last_synced_at ? new Date(last_synced_at) : null;
 
   console.log(`Fetching posts for ${account_name}...`);
+
+  // Limit of 50 posts per request
 
   let url: string | null = `${INSTAGRAM_API_BASE}/v24.0/${ig_user_id}/media?fields=id,caption,media_type,media_url,permalink,timestamp&limit=50&access_token=${access_token}`;
   let postsInserted = 0;
