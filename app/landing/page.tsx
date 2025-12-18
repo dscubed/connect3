@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { LandingHero } from "@/components/landing/hero/LandingHero";
 import { LandingHeroGlow } from "@/components/landing/hero/LandingHeroGlow";
-import { UseCasesSection } from "@/components/landing/use-cases/UseCasesSection";
 import { BenefitsSection } from "@/components/landing/benefits/BenefitsSection";
 import { CollaborationsSection } from "@/components/landing/collaborations/CollaborationsSection";
 import Link from "next/link";
@@ -104,7 +103,8 @@ export default function LandingPage() {
         <div className="w-full border-t border-white/10 my-12 shadow-[0_0_32px_0px_rgba(255,255,255,0.25)]" />
 
         {/* Use Cases Section - Responsive Card Layout */}
-        <UseCasesSection />
+        {/* Temporarily removed due to new Search structure */}
+        {/* <UseCasesSection /> */}
 
         <div className="w-full border-t border-white/10 my-12 shadow-[0_0_32px_0px_rgba(255,255,255,0.25)]" />
 

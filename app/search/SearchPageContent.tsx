@@ -3,13 +3,16 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Sidebar from "@/components/sidebar/Sidebar";
 import { CubeLoader } from "@/components/ui/CubeLoader";
-import MessageList from "@/components/search/Messages/MessageList";
-import SearchInput from "@/components/search/SearchInput";
+import { MessageList } from "@/components/search/Messages/MessageList";
 import ShareButton from "@/components/search/ShareButton";
 import { UserProfile } from "@/components/search/UserProfile/UserProfile";
 import { useAuthStore } from "@/stores/authStore";
-import { ChunkData } from "@/components/profile/chunks/ChunkUtils";
+import {
+  CategoryOrderData,
+  ChunkData,
+} from "@/components/profile/chunks/ChunkUtils";
 import { useChatroom } from "@/components/search/hooks/useChatroom";
+import { ChatRoomSearchBar } from "@/components/search/ChatroomSearchBar";
 
 export default function SearchPageContent() {
   const [mounted, setMounted] = useState(false);
@@ -26,11 +29,12 @@ export default function SearchPageContent() {
   } | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
 
-  const { makeAuthenticatedRequest } = useAuthStore();
+  const { getSupabaseClient } = useAuthStore();
 
   const searchParams = useSearchParams();
   const chatroomId = mounted ? searchParams?.get("chatroom") || null : null;
-  const { messages, addNewMessage } = useChatroom(chatroomId);
+  const { messages, addNewMessage, inFlight } = useChatroom(chatroomId);
+  const supabase = getSupabaseClient();
 
   // Handler for message thread users
   const handleMessageUserClick = (user: {
@@ -54,16 +58,54 @@ export default function SearchPageContent() {
   useEffect(() => {
     const fetchChunks = async () => {
       if (!selectedUser?.id) return;
-      try {
-        const res = await makeAuthenticatedRequest(
-          `/api/chatrooms/getChunks?userId=${selectedUser.id}`
-        );
-        if (!res.ok) throw new Error("Failed to fetch chunks");
-        const data = await res.json();
-        const chunks: ChunkData[] = data.chunks || [];
+      // Set loading state
+      setSelectedUser((prev) =>
+        prev ? { ...prev, chunkLoading: true } : prev
+      );
 
+      try {
+        // Fetch chunks
+        const { data: chunkData, error: chunkError } = (await supabase
+          .from("profile_chunks")
+          .select("id, text, category, order")
+          .eq("profile_id", selectedUser.id)
+          .order("order", { ascending: true })) as {
+          data: ChunkData[] | null;
+          error: Error | null;
+        };
+        if (chunkError || !chunkData) {
+          console.error("Error fetching user chunks:", chunkError);
+          throw chunkError;
+        }
+
+        // Fetch category order
+        const { data: categoryOrderData, error: categoryOrderError } =
+          (await supabase
+            .from("profile_chunk_categories")
+            .select("category, order")
+            .eq("profile_id", selectedUser.id)
+            .order("order", { ascending: true })) as {
+            data: CategoryOrderData[] | null;
+            error: Error | null;
+          };
+        if (categoryOrderError || !categoryOrderData) {
+          console.error(
+            "Error fetching user category order:",
+            categoryOrderError
+          );
+          throw categoryOrderError;
+        }
+
+        // Update selected user with fetched chunks and category order
         setSelectedUser((prev) =>
-          prev ? { ...prev, chunks: chunks, chunkLoading: false } : prev
+          prev
+            ? {
+                ...prev,
+                chunks: chunkData,
+                categoryOrder: categoryOrderData,
+                chunkLoading: false,
+              }
+            : prev
         );
       } catch (err) {
         console.error("Error fetching user chunks:", err);
@@ -75,18 +117,18 @@ export default function SearchPageContent() {
     if (selectedUser?.chunkLoading) {
       fetchChunks();
     }
-  }, [selectedUser?.id, selectedUser?.chunkLoading, makeAuthenticatedRequest]);
+  }, [selectedUser?.id, selectedUser?.chunkLoading, supabase]);
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-[#0B0B0C] text-white flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <CubeLoader size={48} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen w-full bg-[#0B0B0C] text-white relative overflow-hidden">
+    <div className="min-h-screen w-full relative overflow-hidden">
       <div className="flex relative z-10 w-full">
         <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
 
@@ -117,7 +159,11 @@ export default function SearchPageContent() {
 
           {/* Fixed search bar at bottom */}
           <div className="w-full px-4">
-            <SearchInput onSearch={addNewMessage} chatroomId={chatroomId} />
+            <ChatRoomSearchBar
+              chatroomId={chatroomId}
+              addNewMessage={addNewMessage}
+              inFlight={inFlight}
+            />
           </div>
         </main>
       </div>

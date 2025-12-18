@@ -31,7 +31,7 @@ export default function UserDetails({ profile }: UserDetailsProps) {
       {/* Name */}
       <div className="flex items-center gap-2 mb-2">
         <motion.h1
-          className="text-3xl md:text-4xl font-bold text-white cursor-pointer"
+          className="text-3xl md:text-4xl font-bold cursor-pointer"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => handleOpen("name")}
@@ -42,20 +42,20 @@ export default function UserDetails({ profile }: UserDetailsProps) {
 
       {/* Status */}
       <motion.div
-        className="flex items-center gap-2 text-white/80 mb-3 cursor-pointer"
+        className="flex items-center gap-2 text-muted mb-3 cursor-pointer"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         onClick={() => handleOpen("status")}
       >
         <Briefcase className="h-4 w-4" />
-        <span className="text-lg">
+        <span className="text-lg text-muted">
           {profile.status || "Add your current status"}
         </span>
       </motion.div>
 
       {/* Location */}
       <motion.div
-        className="flex items-center gap-2 text-white/60 mb-4 cursor-pointer"
+        className="flex items-center gap-2 text-muted mb-4 cursor-pointer"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         onClick={() => handleOpen("location")}

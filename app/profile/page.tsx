@@ -9,6 +9,9 @@ import ProfilePicture from "@/components/profile/ProfilePicture";
 import UserDetails from "@/components/profile/UserDetails";
 import TLDRSection from "@/components/profile/TLDRSection";
 import ChunksSection from "@/components/profile/chunks/ChunksSection";
+import EventsSection from "@/components/profile/events/EventsSection";
+import { ChunkProvider } from "@/components/profile/chunks/hooks/ChunkProvider";
+import { LinksSection } from "@/components/profile/LinksSection";
 
 export default function ProfilePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -16,7 +19,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0B0B0C] text-white">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="flex items-center gap-4">
           <CubeLoader size={32} />
           <p>Loading profile...</p>
@@ -27,7 +30,7 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0B0B0C] text-white">
+      <div className="min-h-screen flex items-center justify-center">
         <p>Please log in to view your profile.</p>
       </div>
     );
@@ -35,17 +38,16 @@ export default function ProfilePage() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0B0B0C] text-white">
+      <div className="min-h-screen flex items-center justify-center">
         <p>Profile not found.</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0B0C] text-white relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden">
       <div className="flex relative z-10">
         <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
-
         <main className="flex-1 pt-16 md:pt-0 relative">
           <div
             className="h-screen overflow-y-auto"
@@ -54,7 +56,7 @@ export default function ProfilePage() {
               scrollbarColor: "rgba(255,255,255,0.3) transparent",
             }}
           >
-            <CoverImage coverImageUrl={profile.cover_image_url ?? null} />
+            <CoverImage />
 
             <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8">
               <motion.div
@@ -77,8 +79,16 @@ export default function ProfilePage() {
               {/* TLDR Section */}
               <TLDRSection tldr={profile.tldr || null} />
 
+              {/* Links Section */}
+              <LinksSection />
+
+              {/* Events form for organisations only */}
+              {profile.account_type === "organisation" && <EventsSection />}
+
               {/* Chunks Section */}
-              <ChunksSection userId={user.id} />
+              <ChunkProvider>
+                <ChunksSection />
+              </ChunkProvider>
             </div>
           </div>
         </main>

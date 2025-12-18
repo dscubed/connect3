@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 
 export function useSearch({
-  initialQuery = '',
+  initialQuery = "",
   onSearchChange,
 }: {
   initialQuery: string;

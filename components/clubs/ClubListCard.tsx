@@ -1,7 +1,9 @@
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { Building2 } from "lucide-react";
 import { ClubData } from "./ClubsData";
+import { FastAverageColor } from "fast-average-color";
 
 export function ClubListCard({
   club,
@@ -12,6 +14,35 @@ export function ClubListCard({
   isSelected: boolean;
   onClick: () => void;
 }) {
+  const [bgColor, setBgColor] = useState<string | undefined>(undefined);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    if (club.logoUrl && imgRef.current) {
+      const fac = new FastAverageColor();
+      fac
+        .getColorAsync(imgRef.current)
+        .then((color) => {
+          // Lighten the color by blending with white (e.g., 70% white)
+          const lighten = (c: number) => Math.round(c + (255 - c) * 0.7);
+          const [r, g, b, a = 255] = color.value; // alpha defaults to 255 if not present
+          const lr = lighten(r),
+            lg = lighten(g),
+            lb = lighten(b);
+
+          console.log(club.name, "logo average color:", { lr, lg, lb, a });
+
+          // If the color is very light (close to white)
+          if (lr > 240 && lg > 240 && lb > 240) {
+            setBgColor("rgba(113, 113, 123, 0.5)");
+          } else {
+            setBgColor(`rgb(${lr}, ${lg}, ${lb})`);
+          }
+        })
+        .catch(() => setBgColor(undefined));
+    }
+  }, [club.logoUrl, club.name]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -19,40 +50,59 @@ export function ClubListCard({
       onClick={onClick}
       className={`cursor-pointer rounded-xl sm:rounded-2xl border transition-all duration-300 ${
         isSelected
-          ? "bg-white/[0.08] border-white/20 shadow-xl shadow-black/10"
-          : "bg-white/[0.03] border-white/[0.08] hover:bg-white/[0.06] hover:border-white/15 hover:shadow-lg hover:shadow-black/5"
+          ? "bg-primary border-white/20 shadow-xl shadow-black/10"
+          : "bg-secondary border-white/20 hover:bg-primary/80 hover:shadow-lg hover:shadow-black/5"
       }`}
     >
-      <div className="p-3 sm:p-5 flex items-start gap-3 sm:gap-4">
+      <div
+        className={`p-3 sm:p-5 flex items-start gap-3 sm:gap-4 ${
+          isSelected ? "text-primary-foreground" : "text-secondary-foreground"
+        }`}
+      >
         {/* Logo */}
         <div
           className={`rounded-lg sm:rounded-xl p-2 sm:p-3 flex-shrink-0 border ${
-            isSelected
-              ? "border-white/25 bg-white/5"
-              : "border-white/15 bg-white/[0.02]"
+            isSelected ? "border-white" : "border-white"
           }`}
+          style={{
+            background: club.logoUrl && bgColor ? bgColor : undefined,
+          }}
         >
           <div className="w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center">
             {club.logoUrl ? (
               <Image
+                ref={imgRef}
                 src={club.logoUrl || "/placeholder.png"}
                 alt={`${club.name} logo`}
                 width={48}
                 height={48}
-                className="object-contain max-h-8 sm:max-h-12 rounded-md grayscale"
+                className="object-contain max-h-8 sm:max-h-12 drop-shadow-md"
+                crossOrigin="anonymous"
               />
             ) : (
-              <Building2 className="w-8 h-8 sm:w-12 sm:h-12 text-white/80" />
+              <Building2 className="w-8 h-8 sm:w-12 sm:h-12" />
             )}
           </div>
         </div>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <h3 className="text-white font-semibold text-sm sm:text-base mb-1 sm:mb-1.5 truncate">
+          <h3
+            className={`font-semibold text-sm sm:text-base mb-1 sm:mb-1.5 truncate ${
+              isSelected
+                ? "text-primary-foreground"
+                : "text-secondary-foreground"
+            }`}
+          >
             {club.name}
           </h3>
-          <p className="text-white/50 text-xs sm:text-sm line-clamp-2 leading-relaxed">
+          <p
+            className={`text-opacity-50 text-xs sm:text-sm line-clamp-2 leading-relaxed ${
+              isSelected
+                ? "text-primary-foreground/50"
+                : "text-secondary-foreground/50"
+            }`}
+          >
             {club.location}
           </p>
         </div>

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Clock, Calendar, UsersRound, Home } from "lucide-react";
+import { Menu, X, Calendar, UsersRound, Home } from "lucide-react";
 import { SidebarLink } from "./SidebarLink";
 import { usePathname } from "next/navigation";
 import SidebarHeader from "./SidebarHeader";
@@ -13,9 +13,8 @@ interface SidebarProps {
 
 const sidebarLinks = [
   { icon: Home, label: "Home", href: "/" },
-  { icon: Calendar, label: "Events", href: undefined },
+  { icon: Calendar, label: "Events", href: "/events" },
   { icon: UsersRound, label: "Clubs", href: "/clubs" },
-  { icon: Clock, label: "History", href: undefined },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ open, onOpenChange }) => {
@@ -85,10 +84,10 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onOpenChange }) => {
           x: isDesktop ? "0%" : sidebarOpen ? "0%" : "-100%",
         }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
-        className={`z-50 flex flex-col justify-between h-screen bg-[#0B0B0C]/95 backdrop-blur-xl border-r border-white/10 shadow-2xl
+        className={`z-50 flex flex-col justify-between h-screen bg-white backdrop-blur-xl shadow-2xl
     ${
       isDesktop
-        ? "w-64 px-8 relative md:bg-transparent md:border-r-0 md:shadow-none md:backdrop-blur-none md:transform-none"
+        ? "w-64 px-8 relative md:shadow-none md:backdrop-blur-none md:transform-none"
         : "fixed top-0 left-0 w-64"
     }
   `}

@@ -12,16 +12,18 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/stores/authStore";
+import { Textarea } from "@/components/ui/TextArea";
+import { cn } from "@/lib/utils";
 
 const EXAMPLE_QUESTIONS = [
-    "Can you make this more concise but still natural?",
-    "Can you highlight my key projects more clearly?",
-    "Can you keep my tone but make this flow better?",
-    "Can you make this sound more confident without exaggerating?",
-    "Can you emphasise my technical skills more?",
-    "Can you improve clarity while keeping the same voice?",
-    "Can you make this feel more engaging for networking?",
-    "Can you tighten this while keeping all the important details?",
+  "Can you make this more concise but still natural?",
+  "Can you highlight my key projects more clearly?",
+  "Can you keep my tone but make this flow better?",
+  "Can you make this sound more confident without exaggerating?",
+  "Can you emphasise my technical skills more?",
+  "Can you improve clarity while keeping the same voice?",
+  "Can you make this feel more engaging for networking?",
+  "Can you tighten this while keeping all the important details?",
 ];
 
 type ChatMessage = {
@@ -32,12 +34,19 @@ type ChatMessage = {
 
 interface AiEnhanceDialogProps {
   initialText: string;
-  // only user-facing fields
   fieldType: "external_tldr" | "chunk";
   triggerLabel?: string;
   title?: string;
   onApply: (newText: string) => void;
 }
+
+const CARD =
+  "bg-background text-foreground rounded-2xl border border-foreground/20 backdrop-blur shadow-xl";
+
+const INPUT =
+  "bg-transparent text-sm transition-all placeholder:text-foreground/50 " +
+  "scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-transparent focus:scrollbar-thumb-white/50 " +
+  "outline-none resize-none focus-visible:ring-0 border-none min-h-0";
 
 export function AiEnhanceDialog({
   initialText,
@@ -56,7 +65,6 @@ export function AiEnhanceDialog({
 
   const { makeAuthenticatedRequest, user } = useAuthStore();
 
-  // Reset when closing; keep in sync with latest initialText
   useEffect(() => {
     if (!open) {
       setDraftText(initialText);
@@ -67,22 +75,18 @@ export function AiEnhanceDialog({
 
   useEffect(() => {
     if (!open) return;
-  
     const el = chatContainerRef.current;
-    if (el) {
-      // Scroll to bottom whenever messages change
-      el.scrollTop = el.scrollHeight;
-    }
-  }, [messages, open]);  
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [messages, open]);
 
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen);
-  
+
     if (nextOpen) {
-      // choose a random example prompt
-      const random = EXAMPLE_QUESTIONS[Math.floor(Math.random() * EXAMPLE_QUESTIONS.length)];
+      const random =
+        EXAMPLE_QUESTIONS[Math.floor(Math.random() * EXAMPLE_QUESTIONS.length)];
       setExample(random);
-  
+
       if (messages.length === 0) {
         setMessages([
           {
@@ -96,7 +100,6 @@ export function AiEnhanceDialog({
         ]);
       }
     } else {
-      // reset modal state
       setMessages([]);
       setInput("");
     }
@@ -127,19 +130,14 @@ export function AiEnhanceDialog({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fieldType, // "external_tldr" or "chunk"
+          fieldType,
           text: draftText,
-          messages: updatedMessages.map(({ role, content }) => ({
-            role,
-            content,
-          })),
+          messages: updatedMessages.map(({ role, content }) => ({ role, content })),
         }),
       });
 
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to enhance text");
-      }
+      if (!res.ok) throw new Error(data.error || "Failed to enhance text");
 
       const assistantMsg: ChatMessage = {
         id: crypto.randomUUID(),
@@ -152,137 +150,157 @@ export function AiEnhanceDialog({
     } catch (err) {
       console.error("enhance-field client error", err);
       toast.error("Failed to enhance. Please try again.");
-      const errorMsg: ChatMessage = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content:
-          "Something went wrong while enhancing your text. You can try again in a moment.",
-      };
-      setMessages((prev) => [...prev, errorMsg]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content:
+            "Something went wrong while enhancing your text. You can try again in a moment.",
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleApply = () => {
-    onApply(draftText); // parent decides when/how to persist
+    onApply(draftText);
     setOpen(false);
   };
 
   const dialogTitle =
     title ||
-    (fieldType === "chunk"
-      ? "Enhance this highlight"
-      : "Enhance your TLDR");
+    (fieldType === "chunk" ? "Enhance this highlight" : "Enhance your TLDR");
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
+        {/* Match pill-ish soft purple vibe */}
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
-          className="p-2 rounded border border-white/20 bg-black/10 hover:bg-black/20 transition flex items-center gap-1"
+          type="button"
+          className="gap-1 rounded-2xl bg-background/60 hover:bg-background/80 border border-foreground/20 text-foreground/80"
         >
-          <Sparkles className="h-4 w-4 text-white" />
-          <span className="text-xs text-white/70">{triggerLabel}</span>
+          <Sparkles className="h-4 w-4" />
+          <span className="text-xs">{triggerLabel}</span>
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="w-[min(100vw-2rem,700px)] max-h-[85vh] overflow-hidden bg-[#18181b] border border-white/20 text-white">
+      {/* DialogContent styled like your SearchBar card */}
+      <DialogContent
+        className={cn(
+          "w-[min(100vw-2rem,760px)] max-h-[85vh] overflow-hidden p-6",
+          CARD
+        )}
+      >
         <DialogHeader>
-            <DialogTitle className="text-white">{dialogTitle}</DialogTitle>
+          <DialogTitle className="text-foreground">{dialogTitle}</DialogTitle>
         </DialogHeader>
-        <div className="flex flex-col gap-4 h-[70vh]">
-            {/* CHATROOM SECTION */}
-            <div className="flex flex-col flex-1 min-h-0 border border-white/20 rounded-md p-3">
-                <div ref={chatContainerRef} className="flex-1 overflow-y-auto space-y-3 pr-1">
-                    {messages.map((m) => (
-                    <div
-                        key={m.id}
-                        className={
-                        m.role === "assistant"
-                            ? "text-sm rounded-md bg-white/5 px-3 py-2"
-                            : "text-sm rounded-md bg-white/10 px-3 py-2"
-                        }
-                    >
-                        <div className="font-medium mb-1 text-xs text-white/60">
-                        {m.role === "assistant" ? "AI" : "You"}
-                        </div>
-                        <p className="whitespace-pre-wrap text-sm text-white/90">
-                        {m.content}
-                        </p>
-                    </div>
-                    ))}
 
-                    {messages.length === 0 && (
-                    <p className="text-sm text-white/50">
-                        Start a conversation to get suggestions on how to improve your summary.
-                    </p>
-                    )}
+        <div className="flex flex-col gap-4 h-[70vh]">
+          {/* CHATROOM SECTION */}
+          <div className={cn("flex flex-col flex-1 min-h-0 p-4", CARD, "shadow-none")}>
+            <div
+              ref={chatContainerRef}
+              className="flex-1 overflow-y-auto space-y-3 pr-1"
+            >
+              {messages.map((m) => (
+                <div
+                  key={m.id}
+                  className={cn(
+                    "rounded-2xl px-4 py-3",
+                    "border border-foreground/15",
+                    m.role === "assistant"
+                      ? "bg-background/60"
+                      : "bg-background/80"
+                  )}
+                >
+                  <div className="font-medium mb-1 text-xs text-foreground/60">
+                    {m.role === "assistant" ? "AI" : "You"}
+                  </div>
+                  <p className="whitespace-pre-wrap text-sm text-foreground">
+                    {m.content}
+                  </p>
                 </div>
-                <form
-                    className="flex gap-2 mt-3"
-                    onSubmit={(e) => {
+              ))}
+
+              {messages.length === 0 && (
+                <p className="text-sm text-foreground/60">
+                  Start a conversation to get suggestions on how to improve your summary.
+                </p>
+              )}
+            </div>
+
+            {/* Input row styled like your SearchBar */}
+            <form
+              className={cn("mt-3 flex items-end gap-3 px-4 py-3", CARD, "shadow-none")}
+              onSubmit={(e) => {
+                e.preventDefault();
+                sendMessage();
+              }}
+            >
+              <Textarea
+                className={cn(INPUT, "w-full max-h-24")}
+                placeholder={example ? `Ask (e.g. “${example}”)` : "Ask the AI for help..."}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                disabled={isLoading}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
                     sendMessage();
-                    }}
-                >
-                    <textarea
-                    rows={2}
-                    placeholder={example ? `e.g. “${example}”` : "Ask the AI for help..."}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault();
-                          sendMessage();
-                        }
-                    }}
-                    className="flex-1 bg-black/30 text-white border border-white/20 rounded-md px-2 py-1 text-sm"
-                    />
-                    <Button
-                    type="submit"
-                    disabled={isLoading || !input.trim()}
-                    className="px-4"
-                    >
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Send
-                    </Button>
-                </form>
-                </div>
-                {/* EDITABLE DRAFT SECTION */}
-                <div className="flex flex-col flex-[0.8] min-h-0">
-                    <div className="mb-2 text-sm font-medium text-white/80">
-                        Current draft{" "}
-                        <span className="ml-1 text-xs text-white/40">
-                        (you can edit this while chatting)
-                        </span>
-                    </div>
-                    <textarea
-                        className="flex-1 bg-black/20 text-white border border-white/20 rounded-md px-2 py-2 text-sm overflow-y-auto"
-                        value={draftText}
-                        onChange={(e) => setDraftText(e.target.value)}
-                    />
-                    <div className="mt-3 flex justify-end gap-2">
-                        <Button
-                        type="button"
-                        variant="outline"
-                        className="border-white/30 text-white/80"
-                        onClick={() => setDraftText(initialText)}
-                        >
-                        Reset to original
-                        </Button>
-                        <Button
-                        type="button"
-                        className="bg-white text-black hover:bg-white/90"
-                        onClick={handleApply}
-                        >
-                        Apply changes
-                        </Button>
-                    </div>
-                </div>
-             </div>
-        </DialogContent>
+                  }
+                }}
+              />
+
+              <Button
+                type="submit"
+                disabled={isLoading || !input.trim()}
+                className="rounded-2xl"
+              >
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Send
+              </Button>
+            </form>
+          </div>
+
+          {/* EDITABLE DRAFT SECTION */}
+          <div className="flex flex-col flex-[0.8] min-h-0">
+            <div className="mb-2 text-sm font-medium text-foreground">
+              Current draft{" "}
+              <span className="ml-1 text-xs text-foreground/60">
+                (you can edit this while chatting)
+              </span>
+            </div>
+
+            <div className={cn("px-4 py-3", CARD, "shadow-none")}>
+              <Textarea
+                className={cn(INPUT, "w-full min-h-[120px] max-h-[240px]")}
+                value={draftText}
+                onChange={(e) => setDraftText(e.target.value)}
+                disabled={isLoading}
+              />
+            </div>
+
+            <div className="mt-3 flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-2xl border-foreground/20"
+                onClick={() => setDraftText(initialText)}
+              >
+                Reset to original
+              </Button>
+
+              <Button type="button" className="rounded-2xl" onClick={handleApply}>
+                Apply changes
+              </Button>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
     </Dialog>
   );
 }

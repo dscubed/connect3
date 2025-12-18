@@ -5,7 +5,11 @@ import { toast } from "sonner";
 import { useAuthStore } from "@/stores/authStore";
 import { createChatroom } from "@/lib/chatrooms/chatroomUtils";
 
-export function SearchBar() {
+interface SearchBarProps {
+  containerClassName?: string;
+}
+
+export function SearchBar({ containerClassName }: SearchBarProps) {
   const [query, setQuery] = useState("");
   const [creatingChatroom, setCreatingChatroom] = useState(false);
   const router = useRouter();
@@ -56,6 +60,7 @@ export function SearchBar() {
       setQuery={setQuery}
       disabled={creatingChatroom}
       onSubmit={handleSearch}
+      containerClassName={containerClassName}
     />
   );
 }

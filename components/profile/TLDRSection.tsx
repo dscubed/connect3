@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/stores/authStore";
 import { AiEnhanceDialog } from "@/components/profile/edit-modals/AiEnhanceDialog";
+import { Button } from "@/components/ui/button";
 
 interface TLDRSectionProps {
   tldr: string | null;
@@ -70,24 +71,27 @@ export default function TLDRSection({ tldr }: TLDRSectionProps) {
     <div className="mb-12">
       <div className="relative">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-semibold text-white">tldr</h2>
+          <h2 className="text-2xl font-semibold text-black">tldr</h2>
 
           <div className="flex items-center gap-2">
             {/* Edit / Save toggle button */}
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
+              type="button"
               onClick={handleEditOrSave}
               disabled={isSaving}
-              className="px-3 py-1 rounded border border-white/20 bg-black/10 hover:bg-black/20 text-xs text-white/80 flex items-center gap-1"
+              className="gap-1 rounded-2xl bg-background/60 hover:bg-background/80 border border-foreground/20 text-foreground/80"
             >
               {isSaving ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Saving...</span>
+                  <span className="text-xs">Saving...</span>
                 </>
               ) : (
-                <span>{isEditing ? "Save" : "Edit"}</span>
+                <span className="text-xs">{isEditing ? "Save" : "Edit"}</span>
               )}
-            </button>
+            </Button>
 
             {/* NEW: AI Enhance dialog (chat-style) */}
             <AiEnhanceDialog
@@ -103,17 +107,17 @@ export default function TLDRSection({ tldr }: TLDRSectionProps) {
         {/* Display mode vs edit mode */}
         {isEditing ? (
           <textarea
-            className="w-full bg-black/20 border border-white/20 rounded-md p-3 text-white/90 text-base leading-relaxed min-h-[96px] outline-none focus:border-white/40 resize-vertical"
+          className="w-full bg-background border border-border rounded-md p-3 text-foreground text-base leading-relaxed min-h-[96px] outline-none focus:ring-2 focus:ring-ring resize-vertical"
             value={localTldr}
             onChange={(e) => setLocalTldr(e.target.value)}
             placeholder="Write a short summary of yourself (e.g. degree, interests, key projects)."
           />
         ) : (
-          <p className="text-white/70 leading-relaxed text-lg">
+          <p className="text-black/70 leading-relaxed text-lg">
             {localTldr ? (
               localTldr
             ) : (
-              <span className="text-white/40 italic">
+              <span className="text-black/40 italic">
                 Click “Edit” to write a short summary of yourself, or use
                 “Enhance” to get help from AI.
               </span>

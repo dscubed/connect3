@@ -8,14 +8,13 @@ export default function SidebarHeader() {
   return (
     <Link
       href="/"
-      className="flex items-center gap-2 hover:scale-105 transition-transform duration-200 cursor-pointer"
+      className="flex items-center gap-2 hover:scale-105 transition-transform duration-200 cursor-pointer text-black"
       onMouseEnter={() => setHeaderHovering(true)}
       onMouseLeave={() => setHeaderHovering(false)}
     >
       <LogoAnimated
         width={20}
         height={20}
-        fill={"white"}
         onHover={true}
         hovering={headerHovering}
       />

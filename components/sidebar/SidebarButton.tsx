@@ -13,8 +13,8 @@ export default function SidebarButton({
     <div
       className={`flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer select-none transition-all duration-200 hover:scale-105 ${
         active
-          ? "bg-white/10 text-white shadow-lg shadow-white/5"
-          : "text-white/80 hover:bg-white/5 hover:text-white"
+          ? "bg-background text-foreground shadow-lg shadow-black/5"
+          : "text-black/80 hover:bg-black/5 hover:text-black"
       }`}
     >
       {Icon && <Icon className="h-4 w-4" />}
