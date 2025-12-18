@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
-import { runSearch } from "@/lib/search/agent";
-import { generateResponse } from "@/lib/search/response";
+import { runRouted } from "@/lib/search/router";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
 
 const supabase = createClient(
@@ -79,8 +78,7 @@ export async function POST(req: NextRequest) {
       throw new Error("Failed to update message status");
     }
 
-    const { query, state } = await runSearch(messageId, openai, supabase, emit);
-    const response = await generateResponse(query, state, openai, emit);
+    const response = await runRouted(messageId, openai, supabase, emit);
 
     await emit("done", {
       success: true,
@@ -91,7 +89,7 @@ export async function POST(req: NextRequest) {
       .from("chatmessages")
       .update({
         status: "completed",
-        content: response,
+        content: JSON.stringify({ result: response }),
       })
       .eq("id", messageId);
 
@@ -100,7 +98,7 @@ export async function POST(req: NextRequest) {
       throw new Error("Failed to update message status");
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, response });
   } catch (error) {
     console.error("Run search error:", error);
     await emit("error", { message: String(error) });

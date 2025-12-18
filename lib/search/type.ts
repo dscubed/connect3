@@ -29,6 +29,10 @@ export interface AgentState {
 export interface ContextSummary {
   summary: string;
   queries: string[];
+  mode?: "general" | "search"
+  domain?: "university" | "connect3" | "other";
+  university_slug: "unimelb" | null;
+  confidence: number;
 }
 
 // Vector Search Types
@@ -101,5 +105,17 @@ export interface QueryResult {
 export interface SearchResponse {
   summary: string;
   results: QueryResult[];
+  followUps: string;
+}
+
+export interface KBQueryResult {
+  header?: string;
+  text: string;
+  file_ids: string[];
+}
+
+export interface KBSearchResponse {
+  summary: string;
+  results: KBQueryResult[];
   followUps: string;
 }

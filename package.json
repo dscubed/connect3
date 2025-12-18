@@ -5,7 +5,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "scrape:kb": "tsx scripts/scrape/index.ts"
+    "scrape:kb": "tsx scripts/scrape/index.ts",
+    "kb:upload:umsu": "tsx scripts/kb/upload-umsu-vector-store.ts"
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
@@ -50,6 +51,7 @@
     "@types/react-dom": "^19",
     "@types/turndown": "^5.0.6",
     "autoprefixer": "^10.4.20",
+    "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "15.3.1",
     "postcss": "^8",

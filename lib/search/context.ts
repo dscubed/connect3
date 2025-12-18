@@ -11,7 +11,13 @@ const ContextSummarySchema = z.object({
     users: z.boolean(),
     organisations: z.boolean(),
   }),
+
+  mode: z.enum(["general", "search"]),
+  domain: z.enum(["university", "connect3", "other"]),
+  university_slug: z.enum(["unimelb"]).nullable(),
+  confidence: z.number().min(0).max(1),
 });
+
 
 export type ContextSummary = z.infer<typeof ContextSummarySchema>;
 
@@ -32,6 +38,24 @@ ENTITY TYPE DETECTION (CRITICAL):
 - Set "organisations: true" if the query is about GROUPS: clubs, societies, organizations, groups, teams, club, society, organization
 - BOTH can be true if ambiguous or if the query could benefit from both (e.g., "tech at unimelb", "who can I contact about X")
 - DEFAULT: When unclear, prefer BOTH true - it's better to search widely than miss results
+
+ROUTING (CRITICAL):
+Decide whether this request should be handled by:
+- "mode": "general" for general university information questions (policies, how-to, dates, services, joining clubs)
+- "mode": "search" for Connect3 entity search (finding people/orgs inside Connect3 data)
+
+Set:
+- domain: "university" if it's about a university (e.g., UniMelb)
+- domain: "connect3" if it's about the Connect3 product/app/networking features or searching within the app
+- domain: "other" otherwise
+
+UNIVERSITY DETECTION:
+- If the query mentions "unimelb" or "university of melbourne" or "umsu", set university_slug="unimelb" with confidence 0.7-1.0
+- If unclear, set university_slug=null with confidence <= 0.5
+
+IMPORTANT:
+- If mode="general" and domain="university", still fill entityTypes sensibly, but the router will use general KB instead of entity search.
+
 
 QUERY REWRITING:
 ONLY if the user's query is vague or ambiguous/follow up, rewrite the query.
@@ -76,6 +100,15 @@ Query: "Yes" -> Look at chat history to find context.
 - summary: The user is confirming their interest in learning more about tech clubs at University of Melbourne based on previous discussion. Clubs previously discussed include DSCubed, HackMelbourne and CISSA.
 - queries: ["DSCubed unimelb", "HackMelbourne", "CISSA"]
 - entityTypes: { users: false, organisations: true }
+
+Query: "how do i join a club at unimelb"
+- summary: The user wants instructions for joining a student club at the University of Melbourne.
+- queries: ["join a club unimelb", "UMSU club membership"]
+- entityTypes: { users: false, organisations: true }
+- mode: "general"
+- domain: "university"
+- university_slug: "unimelb"
+- confidence: 0.9
 
 ** USE SPECIFIC ENTITY NAMES IF AVAILABLE **
 `;
