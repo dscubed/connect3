@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
   const ctx: RequestContext = { totalRequests: 0 };
 
   try {
-    console.log(`Starting batch run at ${new Date().toISOString()}`);
+    console.log({ event: 'batch_start', timestamp: new Date().toISOString() });
 
     // 3. Fetch Accounts
     const { data: accounts, error } = await supabase
@@ -75,14 +75,15 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`Found ${accounts.length} accounts to process.`);
+    console.log({ event: 'accounts_found', count: accounts.length });
 
     const results = [];
 
     // 4. Process Accounts
     for (const account of accounts) {
+      console.log({ event: 'processing_account', account: account.account_name });
       if (ctx.totalRequests >= MAX_REQUESTS_ALLOWED) {
-        console.log("Max requests allowed reached for this batch. Stopping.");
+        console.log({ event: 'max_requests_reached', total_requests: ctx.totalRequests });
         break;
       }
 
@@ -101,11 +102,13 @@ Deno.serve(async (req) => {
           posts_fetched: postsCount
         });
 
+        console.log({ event: 'account_success', account: account.account_name, posts_fetched: postsCount });
+
         // Rate limiting pause
         await new Promise((resolve) => setTimeout(resolve, 2000));
 
       } catch (e: any) {
-        console.error(`Error processing account ${account.account_name}: ${e}`);
+        console.error({ event: 'account_error', account: account.account_name, error: e.message });
         results.push({
           account: account.account_name,
           status: 'error',
@@ -124,7 +127,7 @@ Deno.serve(async (req) => {
     );
 
   } catch (error: any) {
-    console.error("Batch run failed:", error);
+    console.error({ event: 'batch_error', error: String(error) });
     return new Response(
       JSON.stringify({ success: false, error: String(error) }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
@@ -148,7 +151,7 @@ async function refreshAccessToken(
 
   // Refresh if less than 10% of lifetime remains
   if (timeRemaining < maxLifetime * 0.1) {
-    console.log(`Refreshing token for account ${account_name}...`);
+    console.log({ event: 'refreshing_token', account: account_name });
 
     if (ctx.totalRequests >= MAX_REQUESTS_ALLOWED) return false;
 
@@ -162,7 +165,7 @@ async function refreshAccessToken(
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`Failed to refresh token: ${errorText}`);
+        console.error({ event: 'token_refresh_failed', account: account_name, error: errorText });
         return false;
       }
 
@@ -181,14 +184,14 @@ async function refreshAccessToken(
         .eq("id", id);
 
       if (error) {
-        console.error(`Error updating token in DB: ${error.message}`);
+        console.error({ event: 'token_update_error', account: account_name, error: error.message });
         return false;
       }
 
       account.access_token = newAccessToken;
       return true;
     } catch (error) {
-      console.error(`Error refreshing token: ${error}`);
+      console.error({ event: 'token_refresh_exception', account: account_name, error: error });
       return false;
     }
   }
@@ -203,7 +206,7 @@ async function fetchNewPosts(
   const { ig_user_id, access_token, last_synced_at, account_name } = account;
   const lastSyncedDate = last_synced_at ? new Date(last_synced_at) : null;
 
-  console.log(`Fetching posts for ${account_name}...`);
+  console.log({ event: 'fetching_posts', account: account_name });
 
   // Limit of 50 posts per request
 
@@ -220,7 +223,7 @@ async function fetchNewPosts(
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`Error fetching posts: ${errorText}`);
+        console.error({ event: 'fetch_posts_error', account: account_name, error: errorText });
         break;
       }
 
@@ -258,7 +261,7 @@ async function fetchNewPosts(
           });
 
         if (error) {
-          console.error(`Error inserting post ${post.id}: ${error.message}`);
+          console.error({ event: 'insert_post_error', account: account_name, post_id: post.id, error: error.message });
         } else {
           postsInserted++;
         }
@@ -268,7 +271,7 @@ async function fetchNewPosts(
         url = data.paging?.next || null;
       }
     } catch (error) {
-      console.error(`Exception during fetch: ${error}`);
+      console.error({ event: 'fetch_exception', account: account_name, error: error });
       break;
     }
   }
