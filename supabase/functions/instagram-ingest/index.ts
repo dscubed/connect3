@@ -210,7 +210,13 @@ async function fetchNewPosts(
 
   // Limit of 50 posts per request
 
-  let url: string | null = `${INSTAGRAM_API_BASE}/v24.0/${ig_user_id}/media?fields=id,caption,media_type,media_url,permalink,timestamp&limit=50&access_token=${access_token}`;
+  const fields = ["id", "caption", "media_type", "media_url", "permalink", "timestamp"].join(",");
+  const urlObj = new URL(`${INSTAGRAM_API_BASE}/v24.0/${ig_user_id}/media`);
+  urlObj.searchParams.append("fields", fields);
+  urlObj.searchParams.append("limit", "50");
+  urlObj.searchParams.append("access_token", access_token);
+
+  let url: string | null = urlObj.toString();
   let postsInserted = 0;
   let newestPostTimestamp: Date | null = null;
 
