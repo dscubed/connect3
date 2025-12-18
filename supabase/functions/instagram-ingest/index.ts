@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
   }
 
   // 2. Initialize Supabase Client
-  const supabaseUrl = Deno.env.get('NEXT_PUBLIC_SUPABASE_URL');
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
   const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
   if (!supabaseUrl || !supabaseKey) {
@@ -294,7 +294,6 @@ async function fetchNewPosts(
 
   return postsInserted;
 }
-
 
 async function uploadIntoStorage(
   supabase: any,
