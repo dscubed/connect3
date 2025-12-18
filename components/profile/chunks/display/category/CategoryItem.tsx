@@ -27,7 +27,7 @@ export function CategoryItem({
       {({ attributes, listeners, setNodeRef, style }) => (
         <div
           ref={setNodeRef}
-          className="mb-6 flex flex-col items-start align-start w-full"
+          className="mb-2 flex flex-col items-start align-start w-full"
           style={style}
         >
           {/* Category Header (Drag Handle) */}

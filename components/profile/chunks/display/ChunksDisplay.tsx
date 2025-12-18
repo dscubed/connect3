@@ -31,7 +31,7 @@ export function ChunksDisplay() {
     return (
       <div className="flex flex-col items-center justify-center h-32">
         <CubeLoader size={60} />
-        <span className="text-white/70">Loading chunks...</span>
+        <span className="text-muteed">Loading chunks...</span>
       </div>
     );
   }
@@ -79,9 +79,11 @@ export function ChunksDisplay() {
 
 const EmptyChunksState = () => {
   return (
-    <div className="flex flex-col items-center justify-center h-32 text-center text-white/70">
+    <div className="flex flex-col items-center justify-center h-32 text-center text-muted">
       <Sparkles className="h-8 w-8 mb-2 animate-pulse" />
-      <h2 className="text-xl font-semibold mb-1">No chunks available</h2>
+      <h2 className="text-xl font-semibold mb-1">
+        No chunks available click edit to add some!
+      </h2>
     </div>
   );
 };
