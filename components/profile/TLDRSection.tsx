@@ -1,140 +1,128 @@
 "use client";
-import { Zap, Loader2 } from "lucide-react";
-import { useState, useRef } from "react";
+import { Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/stores/authStore";
-import { Button } from "../ui/button";
-import { TextArea } from "../ui/TextArea";
+import { AiEnhanceDialog } from "@/components/profile/edit-modals/AiEnhanceDialog";
+import { Button } from "@/components/ui/button";
 
 interface TLDRSectionProps {
   tldr: string | null;
 }
 
 export default function TLDRSection({ tldr }: TLDRSectionProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [showPromptInput, setShowPromptInput] = useState(false);
-  const [userPrompt, setUserPrompt] = useState("");
-  const { makeAuthenticatedRequest, user, updateProfile } = useAuthStore();
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [localTldr, setLocalTldr] = useState(tldr ?? "");
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleGenerateTLDR = async () => {
-    setShowPromptInput(false); // Hide input immediately when generating
-    setIsLoading(true);
-    try {
-      const res = await makeAuthenticatedRequest(
-        `/api/profiles/generate-tldr`,
-        {
-          method: "POST",
-          body: JSON.stringify({ userId: user?.id, userPrompt, tldr }),
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to generate TLDR");
-      }
-      toast.success("TLDR generated!");
-      updateProfile({ tldr: data.tldr });
-    } catch {
-      toast.error("Failed to generate TLDR. Please try again.");
+  const { user, updateProfile } = useAuthStore();
+
+  // Keep in sync with server value when NOT editing
+  useEffect(() => {
+    if (!isEditing) {
+      setLocalTldr(tldr ?? "");
     }
-    setIsLoading(false);
-    setUserPrompt("");
+  }, [tldr, isEditing]);
+
+  const handleEditOrSave = async () => {
+    if (!user) return;
+
+    // If not currently editing → enter edit mode
+    if (!isEditing) {
+      setIsEditing(true);
+      return;
+    }
+
+    // If editing → Save
+    setIsSaving(true);
+    try {
+      await updateProfile({ tldr: localTldr });
+      toast.success("TLDR saved.");
+      setIsEditing(false);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to save TLDR.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleCancel = () => {
-    setShowPromptInput(false);
-    setUserPrompt("");
+  // When the AI modal applies changes:
+  // - update local state
+  // - persist the final TLDR via updateProfile
+  const handleApplyFromAi = async (newText: string) => {
+    if (!user) return;
+
+    setLocalTldr(newText);
+    setIsSaving(true);
+    try {
+      await updateProfile({ tldr: newText });
+      toast.success("TLDR enhanced and saved.");
+      setIsEditing(false); // optional: drop out of edit mode if they were editing
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to save enhanced TLDR.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
     <div className="mb-12">
       <div className="relative">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-semibold">tldr</h2>
-          <div className="relative">
+          <h2 className="text-2xl font-semibold text-black">tldr</h2>
+
+          <div className="flex items-center gap-2">
+            {/* Edit / Save toggle button */}
             <Button
-              ref={buttonRef}
-              onClick={() => setShowPromptInput(true)}
-              className="p-2 rounded-2xl border border-white/20 bg-background hover:bg-background/80 transition flex items-center gap-1 text-foreground/70 hover:text-foreground hover:scale-105"
-              disabled={isLoading}
-              title="Generate TLDR from your chunks"
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleEditOrSave}
+              disabled={isSaving}
+              className="px-2 py-1 text-xs flex items-center gap-1"
             >
-              <Zap className="h-4 w-4" />
-              <span className="text-xs">Generate</span>
+              {isSaving ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <span>{isEditing ? "Save" : "Edit"}</span>
+              )}
             </Button>
-            {/* Floating dropdown input just below the button */}
-            {showPromptInput && (
-              <div
-                className="bg-background absolute left-0 mt-2 min-w-[380px] border border-white/20 rounded-lg shadow-lg p-3 flex flex-col gap-2 z-50"
-                style={{
-                  top: buttonRef.current
-                    ? buttonRef.current.offsetHeight + 8
-                    : "100%",
-                  left: buttonRef.current
-                    ? buttonRef.current.offsetLeft - 280
-                    : 280,
-                }}
-              >
-                <TextArea
-                  ref={textareaRef}
-                  className="bg-transparent border border-foreground/20 rounded p-2 outline-none resize-none block w-full placeholder:text-foreground/40 text-foreground"
-                  value={userPrompt}
-                  onChange={(e) => setUserPrompt(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-                      e.preventDefault();
-                      handleGenerateTLDR();
-                    }
-                    if (e.key === "Escape") {
-                      e.preventDefault();
-                      handleCancel();
-                    }
-                  }}
-                  placeholder="Optional: Add instructions for TLDR generation..."
-                  autoFocus
-                  rows={1}
-                  style={{ overflow: "hidden" }}
-                  disabled={isLoading}
-                />
-                <div className="flex gap-2 justify-end">
-                  <button
-                    className="px-3 py-1 rounded bg-white text-black text-xs"
-                    onClick={handleCancel}
-                    disabled={isLoading}
-                    type="button"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    className="px-3 py-1 rounded bg-foreground text-background text-xs flex items-center justify-center"
-                    onClick={handleGenerateTLDR}
-                    disabled={isLoading}
-                    type="button"
-                  >
-                    {isLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-black" />
-                    ) : (
-                      "Generate"
-                    )}
-                  </button>
-                </div>
-              </div>
-            )}
+            {/* NEW: AI Enhance dialog (chat-style) */}
+            <AiEnhanceDialog
+              initialText={localTldr}
+              fieldType="external_tldr"
+              onApply={handleApplyFromAi}
+              title="Enhance your TLDR"
+              triggerLabel="Enhance"
+            />
           </div>
         </div>
-        <p className="text-black/60 leading-relaxed text-lg">
-          {isLoading ? (
-            <span className="text-black/60 italic">Generating TLDR...</span>
-          ) : (
-            tldr || (
-              <span className="text-black/60 italic">
-                Click the lightning icon to generate your TLDR!
+
+        {/* Display mode vs edit mode */}
+        {isEditing ? (
+          <textarea
+          className="w-full bg-background border border-border rounded-md p-3 text-foreground text-base leading-relaxed min-h-[96px] outline-none focus:ring-2 focus:ring-ring resize-vertical"
+            value={localTldr}
+            onChange={(e) => setLocalTldr(e.target.value)}
+            placeholder="Write a short summary of yourself (e.g. degree, interests, key projects)."
+          />
+        ) : (
+          <p className="text-black/70 leading-relaxed text-lg">
+            {localTldr ? (
+              localTldr
+            ) : (
+              <span className="text-black/40 italic">
+                Click “Edit” to write a short summary of yourself, or use
+                “Enhance” to get help from AI.
               </span>
-            )
-          )}
-        </p>
+            )}
+          </p>
+        )}
       </div>
     </div>
   );

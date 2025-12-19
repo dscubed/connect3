@@ -41,7 +41,7 @@ export function ClubListCard({
         })
         .catch(() => setBgColor(undefined));
     }
-  }, [club.logoUrl]);
+  }, [club.logoUrl, club.name]);
 
   return (
     <motion.div

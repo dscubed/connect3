@@ -23,7 +23,7 @@ export function BackWarningModal({
 }: BackWarningModalProps) {
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onCancel()}>
-      <DialogContent>
+      <DialogContent showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>Discard changes?</DialogTitle>
           <DialogDescription>
