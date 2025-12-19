@@ -1,8 +1,8 @@
 import { Textarea } from "@/components/ui/TextArea";
 import { useChunkContext } from "../hooks/ChunkProvider";
-import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AllCategories, ChunkInput } from "../ChunkUtils";
+import { AiEnhanceDialog } from "@/components/profile/edit-modals/AiEnhanceDialog";
 
 export function ChunkEditor({
   cancel,
@@ -66,14 +66,23 @@ export function ChunkEditor({
             rows={1}
           />
           <div className="items-end min-h-10">
-            <Button
-              type="button"
-              variant="ghost"
-              className="px-2 py-1 text-xs flex"
-              style={{ pointerEvents: "auto" }}
-            >
-              <Sparkles className="h-4 w-4" /> Enhance
-            </Button>
+          <AiEnhanceDialog
+            initialText={chunk.text}
+            fieldType="chunk"
+            title="Enhance this highlight"
+            triggerLabel="Enhance"
+            onApply={(newText) => {
+              // update what's shown in the editor immediately
+              setChunk({ ...chunk, text: newText });
+
+              // if editing an existing chunk, update it in the store too
+              if (chunkId) {
+                setChunks((prev) =>
+                  prev.map((c) => (c.id === chunkId ? { ...c, text: newText } : c))
+                );
+              }
+            }}
+          />
           </div>
         </div>
       </div>

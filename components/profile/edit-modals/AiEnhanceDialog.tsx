@@ -64,6 +64,7 @@ export function AiEnhanceDialog({
 
   const { makeAuthenticatedRequest, user } = useAuthStore();
 
+  // 1) Reset everything when dialog closes
   useEffect(() => {
     if (!open) {
       setDraftText(initialText);
@@ -72,6 +73,12 @@ export function AiEnhanceDialog({
     }
   }, [initialText, open]);
 
+  // 2) KEEP draftText in sync while dialog is OPEN
+  useEffect(() => {
+    if (open) setDraftText(initialText);
+  }, [initialText, open]);
+  
+  // 3) Auto-scroll chat  
   useEffect(() => {
     if (!open) return;
     const el = chatContainerRef.current;
@@ -181,18 +188,16 @@ export function AiEnhanceDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        {/* Match pill-ish soft purple vibe */}
         <Button
+          type="button"
           variant="ghost"
           size="sm"
-          type="button"
-          className="gap-1 rounded-2xl bg-background/60 hover:bg-background/80 border border-foreground/20 text-foreground/80"
+          className="px-2 py-1 text-xs flex items-center gap-1"
         >
           <Sparkles className="h-4 w-4" />
-          <span className="text-xs">{triggerLabel}</span>
+          <span>{triggerLabel}</span>
         </Button>
       </DialogTrigger>
-
       {/* DialogContent styled like your SearchBar card */}
       <DialogContent
         className={cn(
