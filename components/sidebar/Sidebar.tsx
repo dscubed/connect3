@@ -7,7 +7,6 @@ import { usePathname } from "next/navigation";
 import SidebarHeader from "./SidebarHeader";
 import { useAuthStore } from "@/stores/authStore";
 
-// ✅ adjust this import path to wherever your RecentChatrooms component is:
 import RecentChatrooms from "../home/QuickInfo/RecentChatrooms";
 
 interface SidebarProps {
