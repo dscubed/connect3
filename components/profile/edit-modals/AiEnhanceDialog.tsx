@@ -41,12 +41,11 @@ interface AiEnhanceDialogProps {
 }
 
 const CARD =
-  "bg-background text-foreground rounded-2xl border border-foreground/20 backdrop-blur shadow-xl";
+  "bg-secondary text-secondary-foreground rounded-2xl border border-foreground/20 backdrop-blur shadow-xl";
 
 const INPUT =
-  "bg-transparent text-sm transition-all placeholder:text-foreground/50 " +
-  "scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-transparent focus:scrollbar-thumb-white/50 " +
-  "outline-none resize-none focus-visible:ring-0 border-none min-h-0";
+  "bg-transparent text-sm transition-all placeholder:text-secondary-foreground/50 " +
+  "scrollbar-hide outline-none resize-none focus-visible:ring-0 border-none min-h-0";
 
 export function AiEnhanceDialog({
   initialText,
@@ -126,15 +125,21 @@ export function AiEnhanceDialog({
     setIsLoading(true);
 
     try {
-      const res = await makeAuthenticatedRequest(`/api/profiles/enhance-field`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fieldType,
-          text: draftText,
-          messages: updatedMessages.map(({ role, content }) => ({ role, content })),
-        }),
-      });
+      const res = await makeAuthenticatedRequest(
+        `/api/profiles/enhance-field`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fieldType,
+            text: draftText,
+            messages: updatedMessages.map(({ role, content }) => ({
+              role,
+              content,
+            })),
+          }),
+        }
+      );
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to enhance text");
@@ -196,12 +201,18 @@ export function AiEnhanceDialog({
         )}
       >
         <DialogHeader>
-          <DialogTitle className="text-foreground">{dialogTitle}</DialogTitle>
+          <DialogTitle>{dialogTitle}</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-4 h-[70vh]">
           {/* CHATROOM SECTION */}
-          <div className={cn("flex flex-col flex-1 min-h-0 p-4", CARD, "shadow-none")}>
+          <div
+            className={cn(
+              "flex flex-col flex-1 min-h-0 p-4",
+              CARD,
+              "shadow-none"
+            )}
+          >
             <div
               ref={chatContainerRef}
               className="flex-1 overflow-y-auto space-y-3 pr-1"
@@ -227,15 +238,20 @@ export function AiEnhanceDialog({
               ))}
 
               {messages.length === 0 && (
-                <p className="text-sm text-foreground/60">
-                  Start a conversation to get suggestions on how to improve your summary.
+                <p className="text-sm text-secondary-foreground/60">
+                  Start a conversation to get suggestions on how to improve your
+                  summary.
                 </p>
               )}
             </div>
 
             {/* Input row styled like your SearchBar */}
             <form
-              className={cn("mt-3 flex items-end gap-3 px-4 py-3", CARD, "shadow-none")}
+              className={cn(
+                "mt-3 flex items-end gap-3 px-4 py-3",
+                CARD,
+                "shadow-none"
+              )}
               onSubmit={(e) => {
                 e.preventDefault();
                 sendMessage();
@@ -243,7 +259,9 @@ export function AiEnhanceDialog({
             >
               <Textarea
                 className={cn(INPUT, "w-full max-h-24")}
-                placeholder={example ? `Ask (e.g. “${example}”)` : "Ask the AI for help..."}
+                placeholder={
+                  example ? `Ask (e.g. “${example}”)` : "Ask the AI for help..."
+                }
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 disabled={isLoading}
@@ -268,9 +286,9 @@ export function AiEnhanceDialog({
 
           {/* EDITABLE DRAFT SECTION */}
           <div className="flex flex-col flex-[0.8] min-h-0">
-            <div className="mb-2 text-sm font-medium text-foreground">
+            <div className="mb-2 text-sm font-medium">
               Current draft{" "}
-              <span className="ml-1 text-xs text-foreground/60">
+              <span className="ml-1 text-xs text-secondary-foreground/60">
                 (you can edit this while chatting)
               </span>
             </div>
@@ -287,14 +305,17 @@ export function AiEnhanceDialog({
             <div className="mt-3 flex justify-end gap-2">
               <Button
                 type="button"
-                variant="outline"
-                className="rounded-2xl border-foreground/20"
+                className="rounded-2xl border bg-secondary hover:bg-secondary/80 text-secondary-foreground border-secondary-foreground/20"
                 onClick={() => setDraftText(initialText)}
               >
                 Reset to original
               </Button>
 
-              <Button type="button" className="rounded-2xl" onClick={handleApply}>
+              <Button
+                type="button"
+                className="rounded-2xl"
+                onClick={handleApply}
+              >
                 Apply changes
               </Button>
             </div>

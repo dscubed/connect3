@@ -45,20 +45,60 @@ export interface AddingState {
 interface LinkDetails {
   icon: IconType;
   label: string;
+  regex?: RegExp;
 }
 
 export const LinkTypes: { [key in LinkType]: LinkDetails } = {
-  linkedin: { icon: FaLinkedin, label: "LinkedIn" },
-  github: { icon: FaGithub, label: "GitHub" },
-  instagram: { icon: FaInstagram, label: "Instagram" },
-  facebook: { icon: FaFacebook, label: "Facebook" },
-  discord: { icon: FaDiscord, label: "Discord" },
-  "discord-server": { icon: MdGroups, label: "Discord Server" },
-  x: { icon: SiX, label: "X" },
-  youtube: { icon: FaYoutube, label: "YouTube" },
+  linkedin: {
+    icon: FaLinkedin,
+    label: "LinkedIn",
+    regex: /^(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/([^/?#]+)/i,
+  },
+  github: {
+    icon: FaGithub,
+    label: "GitHub",
+    regex: /^(?:https?:\/\/)?(?:www\.)?github\.com\/([^/?#]+)/i,
+  },
+  instagram: {
+    icon: FaInstagram,
+    label: "Instagram",
+    regex: /^(?:https?:\/\/)?(?:www\.)?instagram\.com\/([^/?#]+)/i,
+  },
+  facebook: {
+    icon: FaFacebook,
+    label: "Facebook",
+    regex: /^(?:https?:\/\/)?(?:www\.)?facebook\.com\/([^/?#]+)/i,
+  },
+  discord: {
+    icon: FaDiscord,
+    label: "Discord",
+  },
+  "discord-server": {
+    icon: MdGroups,
+    label: "Discord Server",
+    regex: /^(?:https?:\/\/)?(?:www\.)?discord\.gg\/([^/?#]+)/i,
+  },
+  x: {
+    icon: SiX,
+    label: "X",
+    regex: /^(?:https?:\/\/)?(?:www\.)?x\.com\/([^/?#]+)/i,
+  },
+  youtube: {
+    icon: FaYoutube,
+    label: "YouTube",
+    regex: /^(?:https?:\/\/)?(?:www\.)?youtube\.com\/@([^/?#]+)/i,
+  },
   website: { icon: FaGlobe, label: "Website" },
-  tiktok: { icon: FaTiktok, label: "TikTok" },
-  reddit: { icon: FaReddit, label: "Reddit" },
+  tiktok: {
+    icon: FaTiktok,
+    label: "TikTok",
+    regex: /^(?:https?:\/\/)?(?:www\.)?tiktok\.com\/@([^/?#]+)/i,
+  },
+  reddit: {
+    icon: FaReddit,
+    label: "Reddit",
+    regex: /^(?:https?:\/\/)?(?:www\.)?reddit\.com\/u\/([^/?#]+)/i,
+  },
   wechat: { icon: FaWeixin, label: "WeChat" },
   xiaohongshu: { icon: SiXiaohongshu, label: "Xiaohongshu" },
 };
