@@ -5,23 +5,46 @@ import { AddingState } from "./LinksUtils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Fade } from "@/components/ui/Fade";
+import { useAuthStore } from "@/stores/authStore";
 
 interface LinkTypeInputProps {
   addingState: AddingState;
   setAddingState: (state: AddingState) => void;
+  links: LinkType[];
 }
+
+const ORG_EXCLUDED_LINKS: LinkType[] = ["discord"];
+const USER_EXCLUDED_LINKS: LinkType[] = ["website", "discord-server"];
 
 export function LinkTypeInput({
   addingState,
   setAddingState,
+  links,
 }: LinkTypeInputProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const { profile } = useAuthStore.getState();
+
+  // Filter based on already added link types
+  let filteredOptions = Object.entries(LinkTypes).filter(
+    ([key]) => !links.includes(key as LinkType)
+  );
 
   // Filter options based on input
-  const filteredOptions = Object.entries(LinkTypes).filter(([, details]) =>
+  filteredOptions = filteredOptions.filter(([, details]) =>
     details.label.toLowerCase().includes(addingState.typeInput.toLowerCase())
   );
+
+  // filter based on profile type
+  if (profile?.account_type === "organisation") {
+    filteredOptions = filteredOptions.filter(
+      ([key]) => !ORG_EXCLUDED_LINKS.includes(key as LinkType)
+    );
+  } else {
+    filteredOptions = filteredOptions.filter(
+      ([key]) => !USER_EXCLUDED_LINKS.includes(key as LinkType)
+    );
+  }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!showDropdown) return;
