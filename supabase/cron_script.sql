@@ -7,7 +7,7 @@ where exists (
 -- 2. Immediately create the new updated job
 select cron.schedule(
   'insta-cron-sync',
-  '*/30 * * * *',      -- Schedule: Every 5 mins
+  '*/10 * * * *',      -- Schedule: Every 10 mins
   $$
   select net.http_post(
       url => 'https://nsjrzxbtxsqmsdgevszv.supabase.co/functions/v1/insta-cron-sync',
