@@ -118,7 +118,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onOpenChange }) => {
               Chatrooms
             </div>
 
-            <div className="max-h-[42vh] overflow-y-auto pr-1">
+            <div className=" overflow-y-auto pr-1 scrollbar-hide">
               <RecentChatrooms userId={user?.id ?? null} />
             </div>
           </div>
