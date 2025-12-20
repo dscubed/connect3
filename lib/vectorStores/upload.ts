@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { fetchUserDetails } from "@/lib/users/fetchUserDetails";
-import { CategoryChunks } from "@/components/profile/chunks/hooks/ChunkProvider";
+import { getFileText } from "../users/getFileText";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -15,10 +16,10 @@ export const config = {
 
 export async function uploadProfileToVectorStore({
   userId,
-  orderedCategoryChunks,
+  supabase,
 }: {
   userId: string;
-  orderedCategoryChunks: CategoryChunks[];
+  supabase: SupabaseClient;
 }) {
   const userDetails = await fetchUserDetails(userId);
   console.log("Fetched user details:", userDetails);
@@ -45,26 +46,20 @@ export async function uploadProfileToVectorStore({
     );
     await removeProfileFromVectorStore(
       userDetails.openai_file_id,
-      vectorStoreId
+      vectorStoreId,
+      supabase,
+      userId
     );
   }
 
   // Prepare text for upload
-  const profileText = `${userDetails.full_name}\n${userDetails.tldr || ""}`;
-
-  let chunkText = "";
-  for (const categoryChunk of orderedCategoryChunks) {
-    chunkText += `${categoryChunk.category}:\n`;
-    for (const chunk of categoryChunk.chunks) {
-      chunkText += `- ${chunk.text}\n`;
-    }
-  }
-
-  const fullText = `${profileText}\n\n${chunkText}`;
+  const textData = await getFileText(userId, supabase);
+  const text =
+    textData.profile + "\n" + textData.links + "\n" + textData.chunks;
 
   // Prepare file for OpenAI upload
   const fileObj = new File(
-    [fullText],
+    [text],
     `${userDetails.account_type}_${Date.now()}.txt`,
     {
       type: "text/plain",
@@ -83,6 +78,7 @@ export async function uploadProfileToVectorStore({
       file_id: file.id,
     }
   );
+  console.log("Uploaded file with text", text.slice(0, 100));
 
   if (vectorStoreFile.status === "failed") {
     throw new Error(
@@ -111,7 +107,9 @@ export async function uploadProfileToVectorStore({
 
 async function removeProfileFromVectorStore(
   openaiFileId: string,
-  vectorStoreId: string
+  vectorStoreId: string,
+  supabase: SupabaseClient,
+  userId: string
 ) {
   // Remove from vector store
   const { deleted: vsFileDeleted } = await openai.vectorStores.files.delete(
@@ -132,7 +130,18 @@ async function removeProfileFromVectorStore(
     throw new Error("Failed to delete file from vector store");
   }
 
-  console.log(
-    `Removed file ${openaiFileId} from vector store ${vectorStoreId}`
-  );
+  console.log(`Removed file ${openaiFileId}`);
+
+  // Also remove file ID from Supabase profile
+  const { error } = await supabase
+    .from("profiles")
+    .update({ openai_file_id: null })
+    .eq("id", userId);
+  if (error) {
+    console.error(
+      "Error removing OpenAI file ID from Supabase profile:",
+      error
+    );
+    throw new Error("Failed to remove OpenAI file ID from profile");
+  }
 }

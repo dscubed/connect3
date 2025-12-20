@@ -18,7 +18,7 @@ export function LinksSection() {
     if (!profile || loading || fetched) return;
     const fetchLinks = async () => {
       const { data, error } = await supabase
-        .from("profile-links")
+        .from("profile_links")
         .select("id, type, details");
       if (error || !data) {
         toast.error(`Error fetching links: ${error.message}`);

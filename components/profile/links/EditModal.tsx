@@ -13,6 +13,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
 import { LinkTypeInput } from "./LinkTypeInput";
 import { Link } from "lucide-react";
+import { uploadProfileToVectorStore } from "@/lib/vectorStores/client";
 
 interface EditModalProps {
   links: LinkItem[];
@@ -66,7 +67,7 @@ export function EditModal({
 
     // check if ids exist
     const { data, error: checkError } = await supabase
-      .from("profile-links")
+      .from("profile_links")
       .select("id")
       .in("id", ids);
     if (checkError) {
@@ -79,7 +80,7 @@ export function EditModal({
       return;
     }
     const { error } = await supabase
-      .from("profile-links")
+      .from("profile_links")
       .delete()
       .in("id", ids);
 
@@ -90,7 +91,7 @@ export function EditModal({
   };
 
   const addLinksToSupabase = async (newLinks: LinkItem[]) => {
-    const { error } = await supabase.from("profile-links").insert(
+    const { error } = await supabase.from("profile_links").insert(
       newLinks.map((link) => ({
         id: link.id,
         type: link.type,
@@ -107,7 +108,7 @@ export function EditModal({
   const updateLinksInSupabase = async (updatedLinks: LinkItem[]) => {
     for (const link of updatedLinks) {
       const { error } = await supabase
-        .from("profile-links")
+        .from("profile_links")
         .update({ details: link.details })
         .eq("id", link.id);
       if (error) {
@@ -287,10 +288,11 @@ export function EditModal({
                 Add Link
               </Button>
               <Button
-                onClick={() =>
+                onClick={() => {
                   // Save to supabase
-                  saveToSupabase()
-                }
+                  saveToSupabase();
+                  uploadProfileToVectorStore();
+                }}
                 disabled={saving}
                 className="animate-fade-in"
               >
