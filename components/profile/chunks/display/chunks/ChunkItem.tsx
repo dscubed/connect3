@@ -37,13 +37,11 @@ export function ChunkItem({
             }))
           }
           cancel={() =>
-            setTimeout(() => {
-              setEditChunks((prev) => {
-                const updated = { ...prev };
-                delete updated[chunk.id];
-                return updated;
-              });
-            }, 0)
+            setEditChunks((prev) => {
+              const updated = { ...prev };
+              delete updated[chunk.id];
+              return updated;
+            })
           }
           chunkId={chunk.id}
         />

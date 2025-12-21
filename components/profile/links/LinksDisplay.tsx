@@ -1,8 +1,17 @@
-import { Check, PencilLine, Trash, X } from "lucide-react";
+import {
+  Check,
+  Clipboard,
+  ExternalLink,
+  PencilLine,
+  Trash,
+  X,
+} from "lucide-react";
 import { LinkItem, LinkTypes } from "./LinksUtils";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
+import { toast } from "sonner";
 
 interface LinksDisplayProps {
   links: LinkItem[];
@@ -88,46 +97,70 @@ export function LinksDisplay({ links, editFunctions }: LinksDisplayProps) {
                 )}
               </div>
 
-              {editFunctions && updateLink && deleteLink && (
-                <div className="flex gap-2 items-center">
-                  {editState[link.id] !== undefined && (
+              <div className="flex gap-2 items-center">
+                {editFunctions && updateLink && deleteLink ? (
+                  <>
+                    {editState[link.id] !== undefined && (
+                      <Button
+                        variant="ghost"
+                        className="!p-0 h-fit"
+                        onClick={() => saveEdits(link)}
+                      >
+                        <Check className="!size-5" />
+                      </Button>
+                    )}
+
                     <Button
                       variant="ghost"
                       className="!p-0 h-fit"
-                      onClick={() => saveEdits(link)}
+                      onClick={() => toggleEditMode(link)}
                     >
-                      <Check className="!size-5" />
+                      {editState[link.id] !== undefined ? (
+                        <X className="!size-5" />
+                      ) : (
+                        <PencilLine className="!size-5" />
+                      )}
                     </Button>
-                  )}
-
-                  <Button
-                    variant="ghost"
-                    className="!p-0 h-fit"
-                    onClick={() => toggleEditMode(link)}
-                  >
-                    {editState[link.id] !== undefined ? (
-                      <X className="!size-5" />
+                    <Button
+                      variant="ghost"
+                      className="!p-0 hover:text-red-500 hover:bg-red-700/20 h-fit"
+                      onClick={() => {
+                        deleteLink(link.id);
+                      }}
+                    >
+                      <Trash className="!size-5" />
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    {LinkTypes[link.type]?.pattern ? (
+                      <Link
+                        href={
+                          LinkTypes[link.type]?.pattern?.prefix + link.details
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Button variant="ghost" className="!p-0 h-fit">
+                          <ExternalLink className="!size-5" />
+                        </Button>
+                      </Link>
                     ) : (
-                      <PencilLine className="!size-5" />
+                      <Button
+                        variant="ghost"
+                        className="!p-0 h-fit"
+                        onClick={async () => {
+                          await navigator.clipboard.writeText(link.details);
+                          toast.success("Details copied to clipboard!");
+                        }}
+                      >
+                        <Clipboard className="!size-5" />
+                      </Button>
                     )}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="!p-0 hover:text-red-500 hover:bg-red-700/20 h-fit"
-                    onClick={() => {
-                      deleteLink(link.id);
-                    }}
-                  >
-                    <Trash className="!size-5" />
-                  </Button>
-                </div>
-              )}
-            </div>
-            {/* {updateLink && editState[link.id] !== undefined && (
-              <div className="w-full justify-end">
-                <Button onClick={() => saveEdits(link)}>Save</Button>
+                  </>
+                )}
               </div>
-            )} */}
+            </div>
           </div>
         );
       })}
