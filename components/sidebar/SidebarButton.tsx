@@ -18,7 +18,9 @@ export default function SidebarButton({
       }`}
     >
       {Icon && <Icon className="h-4 w-4" />}
-      <span className="text-sm">{label}</span>
+      <span className="text-sm flex-1 min-w-0 truncate" title={label}>
+        {label}
+      </span>
     </div>
   );
 }

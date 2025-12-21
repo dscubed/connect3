@@ -1,9 +1,11 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useRecentChats } from "../hooks/useRecentChats";
 import { Button } from "@/components/ui/button";
+
+import { SidebarLink } from "@/components/sidebar/SidebarLink";
 
 import {
   DropdownMenu,
@@ -12,30 +14,31 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { MoreHorizontal, Pencil, Trash2, Check, X } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Check, X, MessageCircle } from "lucide-react";
 
 interface RecentChatroomsProps {
   userId: string | null;
   guest?: boolean;
 }
 
-export default function RecentChatrooms({
-  userId,
-  guest,
-}: RecentChatroomsProps) {
+export default function RecentChatrooms({ userId, guest }: RecentChatroomsProps) {
   const router = useRouter();
-  const { chatrooms, loading, renameChatroom, deleteChatroom } =
-    useRecentChats();
+  const searchParams = useSearchParams();
+
+  const activeChatroomId = searchParams.get("chatroom");
+  const currentPathForHighlight = activeChatroomId
+    ? `/search?chatroom=${activeChatroomId}`
+    : "";
+
+  const { chatrooms, loading, renameChatroom, deleteChatroom } = useRecentChats();
 
   const [renamingId, setRenamingId] = React.useState<string | null>(null);
   const [renameValue, setRenameValue] = React.useState<string>("");
   const [busyId, setBusyId] = React.useState<string | null>(null);
 
-  if (!userId)
-    return <span className="text-xs text-black/30">Not logged in</span>;
+  if (!userId) return <span className="text-xs text-black/30">Not logged in</span>;
   if (loading) return <span className="text-xs text-black/30">Loading...</span>;
-  if (chatrooms.length === 0)
-    return <span className="text-xs text-black/30">No chatrooms</span>;
+  if (chatrooms.length === 0) return <span className="text-xs text-black/30">No chatrooms</span>;
 
   async function onRenameSave(id: string) {
     setBusyId(id);
@@ -64,13 +67,8 @@ export default function RecentChatrooms({
       {/* Overlay for guest */}
       {guest && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-lg z-10 flex-col gap-4">
-          <p className="text-sm text-white/80">
-            Sign up to save your chatrooms!
-          </p>
-          <Button
-            variant="default"
-            onClick={() => router.push("/auth/sign-up")}
-          >
+          <p className="text-sm text-white/80">Sign up to save your chatrooms!</p>
+          <Button variant="default" onClick={() => router.push("/auth/sign-up")}>
             Sign up
           </Button>
         </div>
@@ -86,23 +84,21 @@ export default function RecentChatrooms({
           const isRenaming = renamingId === chat.id;
           const isBusy = busyId === chat.id;
 
+          const href = `/search?chatroom=${chat.id}`;
+
           return (
-            <div
-              key={chat.id}
-              className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer bg-black/[0.03] hover:bg-black/[0.06] transition-all"
-              onClick={() => {
-                if (!guest && !isRenaming)
-                  router.push(`/search?chatroom=${chat.id}`);
-              }}
-            >
-              <div className="flex flex-col flex-1 min-w-0">
+            <div key={chat.id} className="flex items-center gap-2">
+              <div className="flex-1 min-w-0">
                 {!isRenaming ? (
-                  <span className="font-semibold text-black/80 truncate">
-                    {chat.title}
-                  </span>
+                  <SidebarLink
+                    icon={MessageCircle}
+                    label={chat.title}
+                    href={href}
+                    pathName={currentPathForHighlight}
+                  />
                 ) : (
                   <div
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-black/[0.03]"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <input
@@ -136,6 +132,7 @@ export default function RecentChatrooms({
                 )}
               </div>
 
+              {/* DROPDOWN: stop propagation so it won't trigger navigation */}
               {!guest && (
                 <div onClick={(e) => e.stopPropagation()}>
                   <DropdownMenu>
