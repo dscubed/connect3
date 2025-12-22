@@ -40,30 +40,6 @@ export default function UserDetails({ profile }: UserDetailsProps) {
         </motion.h1>
       </div>
 
-      {/* Status */}
-      <motion.div
-        className="flex items-center gap-2 text-muted mb-3 cursor-pointer"
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        onClick={() => handleOpen("status")}
-      >
-        <Briefcase className="h-4 w-4" />
-        <span className="text-lg text-muted">
-          {profile.status || "Add your current status"}
-        </span>
-      </motion.div>
-
-      {/* Location */}
-      <motion.div
-        className="flex items-center gap-2 text-muted mb-4 cursor-pointer"
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        onClick={() => handleOpen("location")}
-      >
-        <MapPin className="h-4 w-4" />
-        <span>{profile.location || "Location not set"}</span>
-      </motion.div>
-
       {/* Modals */}
       <ProfileModals
         modal={modal}

@@ -65,25 +65,20 @@ export default function ProfilePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
-                <div className="flex flex-col md:flex-row md:items-end gap-6">
+                <div className="flex flex-col gap-6">
                   <ProfilePicture avatar={profile.avatar_url ?? null} />
 
-                  <UserDetails profile={profile} />
-
-                  <div className="flex gap-3 md:pb-4">
-                    {/* Future action buttons can be added here */}
+                  <div className="flex flex-row justify-between">
+                    <UserDetails profile={profile} />
+                    <LinksSection />
                   </div>
                 </div>
               </motion.div>
+              {/* Events form for organisations only */}
+              {profile.account_type === "organisation" && <EventsSection />}
 
               {/* TLDR Section */}
               <TLDRSection tldr={profile.tldr || null} />
-
-              {/* Links Section */}
-              <LinksSection />
-
-              {/* Events form for organisations only */}
-              {profile.account_type === "organisation" && <EventsSection />}
 
               {/* Chunks Section */}
               <ChunkProvider>

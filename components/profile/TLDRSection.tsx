@@ -71,7 +71,7 @@ export default function TLDRSection({ tldr }: TLDRSectionProps) {
     <div className="mb-12">
       <div className="relative">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-semibold text-black">tldr</h2>
+          <h2 className="text-2xl font-semibold text-black">Summary</h2>
 
           <div className="flex items-center gap-2">
             {/* Edit / Save toggle button */}
@@ -106,7 +106,7 @@ export default function TLDRSection({ tldr }: TLDRSectionProps) {
         {/* Display mode vs edit mode */}
         {isEditing ? (
           <textarea
-          className="w-full bg-background border border-border rounded-md p-3 text-foreground text-base leading-relaxed min-h-[96px] outline-none focus:ring-2 focus:ring-ring resize-vertical"
+            className="w-full bg-background border border-border rounded-md p-3 text-foreground text-base leading-relaxed min-h-[96px] outline-none focus:ring-2 focus:ring-ring resize-vertical"
             value={localTldr}
             onChange={(e) => setLocalTldr(e.target.value)}
             placeholder="Write a short summary of yourself (e.g. degree, interests, key projects)."

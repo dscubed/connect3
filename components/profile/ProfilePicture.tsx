@@ -8,7 +8,7 @@ export default function ProfilePicture({ avatar }: { avatar: string | null }) {
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
-    <div className="relative">
+    <div className="relative w-fit">
       <motion.div
         className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-[#0B0B0C] bg-[#0B0B0C]"
         whileHover={{ scale: 1.02 }}
@@ -24,7 +24,6 @@ export default function ProfilePicture({ avatar }: { avatar: string | null }) {
           />
         )}
       </motion.div>
-
       {/* Edit Avatar Button */}
       <motion.button
         className="absolute bottom-2 right-2 p-2 rounded-full bg-white text-black hover:bg-white/90 transition-colors shadow-lg"

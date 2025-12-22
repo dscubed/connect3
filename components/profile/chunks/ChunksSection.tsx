@@ -19,7 +19,6 @@ export default function ChunksSection() {
   return (
     <div className="w-full flex flex-col gap-6 mb-24">
       <div className="w-full flex gap-2 items-center">
-        <h2 className="text-2xl font-semibold">Chunks</h2>
         <ChunkActions />
       </div>
 
