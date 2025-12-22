@@ -14,14 +14,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { MoreHorizontal, Pencil, Trash2, Check, X, MessageCircle } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Check, X } from "lucide-react";
 
 interface RecentChatroomsProps {
   userId: string | null;
   guest?: boolean;
 }
 
-export default function RecentChatrooms({ userId, guest }: RecentChatroomsProps) {
+export default function RecentChatrooms({
+  userId,
+  guest,
+}: RecentChatroomsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -30,15 +33,18 @@ export default function RecentChatrooms({ userId, guest }: RecentChatroomsProps)
     ? `/search?chatroom=${activeChatroomId}`
     : "";
 
-  const { chatrooms, loading, renameChatroom, deleteChatroom } = useRecentChats();
+  const { chatrooms, loading, renameChatroom, deleteChatroom } =
+    useRecentChats();
 
   const [renamingId, setRenamingId] = React.useState<string | null>(null);
   const [renameValue, setRenameValue] = React.useState<string>("");
   const [busyId, setBusyId] = React.useState<string | null>(null);
 
-  if (!userId) return <span className="text-xs text-black/30">Not logged in</span>;
+  if (!userId)
+    return <span className="text-xs text-black/30">Not logged in</span>;
   if (loading) return <span className="text-xs text-black/30">Loading...</span>;
-  if (chatrooms.length === 0) return <span className="text-xs text-black/30">No chatrooms</span>;
+  if (chatrooms.length === 0)
+    return <span className="text-xs text-black/30">No chatrooms</span>;
 
   async function onRenameSave(id: string) {
     setBusyId(id);
@@ -67,8 +73,13 @@ export default function RecentChatrooms({ userId, guest }: RecentChatroomsProps)
       {/* Overlay for guest */}
       {guest && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-lg z-10 flex-col gap-4">
-          <p className="text-sm text-white/80">Sign up to save your chatrooms!</p>
-          <Button variant="default" onClick={() => router.push("/auth/sign-up")}>
+          <p className="text-sm text-white/80">
+            Sign up to save your chatrooms!
+          </p>
+          <Button
+            variant="default"
+            onClick={() => router.push("/auth/sign-up")}
+          >
             Sign up
           </Button>
         </div>
@@ -91,7 +102,6 @@ export default function RecentChatrooms({ userId, guest }: RecentChatroomsProps)
               <div className="flex-1 min-w-0">
                 {!isRenaming ? (
                   <SidebarLink
-                    icon={MessageCircle}
                     label={chat.title}
                     href={href}
                     pathName={currentPathForHighlight}
