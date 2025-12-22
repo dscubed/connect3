@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import { AllCategories, CategoryOrderData, ChunkInput } from "../ChunkUtils";
 import { useAuthStore } from "@/stores/authStore";
-import { toast } from "sonner";
+import { uploadProfileToVectorStore } from "@/lib/vectorStores/client";
 
 export interface ProfileChunk {
   id: string;
@@ -69,8 +69,7 @@ const ChunkContext = createContext<ChunkContextType | undefined>(undefined);
 export function ChunkProvider({ children }: { children: ReactNode }) {
   const [chunks, setChunks] = useState<ProfileChunk[]>([]);
   const [categoryOrder, setCategoryOrder] = useState<CategoryOrderData[]>([]);
-  const { profile, getSupabaseClient, makeAuthenticatedRequest } =
-    useAuthStore.getState();
+  const { profile, getSupabaseClient } = useAuthStore.getState();
   const [editChunks, setEditChunks] = useState<Record<string, ChunkInput>>({});
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
@@ -328,38 +327,13 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
       setPrevChunks(chunks);
       setPrevCategoryOrder(categoryOrder);
 
-      // run vector store upload
-      await uploadChunksToVectorStore();
+      // save profile to vector store
+      await uploadProfileToVectorStore();
     } catch (error) {
       console.error("Failed to save chunks:", error);
     } finally {
       setSavingChunks(false);
     }
-  };
-
-  // upload to vector store
-  const uploadChunksToVectorStore = async () => {
-    const response = await makeAuthenticatedRequest(
-      "/api/vector-store/uploadProfile",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: profile?.id,
-          orderedCategoryChunks,
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      console.error("Failed to upload profile to vector store");
-      throw new Error("Vector store upload failed");
-    }
-
-    toast.success("Profile saved successfully!");
-    return await response.json();
   };
 
   return (

@@ -21,12 +21,12 @@ export async function POST(request: NextRequest) {
       return authResult; // Return error response
     }
     const { user } = authResult;
-    const { userId, orderedCategoryChunks } = await request.json();
+    const { userId } = await request.json();
 
     // Validate input
-    if (!userId || !orderedCategoryChunks || !user) {
+    if (!userId || !user) {
       return NextResponse.json(
-        { error: "userId, orderedCategoryChunks, or authentication required" },
+        { error: "userId, or authentication required" },
         { status: 400 }
       );
     }
@@ -42,10 +42,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Upload to OpenAI Vector Store
-    const fileId = await uploadProfileToVectorStore({
-      userId,
-      orderedCategoryChunks,
-    });
+    const fileId = await uploadProfileToVectorStore({ userId, supabase });
 
     // Update file id in supabase
     const { error } = await supabase

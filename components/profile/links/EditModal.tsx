@@ -4,7 +4,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { LinkItem, LinkType } from "./LinksUtils";
+import { LinkItem, LinkType, LinkTypes, UrlToLinkDetails } from "./LinksUtils";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,8 @@ import { LinksDisplay } from "./LinksDisplay";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
 import { LinkTypeInput } from "./LinkTypeInput";
+import { Link } from "lucide-react";
+import { uploadProfileToVectorStore } from "@/lib/vectorStores/client";
 
 interface EditModalProps {
   links: LinkItem[];
@@ -38,6 +40,8 @@ export function EditModal({
   const [prevLinks, setPrevLinks] = useState<LinkItem[]>(links);
   const [saving, setSaving] = useState(false);
   const { getSupabaseClient, profile } = useAuthStore.getState();
+  const [url, setUrl] = useState("");
+  const [showUrlInput, setShowUrlInput] = useState(false);
 
   const supabase = getSupabaseClient();
 
@@ -58,41 +62,99 @@ export function EditModal({
     deleteLink,
   };
 
-  const saveToSupabase = async () => {
-    setSaving(true);
-    // Get deleted links
-    const deletedLinks = prevLinks.filter(
-      (prevLink) => !links.find((link) => link.id === prevLink.id)
-    );
-    // Delete links
-    const { error: deleteError } = await supabase
-      .from("profile-links")
-      .delete()
-      .in(
-        "id",
-        deletedLinks.map((link) => link.id)
-      );
-    if (deleteError) {
-      console.error("Error deleting links:", deleteError);
-      setSaving(false);
-      toast.error(`Error deleting links: ${deleteError.message}`);
-    }
+  const deleteLinksFromSupabase = async (ids: string[]) => {
+    console.log("Deleting links with IDs:", ids);
 
-    // Upsert current links
-    const { error: upsertError } = await supabase.from("profile-links").upsert(
-      links.map((link) => ({
+    // check if ids exist
+    const { data, error: checkError } = await supabase
+      .from("profile_links")
+      .select("id")
+      .in("id", ids);
+    if (checkError) {
+      console.error("Error checking links before deletion:", checkError);
+      toast.error(`Error deleting links: ${checkError.message}`);
+      return;
+    }
+    if (data.length === 0) {
+      console.log("No links found to delete.");
+      return;
+    }
+    const { error } = await supabase
+      .from("profile_links")
+      .delete()
+      .in("id", ids);
+
+    if (error) {
+      console.error("Error deleting links:", error);
+      toast.error(`Error deleting links: ${error.message}`);
+    }
+  };
+
+  const addLinksToSupabase = async (newLinks: LinkItem[]) => {
+    const { error } = await supabase.from("profile_links").insert(
+      newLinks.map((link) => ({
         id: link.id,
         type: link.type,
         details: link.details,
         profile_id: profile?.id,
       }))
     );
-    if (upsertError) {
-      console.error("Error upserting links:", upsertError);
+    if (error) {
+      console.error("Error adding links:", error);
+      toast.error(`Error adding links: ${error.message}`);
+    }
+  };
+
+  const updateLinksInSupabase = async (updatedLinks: LinkItem[]) => {
+    for (const link of updatedLinks) {
+      const { error } = await supabase
+        .from("profile_links")
+        .update({ details: link.details })
+        .eq("id", link.id);
+      if (error) {
+        console.error("Error updating link:", error);
+        toast.error(`Error updating link: ${error.message}`);
+      }
+    }
+  };
+
+  const saveToSupabase = async () => {
+    setSaving(true);
+
+    // Get deleted links and new links
+    const deletedLinks = prevLinks.filter(
+      (prevLink) => !links.find((link) => link.id === prevLink.id)
+    );
+    const newLinks = links.filter(
+      (link) => !prevLinks.find((prevLink) => prevLink.id === link.id)
+    );
+    const updatedLinks = links.filter((link) =>
+      prevLinks.find(
+        (prevLink) =>
+          prevLink.id === link.id && prevLink.details !== link.details
+      )
+    );
+
+    // No changes
+    if (
+      deletedLinks.length === 0 &&
+      newLinks.length === 0 &&
+      updatedLinks.length === 0
+    ) {
+      toast.info("No changes to save.");
       setSaving(false);
-      toast.error(`Error saving links: ${upsertError.message}`);
+      onOpenChange(false);
       return;
     }
+
+    // Save changes to supabase
+    console.log("Deleted links:", deletedLinks);
+    await deleteLinksFromSupabase(deletedLinks.map((link) => link.id));
+    console.log("New links to add:", newLinks);
+    await addLinksToSupabase(newLinks);
+    console.log("Updated links:", updatedLinks);
+    await updateLinksInSupabase(updatedLinks);
+
     setSaving(false);
     toast.success("Links updated successfully!");
     onOpenChange(false);
@@ -108,6 +170,11 @@ export function EditModal({
 
   const addLink = () => {
     if (addingLink && addingLink.type && addingLink.details.trim()) {
+      if (links.some((link: LinkItem) => link.type === addingLink.type)) {
+        toast.error("This link already exists.");
+        return;
+      }
+
       console.log("Adding link:", addingLink);
       setLinks([
         ...links,
@@ -134,10 +201,11 @@ export function EditModal({
           {addingLink ? (
             <div className="animate-fade-in">
               {/* Inputs */}
-              <div className="flex gap-2 py-2 rounded-md mb-2">
+              <div className="flex gap-2 py-2 rounded-md mb-2 items-center">
                 <LinkTypeInput
                   addingState={addingLink}
                   setAddingState={setAddingLink}
+                  links={links.map((link) => link.type)}
                 />
                 <Input
                   placeholder="Link Details (e.g., URL or username)"
@@ -155,6 +223,43 @@ export function EditModal({
                     })
                   }
                 />
+                <div>
+                  <Button
+                    variant="ghost"
+                    className="!p-0 hover:bg-transparent"
+                    onClick={() => {
+                      setShowUrlInput(!showUrlInput);
+                      setUrl("");
+                    }}
+                  >
+                    <Link className="ml-1 size-6" />
+                  </Button>
+                  {showUrlInput && (
+                    <div className="absolute left-1/2 translate-y-2 bg-transparent p-2 rounded-md border border-secondary-foreground/50 backdrop-blur-md">
+                      <Input
+                        style={{
+                          width: `${Math.max(url.length, 18)}ch`,
+                          maxWidth: "30ch",
+                        }} // 18ch for placeholder fallback
+                        className="px-2 py-1 min-w-64 w-fit border-none focus-visible:ring-0 shadow-none"
+                        placeholder="Paste your URL here"
+                        value={url}
+                        onChange={(e) => {
+                          setUrl(e.target.value);
+                          const details = UrlToLinkDetails(e.target.value);
+                          if (details) {
+                            setAddingLink({
+                              typeInput: LinkTypes[details.type].label,
+                              type: details.type,
+                              details: details.details,
+                            });
+                            setShowUrlInput(false);
+                          }
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
               {/* Actions */}
               <div className="flex gap-2 animate-fade-in">
@@ -174,15 +279,20 @@ export function EditModal({
             <div className="flex justify-between items-center mt-4">
               <Button
                 className="w-fit h-fit animate-fade-in"
-                onClick={() => setAddingLink({ typeInput: "", details: "" })}
+                onClick={() => {
+                  setAddingLink({ typeInput: "", details: "" });
+                  setShowUrlInput(false);
+                  setUrl("");
+                }}
               >
                 Add Link
               </Button>
               <Button
-                onClick={() =>
+                onClick={() => {
                   // Save to supabase
-                  saveToSupabase()
-                }
+                  saveToSupabase();
+                  uploadProfileToVectorStore();
+                }}
                 disabled={saving}
                 className="animate-fade-in"
               >
