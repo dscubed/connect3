@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useRecentChats } from "../hooks/useRecentChats";
+import { useRecentChats } from "../home/hooks/useRecentChats";
 import { Button } from "@/components/ui/button";
 
 import { SidebarLink } from "@/components/sidebar/SidebarLink";

@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import SidebarHeader from "./SidebarHeader";
 import { useAuthStore } from "@/stores/authStore";
 
-import RecentChatrooms from "../home/QuickInfo/RecentChatrooms";
+import RecentChatrooms from "./RecentChatrooms";
 
 interface SidebarProps {
   open?: boolean;
