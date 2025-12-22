@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { createClient } from "@/lib/supabase/client";
-import type { User, Session } from "@supabase/supabase-js";
+import type { User, Session, Subscription } from "@supabase/supabase-js";
 
 export interface Profile {
   id: string;
@@ -24,6 +24,7 @@ interface AuthState {
   profile: Profile | null;
   loading: boolean;
   session: Session | null;
+  authSub: Subscription | null;
   initialize: () => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (fields: Partial<Profile>) => Promise<void>;
@@ -53,8 +54,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   profile: null,
   loading: true,
   session: null,
+  authSub: null,
 
   initialize: async () => {
+    if (get().authSub) return; // Already initialized
+
     const supabase = createClient();
 
     // Get initial session and user
@@ -73,7 +77,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
 
     // Listen for changes
-    supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       const isAnon = session?.user?.is_anonymous ?? false;
       set({ user: session?.user ?? null, session, loading: false });
       if (session?.user && !isAnon) {
@@ -82,6 +88,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ profile: null });
       }
     });
+    set({ authSub: subscription });
   },
 
   signOut: async () => {

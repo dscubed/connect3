@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { MoreHorizontal, Pencil, Trash2, Check, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 interface RecentChatroomsProps {
   userId: string | null;
@@ -98,7 +99,7 @@ export default function RecentChatrooms({
           const href = `/search?chatroom=${chat.id}`;
 
           return (
-            <div key={chat.id} className="flex items-center gap-2">
+            <div key={chat.id} className="flex items-start gap-1">
               <div className="flex-1 min-w-0">
                 {!isRenaming ? (
                   <SidebarLink
@@ -107,37 +108,43 @@ export default function RecentChatrooms({
                     pathName={currentPathForHighlight}
                   />
                 ) : (
-                  <div
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-black/[0.03]"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <input
-                      value={renameValue}
-                      onChange={(e) => setRenameValue(e.target.value)}
-                      className="w-full bg-black/5 border border-black/10 rounded-md px-2 py-1 text-sm text-black outline-none"
-                      autoFocus
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") onRenameSave(chat.id);
-                        if (e.key === "Escape") setRenamingId(null);
-                      }}
-                      disabled={isBusy}
-                    />
-                    <button
-                      className="p-1 rounded hover:bg-black/5 disabled:opacity-50"
-                      onClick={() => onRenameSave(chat.id)}
-                      disabled={isBusy}
-                      aria-label="Save rename"
+                  <div className="flex flex-col items-end">
+                    <div
+                      className="flex items-center gap-2 rounded-lg bg-black/[0.03]"
+                      onClick={(e) => e.stopPropagation()}
                     >
-                      <Check className="w-4 h-4 text-black/70" />
-                    </button>
-                    <button
-                      className="p-1 rounded hover:bg-black/5 disabled:opacity-50"
-                      onClick={() => setRenamingId(null)}
-                      disabled={isBusy}
-                      aria-label="Cancel rename"
-                    >
-                      <X className="w-4 h-4 text-black/70" />
-                    </button>
+                      <Input
+                        value={renameValue}
+                        onChange={(e) => setRenameValue(e.target.value)}
+                        className="w-full bg-black/5 border border-black/10 rounded-md px-2 py-1 text-sm text-black outline-none"
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") onRenameSave(chat.id);
+                          if (e.key === "Escape") setRenamingId(null);
+                        }}
+                        disabled={isBusy}
+                      />
+                    </div>
+                    <div className="flex flex-row gap-2 mt-2 animate-fade-in">
+                      <Button
+                        className="p-1 rounded hover:bg-black/5 disabled:opacity-50 h-fit"
+                        onClick={() => onRenameSave(chat.id)}
+                        disabled={isBusy}
+                        aria-label="Save rename"
+                        variant="ghost"
+                      >
+                        <Check className="w-4 h-4 text-black/70" />
+                      </Button>
+                      <Button
+                        className="p-1 rounded hover:bg-black/5 disabled:opacity-50 h-fit"
+                        onClick={() => setRenamingId(null)}
+                        disabled={isBusy}
+                        aria-label="Cancel rename"
+                        variant="ghost"
+                      >
+                        <X className="w-4 h-4 text-black/70" />
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>
