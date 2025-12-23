@@ -20,7 +20,7 @@ export function ChunkActions() {
     setIsEditing,
   } = useChunkContext();
   return (
-    <div className="flex gap-4">
+    <div className="flex gap-4 animate-fade-in">
       <div className="flex gap-2">
         {isEditing ? (
           <>

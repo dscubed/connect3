@@ -7,15 +7,18 @@ import { CubeLoader } from "@/components/ui/CubeLoader";
 import CoverImage from "@/components/profile/CoverImage";
 import ProfilePicture from "@/components/profile/ProfilePicture";
 import UserDetails from "@/components/profile/UserDetails";
-import TLDRSection from "@/components/profile/TLDRSection";
 import ChunksSection from "@/components/profile/ChunksSection";
 import EventsSection from "@/components/profile/events/EventsSection";
-import { ChunkProvider } from "@/components/profile/chunks/hooks/ChunkProvider";
+import {
+  ChunkProvider,
+  useChunkContext,
+} from "@/components/profile/chunks/hooks/ChunkProvider";
 import { LinksSection } from "@/components/profile/LinksSection";
 import { Button } from "@/components/ui/button";
 
 export default function ProfilePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [editingProfile, setEditingProfile] = useState(false);
   const { user, profile, loading } = useAuthStore();
 
   if (loading) {
@@ -29,18 +32,10 @@ export default function ProfilePage() {
     );
   }
 
-  if (!user) {
+  if (!user || !profile) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p>Please log in to view your profile.</p>
-      </div>
-    );
-  }
-
-  if (!profile) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Profile not found.</p>
       </div>
     );
   }
@@ -59,32 +54,39 @@ export default function ProfilePage() {
           >
             <CoverImage />
 
-            <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8">
-              <motion.div
-                className="relative -mt-20 mb-8"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-              >
-                <div className="flex flex-col gap-6">
-                  <div className="flex flex-row justify-between">
-                    <ProfilePicture avatar={profile.avatar_url ?? null} />
-                    <ActionsButton profile={profile} />
+            <ChunkProvider>
+              <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8">
+                <motion.div
+                  className="relative -mt-20 mb-8"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                >
+                  <div className="flex flex-col gap-6">
+                    <div className="flex flex-row justify-between">
+                      <ProfilePicture
+                        avatar={profile.avatar_url ?? null}
+                        editingProfile={editingProfile}
+                      />
+                      <ActionsButton
+                        profile={profile}
+                        setEditingProfile={setEditingProfile}
+                        editingProfile={editingProfile}
+                      />
+                    </div>
+                    <div className="flex flex-row justify-between">
+                      <UserDetails profile={profile} />
+                      <LinksSection editingProfile={editingProfile} />
+                    </div>
                   </div>
-                  <div className="flex flex-row justify-between">
-                    <UserDetails profile={profile} />
-                    <LinksSection />
-                  </div>
-                </div>
-              </motion.div>
-              {/* Events form for organisations only */}
-              {profile.account_type === "organisation" && <EventsSection />}
+                </motion.div>
+                {/* Events form for organisations only */}
+                {profile.account_type === "organisation" && <EventsSection />}
 
-              {/* Chunks Section */}
-              <ChunkProvider>
-                <ChunksSection />
-              </ChunkProvider>
-            </div>
+                {/* Chunks Section */}
+                <ChunksSection editingProfile={editingProfile} />
+              </div>
+            </ChunkProvider>
           </div>
         </main>
       </div>
@@ -92,15 +94,38 @@ export default function ProfilePage() {
   );
 }
 
-function ActionsButton({ profile }: { profile: Profile }) {
+function ActionsButton({
+  profile,
+  editingProfile,
+  setEditingProfile,
+}: {
+  profile: Profile;
+  editingProfile?: boolean;
+  setEditingProfile: (editing: boolean) => void;
+}) {
+  const { user } = useAuthStore();
+  const { setIsEditing, reset } = useChunkContext();
+
+  const handleEditToggle = () => {
+    setEditingProfile(!editingProfile);
+    // If finishing editing, reset chunk edits and exit chunk editing mode
+    if (editingProfile) {
+      setIsEditing(false);
+      reset();
+    }
+  };
+
   return (
     <div className="flex items-center gap-2">
-      <Button
-        variant="outline"
-        className="text-lg bg-secondary-foreground font-medium text-secondary hover:scale-105 hover:bg-secondary-foreground hover:text-secondary transition-all rounded-2xl"
-      >
-        Edit Profile
-      </Button>
+      {user?.id === profile.id && (
+        <Button
+          variant="outline"
+          className="text-lg bg-secondary-foreground font-medium text-secondary hover:scale-105 hover:bg-secondary-foreground hover:text-secondary transition-all rounded-2xl"
+          onClick={handleEditToggle}
+        >
+          {editingProfile ? "Finish" : "Edit Profile"}
+        </Button>
+      )}
     </div>
   );
 }

@@ -5,7 +5,11 @@ import { ChunkActions } from "./chunks/ChunkActions";
 import { ChunksDisplay } from "./chunks/display/ChunksDisplay";
 import { useAuthStore } from "@/stores/authStore";
 
-export default function ChunksSection() {
+interface ChunksSectionProps {
+  editingProfile: boolean;
+}
+
+export default function ChunksSection({ editingProfile }: ChunksSectionProps) {
   const { fetchChunks } = useChunkContext();
   const profile = useAuthStore((state) => state.profile);
   const fetchedRef = useRef(false);
@@ -18,9 +22,7 @@ export default function ChunksSection() {
 
   return (
     <div className="w-full flex flex-col gap-6 mb-24">
-      <div className="w-full flex gap-2 items-center">
-        <ChunkActions />
-      </div>
+      {editingProfile && <ChunkActions />}
 
       {/* Chunks */}
       <ChunksDisplay />

@@ -6,7 +6,11 @@ import { EditModal } from "./links/EditModal";
 import { LinkItem } from "./links/LinksUtils";
 import { LinksDisplay } from "./links/LinksDisplay";
 
-export function LinksSection() {
+interface LinksSectionProps {
+  editingProfile: boolean;
+}
+
+export function LinksSection({ editingProfile }: LinksSectionProps) {
   const { profile, loading, getSupabaseClient } = useAuthStore.getState();
   const [linkData, setLinkData] = useState<LinkItem[]>([]);
   const [fetched, setFetched] = useState(false);
@@ -34,14 +38,19 @@ export function LinksSection() {
   return (
     <>
       {!loading && (
-        <div className="flex items-center gap-4 animate-fade-in">
+        <div className="flex items-center gap-4 animate-fade-in h-fit">
           {linkData.length > 0 ? (
             <LinksDisplay links={linkData} />
           ) : (
             <p>No links added</p>
           )}
-          <span className="border-l border-muted/70 h-6" />
-          <EditLinkButton onClick={() => setDisplayEditModal(true)} />
+
+          {editingProfile && (
+            <div className="flex h-full items-center animate-fade-in">
+              <span className="h-6 border-l border-secondary-foreground mr-2" />
+              <EditLinkButton onClick={() => setDisplayEditModal(true)} />
+            </div>
+          )}
         </div>
       )}
 
