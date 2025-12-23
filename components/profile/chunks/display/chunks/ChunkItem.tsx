@@ -19,7 +19,7 @@ export function ChunkItem({
     <li
       onClick={() => {
         setEditChunks((prev) => {
-          if (!isEditing) return prev;
+          if (!isEditing || editChunks[chunk.id]) return prev;
           return {
             ...prev,
             [chunk.id]: { text: chunk.text, category },
@@ -37,11 +37,13 @@ export function ChunkItem({
             }))
           }
           cancel={() =>
-            setEditChunks((prev) => {
-              const updated = { ...prev };
-              delete updated[chunk.id];
-              return updated;
-            })
+            setTimeout(() => {
+              setEditChunks((prev) => {
+                const updated = { ...prev };
+                delete updated[chunk.id];
+                return updated;
+              });
+            }, 0)
           }
           chunkId={chunk.id}
         />

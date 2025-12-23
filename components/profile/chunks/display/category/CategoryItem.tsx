@@ -36,7 +36,7 @@ export function CategoryItem({
             {...(isEditing ? { ...attributes, ...listeners } : {})}
           >
             <h1
-              className={`relative text-lg font-semibold flex items-center justify-center transition-all duration-300
+              className={`relative text-2xl font-semibold flex items-center justify-center transition-all duration-300
                 ${isEditing ? "pl-6" : "p-0"}`}
             >
               <Fade

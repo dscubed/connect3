@@ -52,12 +52,10 @@ export function AddCategoryButton() {
           >
             <Button variant="ghost">
               {selectedCategory ? (
-                <h1 className="text-lg font-semibold mb-2">
-                  {selectedCategory}
-                </h1>
+                <h1 className="text-2xl font-semibold">{selectedCategory}</h1>
               ) : (
                 <div className="flex gap-2 items-center align-center ">
-                  <h1 className="text-lg font-semibold"> Add Category </h1>
+                  <h1 className="text-2xl font-semibold"> Add Category </h1>
                 </div>
               )}
             </Button>

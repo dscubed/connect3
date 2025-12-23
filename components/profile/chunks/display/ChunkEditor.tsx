@@ -66,23 +66,25 @@ export function ChunkEditor({
             rows={1}
           />
           <div className="items-end min-h-10">
-          <AiEnhanceDialog
-            initialText={chunk.text}
-            fieldType="chunk"
-            title="Enhance this highlight"
-            triggerLabel="Enhance"
-            onApply={(newText) => {
-              // update what's shown in the editor immediately
-              setChunk({ ...chunk, text: newText });
+            <AiEnhanceDialog
+              initialText={chunk.text}
+              fieldType="chunk"
+              title="Enhance this highlight"
+              triggerLabel="Enhance"
+              onApply={(newText) => {
+                // update what's shown in the editor immediately
+                setChunk({ ...chunk, text: newText });
 
-              // if editing an existing chunk, update it in the store too
-              if (chunkId) {
-                setChunks((prev) =>
-                  prev.map((c) => (c.id === chunkId ? { ...c, text: newText } : c))
-                );
-              }
-            }}
-          />
+                // if editing an existing chunk, update it in the store too
+                if (chunkId) {
+                  setChunks((prev) =>
+                    prev.map((c) =>
+                      c.id === chunkId ? { ...c, text: newText } : c
+                    )
+                  );
+                }
+              }}
+            />
           </div>
         </div>
       </div>

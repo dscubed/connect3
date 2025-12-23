@@ -10,6 +10,7 @@ import { AddCategoryButton } from "../AddCategoryButton";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import { Sparkles } from "lucide-react";
 import { Fade } from "@/components/ui/Fade";
+import { SummaryChunk } from "./SummaryChunk";
 
 export function ChunksDisplay() {
   const { orderedCategoryChunks, loadingChunks, setEditChunks, isEditing } =
@@ -31,48 +32,52 @@ export function ChunksDisplay() {
     return (
       <div className="flex flex-col items-center justify-center h-32">
         <CubeLoader size={60} />
-        <span className="text-muteed">Loading chunks...</span>
+        <span className="text-muted">Loading chunks...</span>
       </div>
     );
   }
   return (
     <div>
-      {orderedCategoryChunks.length === 0 && !isEditing ? (
-        <EmptyChunksState />
-      ) : (
-        <div
-          className={`flex flex-col gap-2 min-h-32 items-center w-full ${
-            !isEditing ? "mb-16 justify-start" : "justify-center"
-          }`}
-        >
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleCategoryDragEnd}
-          >
-            <SortableContext
-              items={categoryIds}
-              strategy={verticalListSortingStrategy}
+      <div
+        className={`flex flex-col gap-2 min-h-32 items-center w-full ${
+          !isEditing ? "mb-16 justify-start" : "justify-center"
+        }`}
+      >
+        <SummaryChunk />
+
+        {orderedCategoryChunks.length === 0 && !isEditing ? (
+          <EmptyChunksState />
+        ) : (
+          <>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleCategoryDragEnd}
             >
-              {orderedCategoryChunks.map(({ category, chunks }) => (
-                <CategoryItem
-                  key={category}
-                  category={category}
-                  chunks={chunks}
-                  newChunks={newChunks}
-                  setNewChunks={setNewChunks}
-                />
-              ))}
-            </SortableContext>
-          </DndContext>
-          <Fade
-            show={isEditing}
-            className="flex flex-col gap-2 items-center justify-center w-full"
-          >
-            <AddCategoryButton />
-          </Fade>
-        </div>
-      )}
+              <SortableContext
+                items={categoryIds}
+                strategy={verticalListSortingStrategy}
+              >
+                {orderedCategoryChunks.map(({ category, chunks }) => (
+                  <CategoryItem
+                    key={category}
+                    category={category}
+                    chunks={chunks}
+                    newChunks={newChunks}
+                    setNewChunks={setNewChunks}
+                  />
+                ))}
+              </SortableContext>
+            </DndContext>
+            <Fade
+              show={isEditing}
+              className="flex flex-col gap-2 items-center justify-center w-full"
+            >
+              <AddCategoryButton />
+            </Fade>
+          </>
+        )}
+      </div>
     </div>
   );
 }

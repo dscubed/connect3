@@ -2,16 +2,17 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Sidebar from "@/components/sidebar/Sidebar";
-import { useAuthStore } from "@/stores/authStore";
+import { Profile, useAuthStore } from "@/stores/authStore";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import CoverImage from "@/components/profile/CoverImage";
 import ProfilePicture from "@/components/profile/ProfilePicture";
 import UserDetails from "@/components/profile/UserDetails";
 import TLDRSection from "@/components/profile/TLDRSection";
-import ChunksSection from "@/components/profile/chunks/ChunksSection";
+import ChunksSection from "@/components/profile/ChunksSection";
 import EventsSection from "@/components/profile/events/EventsSection";
 import { ChunkProvider } from "@/components/profile/chunks/hooks/ChunkProvider";
 import { LinksSection } from "@/components/profile/LinksSection";
+import { Button } from "@/components/ui/button";
 
 export default function ProfilePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -66,8 +67,10 @@ export default function ProfilePage() {
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
                 <div className="flex flex-col gap-6">
-                  <ProfilePicture avatar={profile.avatar_url ?? null} />
-
+                  <div className="flex flex-row justify-between">
+                    <ProfilePicture avatar={profile.avatar_url ?? null} />
+                    <ActionsButton profile={profile} />
+                  </div>
                   <div className="flex flex-row justify-between">
                     <UserDetails profile={profile} />
                     <LinksSection />
@@ -77,9 +80,6 @@ export default function ProfilePage() {
               {/* Events form for organisations only */}
               {profile.account_type === "organisation" && <EventsSection />}
 
-              {/* TLDR Section */}
-              <TLDRSection tldr={profile.tldr || null} />
-
               {/* Chunks Section */}
               <ChunkProvider>
                 <ChunksSection />
@@ -88,6 +88,19 @@ export default function ProfilePage() {
           </div>
         </main>
       </div>
+    </div>
+  );
+}
+
+function ActionsButton({ profile }: { profile: Profile }) {
+  return (
+    <div className="flex items-center gap-2">
+      <Button
+        variant="outline"
+        className="text-lg bg-secondary-foreground font-medium text-secondary hover:scale-105 hover:bg-secondary-foreground hover:text-secondary transition-all rounded-2xl"
+      >
+        Edit Profile
+      </Button>
     </div>
   );
 }

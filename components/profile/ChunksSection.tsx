@@ -1,8 +1,8 @@
 "use client";
-import { useChunkContext } from "./hooks/ChunkProvider";
+import { useChunkContext } from "./chunks/hooks/ChunkProvider";
 import { useEffect, useRef } from "react";
-import { ChunkActions } from "./ChunkActions";
-import { ChunksDisplay } from "./display/ChunksDisplay";
+import { ChunkActions } from "./chunks/ChunkActions";
+import { ChunksDisplay } from "./chunks/display/ChunksDisplay";
 import { useAuthStore } from "@/stores/authStore";
 
 export default function ChunksSection() {

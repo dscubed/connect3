@@ -46,6 +46,12 @@ type ChunkContextType = {
   >;
   isEditing: boolean;
   setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
+  // Tldr states
+  tldr: string;
+  editingTldr: boolean;
+  setEditingTldr: React.Dispatch<React.SetStateAction<boolean>>;
+  newTldr: string;
+  setNewTldr: React.Dispatch<React.SetStateAction<string>>;
 
   // Actions
   addChunk: (category: AllCategories, text: string) => void;
@@ -69,9 +75,12 @@ const ChunkContext = createContext<ChunkContextType | undefined>(undefined);
 export function ChunkProvider({ children }: { children: ReactNode }) {
   const [chunks, setChunks] = useState<ProfileChunk[]>([]);
   const [categoryOrder, setCategoryOrder] = useState<CategoryOrderData[]>([]);
-  const { profile, getSupabaseClient } = useAuthStore.getState();
+  const { profile, getSupabaseClient, updateProfile } = useAuthStore.getState();
   const [editChunks, setEditChunks] = useState<Record<string, ChunkInput>>({});
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [tldr, setTldr] = useState<string>("");
+  const [editingTldr, setEditingTldr] = useState<boolean>(false);
+  const [newTldr, setNewTldr] = useState<string>("");
 
   // loading states
   const [loadingChunks, setLoadingChunks] = useState<boolean>(true);
@@ -232,6 +241,9 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
       // Set fetched data to prev state for tracking
       setPrevChunks(chunksData as ProfileChunk[]);
       setPrevCategoryOrder(categoryOrderData as CategoryOrderData[]);
+
+      // Fetch and set tldr
+      setTldr(profile.tldr || "");
     } catch (error) {
       console.error("Failed to load chunks:", error);
     } finally {
@@ -239,10 +251,12 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
     }
   }, [profile, supabase]);
 
-  // Reset chunks to last fetched state
+  // Reset chunks to last fetched state and reset tldr
   const reset = () => {
     setChunks(prevChunks);
     setCategoryOrder(prevCategoryOrder);
+    setNewTldr(tldr);
+    setEditingTldr(false);
   };
 
   const saveChunks = async () => {
@@ -327,6 +341,9 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
       setPrevChunks(chunks);
       setPrevCategoryOrder(categoryOrder);
 
+      // Save tldr if edited
+      saveTldr();
+
       // save profile to vector store
       await uploadProfileToVectorStore();
     } catch (error) {
@@ -334,6 +351,13 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
     } finally {
       setSavingChunks(false);
     }
+  };
+
+  const saveTldr = async () => {
+    if (!profile) return;
+    setSavingChunks(true);
+    updateProfile({ tldr: newTldr });
+    setSavingChunks(false);
   };
 
   return (
@@ -349,6 +373,12 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
         setEditChunks,
         isEditing,
         setIsEditing,
+        // Tldr states
+        tldr,
+        editingTldr,
+        setEditingTldr,
+        newTldr,
+        setNewTldr,
         // Actions
         addChunk,
         updateChunk,
