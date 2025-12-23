@@ -52,7 +52,7 @@ export default function ProfilePage() {
               scrollbarColor: "rgba(255,255,255,0.3) transparent",
             }}
           >
-            <CoverImage />
+            <CoverImage editingProfile={editingProfile} />
 
             <ChunkProvider>
               <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8">

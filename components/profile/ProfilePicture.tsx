@@ -18,7 +18,7 @@ export default function ProfilePicture({
   return (
     <div className="relative w-fit">
       <motion.div
-        className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-[#0B0B0C] bg-[#0B0B0C]"
+        className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-secondary bg-secondary-foreground"
         whileHover={{ scale: 1.02 }}
         transition={{ duration: 0.2 }}
       >
