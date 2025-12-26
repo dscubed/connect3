@@ -1,5 +1,9 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { LinkTypes } from "@/components/profile/links/LinksUtils";
+import {
+  universities,
+  University,
+} from "@/components/profile/details/univeristies";
 
 export async function getOrderedChunks(
   profileId: string,
@@ -39,7 +43,7 @@ export async function getOrderedChunks(
 async function getProfileData(profileId: string, supabase: SupabaseClient) {
   const { data, error } = await supabase
     .from("profiles")
-    .select("first_name, last_name, account_type, tldr")
+    .select("first_name, last_name, account_type, university, tldr")
     .eq("id", profileId)
     .single();
   if (error || !data) {
@@ -76,6 +80,9 @@ export async function getFileText(profileId: string, supabase: SupabaseClient) {
   ${profileData.first_name} ${profileData.last_name} (${
     profileData.account_type
   })
+  University: ${
+    universities[profileData.university as University]?.name || "Not specified"
+  }
   ${profileData.tldr.length > 0 ? profileData.tldr : "No summary provided."}`;
 
   const linksText = profileLinks

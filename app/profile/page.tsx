@@ -75,7 +75,10 @@ export default function ProfilePage() {
                       />
                     </div>
                     <div className="flex flex-row justify-between">
-                      <UserDetails profile={profile} />
+                      <UserDetails
+                        profile={profile}
+                        editingProfile={editingProfile}
+                      />
                       <LinksSection editingProfile={editingProfile} />
                     </div>
                   </div>

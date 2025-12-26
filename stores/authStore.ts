@@ -16,6 +16,7 @@ export interface Profile {
   tldr?: string;
   cover_image_url?: string;
   status?: string;
+  university?: string | null;
   account_type?: "user" | "organisation";
 }
 
