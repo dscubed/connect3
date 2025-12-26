@@ -1,4 +1,4 @@
-import { useAuthStore } from "@/stores/authStore";
+import { Profile, useAuthStore } from "@/stores/authStore";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { EditLinkButton } from "./links/EditLinkButton";
@@ -8,10 +8,11 @@ import { LinksDisplay } from "./links/LinksDisplay";
 
 interface LinksSectionProps {
   editingProfile: boolean;
+  profile: Profile;
 }
 
-export function LinksSection({ editingProfile }: LinksSectionProps) {
-  const { profile, loading, getSupabaseClient } = useAuthStore.getState();
+export function LinksSection({ editingProfile, profile }: LinksSectionProps) {
+  const { loading, getSupabaseClient } = useAuthStore.getState();
   const [linkData, setLinkData] = useState<LinkItem[]>([]);
   const [fetched, setFetched] = useState(false);
   const [displayEditModal, setDisplayEditModal] = useState(false);
@@ -19,18 +20,20 @@ export function LinksSection({ editingProfile }: LinksSectionProps) {
   const supabase = getSupabaseClient();
 
   useEffect(() => {
+    console.log("Fetching links for profile:", profile);
+
     if (!profile || loading || fetched) return;
     const fetchLinks = async () => {
       const { data, error } = await supabase
         .from("profile_links")
-        .select("id, type, details");
+        .select("id, type, details")
+        .eq("profile_id", profile.id);
       if (error || !data) {
         toast.error(`Error fetching links: ${error.message}`);
         return;
       }
       setLinkData(data as LinkItem[]);
       setFetched(true);
-      console.log("Fetched links:", data);
     };
     fetchLinks();
   }, [profile, loading, supabase, fetched]);

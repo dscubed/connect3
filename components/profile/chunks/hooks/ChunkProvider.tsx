@@ -8,7 +8,7 @@ import React, {
   useEffect,
 } from "react";
 import { AllCategories, CategoryOrderData, ChunkInput } from "../ChunkUtils";
-import { useAuthStore } from "@/stores/authStore";
+import { Profile, useAuthStore } from "@/stores/authStore";
 import { uploadProfileToVectorStore } from "@/lib/vectorStores/client";
 
 export interface ProfileChunk {
@@ -72,10 +72,16 @@ type ChunkContextType = {
 
 const ChunkContext = createContext<ChunkContextType | undefined>(undefined);
 
-export function ChunkProvider({ children }: { children: ReactNode }) {
+export function ChunkProvider({
+  children,
+  profile,
+}: {
+  children: ReactNode;
+  profile: Profile;
+}) {
   const [chunks, setChunks] = useState<ProfileChunk[]>([]);
   const [categoryOrder, setCategoryOrder] = useState<CategoryOrderData[]>([]);
-  const { profile, getSupabaseClient, updateProfile } = useAuthStore.getState();
+  const { user, getSupabaseClient, updateProfile } = useAuthStore.getState();
   const [editChunks, setEditChunks] = useState<Record<string, ChunkInput>>({});
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [tldr, setTldr] = useState<string>("");
@@ -260,7 +266,7 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
   };
 
   const saveChunks = async () => {
-    if (!profile || savingChunks) return;
+    if (!profile || savingChunks || user?.id !== profile.id) return;
     setSavingChunks(true);
 
     // Identify deleted chunks/categories
