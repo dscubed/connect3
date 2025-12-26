@@ -5,10 +5,7 @@ import {
   University,
 } from "@/components/profile/details/univeristies";
 
-export async function getOrderedChunks(
-  profileId: string,
-  supabase: SupabaseClient
-) {
+async function getOrderedChunks(profileId: string, supabase: SupabaseClient) {
   const { data: chunksData, error: chunksError } = await supabase
     .from("profile_chunks")
     .select("text, category, order")
