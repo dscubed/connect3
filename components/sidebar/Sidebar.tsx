@@ -12,6 +12,7 @@ import RecentChatrooms from "./RecentChatrooms";
 interface SidebarProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  chatroomId?: string;
 }
 
 const sidebarLinks = [
@@ -20,7 +21,11 @@ const sidebarLinks = [
   { icon: UsersRound, label: "Clubs", href: "/clubs" },
 ];
 
-const Sidebar: React.FC<SidebarProps> = ({ open, onOpenChange }) => {
+const Sidebar: React.FC<SidebarProps> = ({
+  open,
+  onOpenChange,
+  chatroomId,
+}) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   const sidebarRef = useRef<HTMLElement>(null);
@@ -119,7 +124,10 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onOpenChange }) => {
             </div>
 
             <div className=" overflow-y-auto pr-1 scrollbar-hide">
-              <RecentChatrooms userId={user?.id ?? null} />
+              <RecentChatrooms
+                userId={user?.id ?? null}
+                chatroomId={chatroomId}
+              />
             </div>
           </div>
         </div>

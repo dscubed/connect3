@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useRecentChats } from "../home/hooks/useRecentChats";
 import { Button } from "@/components/ui/button";
 
@@ -20,18 +20,18 @@ import { Input } from "@/components/ui/input";
 interface RecentChatroomsProps {
   userId: string | null;
   guest?: boolean;
+  chatroomId?: string;
 }
 
 export default function RecentChatrooms({
   userId,
   guest,
+  chatroomId,
 }: RecentChatroomsProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  const activeChatroomId = searchParams.get("chatroom");
-  const currentPathForHighlight = activeChatroomId
-    ? `/search?chatroom=${activeChatroomId}`
+  const currentPathForHighlight = chatroomId
+    ? `/search?chatroom=${chatroomId}`
     : "";
 
   const { chatrooms, loading, renameChatroom, deleteChatroom } =

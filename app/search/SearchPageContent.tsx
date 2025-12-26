@@ -130,7 +130,11 @@ export default function SearchPageContent() {
   return (
     <div className="min-h-screen w-full relative overflow-hidden">
       <div className="flex relative z-10 w-full">
-        <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
+        <Sidebar
+          open={sidebarOpen}
+          onOpenChange={setSidebarOpen}
+          chatroomId={chatroomId || undefined}
+        />
 
         <main className="flex-1 min-w-0 pt-16 md:pt-0 relative flex flex-col h-screen">
           {/* Share button */}
