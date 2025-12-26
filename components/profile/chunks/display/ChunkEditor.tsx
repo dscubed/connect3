@@ -58,7 +58,7 @@ export function ChunkEditor({
         />
         <div className="flex w-full items-end gap-2">
           <Textarea
-            className="flex-1 p-2 min-h-0 border-none outline-none focus-visible:ring-0 focus:ring-0 resize-none md:text-md"
+            className="flex-1 p-2 min-h-0 border-none outline-none focus-visible:ring-0 focus:ring-0 resize-none !text-lg"
             placeholder={CATEGORY_PLACEHOLDERS[chunk.category]}
             onKeyDown={handleKeyDown}
             onChange={handleChange}

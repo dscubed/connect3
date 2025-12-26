@@ -66,7 +66,7 @@ export default function CoverImage({
 
       {/* Edit Cover Button */}
       {editingProfile && (
-        <div className="absolute bottom-4 right-12 items-center justify-center flex animate-fade-in">
+        <div className="absolute bottom-12 right-2 md:bottom-6 md:right-12 items-center justify-center flex animate-fade-in">
           {Object.keys(COVER_IMAGES).map((color) => {
             const selected = color === selectedColor;
 

@@ -1,6 +1,5 @@
 "use client";
 import { motion } from "framer-motion";
-import { Briefcase, MapPin } from "lucide-react";
 import { useProfileModals } from "@/components/profile/hooks/useProfileModals";
 import ProfileModals from "@/components/profile/edit-modals/ProfileModals";
 
@@ -29,14 +28,21 @@ export default function UserDetails({ profile }: UserDetailsProps) {
   return (
     <div className="flex-1 md:pb-4">
       {/* Name */}
-      <div className="flex items-center gap-2 mb-2">
+      <div className="flex flex-col gap-2 mb-2">
         <motion.h1
-          className="text-3xl md:text-4xl font-bold cursor-pointer"
+          className="text-4xl font-bold cursor-pointer"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => handleOpen("name")}
         >
           {profile.first_name} {profile.last_name || ""}
+        </motion.h1>
+        <motion.h1
+          className="text-2xl font-medium text-muted/80 cursor-pointer flex items-center gap-2"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          University of Melbourne
         </motion.h1>
       </div>
 

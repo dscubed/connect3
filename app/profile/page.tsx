@@ -46,7 +46,7 @@ export default function ProfilePage() {
         <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
         <main className="flex-1 pt-16 md:pt-0 relative">
           <div
-            className="h-screen overflow-y-auto"
+            className="h-screen w-full max-w-[100vw] overflow-y-auto"
             style={{
               scrollbarWidth: "thin",
               scrollbarColor: "rgba(255,255,255,0.3) transparent",
