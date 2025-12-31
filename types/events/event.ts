@@ -17,6 +17,7 @@ export type HostedEvent = {
     pricing: EventPricing;
     city: EventCity[];
     location_type: EventLocationType;
+    university?: string[];
 }
 
 // could change to a way that users can add their own categories but 
@@ -31,14 +32,55 @@ export type EventCategory = "networking" |
                         
 export type EventPricing  = "free" | "paid"
 export type EventLocationType = "virtual" | "physical"
-export type EventCity = "melbourne" | 
-                        "sydney" | 
+export type EventCity = "melbourne" |
+                        "sydney" |
                         "perth" |
-                        "canberra" | 
+                        "canberra" |
                         "adelaide" |
                         "gold-coast" |
                         "newcaste" |
                         "hobart" |
                         "brisbane" |
-                        "darwin" | 
+                        "darwin" |
                         "geelong"
+
+export type EventFilePricing = {
+  type: "free";
+} | {
+  type: "paid";
+  min?: number;
+  max?: number;
+  currency?: string;
+};
+
+export type EventFileAttributes = {
+  university: string[];
+  start_time: number;
+  end_time: number;
+  pricing: EventFilePricing;
+  city: EventCity[];
+};
+
+export type EventFile = {
+  id: string;
+  event_name: string;
+  organisers: {
+    creator: string;
+    collaborators: string[];
+  };
+  time: {
+    start: number;
+    end: number;
+  };
+  location: {
+    city: EventCity[];
+    venue?: string;
+    location_type: EventLocationType;
+  };
+  pricing: EventFilePricing;
+  description: string;
+  type?: EventCategory[];
+  thumbnail_url?: string;
+  booking_links?: string[];
+  attributes: EventFileAttributes;
+};

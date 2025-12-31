@@ -1,6 +1,7 @@
 import { authenticateRequest } from "@/lib/api/auth-middleware";
 import { createEventBodySchema } from "@/lib/schemas/api/events";
 import { fetchUserDetails } from "@/lib/users/fetchUserDetails";
+import { EventFile, EventFilePricing } from "@/types/events/event";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
@@ -46,7 +47,8 @@ export async function POST(request: NextRequest, { params }: RouteParameters) {
         type,
         pricing,
         city,
-        location_type
+        location_type,
+        university
     } = event;
 
     const creator = await fetchUserDetails(user.id);        
@@ -75,7 +77,7 @@ export async function POST(request: NextRequest, { params }: RouteParameters) {
       );
     }
 
-    const collaborators = data.flatMap(item => item.profiles).map(profile => profile.first_name).join(', ');
+    const collaboratorNames = data.flatMap(item => item.profiles).map(profile => profile.first_name);
 
     // Get vector store ID from environment variables
     const vectorStoreId = process.env.OPENAI_EVENTS_VECTOR_STORE_ID;
@@ -83,11 +85,43 @@ export async function POST(request: NextRequest, { params }: RouteParameters) {
       throw new Error("Events Vector Store ID not configured in environment variables");
     }
 
-    // Create file content with event description
-    const fileContent = description || '';
-    const fileName = `event_${name.replace(/\s+/g, '_')}.txt`;
+    const filePricing: EventFilePricing = pricing === "free"
+      ? { type: "free" }
+      : { type: "paid" };
+
+    const eventFile: EventFile = {
+      id: eventId,
+      event_name: name,
+      organisers: {
+        creator: creator?.full_name || "Unknown",
+        collaborators: collaboratorNames,
+      },
+      time: {
+        start: start.getTime(),
+        end: end.getTime(),
+      },
+      location: {
+        city: city,
+        location_type: location_type,
+      },
+      pricing: filePricing,
+      description: description || "",
+      type: type,
+      thumbnail_url: event.thumbnailUrl,
+      booking_links: event.booking_link,
+      attributes: {
+        university: university || [],
+        start_time: start.getTime(),
+        end_time: end.getTime(),
+        pricing: filePricing,
+        city: city,
+      },
+    };
+
+    const fileContent = JSON.stringify(eventFile, null, 2);
+    const fileName = `event_${name.replace(/\s+/g, '_')}.json`;
     const fileObj = new File([fileContent], fileName, {
-      type: "text/plain",
+      type: "application/json",
     });
 
     // upload to vector store
@@ -121,15 +155,16 @@ export async function POST(request: NextRequest, { params }: RouteParameters) {
       vector_store_id: vectorStoreId,
       attributes: {
         id: eventId,
-        creator_name: creator?.full_name || 'Unknown',
-        type: type.join(', '),
-        start: start.toDateString(),
-        end: end.toDateString(),
-        city: city.join(', '),
-        collaborators: collaborators || '',
-        pricing: pricing,
-        event_location_type: location_type,
         event_name: name,
+        creator_name: creator?.full_name || "Unknown",
+        collaborators: collaboratorNames.join(", "),
+        type: type.join(", "),
+        start_time: start.getTime(),
+        end_time: end.getTime(),
+        city: city.join(", "),
+        pricing_type: pricing,
+        location_type: location_type,
+        university: (university || []).join(", "),
       },
     });
 
