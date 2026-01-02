@@ -49,9 +49,7 @@ export async function searchEntity(
   entityType: SearchEntityType,
   filter: FilterObject
 ): Promise<SearchResults> {
-  console.log(`Searching ${entityType} with query: "${query}"`);
   const vsId = getVectorStoreId(entityType);
-  console.log(`Using vector store: ${vsId}`);
 
   const useApiFilter = filter.value.length > 0 && filter.value.length < 50;
   const searchFilter: VectorStoreFilter = useApiFilter ? filter : undefined;
@@ -66,8 +64,6 @@ export async function searchEntity(
     max_num_results: 15,
   });
 
-  console.log(`Raw API response: ${response.data.length} items`);
-
   const results: FileResult[] = response.data
     .filter((item) => {
       const attributes = item.attributes as Record<string, string> | null;
@@ -81,7 +77,6 @@ export async function searchEntity(
       text: item.content[0].text,
     }));
 
-  console.log(`Returning ${results.length} results`);
   return { results };
 }
 

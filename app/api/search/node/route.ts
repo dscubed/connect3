@@ -27,18 +27,13 @@ export async function POST(request: NextRequest) {
     const context: string = body.context ?? "";
     const withResponse: boolean = body.with_response ?? false;
 
-    console.log("Search plan:", searchPlan);
-    console.log("Query:", query);
-
     const searchResults = await executeSearchPlan(openai, searchPlan, filters);
-    console.log(`Search returned ${searchResults.results.length} results`);
 
     if (!withResponse) {
       return NextResponse.json(searchResults);
     }
 
     const response = await generateResponse(openai, query, searchResults, context);
-    console.log("Generated response:", JSON.stringify(response, null, 2));
 
     return NextResponse.json({ searchResults, response });
   } catch (error) {
