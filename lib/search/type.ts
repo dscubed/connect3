@@ -103,3 +103,59 @@ export interface SearchResponse {
   results: ResultSection[];
   followUps: string;
 }
+
+// Search Node Types
+
+export type SearchEntityType = "user" | "event" | "organisation";
+
+export interface SearchPlan {
+  events: string | null;
+  users: string | null;
+  organisations: string | null;
+}
+
+export interface FilterObject {
+  type: string;
+  key: string;
+  value: string[];
+}
+
+export interface SearchFilters {
+  org_filter: FilterObject;
+  event_filter: FilterObject;
+  user_filter: FilterObject;
+}
+
+export interface FilterSearchResponse {
+  include: boolean;
+  entity_ids: string[];
+}
+
+export interface FileResult {
+  file_id: string;
+  text: string;
+}
+
+export interface SearchResults {
+  results: FileResult[];
+}
+
+export const DEFAULT_FILTER: FilterObject = {
+  type: "nin",
+  key: "id",
+  value: [],
+};
+
+// Response Generation Node Types
+
+export interface ResponseResult {
+  header: string | null;
+  text: string;
+  file_ids: string[];
+}
+
+export interface GeneratedResponse {
+  summary: string;
+  results: ResponseResult[];
+  follow_ups: string;
+}
