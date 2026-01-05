@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { validateFile, CUBE_CONFIG } from '../utils/cubeUtils';
+import { useState } from "react";
+import { toast } from "sonner";
+import { validateFile, CUBE_CONFIG } from "../utils/cubeUtils";
 
 export const useFileHandlers = (
   files: File[],

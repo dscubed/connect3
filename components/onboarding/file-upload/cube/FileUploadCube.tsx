@@ -2,7 +2,7 @@
 import { useState, useRef } from "react";
 import { useCubeAnimation } from "./hooks/useCubeAnimation";
 import { useFileHandlers } from "./hooks/useFileHandlers";
-import { getContentColor, CUBE_CONFIG } from "./utils/cubeUtils";
+import { CUBE_CONFIG } from "./utils/cubeUtils";
 import { CubeContainer } from "./CubeContainer";
 import { FileList } from "./FileList";
 
@@ -74,7 +74,6 @@ export const FileUploadCube = ({
           isDeleting={isDeleting}
           cubeRotate={cubeRotate}
           cube={cube}
-          contentColor={getContentColor(files.length)}
           {...handleCubeInteraction}
         />
 
