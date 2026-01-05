@@ -94,6 +94,7 @@ export async function seedAccount(igUserId: string, shortLivedToken: string, pro
             priority: 2,
             updated_at: new Date().toISOString(),
             profile_id: profileId,
+            is_connected: true,
         }, { onConflict: 'ig_user_id' });
 
     if (error) {
