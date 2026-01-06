@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     );
   }
 
-  console.log("WORKS")
+  console.log("WORKS");
 
   // 1. Verify State
   const cookieStore = await cookies();
