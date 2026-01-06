@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 export const createChatroom = async (
   query: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   selectedEntityFilters: EntityFilterOptions
 ) => {
   const { user, getSupabaseClient } = useAuthStore.getState();

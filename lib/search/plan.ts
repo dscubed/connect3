@@ -126,7 +126,7 @@ Do not assume explicit relationships between users, organisations, or events.
     model: "gpt-4o-mini",
     input: [
       { role: "system", content: systemPrompt },
-      ...contexts,
+      ...(contexts as Array<{ role: "system" | "user" | "assistant"; content: string }>),
       { role: "user", content: `User query: ${query}` },
     ],
     text: {

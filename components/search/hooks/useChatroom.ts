@@ -41,6 +41,7 @@ export function useChatroom(chatroomId: string | null) {
 
   // Add New Message from Chatroom
   const addNewMessage = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async (query: string, selectedEntityFilters: EntityFilterOptions) => {
       if (!query.trim() || !chatroomId || !user || inFlight) return;
 

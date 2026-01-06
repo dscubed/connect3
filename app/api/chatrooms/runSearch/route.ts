@@ -11,7 +11,8 @@ const supabase = createClient(
   process.env.SUPABASE_SECRET_KEY!
 );
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! }); // Will be used when Achal's implementation is integrated
 
 export type SSEEmitter = (type: string, data: unknown) => Promise<void>;
 
