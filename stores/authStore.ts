@@ -17,6 +17,7 @@ export interface Profile {
   cover_image_url?: string;
   status?: string;
   account_type?: "user" | "organisation";
+  instagram_connected?: boolean;
 }
 
 interface AuthState {
@@ -44,8 +45,19 @@ async function fetchProfile(
     .select("*")
     .eq("id", userId)
     .single();
-  if (!error) set({ profile });
-  else set({ profile: null });
+  if (!error) {
+    // Check for connected Instagram account
+    const { data: igAccount } = await supabase
+      .from("instagram_accounts")
+      .select("id")
+      .eq("profile_id", userId)
+      .eq("is_connected", true)
+      .single();
+
+    set({ profile: { ...profile, instagram_connected: !!igAccount } });
+  } else {
+    set({ profile: null });
+  }
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -95,18 +107,28 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const userId = get().user?.id;
     if (!userId) return;
 
+    // Destructure instagram_connected out as it is not a column in the profiles table
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { instagram_connected, ...dbFields } = fields;
+
     const updateData = {
-      ...fields,
+      ...dbFields,
       updated_at: new Date().toISOString(),
     };
 
-    const { error } = await supabase
-      .from("profiles")
-      .update(updateData)
-      .eq("id", userId);
+    // Only perform DB update if there are fields to update
+    let error = null;
+    if (Object.keys(dbFields).length > 0) {
+      const result = await supabase
+        .from("profiles")
+        .update(updateData)
+        .eq("id", userId);
+      error = result.error;
+    }
 
     if (!error) {
-      set({ profile: { ...get().profile!, ...updateData } });
+      // Update local state with ALL fields including instagram_connected
+      set({ profile: { ...get().profile!, ...fields, ...updateData } });
     }
   },
 
