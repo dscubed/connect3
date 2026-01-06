@@ -63,6 +63,7 @@ Deno.serve(async (req) => {
     const { data: accounts, error } = await supabase
       .from("instagram_accounts")
       .select("*")
+      .eq("is_connected", true)
       .order("priority", { ascending: false })
       .order("last_synced_at", { ascending: true, nullsFirst: true });
 
