@@ -209,8 +209,6 @@ async function fetchNewPosts(
 
   console.log({ event: 'fetching_posts', account: account_name });
 
-  // Limit of 50 posts per request
-
   const fields = ["id", "caption", "media_type", "media_url", "permalink", "timestamp"].join(",");
   const urlObj = new URL(`${INSTAGRAM_API_BASE}/v24.0/${ig_user_id}/media`);
   urlObj.searchParams.append("fields", fields);
@@ -221,8 +219,9 @@ async function fetchNewPosts(
   let postsInserted = 0;
   let newestPostTimestamp: Date | null = null;
 
-  while (url) {
-    if (ctx.totalRequests >= MAX_REQUESTS_ALLOWED) break;
+  // Only fetch one page (max depth of 1) to prevent timeouts
+  if (url) {
+    if (ctx.totalRequests >= MAX_REQUESTS_ALLOWED) return postsInserted;
 
     try {
       const response: Response = await fetch(url);
@@ -231,13 +230,15 @@ async function fetchNewPosts(
       if (!response.ok) {
         const errorText = await response.text();
         console.error({ event: 'fetch_posts_error', account: account_name, error: errorText });
-        break;
+        return postsInserted;
       }
 
       const data: any = await response.json();
       const posts: InstagramPost[] = data.data || [];
 
-      if (posts.length === 0) break;
+      if (posts.length === 0) return postsInserted;
+
+      let overlapFound = false;
 
       for (const post of posts) {
         const postTimestamp = new Date(post.timestamp);
@@ -246,11 +247,13 @@ async function fetchNewPosts(
           newestPostTimestamp = postTimestamp;
         }
 
+        // Check for overlap
         if (lastSyncedDate && postTimestamp <= lastSyncedDate) {
-          url = null;
-          break;
+          overlapFound = true;
+          break; // Stop processing this batch at the overlap point
         }
 
+        // Process the post (upload, insert, etc.)
         let finalMediaUrl = await uploadIntoStorage(supabase, post, ig_user_id, account_name);
 
         const postRecord = {
@@ -276,12 +279,13 @@ async function fetchNewPosts(
         }
       }
 
-      if (url) {
-        url = data.paging?.next || null;
-      }
+      // If no overlap (gap scenario), process the batch but do NOT fetch next page
+      // If overlap, we already stopped early
+      url = null; // Prevent fetching next page
+
     } catch (error) {
       console.error({ event: 'fetch_exception', account: account_name, error: error });
-      break;
+      return postsInserted;
     }
   }
 
