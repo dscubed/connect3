@@ -107,18 +107,28 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const userId = get().user?.id;
     if (!userId) return;
 
+    // Destructure instagram_connected out as it is not a column in the profiles table
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { instagram_connected, ...dbFields } = fields;
+
     const updateData = {
-      ...fields,
+      ...dbFields,
       updated_at: new Date().toISOString(),
     };
 
-    const { error } = await supabase
-      .from("profiles")
-      .update(updateData)
-      .eq("id", userId);
+    // Only perform DB update if there are fields to update
+    let error = null;
+    if (Object.keys(dbFields).length > 0) {
+      const result = await supabase
+        .from("profiles")
+        .update(updateData)
+        .eq("id", userId);
+      error = result.error;
+    }
 
     if (!error) {
-      set({ profile: { ...get().profile!, ...updateData } });
+      // Update local state with ALL fields including instagram_connected
+      set({ profile: { ...get().profile!, ...fields, ...updateData } });
     }
   },
 
