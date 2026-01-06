@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase Admin Client (Service Role)
 // We use the service role key to bypass RLS when managing system-wide instagram accounts
-const supabaseAdmin = createClient(
+export const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
@@ -55,7 +55,7 @@ export async function refreshLongLivedToken(accessToken: string) {
   };
 }
 
-export async function seedAccount(igUserId: string, shortLivedToken: string) {
+export async function seedAccount(igUserId: string, shortLivedToken: string, profileId: string) {
     console.log(`Seeding account for User ID: ${igUserId}`);
 
     // 1. Exchange for Long-Lived Token first
@@ -93,6 +93,8 @@ export async function seedAccount(igUserId: string, shortLivedToken: string) {
             token_expires_at: expiresAt.toISOString(),
             priority: 2,
             updated_at: new Date().toISOString(),
+            profile_id: profileId,
+            is_connected: true,
         }, { onConflict: 'ig_user_id' });
 
     if (error) {

@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { supabase as adminSupabase } from "@/lib/instagram/ingest";
+import { supabaseAdmin } from "@/lib/instagram/auth";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
 
     // Find the first page with an IG business account
     const pageWithIg = pagesData.data.find(
-      (p: any) => p.instagram_business_account
+      (p: { instagram_business_account: unknown }) => p.instagram_business_account
     );
 
     if (!pageWithIg) {
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
     const igUsername = igAccount.username || igAccount.name;
 
     // 4. Save to Supabase using Admin Client (bypassing RLS)
-    const { error: dbError } = await adminSupabase
+    const { error: dbError } = await supabaseAdmin
       .from("instagram_accounts")
       .upsert(
         {
@@ -90,10 +90,11 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ success: true });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Instagram Linking Error:", err);
+    const errorMessage = err instanceof Error ? err.message : "Failed to link Instagram account";
     return NextResponse.json(
-      { error: err.message || "Failed to link Instagram account" },
+      { error: errorMessage },
       { status: 500 }
     );
   }

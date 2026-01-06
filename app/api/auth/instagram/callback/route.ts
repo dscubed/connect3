@@ -79,17 +79,18 @@ export async function GET(request: Request) {
     const igUserId = tokenData.user_id; // Basic Display returns user_id here
 
     // 4. Seed Account (Fetch info, Exchange for Long-Lived, Save to DB)
-    await seedAccount(igUserId.toString(), shortLivedToken);
+    await seedAccount(igUserId.toString(), shortLivedToken, user.id);
 
     // 5. Redirect Success
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_SITE_URL}/clubs?success=instagram_connected`
+      `${process.env.NEXT_PUBLIC_SITE_URL}/?success=instagram_connected`
     );
 
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Instagram Callback Error:", err);
+    const errorMessage = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_SITE_URL}/clubs?error=server_error&description=${encodeURIComponent(err.message)}`
+      `${process.env.NEXT_PUBLIC_SITE_URL}/clubs?error=server_error&description=${encodeURIComponent(errorMessage)}`
     );
   }
 }   
