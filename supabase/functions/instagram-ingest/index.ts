@@ -238,8 +238,6 @@ async function fetchNewPosts(
 
       if (posts.length === 0) return postsInserted;
 
-      let overlapFound = false;
-
       for (const post of posts) {
         const postTimestamp = new Date(post.timestamp);
 
@@ -249,7 +247,6 @@ async function fetchNewPosts(
 
         // Check for overlap
         if (lastSyncedDate && postTimestamp <= lastSyncedDate) {
-          overlapFound = true;
           break; // Stop processing this batch at the overlap point
         }
 
