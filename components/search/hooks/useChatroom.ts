@@ -55,9 +55,6 @@ export function useChatroom(chatroomId: string | null) {
             content: null, // Will be populated by background search
             user_id: user.id,
             status: "pending", // Initial status
-            users: selectedEntityFilters.users,
-            organisations: selectedEntityFilters.organisations,
-            // events: selectedEntityFilters.events, TODO: Once finished
           })
           .select()
           .single();

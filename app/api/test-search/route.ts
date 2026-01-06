@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { planSearch } from "@/lib/search/plan";
 import { filterSearchResults, buildExcludeFilters } from "@/lib/search/filter";
-import { searchVectorStores } from "@/lib/search/vectorSearch";
 import { ChatMessage } from "@/lib/search/types";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
 
@@ -120,8 +119,9 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    if (testType === "search") {
-      console.log("Testing full search pipeline with query:", query);
+    if (testType === "combined") {
+      // Test planner + filter together (without actual search execution)
+      console.log("Testing planner + filter combination with query:", query);
 
       // Step 1: Plan
       const plan = await planSearch(
@@ -140,8 +140,8 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      // Step 2: Check if filtering is needed
-      let excludeFilters = { user: [], organisation: [], event: [] };
+      // Step 2: Test filter if needed
+      let filterResult = null;
       if (plan.filterSearch) {
         console.log("Filtering previous results...");
         const filterResponse = await filterSearchResults(
@@ -151,48 +151,33 @@ export async function POST(request: NextRequest) {
           openai
         );
         
-        if (filterResponse.include) {
-          // If include mode, we should fetch entities directly (not implemented in test)
-          return NextResponse.json({
-            success: true,
-            plan,
-            filterResponse,
-            message: "Filter returned INCLUDE mode - entities should be fetched directly from database",
-            entityIds: filterResponse.entityIds
-          });
-        }
+        const filters = filterResponse.include 
+          ? null 
+          : buildExcludeFilters(filterResponse);
         
-        excludeFilters = buildExcludeFilters(filterResponse);
-        console.log("Exclude filters:", excludeFilters);
+        filterResult = {
+          filterResponse,
+          filters,
+          explanation: {
+            mode: filterResponse.include 
+              ? "INCLUDE specific entities" 
+              : "EXCLUDE entities (pagination)",
+            entityCount: filterResponse.entityIds.length,
+            entities: filterResponse.entityIds
+          }
+        };
       }
-
-      // Step 3: Execute search
-      const searchResults = await searchVectorStores(
-        plan.searches,
-        excludeFilters,
-        openai,
-        plan.context
-      );
 
       return NextResponse.json({
         success: true,
         plan,
-        searchResults: {
-          total: searchResults.results.length,
-          byType: {
-            // Note: We can't determine type from FileResult alone, would need to check file attributes
-            total: searchResults.results.length
-          },
-          samples: searchResults.results.slice(0, 3).map(r => ({
-            file_id: r.file_id,
-            textPreview: r.text.slice(0, 150) + "..."
-          }))
-        }
+        filterResult,
+        note: "Search execution is handled by Achal's implementation"
       });
     }
 
     return NextResponse.json(
-      { error: "Invalid testType. Use 'planner', 'filter', or 'search'" },
+      { error: "Invalid testType. Use 'planner', 'filter', or 'combined'" },
       { status: 400 }
     );
   } catch (error) {
