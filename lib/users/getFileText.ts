@@ -73,10 +73,13 @@ export async function getFileText(profileId: string, supabase: SupabaseClient) {
   const profileChunks = await getOrderedChunks(profileId, supabase);
   const profileLinks = await getProfileLinks(profileId, supabase);
 
+  const name =
+    profileData.account_type === "organisation"
+      ? profileData.first_name || "Organisation"
+      : `${profileData.first_name} ${profileData.last_name || ""}`;
+
   const profileText = `
-  ${profileData.first_name} ${profileData.last_name} (${
-    profileData.account_type
-  })
+  ${name} (${profileData.account_type})
   University: ${
     universities[profileData.university as University]?.name || "Not specified"
   }
