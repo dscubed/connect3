@@ -16,7 +16,7 @@ export function AuthButton() {
 
   return user && !user.is_anonymous ? (
     <div className="flex items-center gap-2">
-      {profile?.account_type === "organisation" && !profile?.instagram_connected && (
+      {profile?.account_type === "organisation" && (
         <ConnectInstagramButton />
       )}
       <Link href="/profile" className="flex-shrink-0">

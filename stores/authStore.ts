@@ -51,6 +51,7 @@ async function fetchProfile(
       .from("instagram_accounts")
       .select("id")
       .eq("profile_id", userId)
+      .eq("is_connected", true)
       .single();
 
     set({ profile: { ...profile, instagram_connected: !!igAccount } });
