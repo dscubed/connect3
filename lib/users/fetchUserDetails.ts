@@ -12,6 +12,7 @@ export interface UserDetails {
   tldr?: string;
   account_type?: string;
   openai_file_id?: string;
+  university?: string;
 }
 
 export async function fetchUserDetails(
@@ -21,7 +22,7 @@ export async function fetchUserDetails(
     const { data: user, error } = await supabase
       .from("profiles")
       .select(
-        "id, first_name, last_name, avatar_url, account_type, tldr, openai_file_id"
+        "id, first_name, last_name, avatar_url, account_type, tldr, openai_file_id, university"
       )
       .eq("id", userId)
       .single();
@@ -49,6 +50,7 @@ export async function fetchUserDetails(
       tldr: user.tldr || "",
       account_type: user.account_type || "user",
       openai_file_id: user.openai_file_id || null,
+      university: user.university || null,
     };
 
     return userDetails;
