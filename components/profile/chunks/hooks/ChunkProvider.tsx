@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import { AllCategories, CategoryOrderData, ChunkInput } from "../ChunkUtils";
 import { Profile, useAuthStore } from "@/stores/authStore";
-import { uploadProfileToVectorStore } from "@/lib/vectorStores/client";
+import { uploadProfileToVectorStore } from "@/lib/vectorStores/profile/client";
 
 export interface ProfileChunk {
   id: string;

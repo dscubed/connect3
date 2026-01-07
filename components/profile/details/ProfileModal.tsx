@@ -12,7 +12,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useEffect, useState } from "react";
 import { UniversityInput } from "./UniversityInput";
 import { University } from "./univeristies";
-import { uploadProfileToVectorStore } from "@/lib/vectorStores/client";
+import { uploadProfileToVectorStore } from "@/lib/vectorStores/profile/client";
 import { toast } from "sonner";
 
 interface ProfileModalProps {

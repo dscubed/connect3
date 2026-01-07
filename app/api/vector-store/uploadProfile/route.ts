@@ -2,7 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
 import { fetchUserDetails } from "@/lib/users/fetchUserDetails";
-import { uploadProfileToVectorStore } from "@/lib/vectorStores/upload";
+import { uploadProfileToVectorStore } from "@/lib/vectorStores/profile/upload";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

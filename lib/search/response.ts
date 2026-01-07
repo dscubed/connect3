@@ -22,23 +22,6 @@ const LLMSearchResultSchema = z.object({
   followUps: z.string(),
 });
 
-const SearchResponseSchema = z.object({
-  summary: z.string(),
-  results: z.array(
-    z.object({
-      header: z.string(),
-      text: z.string(),
-      matches: z.array(
-        z.object({
-          type: z.string(),
-          id: z.string(),
-        })
-      ),
-    })
-  ),
-  followUps: z.string(),
-});
-
 export const generateResponse = async (
   searchResults: FileResult[],
   context: string,
@@ -107,7 +90,7 @@ export const generateResponse = async (
     throw new Error(`Failed to parse JSON response: ${textContent}`);
   }
 
-  const validated = SearchResponseSchema.safeParse(parsed);
+  const validated = LLMSearchResultSchema.safeParse(parsed);
   if (!validated.success) {
     throw new Error(`Invalid response schema: ${validated.error.message}`);
   }
@@ -118,8 +101,8 @@ export const generateResponse = async (
     outputResults.push({
       header: result.header ?? undefined,
       text: result.text,
-      matches: result.matches
-        .map((match) => fileMap[match.id])
+      matches: result.fileIds
+        .map((id) => fileMap[id])
         .filter(Boolean) as EntityResult[],
     });
   }

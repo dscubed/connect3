@@ -32,7 +32,7 @@ const searchSingleEntity = async (
   else if (entityType === "organisation")
     vectorStoreId = process.env.OPENAI_ORG_VECTOR_STORE_ID!;
   else if (entityType === "events")
-    vectorStoreId = process.env.OPENAI_EVENT_VECTOR_STORE_ID!;
+    vectorStoreId = process.env.OPENAI_EVENTS_VECTOR_STORE_ID!;
   else throw new Error(`Unknown entity type: ${entityType}`);
 
   const systemPrompt = `You are an expert search engine querying a vector store for relevant documents based on the user's query.
@@ -129,7 +129,6 @@ const getFileContent = async (
     }
 
     // Placeholder until event content retrieval is implemented
-
     return { fileContent: "", id: data.id };
   }
   throw new Error(`Unknown entity type: ${entityType}`);
