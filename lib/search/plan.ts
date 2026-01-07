@@ -1,45 +1,27 @@
-// Planner node - matches Colab implementation
 import OpenAI from "openai";
-import { SearchPlan, ChatMessage } from "./types";
-import { z } from "zod";
 import { zodTextFormat } from "openai/helpers/zod.mjs";
+import { SearchPlan } from "./types";
+import { z } from "zod";
+import { ResponseInput } from "openai/resources/responses/responses.mjs";
 
-const EntitySearchSchema = z.object({
-  organisation: z.string().nullable(),
-  event: z.string().nullable(),
-  user: z.string().nullable(),
-});
-
+// Context Summary Schema
 const SearchPlanSchema = z.object({
   requiresSearch: z.boolean(),
   filterSearch: z.boolean(),
   context: z.string(),
-  searches: EntitySearchSchema,
+  searches: z.object({
+    user: z.string(),
+    organisation: z.string(),
+    events: z.string(),
+  }),
 });
 
 export const planSearch = async (
+  openai: OpenAI,
   query: string,
-  userInfo: string = "",
-  chatHistory: ChatMessage[] = [],
-  openai: OpenAI
+  tldr: string,
+  prevMessages: ResponseInput
 ): Promise<SearchPlan> => {
-  const contexts: Array<{ role: string; content: string }> = [];
-  
-  if (userInfo) {
-    contexts.push({ role: "system", content: `User info: ${userInfo}` });
-  } else {
-    contexts.push({ role: "system", content: "No additional user information provided." });
-  }
-
-  if (chatHistory.length === 0) {
-    contexts.push({ role: "system", content: "No previous chat history." });
-  } else {
-    // Add last 3 messages for context
-    chatHistory.slice(-3).forEach((msg) => {
-      contexts.push({ role: msg.role, content: msg.content });
-    });
-  }
-
   const systemPrompt = `You are an expert search planner. Given a user query, you will break down the query into relevant searches across multiple vector stores.
 
 The vector stores available are:
@@ -120,14 +102,27 @@ Do not assume explicit relationships between users, organisations, or events.
 "Tell me more about AI club its members and upcoming events" requires searching organisations, users, and events separately:
 -> {"organisation": "AI club", "user": "members of AI club", "event": "upcoming events by AI club"}
 
-*If the query for the entity type is not needed, set it to null.*`;
+*If the query for the entity type is not needed, set it to null.*
+Your task is to analyze the query and decide which of these vector stores are most likely to contain relevant information.
+Return a JSON object in the following format:
+{
+    "requires_search": <boolean indicating if any search is needed>,
+    "filter_search": <boolean indicating if filtering of previous results is needed>,
+    "context": "<brief context for the search>",
+    "searches": {
+        "organisation": "<query string for organization search>",
+        "event": "<query string for event search>",
+        "user": "<query string for user search>",
+    }
+}`;
 
   const response = await openai.responses.parse({
     model: "gpt-4o-mini",
     input: [
       { role: "system", content: systemPrompt },
-      ...(contexts as Array<{ role: "system" | "user" | "assistant"; content: string }>),
-      { role: "user", content: `User query: ${query}` },
+      ...prevMessages,
+      { role: "system", content: `User info: ${tldr}` },
+      { role: "user", content: `Current Query: ${query}` },
     ],
     text: {
       format: zodTextFormat(SearchPlanSchema, "search_plan"),
@@ -135,9 +130,8 @@ Do not assume explicit relationships between users, organisations, or events.
   });
 
   if (!response.output_parsed) {
-    throw new Error("Failed to parse search plan");
+    throw new Error("Failed to parse context summary");
   }
 
   return response.output_parsed as SearchPlan;
 };
-

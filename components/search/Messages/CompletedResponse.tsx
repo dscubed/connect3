@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { LLMSearchResponse } from "@/lib/search/type";
+import { LLMSearchResponse } from "@/lib/search/types";
 import { ResultSectionSchema } from "./QueryResult";
 
 export function CompletedResponse({

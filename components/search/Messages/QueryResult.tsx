@@ -1,4 +1,4 @@
-import type { LLMResultSection } from "@/lib/search/type";
+import type { LLMResultSection } from "@/lib/search/types";
 import MatchResults from "../MatchResult/MatchResults";
 
 export function ResultSection({

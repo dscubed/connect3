@@ -1,4 +1,4 @@
-import { LLMSearchResponse } from "@/lib/search/type";
+import { LLMSearchResponse } from "@/lib/search/types";
 
 export interface UserProfile {
   id: string;

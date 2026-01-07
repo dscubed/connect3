@@ -1,12 +1,12 @@
-// Search agent types - matching Colab architecture
+// import { SearchProgress } from "@/components/search/types";
 
-export type EntityType = "user" | "organisation" | "event";
+export type EntityType = "user" | "organisation" | "events";
 
-export interface EntitySearch {
-  user: string | null;
-  organisation: string | null;
-  event: string | null;
-}
+// Planner Node
+
+export type EntitySearch = {
+  [type in EntityType]: string;
+};
 
 export interface SearchPlan {
   requiresSearch: boolean;
@@ -15,50 +15,64 @@ export interface SearchPlan {
   searches: EntitySearch;
 }
 
+// Filter Node
+
 export interface FilterSearchResponse {
   include: boolean;
-  entityIds: string[]; // Format: "type_id" e.g. "user_10", "organisation_5", "event_3"
+  entityIds: string[];
 }
 
-export interface ExcludeFilters {
-  user: string[];
-  organisation: string[];
-  event: string[];
+export interface FilterObject {
+  type: string; // This should always be "nin"
+  key: string; // This should always be "id"
+  value: string[]; // List of entity IDs to filter
 }
 
-export interface SearchResult {
-  id: string;
-  name: string;
-  type: EntityType;
-  text: string;
-  score: number;
-  file_id: string;
-  userId?: string;
-}
+export type EntityFilters = {
+  [type in EntityType]: FilterObject | null;
+};
+
+// Search Node
 
 export interface FileResult {
-  file_id: string;
+  fileId: string;
   text: string;
 }
 
-export interface SearchResults {
-  results: FileResult[];
+export interface EntitySearchResponse {
+  fileIds: string[];
 }
 
-export interface Result {
-  header: string;
+export interface FileMap {
+  [fileId: string]: EntityResult;
+}
+
+// Response Node
+export interface LLMResultSection {
+  header: string | undefined;
   text: string;
-  file_ids: string[];
+  fileIds: string[];
+}
+
+export interface LLMSearchResponse {
+  summary: string;
+  results: LLMResultSection[];
+  followUps: string;
+}
+
+export interface ResultSection {
+  header: string | undefined;
+  text: string;
+  matches: EntityResult[];
 }
 
 export interface SearchResponse {
   summary: string;
-  results: Result[];
-  follow_ups: string;
+  results: ResultSection[];
+  followUps: string;
 }
 
-export interface ChatMessage {
-  role: string;
-  content: string;
+export interface EntityResult {
+  type: EntityType;
+  id: string;
 }
-

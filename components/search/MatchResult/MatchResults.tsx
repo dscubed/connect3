@@ -4,7 +4,7 @@ import { useState } from "react";
 import UserAvatar from "./UserAvatar";
 import FileDescription from "./FileDescription";
 import { ChevronDown } from "lucide-react";
-import { EntityResult } from "@/lib/search/type";
+import { EntityResult } from "@/lib/search/types";
 import { useEntityCache } from "../hooks/useEntityCache";
 
 interface MatchResultsProps {

@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
-// TODO: Achal is working on agent and response nodes
-// import { runSearch } from "@/lib/search/agent";
-// import { generateResponse } from "@/lib/search/response";
+import { runSearch } from "@/lib/search/agent";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
 
 const supabase = createClient(
@@ -11,8 +9,7 @@ const supabase = createClient(
   process.env.SUPABASE_SECRET_KEY!
 );
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! }); // Will be used when Achal's implementation is integrated
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
 export type SSEEmitter = (type: string, data: unknown) => Promise<void>;
 
@@ -81,13 +78,7 @@ export async function POST(req: NextRequest) {
       throw new Error("Failed to update message status");
     }
 
-    // TODO: Achal is implementing runSearch and generateResponse
-    // Temporary stub until implementation is ready
-    throw new Error("Search functionality is being implemented by Achal. Please wait for integration.");
-    
-    /* 
-    const { query, state } = await runSearch(messageId, openai, supabase, emit);
-    const response = await generateResponse(query, state, openai, emit);
+    const response = await runSearch(messageId, openai, supabase, emit);
 
     await emit("done", {
       success: true,
@@ -108,7 +99,6 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true });
-    */
   } catch (error) {
     console.error("Run search error:", error);
     await emit("error", { message: String(error) });

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { EntityType } from "@/lib/search/type";
+import { EntityType } from "@/lib/search/types";
 import { Profile, useAuthStore } from "@/stores/authStore";
 
 // Global cache shared across all hook calls

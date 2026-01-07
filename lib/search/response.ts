@@ -1,10 +1,11 @@
 import OpenAI from "openai";
 import {
   EntityResult,
+  FileMap,
   FileResult,
   ResultSection,
   SearchResponse,
-} from "./type";
+} from "./types";
 import { z } from "zod";
 import { zodTextFormat } from "openai/helpers/zod.mjs";
 import { partialParseResponse } from "./streamParser";
@@ -42,8 +43,8 @@ export const generateResponse = async (
   searchResults: FileResult[],
   context: string,
   openai: OpenAI,
-  emit: (event: string, data: unknown) => void,
-  fileMap: Map<string, EntityResult> | null
+  fileMap: FileMap,
+  emit?: (event: string, data: unknown) => void
 ): Promise<SearchResponse> => {
   const results = searchResults
     .map((res) => `${res.fileId}:\n${res.text}`)
@@ -94,7 +95,7 @@ export const generateResponse = async (
     if (event.type === "response.output_text.delta" && "delta" in event) {
       textContent += event.delta;
       const partial = partialParseResponse(textContent, fileMap);
-      emit("response", { partial });
+      if (emit) emit("response", { partial });
     }
   }
 
@@ -118,7 +119,7 @@ export const generateResponse = async (
       header: result.header ?? undefined,
       text: result.text,
       matches: result.matches
-        .map((match) => fileMap?.get(match.id))
+        .map((match) => fileMap[match.id])
         .filter(Boolean) as EntityResult[],
     });
   }

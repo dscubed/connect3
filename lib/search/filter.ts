@@ -1,30 +1,33 @@
-// Filter node - matches Colab implementation with include/exclude modes
+import { EntityFilters, EntitySearch, EntityType } from "./types";
 import OpenAI from "openai";
-import { FilterSearchResponse, EntitySearch, ExcludeFilters, ChatMessage } from "./types";
+import { ResponseInput } from "openai/resources/responses/responses.mjs";
 import { z } from "zod";
 import { zodTextFormat } from "openai/helpers/zod.mjs";
-import type { SupabaseClient } from "@supabase/supabase-js";
 
 const FilterSearchResponseSchema = z.object({
   include: z.boolean(),
-  entityIds: z.array(z.string()),
+  entity_ids: z.array(z.string()),
 });
 
-export const filterSearchResults = async (
+// Filter Search Function
+export const filterSearch = async (
   query: string,
-  chatHistory: ChatMessage[],
-  searches: EntitySearch,
+  entities: EntitySearch,
+  prevMessages: ResponseInput,
   openai: OpenAI
-): Promise<FilterSearchResponse> => {
-  const entitiesInSearch: string[] = [];
-  if (searches.organisation) entitiesInSearch.push("organisation");
-  if (searches.event) entitiesInSearch.push("event");
-  if (searches.user) entitiesInSearch.push("user");
+): Promise<EntityFilters> => {
+  // Determine which entity types to filter based on received plan
+  const entitiesIncluded = [];
+  for (const entityType of Object.keys(entities)) {
+    if (entities[entityType as EntityType]) {
+      entitiesIncluded.push(entityType as EntityType);
+    }
+  }
+  const entityContext = `Only consider the following entity types for inclusion/exclusion: ${entitiesIncluded.join(
+    ", "
+  )}`;
 
-  const entityContext = `Only consider the following entity types for inclusion/exclusion: ${entitiesInSearch.join(", ")}.`;
-
-  console.log("Filtering search results for entities:", entityContext);
-
+  // System prompt for filtering logic
   const systemPrompt = `You are an expert search result filter. Given a user query and previous search results, you will determine which entities to include or exclude from the previous results to best answer the user's query.
 
 Your task is to analyze the query and previous results, and return a JSON object in the following format:
@@ -33,7 +36,7 @@ Your task is to analyze the query and previous results, and return a JSON object
     "entityIds": [<list of entity IDs to include or exclude>]
 }
 
-entity IDs should be listed as "type_id" e.g. "user_10", "organisation_5", "event_3"
+entity IDs should be listed as "type_id" e.g. "user_10", "organisation_5", "events_3"
 
 You MUST decide:
 - If the user wants to EXCLUDE entities (pagination), set "include" to false and list the entities to exclude in "entityIds".
@@ -55,16 +58,14 @@ include should only be true or false, not null or other values.
 return an empty list for entityIds if there are no relevant entities to include or exclude.
 NEVER RETURN NULL FOR INCLUDE OR ENTITYIDS.`;
 
+  //  TODO: Implement the LLM call and check if works as intended
   const response = await openai.responses.parse({
     model: "gpt-4o-mini",
     input: [
       { role: "system", content: systemPrompt },
-      ...chatHistory.map((msg) => ({
-        role: msg.role as "user" | "assistant" | "system",
-        content: msg.content,
-      })),
+      ...prevMessages,
       { role: "system", content: entityContext },
-      { role: "user", content: `User query: ${query}` },
+      { role: "user", content: `User Query: ${query}` },
     ],
     text: {
       format: zodTextFormat(FilterSearchResponseSchema, "filter_response"),
@@ -72,94 +73,45 @@ NEVER RETURN NULL FOR INCLUDE OR ENTITYIDS.`;
   });
 
   if (!response.output_parsed) {
-    throw new Error("Failed to parse filter response");
+    throw new Error("Failed to parse filter search response");
   }
 
-  return response.output_parsed as FilterSearchResponse;
+  return buildFilterObject(response.output_parsed.entity_ids);
 };
 
-export const buildExcludeFilters = (
-  filterResponse: FilterSearchResponse
-): ExcludeFilters => {
-  const filters: ExcludeFilters = {
-    user: [],
-    organisation: [],
-    event: [],
+// Helper function to build OpenAI filter object
+const buildFilterObject = (entityIds: string[]): EntityFilters => {
+  const filterObject: EntityFilters = {
+    organisation: null,
+    user: null,
+    events: null,
   };
 
-  for (const key of filterResponse.entityIds) {
-    if (!key.includes("_")) {
-      throw new Error(`Invalid entity ID format: ${key}`);
+  if (entityIds.length === 0) {
+    return filterObject;
+  }
+
+  for (const id of entityIds) {
+    if (!id.includes("_")) {
+      throw new Error(`Invalid entity ID format: ${id}`);
     }
-    const [type, id] = key.split("_");
-    if (type === "user") {
-      filters.user.push(id);
-    } else if (type === "organisation") {
-      filters.organisation.push(id);
-    } else if (type === "event") {
-      filters.event.push(id);
-    } else {
+
+    const [type, entityId] = id.split("_");
+
+    if (type !== "user" && type !== "organisation" && type !== "events") {
       throw new Error(`Unknown entity type: ${type}`);
     }
-  }
 
-  return filters;
-};
-
-/**
- * Fetch included entities directly from database when filter returns include: true
- * Matches Colab's included_entities() function
- */
-export const getIncludedEntities = async (
-  filterResponse: FilterSearchResponse,
-  supabase: SupabaseClient
-): Promise<string> => {
-  let text = "";
-
-  for (const key of filterResponse.entityIds) {
-    if (!key.includes("_")) {
-      console.warn(`Invalid entity ID format: ${key}`);
-      continue;
-    }
-
-    const [type, id] = key.split("_");
-
-    try {
-      if (type === "user") {
-        // Fetch user files from database
-        const { data, error } = await supabase
-          .from("user_files")
-          .select("openai_file_id, summary_text")
-          .eq("user_id", id)
-          .eq("status", "completed")
-          .limit(5); // Limit files per entity
-
-        if (error || !data || data.length === 0) {
-          console.warn(`No data found for ${type}_${id}`);
-          continue;
-        }
-
-        // Format entity data
-        text += `\n=== ${type}_${id} ===\n`;
-        for (const item of data) {
-          if (item.summary_text) {
-            text += `File ID: ${item.openai_file_id}\n`;
-            text += `${item.summary_text}\n\n`;
-          }
-        }
-      } else if (type === "organisation" || type === "event") {
-        // For organisations and events, we'd need to check if there's a table for them
-        // For now, log a warning - you may need to add tables for these entity types
-        console.warn(`Entity type ${type} not yet supported for direct fetching`);
-        // TODO: Implement organisation and event fetching when tables are available
-      } else {
-        console.warn(`Unknown entity type: ${type}`);
-      }
-    } catch (err) {
-      console.error(`Error fetching entity ${key}:`, err);
+    if (!filterObject[type as EntityType]) {
+      filterObject[type as EntityType] = {
+        type: "nin",
+        key: "id",
+        value: [entityId],
+      };
+    } else {
+      filterObject[type as EntityType]!.value.push(entityId);
     }
   }
 
-  return text;
+  return filterObject;
 };
-

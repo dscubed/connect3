@@ -3,10 +3,11 @@ import {
   EntityFilters,
   EntitySearchResponse,
   EntityType,
+  FileMap,
   FileResult,
   FilterObject,
   SearchPlan,
-} from "./type";
+} from "./types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { zodTextFormat } from "openai/helpers/zod.mjs";
@@ -23,7 +24,7 @@ const searchSingleEntity = async (
   entityType: EntityType,
   supabase: SupabaseClient,
   openai: OpenAI
-): Promise<FileResult[] | null> => {
+): Promise<{ results: FileResult[]; fileMap: FileMap }> => {
   let vectorStoreId = "";
 
   if (entityType === "user")
@@ -71,27 +72,36 @@ const searchSingleEntity = async (
   });
 
   if (!response.output_parsed) {
-    return null;
+    return { results: [], fileMap: {} };
   }
 
   const outputParsed = response.output_parsed as EntitySearchResponse;
 
+  const fileMap: FileMap = {};
+
   const fileResults = await Promise.all(
     outputParsed.fileIds.map(async (fileId) => {
       console.log(`Found file ID: ${fileId}`);
-      const fileContent = await getFileContent(fileId, supabase, entityType);
+      const { fileContent, id } = await getFileContent(
+        fileId,
+        supabase,
+        entityType
+      );
+
+      fileMap[fileId] = { id, type: entityType };
+
       return { fileId, text: fileContent };
     })
   );
 
-  return fileResults;
+  return { results: fileResults, fileMap };
 };
 
 const getFileContent = async (
   fileId: string,
   supabase: SupabaseClient,
   entityType: EntityType
-): Promise<string> => {
+): Promise<{ fileContent: string; id: string }> => {
   if (entityType === "user" || entityType === "organisation") {
     const { data, error } = await supabase
       .from("profiles")
@@ -103,14 +113,26 @@ const getFileContent = async (
         `Error fetching profile for file ID ${fileId}: ${error.message}`
       );
     }
-    const profileTextData = await getFileText(data.id, supabase);
-    return profileTextData;
+    const fileContent = await getFileText(data.id, supabase);
+    return { fileContent, id: data.id };
   } else if (entityType === "events") {
     // TODO: Implement event file content retrieval
-    return "";
-  } else {
-    return ""; // Placeholder for other entity types
+    const { data, error } = await supabase
+      .from("events")
+      .select("id")
+      .eq("openai_file_id", fileId)
+      .single();
+    if (error || !data) {
+      throw new Error(
+        `Error fetching profile for file ID ${fileId}: ${error.message}`
+      );
+    }
+
+    // Placeholder until event content retrieval is implemented
+
+    return { fileContent: "", id: data.id };
   }
+  throw new Error(`Unknown entity type: ${entityType}`);
 };
 
 export const executeSearchPlan = async (
@@ -118,33 +140,34 @@ export const executeSearchPlan = async (
   filters: EntityFilters,
   supabase: SupabaseClient,
   openai: OpenAI
-): Promise<FileResult[]> => {
-  // Perform searches for each entity type in parallel
-  const results = (
-    await Promise.all(
-      (Object.keys(searchPlan.searches) as EntityType[]).map(
-        async (entityType) => {
-          if (
-            searchPlan.searches[entityType] == null ||
-            searchPlan.searches[entityType] === ""
-          )
-            return [];
+): Promise<{ results: FileResult[]; fileMap: FileMap }> => {
+  const allResults: FileResult[] = [];
+  const mergedFileMap: FileMap = {};
 
-          const query = searchPlan.searches[entityType];
-          const entityResults = await searchSingleEntity(
-            query,
-            searchPlan.context,
-            filters[entityType]!,
-            entityType,
-            supabase,
-            openai
-          );
+  const entityTypes = Object.keys(searchPlan.searches) as EntityType[];
 
-          return entityResults ?? [];
-        }
+  await Promise.all(
+    entityTypes.map(async (entityType) => {
+      if (
+        searchPlan.searches[entityType] == null ||
+        searchPlan.searches[entityType] === ""
       )
-    )
-  ).flat();
+        return;
 
-  return results;
+      const query = searchPlan.searches[entityType];
+      const { results, fileMap } = await searchSingleEntity(
+        query,
+        searchPlan.context,
+        filters[entityType]!,
+        entityType,
+        supabase,
+        openai
+      );
+
+      allResults.push(...results);
+      Object.assign(mergedFileMap, fileMap);
+    })
+  );
+
+  return { results: allResults, fileMap: mergedFileMap };
 };
