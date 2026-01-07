@@ -1,72 +1,128 @@
-import { useEffect, useState } from "react";
+import { useCallback, useMemo } from "react";
+import useSWR from "swr";
 import { useAuthStore } from "@/stores/authStore";
 
 export interface ChatroomInfo {
   id: string;
   title: string;
-  last_message_at: string;
-  last_query: string;
+  last_message_at: string | null;
 }
 
 export interface ChatroomData {
   id: string;
   title: string | null;
   last_message_id: string | null;
-  last_message_at: string;
+  last_message_at: string | null;
 }
 
-export function useRecentChats() {
+type UseRecentChatsOptions = {
+  limit?: number;
+};
+
+export function useRecentChats(options: UseRecentChatsOptions = {}) {
   const user = useAuthStore((state) => state.user);
-  const authLoading = useAuthStore((state) => state.loading);
   const getSupabaseClient = useAuthStore((state) => state.getSupabaseClient);
-  const supabase = getSupabaseClient();
+  const supabase = useMemo(() => getSupabaseClient(), [getSupabaseClient]);
 
-  const [chatrooms, setChatrooms] = useState<ChatroomInfo[]>([]);
-  const [loading, setLoading] = useState(true);
+  const swrKey = user?.id ? ["chatrooms", user.id, options.limit] : null;
 
-  useEffect(() => {
-    async function fetchChatrooms() {
-      if (!user?.id) return;
-      setLoading(true);
+  const fetchChatrooms = useCallback(async (): Promise<ChatroomInfo[]> => {
+    if (!user?.id) return [];
 
-      const { data, error } = await supabase
-        .from("chatrooms")
-        .select("id, title, last_message_id, last_message_at")
-        .eq("created_by", user.id)
-        .order("last_message_at", { ascending: false })
-        .limit(3);
+    let q = supabase
+      .from("chatrooms")
+      .select("id, title, last_message_id, last_message_at")
+      .eq("created_by", user.id)
+      .order("last_message_at", { ascending: false, nullsFirst: false });
 
-      if (error || !data) {
-        setChatrooms([]);
-        setLoading(false);
-        return;
-      }
+    if (typeof options.limit === "number") q = q.limit(options.limit);
 
-      const chatroomInfos: ChatroomInfo[] = await Promise.all(
-        (data as ChatroomData[]).map(async (chatroom) => {
-          let last_query = "";
-          if (chatroom.last_message_id) {
-            const { data: queryData } = await supabase
-              .from("chatmessages")
-              .select("query")
-              .eq("id", chatroom.last_message_id)
-              .single();
-            last_query = queryData?.query || "";
-          }
-          return {
-            id: chatroom.id,
-            title: chatroom.title || "Untitled Chat",
-            last_message_at: chatroom.last_message_at,
-            last_query,
-          };
-        })
+    const { data, error } = await q;
+    if (error || !data) return [];
+
+    const rooms = data as ChatroomData[];
+
+    return rooms.map((room) => ({
+      id: room.id,
+      title: room.title || "Untitled Chat",
+      last_message_at: room.last_message_at ?? null,
+    }));
+  }, [options.limit, supabase, user?.id]);
+
+  const {
+    data: chatrooms = [],
+    isLoading: loading,
+    mutate,
+  } = useSWR(swrKey, fetchChatrooms, {
+    revalidateOnFocus: false,
+  });
+
+  const refetch = useCallback(() => {
+    mutate();
+  }, [mutate]);
+
+  const renameChatroom = useCallback(
+    async (chatroomId: string, title: string) => {
+      if (!user?.id) return { ok: false as const, error: "Not logged in" };
+
+      const trimmed = title.trim();
+      if (!trimmed) return { ok: false as const, error: "Title required" };
+
+      // optimistic update
+      mutate(
+        (prev) =>
+          prev?.map((c) =>
+            c.id === chatroomId ? { ...c, title: trimmed } : c
+          ),
+        { revalidate: false }
       );
 
-      setChatrooms(chatroomInfos);
-      setLoading(false);
-    }
-    fetchChatrooms();
-  }, [user?.id, supabase, authLoading]);
+      const { error } = await supabase
+        .from("chatrooms")
+        .update({ title: trimmed })
+        .eq("id", chatroomId)
+        .eq("created_by", user.id);
 
-  return { chatrooms, loading };
+      if (error) {
+        mutate(); // rollback
+        return { ok: false as const, error: error.message };
+      }
+
+      return { ok: true as const };
+    },
+    [mutate, supabase, user?.id]
+  );
+
+  const deleteChatroom = useCallback(
+    async (chatroomId: string) => {
+      if (!user?.id) return { ok: false as const, error: "Not logged in" };
+
+      // optimistic update
+      mutate((prev) => prev?.filter((c) => c.id !== chatroomId), {
+        revalidate: false,
+      });
+
+      const { error } = await supabase
+        .from("chatrooms")
+        .delete()
+        .eq("id", chatroomId)
+        .eq("created_by", user.id);
+
+      if (error) {
+        mutate(); // rollback
+        return { ok: false as const, error: error.message };
+      }
+
+      return { ok: true as const };
+    },
+    [mutate, supabase, user?.id]
+  );
+
+  return {
+    chatrooms,
+    loading,
+    refetch,
+    renameChatroom,
+    deleteChatroom,
+  };
 }

@@ -19,8 +19,8 @@ export function EventListCard({
       onClick={onClick}
       className={`cursor-pointer rounded-xl sm:rounded-2xl border transition-all duration-300 ${
         isSelected
-          ? "bg-white/[0.08] border-white/20 shadow-xl shadow-black/10"
-          : "bg-white/[0.03] border-white/[0.08] hover:bg-white/[0.06] hover:border-white/15 hover:shadow-lg hover:shadow-black/5"
+          ? "bg-primary border-white/20 shadow-xl shadow-black/10"
+          : "bg-secondary border-white/20 hover:bg-primary/80 hover:shadow-lg hover:shadow-black/5"
       }`}
     >
       <div className="p-3 sm:p-5 flex items-start gap-3 sm:gap-4">
@@ -28,8 +28,8 @@ export function EventListCard({
         <div
           className={`rounded-lg sm:rounded-xl p-2 sm:p-3 flex-shrink-0 border ${
             isSelected
-              ? "border-white/25 bg-white/5"
-              : "border-white/15 bg-white/[0.02]"
+              ? "border-white bg-foreground/50"
+              : "border-white bg-muted"
           }`}
         >
           <div className="w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center">
@@ -53,7 +53,8 @@ export function EventListCard({
             {event.name}
           </h3>
           <p className="text-white/50 text-xs sm:text-sm line-clamp-2 leading-relaxed">
-            { new Date(event.start).toLocaleDateString() } - { new Date(event.end).toLocaleDateString() }
+            {new Date(event.start).toLocaleDateString()} -{" "}
+            {new Date(event.end).toLocaleDateString()}
           </p>
         </div>
       </div>

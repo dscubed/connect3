@@ -10,9 +10,9 @@ export default function EventsPage() {
   const isDesktop = breakpointLarge();
 
   return (
-    <div className="flex h-screen  bg-black overflow-hidden">
+    <div className="flex h-screen overflow-hidden">
       <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
-      { isDesktop ? <DesktopLayout /> : <MobileLayout /> }
+      {isDesktop ? <DesktopLayout /> : <MobileLayout />}
     </div>
   );
 }

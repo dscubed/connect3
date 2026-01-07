@@ -29,17 +29,17 @@ export default function MatchResults({ match, userIndex }: MatchResultsProps) {
     >
       {/* User header with avatar and name - clickable to toggle */}
       <div
-        className="flex items-center gap-3 mb-2 cursor-pointer hover:bg-white/5 rounded-lg p-2 -m-2 transition-colors"
+        className="flex items-center gap-3 mb-2 cursor-pointer rounded-lg p-2 -m-2 transition-colors"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <UserAvatar avatarUrl={avatarUrl} fullName={match.name || "User"} />
-        <span className="text-white font-medium text-lg flex-1">
+        <span className="font-medium text-lg flex-1">
           {match.name || "User"}
         </span>
 
         {/* Show collapsed message when not expanded */}
         {!isExpanded && (
-          <span className="text-white/60 text-sm mr-2">
+          <span className="text-muted text-sm mr-2">
             Show {match.relevantFiles.length}{" "}
             {match.relevantFiles.length === 1 ? "match" : "matches"}
           </span>
@@ -48,7 +48,7 @@ export default function MatchResults({ match, userIndex }: MatchResultsProps) {
         <motion.div
           animate={{ rotate: isExpanded ? 180 : 0 }}
           transition={{ duration: 0.2 }}
-          className="text-white/60"
+          className="text-muted"
         >
           <ChevronDown className="h-5 w-5" />
         </motion.div>

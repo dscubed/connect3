@@ -1,12 +1,7 @@
-import { EntityFilterOptions } from "@/components/home/hooks/useSearch";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
 
-export const createChatroom = async (
-  query: string,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  selectedEntityFilters: EntityFilterOptions
-) => {
+export const createChatroom = async (query: string) => {
   const { user, getSupabaseClient } = useAuthStore.getState();
 
   if (!user) {
@@ -57,7 +52,8 @@ export const createChatroom = async (
       data: messageData,
     });
     toast.error(
-      messageError?.message || "Failed to create initial message. Please try again."
+      messageError?.message ||
+        "Failed to create initial message. Please try again."
     );
     return;
   }

@@ -1,7 +1,7 @@
 import { Clock, Flame, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
-import RecentChatrooms from "./QuickInfo/RecentChatrooms";
+import RecentChatrooms from "../sidebar/RecentChatrooms";
 import MatchStats from "./QuickInfo/MatchStats";
 
 export default function QuickInfoSection() {

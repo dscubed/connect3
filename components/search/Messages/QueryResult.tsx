@@ -1,14 +1,18 @@
-import type { QueryResult } from "@/lib/search/type";
+import type { LLMResultSection } from "@/lib/search/type";
 import MatchResults from "../MatchResult/MatchResults";
 
-export function QueryResult({ result }: { result: Partial<QueryResult> }) {
+export function ResultSection({
+  result,
+}: {
+  result: Partial<LLMResultSection>;
+}) {
   return (
     <div className="space-y-4">
       {result.header && (
-        <h3 className="text-white/90 text-lg font-semibold">{result.header}</h3>
+        <h3 className="text-lg font-semibold">{result.header}</h3>
       )}
       {result.text && (
-        <p className="text-white/80 leading-relaxed">{result.text}</p>
+        <p className="leading-relaxed opacity-80">{result.text}</p>
       )}
       {result.matches &&
         result.matches.map((match, index) => (

@@ -16,26 +16,33 @@ interface EventDetailPanelProps {
   onBack?: () => void;
 }
 
-export function EventDetailPanel({ event, onBack }: EventDetailPanelProps){
-  const { data: creator, error: creatorError, isLoading: isLoadingCreator } = useSWR(
+export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
+  const {
+    data: creator,
+    error: creatorError,
+    isLoading: isLoadingCreator,
+  } = useSWR(
     event.creator_profile_id ? `/api/users/${event.creator_profile_id}` : null,
-    (url) => fetch(url).then(res => res.json())
+    (url) => fetch(url).then((res) => res.json())
   );
 
-  const { data: collaborators, error: collaboratorError, isLoading: isLoadingCollaborators } = useSWR(
-    event.id ? `/api/events/${event.id}/collaborators` : null,
-    (url) => fetch(url).then(res => res.json())    
-  )
+  const {
+    data: collaborators,
+    error: collaboratorError,
+    isLoading: isLoadingCollaborators,
+  } = useSWR(event.id ? `/api/events/${event.id}/collaborators` : null, (url) =>
+    fetch(url).then((res) => res.json())
+  );
 
   let organiserString = "";
   if (!isLoadingCollaborators && !isLoadingCreator) {
-    const collaboratorNames = collaborators.map((collaborator: { first_name: string }) => 
-      collaborator.first_name
+    const collaboratorNames = collaborators.map(
+      (collaborator: { first_name: string }) => collaborator.first_name
     );
     const formatted = collaboratorNames.join(", ");
     organiserString = `${creator.full_name}, ${formatted}`;
   }
-  
+
   return (
     <motion.div
       key={event.id}
@@ -57,9 +64,9 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps){
       )}
 
       {/* Header with Logo */}
-      <div className="relative rounded-xl sm:rounded-2xl bg-gradient-to-br from-white/[0.08] to-white/[0.03] p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6 border border-white/15 shadow-xl shadow-black/10">
+      <div className="relative rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
         <div className="flex flex-row items-center sm:items-start gap-6">
-          <div className="rounded-xl sm:rounded-2xl p-3 sm:p-4 flex-shrink-0 border-2 border-white/20 bg-white/5 shadow-lg shadow-black/10 mx-auto sm:mx-0">
+          <div className="rounded-xl sm:rounded-2xl p-3 sm:p-4 flex-shrink-0 border-2 border-white/20 bg-secondary shadow-lg shadow-black/10 mx-auto sm:mx-0">
             <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
               {event.thumbnailUrl ? (
                 <Image
@@ -67,7 +74,7 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps){
                   alt={`${event.name} logo`}
                   width={80}
                   height={80}
-                  className="object-contain max-h-16 sm:max-h-20 rounded-lg grayscale"
+                  className="object-contain max-h-16 sm:max-h-20 drop-shadow-lg"
                 />
               ) : (
                 <Calendar className="w-16 h-16 sm:w-20 sm:h-20 text-white/80" />
@@ -75,54 +82,66 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps){
             </div>
           </div>
           <div className="flex-1 text-left min-w-0">
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2 sm:mb-3 leading-tight">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 sm:mb-3 leading-tight">
               {event.name}
             </h1>
             <div className="flex flex-col gap-1">
               {/* organiser information */}
-              <span className="text-white/70 text-sm md:text-md">{isLoadingCreator || isLoadingCollaborators
-                ? <p>Fetching organisers...</p>
-                : creatorError || collaboratorError 
-                ? <p>Hosted By: Unknown</p>
-                : <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  Hosted By: {organiserString || 'Unknown'}
-                </motion.div> }
+              <span className="text-muted text-sm md:text-md">
+                {isLoadingCreator || isLoadingCollaborators ? (
+                  <p>Fetching organisers...</p>
+                ) : creatorError || collaboratorError ? (
+                  <p>Hosted By: Unknown</p>
+                ) : (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                    Hosted By: {organiserString || "Unknown"}
+                  </motion.div>
+                )}
               </span>
-              <p className="text-white/70 text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
-              <Calendar className="size-4" /> 
-              { new Date(event.start).toLocaleDateString() } - { new Date(event.end).toLocaleDateString() }
-            </p>
-            <p className="text-white/70 text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
-              <Clock className="size-4" />
-              { new Date(event.start).toLocaleTimeString([], {timeStyle: 'short'}) } - { new Date(event.end).toLocaleTimeString([], {timeStyle: 'short'}) }
-            </p>
+              <p className="text-muted text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
+                <Calendar className="size-4" />
+                {new Date(event.start).toLocaleDateString()} -{" "}
+                {new Date(event.end).toLocaleDateString()}
+              </p>
+              <p className="text-muted text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
+                <Clock className="size-4" />
+                {new Date(event.start).toLocaleTimeString([], {
+                  timeStyle: "short",
+                })}{" "}
+                -{" "}
+                {new Date(event.end).toLocaleTimeString([], {
+                  timeStyle: "short",
+                })}
+              </p>
 
-            {/* event location */}
-            <p className="text-white/70 text-xs sm:text-sm line-clamp-2 loading-relaxed flex gap-1 items-center">
-              <MapPin className="size-4 text-white/70" />
-                {event.city.map((city) => 
-                  city.charAt(0).toUpperCase() + city.replace('-', ' ').slice(1)
-                ).join(', ')}
-                {' | '}
-                {event.location_type === 'virtual' ? 'Online' : 'In-Person'}
-            </p>
+              {/* event location */}
+              <p className="text-muted text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
+                <MapPin className="size-4 text-muted" />
+                {event.city
+                  .map(
+                    (city) =>
+                      city.charAt(0).toUpperCase() +
+                      city.replace("-", " ").slice(1)
+                  )
+                  .join(", ")}
+                {" | "}
+                {event.location_type === "virtual" ? "Online" : "In-Person"}
+              </p>
 
-            {/* event pricing */}
-            <p className="text-white/70 text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
-              <DollarSign className="size-4 text-white/70"/>
-              {event.pricing === 'free' ? 'Free' : 'Paid'}
-            </p>
+              {/* event pricing */}
+              <p className="text-muted text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
+                <DollarSign className="size-4 text-muted" />
+                {event.pricing === "free" ? "Free" : "Paid"}
+              </p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="bg-white/[0.04] rounded-xl sm:rounded-2xl border border-white/10 p-4 sm:p-6 lg:p-7 mb-4 sm:mb-6 shadow-lg shadow-black/5">
-        <h2 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">
-          About
-        </h2>
-        <p className="text-white/70 leading-relaxed text-sm sm:text-[15px] whitespace-pre-wrap">
+      <div className="sm:rounded-2xl p-4 sm:p-6 lg:p-7 mb-4 sm:mb-6">
+        <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">About</h2>
+        <p className="leading-relaxed text-sm sm:text-base text-muted">
           {event.description}
         </p>
       </div>
@@ -131,8 +150,9 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps){
       <div className="space-y-4 mb-6">
         {/* Booking Links */}
         {event.booking_link && event.booking_link.length > 0 && (
-          <div className="bg-white/[0.04] rounded-xl sm:rounded-2xl border border-white/10 p-4 sm:p-6 shadow-lg shadow-black/5">
-            <h2 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">
+          <div className="rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-7 mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">
+              {" "}
               Booking Links
             </h2>
             <div className="space-y-2">
@@ -142,7 +162,7 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps){
                   href={link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 p-3 rounded-lg bg-white/[0.08] hover:bg-white/[0.12] border border-white/10 hover:border-white/20 transition-all group shadow-sm hover:shadow-md shadow-black/5"
+                  className="flex items-center justify-between p-3 sm:p-4 rounded-lg sm:rounded-xl bg-foreground hover:bg-foreground/60 border border-white/10 transition-all shadow-sm hover:shadow-md"
                 >
                   <LinkIcon className="w-4 h-4 text-white/60" />
                   <span className="text-white/90 text-sm sm:text-base truncate">

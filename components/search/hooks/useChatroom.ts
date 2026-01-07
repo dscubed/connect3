@@ -3,7 +3,6 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { ChatMessage } from "../types";
 import { useSearchStream } from "./useStreamSearch";
-import { EntityFilterOptions } from "@/components/home/hooks/useSearch";
 
 export function useChatroom(chatroomId: string | null) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -41,8 +40,7 @@ export function useChatroom(chatroomId: string | null) {
 
   // Add New Message from Chatroom
   const addNewMessage = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async (query: string, selectedEntityFilters: EntityFilterOptions) => {
+    async (query: string) => {
       if (!query.trim() || !chatroomId || !user || inFlight) return;
 
       try {

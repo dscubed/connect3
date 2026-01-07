@@ -615,7 +615,7 @@ export const clubsData: ClubData[] = [
 
   // 180 Degrees Consulting Melbourne
   {
-    id: "180dc",
+    id: "180dc-melb",
     name: "180 Degrees Consulting Melbourne",
     full_name: "180 Degrees Consulting Melbourne",
     location: "Melbourne, Australia",
@@ -629,7 +629,7 @@ export const clubsData: ClubData[] = [
       website: "https://www.180dcunimelb.org/",
     },
     logoUrl:
-      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/180dc.png",
+      "https://nsjrzxbtxsqmsdgevszv.supabase.co/storage/v1/object/public/club_logos/180dc-melb.png",
     socials: {
       linkedin: "https://www.linkedin.com/company/180-degrees-consulting-umelb",
       instagram: "https://www.instagram.com/180dcunimelb/",
@@ -1109,7 +1109,8 @@ export const clubsData: ClubData[] = [
     socials: {
       facebook: "https://www.facebook.com/momumomu/",
       instagram: "https://www.instagram.com/momuians",
-      linkedin: "https://www.linkedin.com/company/malaysians-of-melbourne-university-momu/",
+      linkedin:
+        "https://www.linkedin.com/company/malaysians-of-melbourne-university-momu/",
     },
   },
 

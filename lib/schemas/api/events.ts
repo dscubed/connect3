@@ -40,4 +40,5 @@ export const createEventBodySchema = z.object({
     pricing: eventPricingSchema,
     city: z.array(eventCitySchema),
     location_type: eventLocationTypeSchema,
+    university: z.array(z.string()).optional(),
 });

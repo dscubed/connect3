@@ -21,8 +21,8 @@ export function MessageThread({ message, index }: MessageThreadProps) {
         transition={{ duration: 0.6, delay: index * 0.2 }}
       >
         <div className="inline-block">
-          <div className="text-white/60 text-sm mb-1">you</div>
-          <div className="text-white text-lg">{message.query}</div>
+          <div className="text-muted text-sm mb-1">you</div>
+          <div className="text-lg">{message.query}</div>
         </div>
       </motion.div>
 
@@ -33,7 +33,7 @@ export function MessageThread({ message, index }: MessageThreadProps) {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, delay: index * 0.2 + 0.3 }}
       >
-        <div className="text-white/60 text-sm mb-2">c3</div>
+        <div className="text-muted text-sm mb-2">c3</div>
 
         {/* Loading State */}
         {message.content ? (

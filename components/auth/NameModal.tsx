@@ -47,7 +47,7 @@ export default function NameModal({
 
   return (
     <Dialog open={open} onOpenChange={(val) => !val && onClose()}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>Please confirm your details</DialogTitle>
         </DialogHeader>
