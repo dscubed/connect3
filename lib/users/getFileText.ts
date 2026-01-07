@@ -97,11 +97,8 @@ export async function getFileText(profileId: string, supabase: SupabaseClient) {
     }
   }
 
-  const data = {
-    profile: profileText.trim(),
-    links: linksText.trim(),
-    chunks: chunkText.trim(),
-  };
+  const text =
+    profileText.trim() + "\n" + linksText.trim() + "\n" + chunkText.trim();
 
-  return data;
+  return text;
 }

@@ -1,7 +1,11 @@
-import type { ResultSection } from "@/lib/search/type";
+import type { LLMResultSection } from "@/lib/search/type";
 import MatchResults from "../MatchResult/MatchResults";
 
-export function ResultSection({ result }: { result: Partial<ResultSection> }) {
+export function ResultSection({
+  result,
+}: {
+  result: Partial<LLMResultSection>;
+}) {
   return (
     <div className="space-y-4">
       {result.header && (

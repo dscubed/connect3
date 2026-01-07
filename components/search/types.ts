@@ -1,4 +1,4 @@
-import { SearchResponse } from "@/lib/search/type";
+import { LLMSearchResponse } from "@/lib/search/type";
 
 export interface UserProfile {
   id: string;
@@ -24,7 +24,7 @@ export interface ChatMessage {
   id: string;
   query: string;
   chatroom_id: string;
-  content: SearchResponse | null;
+  content: LLMSearchResponse | null;
   created_at: string;
   user_id: string;
   status: "pending" | "processing" | "completed" | "failed";
