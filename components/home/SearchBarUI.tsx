@@ -43,7 +43,7 @@ const SearchBarUIComponent: React.FC<SearchBarUIProps> = ({
   return (
     <form onSubmit={handleSubmit} className="w-full">
       <div
-        className={`bg-background text-foreground mx-auto max-w-2xl flex flex-col items-center ${containerClassName} transition-all ${
+        className={`bg-background text-foreground mx-auto max-w-4xl flex flex-col items-center ${containerClassName} transition-all ${
           disabled || isLoading
             ? "opacity-50 pointer-events-none grayscale"
             : ""
