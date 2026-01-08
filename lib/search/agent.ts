@@ -1,0 +1,71 @@
+import { SupabaseClient } from "@supabase/supabase-js";
+import OpenAI from "openai";
+import { planSearch } from "./plan";
+import { filterSearch } from "./filter";
+import { executeSearchPlan } from "./search";
+import { EntityFilters, SearchResponse } from "./types";
+import { generateResponse } from "./response";
+import { getContext } from "./context";
+
+export const runSearch = async (
+  chatmessageId: string,
+  openai: OpenAI,
+  supabase: SupabaseClient,
+  emit?: (event: string, data: unknown) => void
+): Promise<SearchResponse | null> => {
+  // Fetch chatmessage and related data
+  const { query, tldr, prevMessages } = await getContext(
+    chatmessageId,
+    supabase
+  );
+
+  // Plan Search
+  const searchPlan = await planSearch(openai, query, tldr, prevMessages);
+  if (emit) emit("progress", "Planned Searched...");
+
+  console.log("Search Plan:", searchPlan);
+
+  // Route to general chatbot if no search required
+  if (!searchPlan.requiresSearch) {
+    // TODO: route to general chatbot
+    return null;
+  }
+
+  // Filter searches if required
+  let filters: EntityFilters = {
+    organisation: null,
+    user: null,
+    events: null,
+  };
+  if (searchPlan.filterSearch) {
+    filters = await filterSearch(
+      query,
+      searchPlan.searches,
+      prevMessages,
+      openai
+    );
+  }
+  if (emit) emit("progress", "Applied Filters...");
+
+  // Perform Search
+  const { results, fileMap } = await executeSearchPlan(
+    searchPlan,
+    filters,
+    supabase,
+    openai
+  );
+  if (emit) emit("progress", "Completed Search...");
+  console.log("Search Results:", results);
+
+  // Generate the final response
+  const response = await generateResponse(
+    results,
+    searchPlan.context,
+    openai,
+    fileMap,
+    emit
+  );
+  console.log("Final Response:", response);
+
+  return response;
+};

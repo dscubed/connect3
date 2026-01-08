@@ -4,7 +4,6 @@ import { useSearchParams } from "next/navigation";
 import Sidebar from "@/components/sidebar/Sidebar";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import { MessageList } from "@/components/search/Messages/MessageList";
-import ShareButton from "@/components/search/ShareButton";
 import { UserProfile } from "@/components/search/UserProfile/UserProfile";
 import { useAuthStore } from "@/stores/authStore";
 import {
@@ -136,23 +135,18 @@ export default function SearchPageContent() {
           chatroomId={chatroomId || undefined}
         />
 
-        <main className="flex-1 min-w-0 pt-16 md:pt-0 relative flex flex-col h-screen">
-          {/* Share button */}
-          <ShareButton chatroomId={chatroomId} />
-
+        <main className="flex-1 min-w-0 pt-16 md:pt-12 relative flex flex-col items-center h-screen">
           {/* Scrollable content area */}
           <div
-            className="flex-1 overflow-y-auto px-4 pb-30 w-full"
+            className="flex-1 overflow-y-auto px-4 pb-36 w-full"
             style={{
-              maxHeight: "calc(100vh)",
               paddingBottom: "140px",
               scrollbarWidth: "thin",
-              scrollbarColor: "rgba(255,255,255,0.3) transparent",
             }}
           >
             {/* All Messages Thread */}
             {messages.length > 0 && (
-              <div className="w-full max-w-none">
+              <div className="w-full">
                 <MessageList
                   messages={messages}
                   onUserClick={handleMessageUserClick}
@@ -162,12 +156,14 @@ export default function SearchPageContent() {
           </div>
 
           {/* Fixed search bar at bottom */}
-          <div className="w-full px-4">
-            <ChatRoomSearchBar
-              chatroomId={chatroomId}
-              addNewMessage={addNewMessage}
-              inFlight={inFlight}
-            />
+          <div className="w-full px-4 absolute bottom-0">
+            <div className="bg-white h-full pb-4">
+              <ChatRoomSearchBar
+                chatroomId={chatroomId}
+                addNewMessage={addNewMessage}
+                inFlight={inFlight}
+              />
+            </div>
           </div>
         </main>
       </div>

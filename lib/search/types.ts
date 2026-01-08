@@ -28,11 +28,9 @@ export interface FilterObject {
   value: string[]; // List of entity IDs to filter
 }
 
-export interface EntityFilters {
-  organisation: FilterObject | null;
-  user: FilterObject | null;
-  events: FilterObject | null;
-}
+export type EntityFilters = {
+  [type in EntityType]: FilterObject | null;
+};
 
 // Search Node
 
@@ -43,6 +41,10 @@ export interface FileResult {
 
 export interface EntitySearchResponse {
   fileIds: string[];
+}
+
+export interface FileMap {
+  [fileId: string]: EntityResult;
 }
 
 // Response Node

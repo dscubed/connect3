@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import { fetchUserDetails } from "@/lib/users/fetchUserDetails";
-import { getFileText } from "../users/getFileText";
+import { getFileText } from "../../users/getFileText";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 const openai = new OpenAI({
@@ -9,10 +9,6 @@ const openai = new OpenAI({
 
 const userVectorStoreId = process.env.OPENAI_USER_VECTOR_STORE_ID;
 const orgVectorStoreId = process.env.OPENAI_ORG_VECTOR_STORE_ID;
-
-export const config = {
-  runtime: "edge",
-};
 
 export async function uploadProfileToVectorStore({
   userId,
@@ -53,9 +49,7 @@ export async function uploadProfileToVectorStore({
   }
 
   // Prepare text for upload
-  const textData = await getFileText(userId, supabase);
-  const text =
-    textData.profile + "\n" + textData.links + "\n" + textData.chunks;
+  const text = await getFileText(userId, supabase);
 
   // Prepare file for OpenAI upload
   const fileObj = new File(

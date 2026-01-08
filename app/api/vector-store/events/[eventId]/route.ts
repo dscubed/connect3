@@ -105,11 +105,11 @@ export async function POST(request: NextRequest, { params }: RouteParameters) {
     }
 
     const filePricing: EventFilePricing =
-      pricing === "free" ? { type: "free" } : { type: "paid" };
+      event.pricing === "free" ? { type: "free" } : { type: "paid" };
 
     const eventFile: EventFile = {
       id: eventId,
-      event_name: name,
+      event_name: event.name,
       organisers: {
         creator: creator?.full_name || "Unknown",
         collaborators: collaboratorNames,
@@ -119,8 +119,8 @@ export async function POST(request: NextRequest, { params }: RouteParameters) {
         end: end.getTime(),
       },
       location: {
-        city: city,
-        location_type: location_type,
+        city: event.city,
+        location_type: event.location_type,
       },
       pricing: filePricing,
       description: description || "",
