@@ -1,10 +1,15 @@
-import { GripVertical, PlusCircle } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { SortableCategory } from "./SortableCategory";
 import { CategoryChunks } from "./CategoryChunks";
 import { ChunkEntry, useChunkContext } from "../../hooks/ChunkProvider";
 import { AllCategories, ChunkInput } from "../../ChunkUtils";
 import { Fade } from "@/components/ui/Fade";
 import { Button } from "@/components/ui/button";
+import {
+  SectionCard,
+  SectionCardHeader,
+} from "@/components/profile/SectionCard";
+import { CardContent } from "@/components/ui/card";
 
 interface CategoryItemProps {
   category: AllCategories;
@@ -25,28 +30,17 @@ export function CategoryItem({
   return (
     <SortableCategory key={category} id={category}>
       {({ attributes, listeners, setNodeRef, style }) => (
-        <div
-          ref={setNodeRef}
+        <SectionCard
           className="mb-2 flex flex-col items-start align-start w-full"
           style={style}
+          ref={setNodeRef}
+          variant="white"
         >
           {/* Category Header (Drag Handle) */}
-          <div
-            className="flex items-center align-center mb-2 gap-2 hover:bg-white/10 rounded-md w-full"
+          <SectionCardHeader
+            title={category}
             {...(isEditing ? { ...attributes, ...listeners } : {})}
           >
-            <h1
-              className={`relative text-2xl font-semibold flex items-center justify-center transition-all duration-300
-                ${isEditing ? "pl-6" : "p-0"}`}
-            >
-              <Fade
-                show={isEditing}
-                className="absolute left-0 mr-1 hover:cursor-grab"
-              >
-                <GripVertical className="h-5 w-5" />
-              </Fade>
-              {category}
-            </h1>
             <Fade
               show={isEditing}
               className="flex items-center cursor-pointer transition-colors"
@@ -64,15 +58,17 @@ export function CategoryItem({
                 <PlusCircle className="!size-5" />
               </Button>
             </Fade>
-          </div>
-          {/* Category Chunks */}
-          <CategoryChunks
-            chunks={chunks}
-            category={category}
-            newChunks={newChunks}
-            setNewChunks={setNewChunks}
-          />
-        </div>
+          </SectionCardHeader>
+          <CardContent className="w-full">
+            {/* Category Chunks */}
+            <CategoryChunks
+              chunks={chunks}
+              category={category}
+              newChunks={newChunks}
+              setNewChunks={setNewChunks}
+            />
+          </CardContent>
+        </SectionCard>
       )}
     </SortableCategory>
   );

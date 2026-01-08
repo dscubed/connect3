@@ -27,7 +27,7 @@ export function CategoryChunks({
 }: CategoryChunksProps) {
   const { sensors, handleChunkDragEnd } = useDnd();
   return (
-    <ul className="space-y-2 w-full">
+    <ul className="w-full">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}

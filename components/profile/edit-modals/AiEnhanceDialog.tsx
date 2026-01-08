@@ -25,7 +25,7 @@ const EXAMPLE_QUESTIONS_CHUNK = [
   "Can you tighten this while keeping all the important details?",
 ];
 
-const EXAMPLE_QUESTIONS_SUMMARY= [
+const EXAMPLE_QUESTIONS_SUMMARY = [
   // edit-style
   "Can you make this more concise but still natural?",
   "Can you keep my tone but make this flow better?",
@@ -46,7 +46,6 @@ type ChatMessage = {
 interface AiEnhanceDialogProps {
   initialText: string;
   fieldType: "external_tldr" | "chunk";
-  triggerLabel?: string;
   title?: string;
   onApply: (newText: string) => void;
 }
@@ -61,7 +60,6 @@ const INPUT =
 export function AiEnhanceDialog({
   initialText,
   fieldType,
-  triggerLabel = "Enhance",
   title,
   onApply,
 }: AiEnhanceDialogProps) {
@@ -88,8 +86,8 @@ export function AiEnhanceDialog({
   useEffect(() => {
     if (open) setDraftText(initialText);
   }, [initialText, open]);
-  
-  // 3) Auto-scroll chat  
+
+  // 3) Auto-scroll chat
   useEffect(() => {
     if (!open) return;
     const el = chatContainerRef.current;
@@ -113,9 +111,9 @@ export function AiEnhanceDialog({
             id: "welcome",
             role: "assistant",
             content:
-            fieldType === "chunk"
-              ? "Tell me what you want this highlight to emphasise, and I'll refine it."
-              : "Tell me what you want this summary to highlight — or ask me to write one for you.",
+              fieldType === "chunk"
+                ? "Tell me what you want this highlight to emphasise, and I'll refine it."
+                : "Tell me what you want this summary to highlight — or ask me to write one for you.",
           },
         ]);
       }
@@ -211,10 +209,13 @@ export function AiEnhanceDialog({
           type="button"
           variant="ghost"
           size="sm"
-          className="px-2 py-1 text-xs flex items-center gap-1"
+          className={cn(
+            "p-2 text-xs flex items-center gap-1 rounded-full",
+            "border border-muted/80 text-muted/80 shadow-sm focus-visible:ring-0",
+            "hover:bg-transparent hover:text-muted hover:border-muted"
+          )}
         >
           <Sparkles className="h-4 w-4" />
-          <span>{triggerLabel}</span>
         </Button>
       </DialogTrigger>
       {/* DialogContent styled like your SearchBar card */}
@@ -317,7 +318,9 @@ export function AiEnhanceDialog({
               </span>
             </div>
 
-            <div className={cn("px-4 py-3 flex-1 min-h-0", CARD, "shadow-none")}>
+            <div
+              className={cn("px-4 py-3 flex-1 min-h-0", CARD, "shadow-none")}
+            >
               <Textarea
                 className={cn(
                   INPUT,

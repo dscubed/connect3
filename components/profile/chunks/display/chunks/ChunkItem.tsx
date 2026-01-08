@@ -54,7 +54,7 @@ export function ChunkItem({
               className="inline-block w-2 h-2 bg-black rounded-full"
               aria-hidden="true"
             />
-            <span className="flex-1 p-2 text-lg">{chunk.text}</span>
+            <span className="flex-1 p-1 text-lg">{chunk.text}</span>
             <Fade
               show={isEditing}
               className="p-1 text-muted hover:text-red-500 transition-colors"

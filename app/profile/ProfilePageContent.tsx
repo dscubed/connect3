@@ -10,6 +10,7 @@ import { LinksSection } from "@/components/profile/LinksSection";
 import { ActionsButton } from "@/components/profile/ActionsButton";
 import { Profile } from "@/stores/authStore";
 import { useEffect, useState } from "react";
+import { SummaryCard } from "@/components/profile/SummaryCard";
 
 interface ProfilePageContentProps {
   editingProfile: boolean;
@@ -74,6 +75,8 @@ export function ProfilePageContent({
                     </div>
                   </div>
                 </motion.div>
+                <SummaryCard editingProfile={editingProfile} />
+
                 {/* Events form for organisations only */}
                 {profile.account_type === "organisation" && <EventsSection />}
 

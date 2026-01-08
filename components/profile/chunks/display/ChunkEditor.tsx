@@ -70,7 +70,6 @@ export function ChunkEditor({
               initialText={chunk.text}
               fieldType="chunk"
               title="Enhance this highlight"
-              triggerLabel="Enhance"
               onApply={(newText) => {
                 // update what's shown in the editor immediately
                 setChunk({ ...chunk, text: newText });
