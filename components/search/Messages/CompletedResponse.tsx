@@ -9,7 +9,7 @@ export function CompletedResponse({
 }) {
   return (
     <motion.div
-      className="space-y-6 leading-relaxed"
+      className="space-y-6 leading-relaxed !mt-0"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
