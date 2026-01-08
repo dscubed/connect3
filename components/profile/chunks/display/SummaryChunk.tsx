@@ -2,6 +2,7 @@ import { Textarea } from "@/components/ui/TextArea";
 import { useChunkContext } from "../hooks/ChunkProvider";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { AiEnhanceDialog } from "@/components/profile/edit-modals/AiEnhanceDialog";
 
 export function SummaryChunk() {
   const { tldr, isEditing, setNewTldr, newTldr, editingTldr, setEditingTldr } =
@@ -42,9 +43,29 @@ export function SummaryChunk() {
 
   return (
     <div className="mb-4 flex flex-col items-start justify-center w-full">
-      <h1 className="relative text-2xl font-semibold flex items-center justify-center transition-all duration-300 mb-4">
-        Summary
-      </h1>
+      <div className="w-full flex items-center justify-between mb-4">
+        <h1 className="relative text-2xl font-semibold flex items-center justify-center transition-all duration-300">
+          Summary
+        </h1>
+
+        {/* Enhance button (only when profile is in edit mode) */}
+        {isEditing && editingTldr && (
+          <AiEnhanceDialog
+            initialText={newTldr}
+            fieldType="external_tldr"
+            triggerLabel="Enhance"
+            title="Enhance your TLDR"
+            onApply={(updated) => {
+              // Apply the improved/generate TLDR into the editor
+              setNewTldr(updated);
+
+              // If they weren’t already editing this field, open editing state
+              if (!editingTldr) setEditingTldr(true);
+            }}
+          />
+        )}
+      </div>
+
       <div className="w-full flex flex-col gap-2">
         {editingTldr && isEditing ? (
           <>
@@ -58,15 +79,10 @@ export function SummaryChunk() {
               onKeyDown={handleKeyDown}
             />
             <div className="flex justify-end gap-2 animate-fade-in">
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  cancel();
-                }}
-              >
+              <Button variant="ghost" onClick={cancel}>
                 Cancel
               </Button>
-              <Button variant="ghost" onClick={() => submit()}>
+              <Button variant="ghost" onClick={submit}>
                 Save
               </Button>
             </div>
