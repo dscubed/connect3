@@ -10,10 +10,6 @@ const openai = new OpenAI({
 const userVectorStoreId = process.env.OPENAI_USER_VECTOR_STORE_ID;
 const orgVectorStoreId = process.env.OPENAI_ORG_VECTOR_STORE_ID;
 
-export const config = {
-  runtime: "edge",
-};
-
 export async function uploadProfileToVectorStore({
   userId,
   supabase,

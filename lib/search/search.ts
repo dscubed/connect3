@@ -45,6 +45,9 @@ const searchSingleEntity = async (
       FILE IDs are in the format file-id1, file-id2, etc. DON'T USE THE FILENAME e.g. user_10.txt, event_5.txt
       The id following file- should be 22 characters long make sure file ids you include are valid.
 
+      RETURN the full id including the 'file-' prefix.
+      e.g. file-abcdefghijklmn12345678, file-zyxwvutsrqponm98765432.
+
       If no files are relevant to the query, return an empty list:
       {"fileIds": []}`;
 

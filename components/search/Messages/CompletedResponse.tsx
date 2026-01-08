@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
-import { LLMSearchResponse } from "@/lib/search/types";
-import { ResultSectionSchema } from "./QueryResult";
+import { SearchResponse } from "@/lib/search/types";
+import { ResultSection } from "./QueryResult";
 
 export function CompletedResponse({
   content,
 }: {
-  content: Partial<LLMSearchResponse>;
+  content: Partial<SearchResponse>;
 }) {
   return (
     <motion.div
@@ -27,7 +27,7 @@ export function CompletedResponse({
 
       {/* Results */}
       {(content.results || []).map((result, userIndex) => {
-        return <ResultSectionSchema key={userIndex} result={result} />;
+        return <ResultSection key={userIndex} result={result} />;
       })}
 
       {/* Follow-up questions */}
