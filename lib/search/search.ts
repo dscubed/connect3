@@ -100,6 +100,70 @@ const searchSingleEntity = async (
   return { results: fileResults, fileMap };
 };
 
+export const getEventText = async (
+  eventId: string,
+  supabase: SupabaseClient
+): Promise<string> => {
+  const { data: eventData, error: eventError } = await supabase
+    .from("events")
+    .select("*")
+    .eq("id", eventId)
+    .single();
+  if (eventError || !eventData) {
+    throw new Error(`Error fetching event data: ${eventError?.message}`);
+  }
+  const { data: creatorData, error: creatorError } = await supabase
+    .from("profiles")
+    .select("first_name, last_name, university")
+    .eq("id", eventData.creator_profile_id)
+    .single();
+  if (creatorError || !creatorData) {
+    throw new Error(`Error fetching creator data: ${creatorError?.message}`);
+  }
+  const { data: collaboratorsData, error: collaboratorsError } = await supabase
+    .from("event_collaborators")
+    .select(`profiles ( first_name, last_name )`)
+    .eq("event_id", eventId);
+  if (collaboratorsError || !collaboratorsData) {
+    throw new Error(
+      `Error fetching collaborators: ${collaboratorsError?.message}`
+    );
+  }
+  const collaborators = collaboratorsData
+    .flatMap((item: any) => item.profiles)
+    .map((profile: any) =>
+      `${profile.first_name || ""} ${profile.last_name || ""}`.trim()
+    );
+  const creatorName =
+    `${creatorData.first_name || ""} ${creatorData.last_name || ""}`.trim() ||
+    "Unknown";
+  const text = `${eventData.name || "Untitled Event"} (${eventData.type?.join(", ") || "No type"
+    })
+Location: ${eventData.location_type}${eventData.city?.length > 0 ? " in " + eventData.city.join(", ") : ""
+    }
+Pricing: ${eventData.pricing === "free" ? "Free" : "Paid"}
+Creator: ${creatorName}${collaborators.length > 0
+      ? "\nCollaborators: " + collaborators.join(", ")
+      : ""
+    }
+Start: ${new Date(eventData.start).toLocaleString()}
+End: ${new Date(eventData.end).toLocaleString()}${eventData.booking_link?.length > 0
+      ? "\n" +
+      eventData.booking_link
+        .map((link: string) => `Booking: ${link}`)
+        .join("\n")
+      : ""
+    }${eventData.university?.length > 0
+      ? "\nUniversities: " + eventData.university.join(", ")
+      : ""
+    }
+${eventData.description?.length > 0
+      ? eventData.description
+      : "No description provided."
+    }`;
+  return text;
+};
+
 const getFileContent = async (
   fileId: string,
   supabase: SupabaseClient,
@@ -119,7 +183,6 @@ const getFileContent = async (
     const fileContent = await getFileText(data.id, supabase);
     return { fileContent, id: data.id };
   } else if (entityType === "events") {
-    // TODO: Implement event file content retrieval
     const { data, error } = await supabase
       .from("events")
       .select("id")
@@ -127,12 +190,11 @@ const getFileContent = async (
       .single();
     if (error || !data) {
       throw new Error(
-        `Error fetching profile for file ID ${fileId}: ${error.message}`
+        `Error fetching event for file ID ${fileId}: ${error.message}`
       );
     }
-
-    // Placeholder until event content retrieval is implemented
-    return { fileContent: "", id: data.id };
+    const fileContent = await getEventText(data.id, supabase);
+    return { fileContent, id: data.id };
   }
   throw new Error(`Unknown entity type: ${entityType}`);
 };
