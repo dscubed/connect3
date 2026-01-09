@@ -14,7 +14,7 @@ export function MessageList({ messages, onUserClick }: MessageListProps) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-8 px-8">
       {messages.map((message, index) => (
         <MessageThread
           key={message.id}

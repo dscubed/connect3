@@ -15,15 +15,26 @@ import { useAuthStore } from "@/stores/authStore";
 import { Textarea } from "@/components/ui/TextArea";
 import { cn } from "@/lib/utils";
 
-const EXAMPLE_QUESTIONS = [
+const EXAMPLE_QUESTIONS_CHUNK = [
   "Can you make this more concise but still natural?",
-  "Can you highlight my key projects more clearly?",
+  "Can you highlight my key responsibilities more clearly?",
   "Can you keep my tone but make this flow better?",
   "Can you make this sound more confident without exaggerating?",
   "Can you emphasise my technical skills more?",
   "Can you improve clarity while keeping the same voice?",
-  "Can you make this feel more engaging for networking?",
   "Can you tighten this while keeping all the important details?",
+];
+
+const EXAMPLE_QUESTIONS_SUMMARY= [
+  // edit-style
+  "Can you make this more concise but still natural?",
+  "Can you keep my tone but make this flow better?",
+  "Can you make this feel more engaging for networking?",
+
+  // generate-style
+  "Can you write something engaging for me based on my profile?",
+  "Can you generate a summary that highlights my key projects?",
+  "Can you write a confident networking summary from my chunks?",
 ];
 
 type ChatMessage = {
@@ -89,8 +100,11 @@ export function AiEnhanceDialog({
     setOpen(nextOpen);
 
     if (nextOpen) {
-      const random =
-        EXAMPLE_QUESTIONS[Math.floor(Math.random() * EXAMPLE_QUESTIONS.length)];
+      const examples =
+        fieldType === "chunk"
+          ? EXAMPLE_QUESTIONS_CHUNK
+          : EXAMPLE_QUESTIONS_SUMMARY;
+      const random = examples[Math.floor(Math.random() * examples.length)];
       setExample(random);
 
       if (messages.length === 0) {
@@ -99,9 +113,9 @@ export function AiEnhanceDialog({
             id: "welcome",
             role: "assistant",
             content:
-              fieldType === "chunk"
-                ? "Tell me what you want this highlight to emphasise, and I’ll help you refine it."
-                : "Tell me what you want this TLDR to highlight, and I’ll help you refine it.",
+            fieldType === "chunk"
+              ? "Tell me what you want this highlight to emphasise, and I'll refine it."
+              : "Tell me what you want this summary to highlight — or ask me to write one for you.",
           },
         ]);
       }
@@ -151,10 +165,15 @@ export function AiEnhanceDialog({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to enhance text");
 
+      const reply =
+        typeof data.reply === "string" && data.reply.trim().length > 0
+          ? data.reply.trim()
+          : "Done — I updated the draft below.";
+
       const assistantMsg: ChatMessage = {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: data.reply as string,
+        content: reply,
       };
 
       setMessages((prev) => [...prev, assistantMsg]);
@@ -183,7 +202,7 @@ export function AiEnhanceDialog({
 
   const dialogTitle =
     title ||
-    (fieldType === "chunk" ? "Enhance this highlight" : "Enhance your TLDR");
+    (fieldType === "chunk" ? "Enhance this highlight" : "Enhance your summary");
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -290,7 +309,7 @@ export function AiEnhanceDialog({
           </div>
 
           {/* EDITABLE DRAFT SECTION */}
-          <div className="flex flex-col flex-[0.8] min-h-0">
+          <div className="flex flex-col flex-[0.8] min-h-0 overflow-hidden">
             <div className="mb-2 text-sm font-medium">
               Current draft{" "}
               <span className="ml-1 text-xs text-secondary-foreground/60">
@@ -298,9 +317,12 @@ export function AiEnhanceDialog({
               </span>
             </div>
 
-            <div className={cn("px-4 py-3", CARD, "shadow-none")}>
+            <div className={cn("px-4 py-3 flex-1 min-h-0", CARD, "shadow-none")}>
               <Textarea
-                className={cn(INPUT, "w-full min-h-[120px] max-h-[240px]")}
+                className={cn(
+                  INPUT,
+                  "w-full h-full min-h-[120px] max-h-full overflow-y-auto scrollbar-hide"
+                )}
                 value={draftText}
                 onChange={(e) => setDraftText(e.target.value)}
                 disabled={isLoading}

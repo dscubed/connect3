@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 import { runSearch } from "@/lib/search/agent";
-import { generateResponse } from "@/lib/search/response";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
 
 const supabase = createClient(
@@ -79,8 +78,7 @@ export async function POST(req: NextRequest) {
       throw new Error("Failed to update message status");
     }
 
-    const { query, state } = await runSearch(messageId, openai, supabase, emit);
-    const response = await generateResponse(query, state, openai, emit);
+    const response = await runSearch(messageId, openai, supabase, emit);
 
     await emit("done", {
       success: true,

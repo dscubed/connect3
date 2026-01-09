@@ -8,43 +8,42 @@ const client = new OpenAI({
 });
 
 const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SECRET_KEY!
-  );
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SECRET_KEY!
+);
 
 export async function POST(request: NextRequest) {
   try {
-    // 1. Authenticate the request (same pattern as your other routes)
+    // 1. Authenticate the request
     const authResult = await authenticateRequest(request);
     if (authResult instanceof NextResponse) {
-      return authResult; // 401 / error response from auth-middleware
+      return authResult;
     }
     const { user } = authResult;
 
-    // 2. Fetch some of the user's visible chunks as context for the model
+    // 2. Fetch the user's visible profile chunks as context
     const { data: chunks, error: chunksError } = await supabase
-    .from("user_files")
-    .select("summary_text, category, visible")
-    .eq("user_id", user.id)
-    .eq("visible", true)
-    .order("created_at", { ascending: false })
-    .limit(30);
+      .from("user_files")
+      .select("summary_text, category, visible")
+      .eq("user_id", user.id)
+      .eq("visible", true)
+      .order("created_at", { ascending: false })
+      .limit(30);
 
     if (chunksError) {
-    console.error("Error fetching chunks for enhance-field:", chunksError);
+      console.error("Error fetching chunks for enhance-field:", chunksError);
     }
 
-    // Build a compact text context from summary_text + category
+    // Build a compact context string from the chunks
     const chunksText = (chunks ?? [])
-    .filter((c) => c.summary_text && c.summary_text.trim().length > 0)
-    .map(
-    (c) =>
-        `- [${c.category ?? "general"}] ${c.summary_text}`
-    )
-    .join("\n")
-    .slice(0, 4000);
+      .filter((c) => c.summary_text && c.summary_text.trim().length > 0)
+      .map(
+        (c) => `- [${c.category ?? "general"}] ${c.summary_text}`
+      )
+      .join("\n")
+      .slice(0, 4000);
 
-    // 3. Parse body
+    // 3. Parse request body
     const body = await request.json();
     const {
       fieldType,
@@ -61,50 +60,92 @@ export async function POST(request: NextRequest) {
         ? "profile highlight"
         : "external TLDR";
 
+    // 4. Decide whether to EDIT or GENERATE
+    const draft = (text ?? "").trim();
 
+    const looksPlaceholder =
+      draft.length === 0 ||
+      draft.length < 20 ||
+      /^(n\/a|na|none|tbd|todo|placeholder|\(none provided\))$/i.test(draft);
+
+    const generateRequested = (messages ?? []).some(
+      (m) =>
+        m.role === "user" &&
+        /(write|generate|create).*(tldr|summary)|write something engaging|make (me )?(an )?(engaging )?(tldr|summary)/i.test(
+          m.content
+        )
+    );
+
+    // Never generate new content for individual chunks
+    const mode: "EDIT" | "GENERATE" =
+      fieldType === "chunk"
+        ? "EDIT"
+        : looksPlaceholder || generateRequested
+        ? "GENERATE"
+        : "EDIT";
+
+    // 5. System prompt (supports EDIT and GENERATE modes)
     const systemPrompt = `
-    You are an AI writing coach helping a university student improve a short ${fieldLabel}.
-    Your role is to polish the user's writing - not to rewrite it.
+You are an AI writing coach helping a university student produce a short ${fieldLabel}.
 
-    Editing principles (very important):
-    - Preserve the user's existing voice, tone, formality level, and point of view unless the user explicitly asks for a change.
-    - Keep the core phrasing, rhythm, and personal style of the user's text. Only adjust wording when it clearly improves clarity, correctness, or flow.
-    - Do NOT replace simple words with overly formal or corporate ones unless requested.
-    - Do NOT shift from first-person to third-person or vice versa unless the user asks.
-    - Aim to keep the structure and meaning of each sentence the same.
-    - Think of this as a **light editorial pass**, not a transformation.
+You must operate in TWO modes:
 
-    Content guidelines:
-    - For TLDRs: keep the final output to around 2-3 sentences.
-    - For highlights: keep it to 1-3 concise sentences.
-    - Emphasise concrete skills, outcomes, and impact when they are already present in the text.
-    - Do not invent achievements or add details that the user did not provide.
+MODE 1 — EDIT:
+- If the user provides a meaningful draft, do a light editorial pass.
+- Preserve the user's voice, tone, formality level, and point of view unless explicitly asked to change.
+- Keep the structure and meaning of each sentence largely the same.
+- Improve clarity, flow, and correctness only.
+- Do NOT over-formalise or introduce new information.
 
-    You must respond with a pure JSON object of the form:
-    {
-    "reply": "<what you say back in chat (feedback, explanation)>",
-    "improvedText": "<the improved version of the user's text>"
-    }
-    Do NOT wrap this JSON in backticks and do NOT add any extra commentary.
+MODE 2 — GENERATE:
+- If the draft is empty or placeholder, OR the user asks you to write one, generate a new ${fieldLabel}.
+- Use ONLY the provided profile chunks as factual grounding.
+- Do NOT invent achievements, metrics, employers, dates, or skills.
+- If something is uncertain, omit it or phrase it generally.
+- Follow the user's requested style (e.g. engaging, confident, formal).
+
+Length guidelines:
+- TLDRs: 2–3 sentences.
+- Highlights: 1–3 concise sentences.
+
+You must respond with a pure JSON object of the form:
+{
+  "reply": "<NON-EMPTY. 1–2 sentences describing what you did and asking what tone they want if relevant>",
+  "improvedText": "<the final edited or generated text>"
+}
+Rules:
+- "reply" must be a non-empty string (at least 10 characters).
+- "improvedText" must be a non-empty string.
+Do NOT wrap this JSON in backticks and do NOT add any extra commentary.
     `.trim();
 
+    // 6. Build messages for OpenAI
     const openaiMessages = [
       { role: "system" as const, content: systemPrompt },
+
+      // Explicitly state which mode to use
+      { role: "user" as const, content: `Mode: ${mode}` },
+
+      // Provide profile chunks as the factual source of truth
       {
         role: "user" as const,
         content:
           chunksText.length > 0
-            ? `Here are some of my profile chunks and highlights for context:\n${chunksText}`
-            : "I don't have extra chunks available, just use the text I provide.",
+            ? `PROFILE CHUNKS (use these as the factual source of truth):\n${chunksText}`
+            : "PROFILE CHUNKS: (none available)",
       },
+
+      // Conversation history (style and intent)
       ...messages,
+
+      // Current draft (may be empty)
       {
         role: "user" as const,
-        content: `Here is the current ${fieldLabel} we are editing:\n\n"""${text}"""`,
+        content: `Draft ${fieldLabel} (may be empty or placeholder; if so, generate from chunks):\n\n"""${text ?? ""}"""`,
       },
     ];
 
-    // 3. Call OpenAI
+    // 7. Call OpenAI
     const completion = await client.chat.completions.create({
       model: "gpt-4o-mini",
       messages: openaiMessages,
@@ -124,7 +165,7 @@ export async function POST(request: NextRequest) {
       };
     }
 
-    // 4. Return JSON to the client
+    // 8. Return response to client
     return NextResponse.json(
       {
         reply: parsed.reply,
