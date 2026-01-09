@@ -13,7 +13,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
 import { LinkTypeInput } from "./LinkTypeInput";
 import { Link } from "lucide-react";
-import { uploadProfileToVectorStore } from "@/lib/vectorStores/client";
+import { uploadProfileToVectorStore } from "@/lib/vectorStores/profile/client";
 
 interface EditModalProps {
   links: LinkItem[];

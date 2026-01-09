@@ -12,7 +12,8 @@ import { useAuthStore } from "@/stores/authStore";
 import { useEffect, useState } from "react";
 import { UniversityInput } from "./UniversityInput";
 import { University } from "./univeristies";
-import { uploadProfileToVectorStore } from "@/lib/vectorStores/client";
+import { uploadProfileToVectorStore } from "@/lib/vectorStores/profile/client";
+import { toast } from "sonner";
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -22,7 +23,7 @@ interface ProfileModalProps {
 export function ProfileModal({ isOpen, setIsOpen }: ProfileModalProps) {
   const { profile, updateProfile } = useAuthStore.getState();
   const [firstName, setFirstName] = useState(profile?.first_name || "");
-  const [lastName, setLastName] = useState(profile?.last_name || "");
+  const [lastName, setLastName] = useState(profile?.last_name || null);
   const [university, setUniversity] = useState<University | null>(
     (profile?.university as University) || null
   );
@@ -39,6 +40,21 @@ export function ProfileModal({ isOpen, setIsOpen }: ProfileModalProps) {
     if (!profile) return;
 
     console.log("Saving profile with university:", university);
+
+    const isOrg = profile.account_type === "organisation";
+
+    if (isOrg) {
+      if (!firstName.trim()) {
+        toast.error("Organisation name is empty.");
+        return;
+      }
+    } else {
+      if (!firstName.trim() || !lastName?.trim()) {
+        toast.error("First or last name is empty.");
+        return;
+      }
+    }
+
     updateProfile({
       first_name: firstName,
       last_name: lastName,
@@ -71,7 +87,7 @@ export function ProfileModal({ isOpen, setIsOpen }: ProfileModalProps) {
             />
             <Input
               placeholder={profile.last_name || `Last Name`}
-              value={lastName}
+              value={lastName || ""}
               onChange={(e) => setLastName(e.target.value)}
             />
           </div>

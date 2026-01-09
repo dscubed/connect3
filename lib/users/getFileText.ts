@@ -76,9 +76,7 @@ export async function getFileText(profileId: string, supabase: SupabaseClient) {
   const tldr = profileData.tldr || "";
 
   const profileText = `
-  ${profileData.first_name} ${profileData.last_name} (${
-    profileData.account_type
-  })
+  ${name} (${profileData.account_type})
   University: ${
     universities[profileData.university as University]?.name || "Not specified"
   }
@@ -96,11 +94,8 @@ export async function getFileText(profileId: string, supabase: SupabaseClient) {
     }
   }
 
-  const data = {
-    profile: profileText.trim(),
-    links: linksText.trim(),
-    chunks: chunkText.trim(),
-  };
+  const text =
+    profileText.trim() + "\n" + linksText.trim() + "\n" + chunkText.trim();
 
-  return data;
+  return text;
 }

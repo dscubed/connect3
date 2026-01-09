@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { EntityType } from "@/lib/search/type";
+import { EntityType } from "@/lib/search/types";
 import { Profile, useAuthStore } from "@/stores/authStore";
 
 // Global cache shared across all hook calls
@@ -25,7 +25,9 @@ export function useEntityCache(entityId: string, entityType: EntityType) {
         const supabase = getSupabaseClient();
         const { data, error } = await supabase
           .from("profiles")
-          .select("avatar_url, tldr, status, location, first_name, last_name")
+          .select(
+            "avatar_url, tldr, status, location, first_name, last_name, account_type"
+          )
           .eq("id", entityId)
           .single();
         if (!error && data?.avatar_url) {

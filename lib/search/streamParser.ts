@@ -1,4 +1,4 @@
-import { EntityResult, ResultSection, SearchResponse } from "./type";
+import { ResultSection, SearchResponse, EntityResult, FileMap } from "./types";
 
 type PartialResult = {
   header?: string | null;
@@ -92,7 +92,7 @@ const parsePartialResults = (resultsContent: string): PartialResult[] => {
 
 export const partialParseResponse = (
   text: string,
-  entityMap?: Map<string, EntityResult>
+  fileMap: FileMap
 ): Partial<SearchResponse> => {
   const response: Partial<SearchResponse> = {};
 
@@ -111,9 +111,9 @@ export const partialParseResponse = (
         (r): ResultSection => ({
           header: r.header ?? undefined,
           text: r.text ?? "",
-          matches: entityMap
+          matches: fileMap
             ? ((r.entity_ids ?? [])
-                .map((id) => entityMap.get(id))
+                .map((id) => fileMap[id])
                 .filter(Boolean) as EntityResult[])
             : [],
         })

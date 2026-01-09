@@ -12,23 +12,28 @@ export default function EventFormHeader() {
 
   const handleAddButtonClick = () => {
     setAddingEvent(true);
-  }
+  };
 
   const handleFormCancel = () => {
     setAddingEvent(false);
-  }
+  };
 
-  const handleFormSubmit = async (eventData: Omit<HostedEvent, 'id' | "push">) => {
+  const handleFormSubmit = async (
+    eventData: Omit<HostedEvent, "id" | "push">
+  ) => {
     const eventId = crypto.randomUUID();
 
-    // create event in database 
-    const dbResponse = await makeAuthenticatedRequest(`/api/events/${eventId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(eventData),
-    });
+    // create event in database
+    const dbResponse = await makeAuthenticatedRequest(
+      `/api/events/${eventId}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(eventData),
+      }
+    );
 
     if (dbResponse.ok) {
       toast.success("Successfully added event");
@@ -39,20 +44,23 @@ export default function EventFormHeader() {
       return;
     }
 
-    const vectorStoreResponse = await makeAuthenticatedRequest(`/api/vector-store/events/${eventId}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(eventData)
-    });
+    const vectorStoreResponse = await makeAuthenticatedRequest(
+      `/api/vector-store/events/${eventId}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(eventData),
+      }
+    );
 
     if (vectorStoreResponse.ok) {
       console.log("Added event to vector store");
     } else {
       toast.error("Failed to add event to vector store");
     }
-  }
+  };
 
   return (
     <motion.div
@@ -63,24 +71,28 @@ export default function EventFormHeader() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0 }}
     >
-      {addingEvent ? 
+      {addingEvent ? (
         <div className="flex flex-col gap-2 w-full">
           {/* event form */}
-          <AddEventForm onSubmit={handleFormSubmit} onCancel={handleFormCancel} />
+          <AddEventForm
+            onSubmit={handleFormSubmit}
+            onCancel={handleFormCancel}
+          />
         </div>
-       :
+      ) : (
         // header
-        <button className="w-full flex items-center justify-between group" onClick={handleAddButtonClick}>
+        <button
+          className="w-full flex items-center justify-between group"
+          onClick={handleAddButtonClick}
+        >
           <div className="flex items-center gap-4">
-            <h3 className="text-xl font-semibold text-white/90">
-              Add Event
-            </h3>
-            <span className="text-sm text-white/50 bg-white/10 px-3 py-1 rounded-full">
-              <Plus className="h-5 w-5 text-white/50 group-hover:text-white/70 transition-colors" />
+            <h3 className="text-xl font-semibold">Add Event</h3>
+            <span className="text-sm px-3 py-1 rounded-full">
+              <Plus className="h-5 w-5 text-muted/70 group-hover:text-muted transition-colors" />
             </span>
           </div>
         </button>
-      }
+      )}
     </motion.div>
-  )
+  );
 }

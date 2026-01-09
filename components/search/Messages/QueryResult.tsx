@@ -1,4 +1,4 @@
-import type { ResultSection } from "@/lib/search/type";
+import type { ResultSection } from "@/lib/search/types";
 import MatchResults from "../MatchResult/MatchResults";
 
 export function ResultSection({ result }: { result: Partial<ResultSection> }) {
