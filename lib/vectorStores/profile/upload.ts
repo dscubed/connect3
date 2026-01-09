@@ -105,28 +105,41 @@ async function removeProfileFromVectorStore(
   supabase: SupabaseClient,
   userId: string
 ) {
-  // Remove from vector store
-  const { deleted: vsFileDeleted } = await openai.vectorStores.files.delete(
-    openaiFileId,
-    {
+  // 1) Try to remove from vector store (detach)
+  try {
+    await openai.vectorStores.files.delete(openaiFileId, {
       vector_store_id: vectorStoreId,
+    });
+    console.log(
+      `Detached file ${openaiFileId} from vector store ${vectorStoreId}`
+    );
+  } catch (err: any) {
+    // If it's already not in the vector store, that's fine
+    if (err?.status === 404) {
+      console.warn(
+        `File ${openaiFileId} not found in vector store ${vectorStoreId}; skipping detach`
+      );
+    } else {
+      console.error("Error detaching file from vector store:", err);
+      throw err;
     }
-  );
-
-  // Remove from OpenAI files
-  const { deleted: openaiFileDeleted } = await openai.files.delete(
-    openaiFileId
-  );
-
-  const deleted = vsFileDeleted && openaiFileDeleted;
-
-  if (!deleted) {
-    throw new Error("Failed to delete file from vector store");
   }
 
-  console.log(`Removed file ${openaiFileId}`);
+  // 2) Try to delete the underlying OpenAI file
+  try {
+    await openai.files.delete(openaiFileId);
+    console.log(`Deleted OpenAI file ${openaiFileId}`);
+  } catch (err: any) {
+    // If the file is already gone, that's fine
+    if (err?.status === 404) {
+      console.warn(`OpenAI file ${openaiFileId} already deleted; skipping`);
+    } else {
+      console.error("Error deleting OpenAI file:", err);
+      throw err;
+    }
+  }
 
-  // Also remove file ID from Supabase profile
+  // 3) Always clear Supabase openai_file_id so we don't keep stale references
   const { error } = await supabase
     .from("profiles")
     .update({ openai_file_id: null })
@@ -138,4 +151,5 @@ async function removeProfileFromVectorStore(
     );
     throw new Error("Failed to remove OpenAI file ID from profile");
   }
+  console.log(`Cleared openai_file_id for user ${userId}`);
 }
