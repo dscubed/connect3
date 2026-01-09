@@ -6,13 +6,14 @@ import { executeSearchPlan } from "./search";
 import { EntityFilters, SearchResponse } from "./types";
 import { generateResponse } from "./response";
 import { getContext } from "./context";
+import { runGeneral } from "./general/runGeneral";
 
 export const runSearch = async (
   chatmessageId: string,
   openai: OpenAI,
   supabase: SupabaseClient,
   emit?: (event: string, data: unknown) => void
-): Promise<SearchResponse | null> => {
+): Promise<SearchResponse> => {
   // Fetch chatmessage and related data
   const { query, tldr, prevMessages } = await getContext(
     chatmessageId,
@@ -27,8 +28,23 @@ export const runSearch = async (
 
   // Route to general chatbot if no search required
   if (!searchPlan.requiresSearch) {
-    // TODO: route to general chatbot
-    return null;
+    if (emit) emit("progress", "Routed to General Chat...");
+  
+    const generalText = await runGeneral({
+      openai,
+      query,
+      tldr,
+      prevMessages,
+      // optionally pass user's uni slug if you store it
+      // userUniversitySlug: userUniSlugFromDB
+    });
+  
+    // Return in your existing SearchResponse shape
+    return {
+      summary: generalText,
+      results: [],
+      followUps: "",
+    };
   }
 
   // Filter searches if required
