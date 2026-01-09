@@ -73,6 +73,8 @@ export async function getFileText(profileId: string, supabase: SupabaseClient) {
   const profileChunks = await getOrderedChunks(profileId, supabase);
   const profileLinks = await getProfileLinks(profileId, supabase);
 
+  const tldr = profileData.tldr || "";
+
   const profileText = `
   ${profileData.first_name} ${profileData.last_name} (${
     profileData.account_type
@@ -80,7 +82,7 @@ export async function getFileText(profileId: string, supabase: SupabaseClient) {
   University: ${
     universities[profileData.university as University]?.name || "Not specified"
   }
-  ${profileData.tldr.length > 0 ? profileData.tldr : "No summary provided."}`;
+  ${tldr.length > 0 ? tldr : "No summary provided."}`;
 
   const linksText = profileLinks
     .map((link) => `${link.type}: ${link.details}`)

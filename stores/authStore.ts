@@ -125,13 +125,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       throw new Error("Authentication required. Please log in.");
     }
 
+    // Build headers carefully so FormData requests don't get an explicit Content-Type
+    const isFormData = options.body instanceof FormData;
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${session.access_token}`,
+      ...((options.headers as Record<string, string>) || {}),
+    };
+    if (!isFormData) {
+      headers["Content-Type"] = "application/json";
+    } else {
+      delete headers["Content-Type"];
+      delete headers["content-type"];
+    }
+
     const response = await fetch(url, {
       ...options,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session.access_token}`,
-        ...options.headers,
-      },
+      headers,
     });
 
     if (response.status === 401) {

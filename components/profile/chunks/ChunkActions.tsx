@@ -1,3 +1,5 @@
+"use client";
+
 import {
   FileUp,
   MessageCircle,
@@ -6,6 +8,7 @@ import {
   RotateCcw,
   Save,
 } from "lucide-react";
+import { parseDocument } from "@/lib/onboarding/parsers/documentParser";
 import { useChunkContext } from "./hooks/ChunkProvider";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -141,23 +144,36 @@ const ResumeUploadModal = ({
       return;
     }
 
-    const formData = new FormData();
-    formData.append("resume", resume[0]);
-    formData.append("profileId", user?.id ?? "");
+    // Parse the file on the client and send text to the server
+    try {
+      const parseResult = await parseDocument(resume[0]);
+      if (!parseResult.success) {
+        toast.error(parseResult.error || "Failed to parse resume.");
+        return;
+      }
 
-    const response = await makeAuthenticatedRequest("/api/profiles/resume", {
-      method: "POST",
-      body: formData,
-    });
+      const resumeText = parseResult.text || "";
 
-    if (!response.ok) {
+      const response = await makeAuthenticatedRequest("/api/profiles/resume", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profileId: user.id, fileName: resume[0].name, text: resumeText }),
+      });
+
+      if (!response.ok) {
+        const respText = await response.text().catch(() => null);
+        console.error("Resume processing failed:", respText);
+        toast.error("Failed to process resume. Please try again.");
+        return;
+      }
+
+      toast.success(
+        `Resume ${resume.map((r) => r.name).join(", ")} processed successfully!`
+      );
+    } catch (err) {
+      console.error("Error processing resume:", err);
       toast.error("Failed to process resume. Please try again.");
-      return;
     }
-
-    toast.success(
-      `Resume ${resume.map((r) => r.name).join(", ")} processed successfully!`
-    );
   };
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
