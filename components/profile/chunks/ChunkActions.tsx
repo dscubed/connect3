@@ -8,7 +8,7 @@ import {
   RotateCcw,
   Save,
 } from "lucide-react";
-import { parseDocument } from "@/lib/onboarding/parsers/documentParser";
+import { parseDocument } from "@/lib/parsers/documentParser";
 import { useChunkContext } from "./hooks/ChunkProvider";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";

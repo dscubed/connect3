@@ -10,7 +10,7 @@ async function getOrderedChunks(profileId: string, supabase: SupabaseClient) {
     .from("profile_chunks")
     .select("text, category, order")
     .eq("profile_id", profileId)
-    .order("created_at", { ascending: true });
+    //.order("created_at", { ascending: true });
   if (chunksError || !chunksData) {
     throw new Error(`Error fetching profile chunks: ${chunksError.message}`);
   }
@@ -25,12 +25,22 @@ async function getOrderedChunks(profileId: string, supabase: SupabaseClient) {
     );
   }
 
-  const orderedChunks = categoryOrderData.map(({ category }) => ({
+  /*const orderedChunks = categoryOrderData.map(({ category }) => ({
+    category,
+    chunks: chunksData
+      .filter((chunk) => chunk.category === category)
+      .sort((a, b) => a.order - b.order),
+  }));*/
+
+  const orderedChunks = categoryOrderData
+  .sort((a, b) => a.order - b.order)
+  .map(({ category }) => ({
     category,
     chunks: chunksData
       .filter((chunk) => chunk.category === category)
       .sort((a, b) => a.order - b.order),
   }));
+
 
   return {
     orderedChunks,
@@ -75,6 +85,7 @@ export async function getFileText(profileId: string, supabase: SupabaseClient) {
 
   const tldr = profileData.tldr || "";
 
+  const name = `${profileData.first_name ?? ""} ${profileData.last_name ?? ""}`.trim() || "Unknown";
   const profileText = `
   ${name} (${profileData.account_type})
   University: ${

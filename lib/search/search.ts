@@ -130,8 +130,8 @@ export const getEventText = async (
     );
   }
   const collaborators = collaboratorsData
-    .flatMap((item: any) => item.profiles)
-    .map((profile: any) =>
+    .flatMap((item: { profiles: Array<{ first_name?: string; last_name?: string }> }) => item.profiles)
+    .map((profile: { first_name?: string; last_name?: string }) =>
       `${profile.first_name || ""} ${profile.last_name || ""}`.trim()
     );
   const creatorName =

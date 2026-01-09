@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
-import { parseDocument } from "@/lib/onboarding/parsers/documentParser";
+import { parseDocument } from "@/lib/parsers/documentParser";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
