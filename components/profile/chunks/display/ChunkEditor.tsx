@@ -3,6 +3,16 @@ import { useChunkContext } from "../hooks/ChunkProvider";
 import { Button } from "@/components/ui/button";
 import { AllCategories, ChunkInput } from "../ChunkUtils";
 import { AiEnhanceDialog } from "@/components/profile/edit-modals/AiEnhanceDialog";
+import { toast } from "sonner";
+import { useAuthStore } from "@/stores/authStore";
+
+type ValidationResult = {
+  safe: boolean;
+  sensitive: boolean;
+  relevant: boolean;
+  categoryMatches: boolean;
+  reason: string;
+};
 
 export function ChunkEditor({
   cancel,
@@ -16,12 +26,71 @@ export function ChunkEditor({
   chunkId?: string;
 }) {
   const { addChunk, setChunks } = useChunkContext();
+  const { makeAuthenticatedRequest, user } = useAuthStore();
 
   if (chunk.category === null) return null;
 
-  const submit = () => {
+  const submit = async () => {
     if (chunk.text.trim() === "") return;
-    // If chunkId is provided, we're editing an existing chunk
+
+    if (!user) {
+      toast.error("You need to be signed in to save highlights.");
+      return;
+    }
+
+    // 1) Validate chunk (safety + relevance-to-category)
+    try {
+      const res = await makeAuthenticatedRequest(
+        "/api/validate/chunks",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text: chunk.text.trim(),
+            category: chunk.category,
+            fullName:
+              (user as any)?.user_metadata?.full_name ||
+              (user as any)?.user_metadata?.name ||
+              "",
+          }),
+        }
+      );
+
+      const validation = (await res.json()) as ValidationResult;
+      if (!res.ok) throw new Error("Validation failed");
+
+      if (!validation.safe) {
+        toast.error(validation.reason || "This content can't be saved.");
+        return;
+      }
+
+      if (validation.sensitive) {
+        toast.error(
+          validation.reason ||
+            "Please remove personal information before saving."
+        );
+        return;
+      }
+
+      if (!validation.relevant) {
+        toast.error(validation.reason || "This highlight doesn't look valid.");
+        return;
+      }
+
+      if (!validation.categoryMatches) {
+        toast.error(
+          validation.reason ||
+            "This highlight doesn't seem to match the selected category."
+        );
+        return;
+      }
+    } catch (err) {
+      console.error("validate-chunk client error", err);
+      toast.error("Could not validate right now. Please try again.");
+      return;
+    }
+
+    // 2) Save chunk
     if (chunkId) {
       setChunks((prev) =>
         prev.map((c) =>
@@ -31,6 +100,7 @@ export function ChunkEditor({
     } else {
       addChunk(chunk.category!, chunk.text.trim());
     }
+
     setChunk({ text: "", category: null });
     cancel();
   };
@@ -72,10 +142,7 @@ export function ChunkEditor({
               title="Enhance this highlight"
               triggerLabel="Enhance"
               onApply={(newText) => {
-                // update what's shown in the editor immediately
                 setChunk({ ...chunk, text: newText });
-
-                // if editing an existing chunk, update it in the store too
                 if (chunkId) {
                   setChunks((prev) =>
                     prev.map((c) =>
@@ -90,15 +157,10 @@ export function ChunkEditor({
       </div>
       <div>
         <div className="flex justify-end gap-2">
-          <Button
-            variant="ghost"
-            onClick={() => {
-              cancel();
-            }}
-          >
+          <Button variant="ghost" onClick={cancel}>
             Cancel
           </Button>
-          <Button variant="ghost" onClick={() => submit()}>
+          <Button variant="ghost" onClick={submit}>
             Save
           </Button>
         </div>

@@ -3,12 +3,25 @@ import { useChunkContext } from "../hooks/ChunkProvider";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { AiEnhanceDialog } from "@/components/profile/edit-modals/AiEnhanceDialog";
+import { toast } from "sonner";
+import { useAuthStore } from "@/stores/authStore";
+
+type ValidationResult = {
+  safe: boolean;
+  sensitive: boolean;
+  relevant: boolean;
+  categoryMatches: boolean;
+  reason: string;
+};
 
 export function SummaryChunk() {
   const { tldr, isEditing, setNewTldr, newTldr, editingTldr, setEditingTldr } =
     useChunkContext();
 
+  const { makeAuthenticatedRequest, user } = useAuthStore();
+
   const [prevTldr, setPrevTldr] = useState(tldr);
+  const [isValidating, setIsValidating] = useState(false);
 
   useEffect(() => {
     if (isEditing) {
@@ -26,9 +39,81 @@ export function SummaryChunk() {
     setNewTldr(prevTldr);
   };
 
-  const submit = () => {
+  const validateSummary = async (text: string) => {
+    if (!user) {
+      toast.error("You need to be signed in to save your summary.");
+      return null;
+    }
+
+    const trimmed = text.trim();
+
+    // Allow clearing the summary without validation
+    if (trimmed.length === 0) {
+      return {
+        safe: true,
+        sensitive: false,
+        relevant: true,
+        categoryMatches: true,
+        reason: "Empty summary is allowed.",
+      } as ValidationResult;
+    }
+
+    setIsValidating(true);
+    try {
+      const res = await makeAuthenticatedRequest(`/api/validate/chunks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: trimmed,
+          mode: "summary",
+        }),
+      });
+
+      const data = (await res.json()) as ValidationResult;
+      if (!res.ok) {
+        throw new Error((data as any)?.error || "Validation failed");
+      }
+
+      return data;
+    } catch (err) {
+      console.error("summary validation error", err);
+      toast.error("Could not validate right now. Please try again.");
+      return null;
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
+  const submit = async () => {
+    if (isValidating) return;
+
+    const validation = await validateSummary(newTldr);
+    if (!validation) return;
+
+    if (!validation.safe) {
+      toast.error(validation.reason || "This summary can't be saved.");
+      return;
+    }
+
+    if (validation.sensitive) {
+      toast.error(
+        validation.reason ||
+          "Please remove personal information before saving your summary."
+      );
+      return;
+    }
+
+    if (!validation.relevant) {
+      toast.error(
+        validation.reason || "This summary doesn't look like meaningful text."
+      );
+      return;
+    }
+
+    // Passed validation → accept the edit locally (persist happens when saveChunks runs)
     setEditingTldr(false);
     setPrevTldr(newTldr);
+    toast.success("Summary saved.");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -56,10 +141,7 @@ export function SummaryChunk() {
             triggerLabel="Enhance"
             title="Enhance your TLDR"
             onApply={(updated) => {
-              // Apply the improved/generate TLDR into the editor
               setNewTldr(updated);
-
-              // If they weren’t already editing this field, open editing state
               if (!editingTldr) setEditingTldr(true);
             }}
           />
@@ -77,13 +159,15 @@ export function SummaryChunk() {
               className="w-full focus-visible:ring-0 resize-none min-h-0 border-none !text-lg placeholder:italic py-0 px-2"
               placeholder="Add a short summary of yourself to allow others to get to know you better and make your profile more discoverable."
               onKeyDown={handleKeyDown}
+              disabled={isValidating}
             />
+
             <div className="flex justify-end gap-2 animate-fade-in">
-              <Button variant="ghost" onClick={cancel}>
+              <Button variant="ghost" onClick={cancel} disabled={isValidating}>
                 Cancel
               </Button>
-              <Button variant="ghost" onClick={submit}>
-                Save
+              <Button variant="ghost" onClick={submit} disabled={isValidating}>
+                {isValidating ? "Validating..." : "Save"}
               </Button>
             </div>
           </>
