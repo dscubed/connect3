@@ -5,7 +5,7 @@ import type { User, Session, Subscription } from "@supabase/supabase-js";
 export interface Profile {
   id: string;
   first_name: string;
-  last_name: string | null;
+  last_name: string;
   avatar_url: string;
   blurred_avatar_url?: string;
   created_at: string;
@@ -108,15 +108,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       updated_at: new Date().toISOString(),
     };
 
-    console.log("Updating profile with data:", updateData);
-
-    const response = await supabase
+    const { error } = await supabase
       .from("profiles")
       .update(updateData)
       .eq("id", userId);
-
-    console.log("Supabase update response:", response);
-    const { error } = response;
 
     if (!error) {
       set({ profile: { ...get().profile!, ...updateData } });
@@ -130,7 +125,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       throw new Error("Authentication required. Please log in.");
     }
 
-    // Build headers carefully so FormData requests don't get an explicit Content-Type
+    // Build headers so FormData requests don't get an explicit Content-Type
     const isFormData = options.body instanceof FormData;
     const headers: Record<string, string> = {
       Authorization: `Bearer ${session.access_token}`,
