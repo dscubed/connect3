@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogOverlay } from "@/components/ui/dialog";
-import FileUploadCube from "@/components/onboarding/file-upload/cube/FileUploadCube";
+import FileUploadCube from "@/components/profile/cube/FileUploadCube";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import { toast } from "sonner";
 import { useAuthStore } from "@/stores/authStore";
