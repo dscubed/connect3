@@ -9,7 +9,7 @@ const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Validation schema (kept minimal)
+// Validation schema
 const ValidationSchema = z.object({
   safe: z.boolean(),
   sensitive: z.boolean(),
@@ -34,10 +34,11 @@ export async function POST(req: NextRequest) {
 
     // 2. Validate request body
     const body = await req.json();
-    const { text, fullName, category } = body as {
+    const { text, fullName, category, mode } = body as {
       text: string;
       fullName?: string;
-      category?: string;
+      category?: string; // optional for summary validation
+      mode?: "chunk" | "summary"; // optional hint
     };
 
     if (!text || typeof text !== "string") {
@@ -54,10 +55,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!category || typeof category !== "string") {
-      return NextResponse.json({ error: "Invalid category" }, { status: 400 });
-    }
-
     // 3. Rate limiting
     try {
       await limiter.check(10, user.id);
@@ -69,14 +66,14 @@ export async function POST(req: NextRequest) {
     }
 
     console.log(
-      `Validation request from user ${user.id}, category=${category}, text length: ${text.length}`
+      `Validation request from user ${user.id}, mode=${mode || "chunk"}, category=${
+        category || "(none)"
+      }, text length: ${text.length}`
     );
 
-    // 4. Call OpenAI (SAFETY + RELEVANCE)
+    // 4. Call OpenAI (SAFETY + RELEVANCE; category match only when category provided)
     const systemPrompt = `
 You are a validation engine for a profile-building app.
-The chunk category is: "${category}".
-
 We strongly prefer LOW false rejections.
 If you are unsure, allow the content.
 
@@ -98,32 +95,31 @@ CHECKS
 - If unsure, sensitive=false.
 
 3) relevant
-- true if the text plausibly belongs in a profile highlight for the given category.
+- true if the text plausibly belongs in a user profile (summary or highlight).
 - false ONLY if it is clearly nonsense, random characters, empty filler, or totally unrelated.
 
 Examples of clearly NOT relevant:
 - "akjdfbskjdbfsln"
 - "lol idk"
-- random quotes/rants unrelated to the category
+- a random rant unrelated to any profile info
 
 4) categoryMatches
-- true if the content reasonably fits the category.
-- If the content is broad but still plausibly fits, set true.
+- Only evaluate this if a category is provided.
+- If no category is provided, set categoryMatches=true.
+- If a category is provided, set categoryMatches=true if the content reasonably fits the category.
 - false ONLY if it clearly belongs to a different category.
 
 -----------------------
 OUTPUT RULES
 -----------------------
-
 - reason MUST be exactly one sentence explaining the main factor.
 - If safe=false or sensitive=true, reason should focus on that.
 - If relevant=false, reason should say it looks like nonsensical/unrelated text.
-- If categoryMatches=false, reason should say the content doesn't match the chosen category.
+- If categoryMatches=false, reason should say the content doesn't match the selected category.
 
 -----------------------
 RESPONSE FORMAT
 -----------------------
-
 Respond ONLY as a JSON object:
 
 {
@@ -141,7 +137,9 @@ Respond ONLY as a JSON object:
         { role: "system", content: systemPrompt },
         {
           role: "user",
-          content: `Category: ${category}\n\nContent:\n${text}`,
+          content: category
+            ? `Category: ${category}\n\nContent:\n${text}`
+            : `Content:\n${text}`,
         },
       ],
       text: {
