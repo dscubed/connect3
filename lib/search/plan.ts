@@ -66,6 +66,23 @@ Examples of queries that do NOT require search:
 - General Knowledge: "Who is the president of the USA?", "What is the capital of France?"
 - Personal Questions: "What is my name?", "Where do I live?"
 
+Connect3 product questions (DO NOT require search):
+- "How do I use Connect3?"
+- "What can Connect3 do?"
+- "How does Connect3 find students/clubs/events?"
+- "Is my data private on Connect3?"
+- "How do recommendations work?"
+- "Why am I not seeing results?"
+- "How do I edit my profile / TLDR / chunks?"
+- "What information do you store about me?"
+
+Important distinction:
+- If the user is asking ABOUT the Connect3 app, its features, privacy, or how it works → requiresSearch = false.
+- Only set requiresSearch = true when the user is asking to retrieve specific Connect3 directory content (users/organisations/events), e.g.:
+  - "Find me robotics clubs"
+  - "Show me events this weekend"
+  - "Suggest users interested in ML"
+
 Examples of queries that DO require search:
 - Specific Inquiries: "Tell me about the AI club", "What events are happening this weekend?"
 - User/Organisation Information: "Find me users interested in robotics", "What clubs are available for students?"
@@ -80,6 +97,15 @@ Reject:
   -> false, clarify "Would you like to know about subjects taken by other data science students?"
 - "How can I get internships?", "How do I get a job?"
   -> false, clarify "Are you looking for students who can give advice or networking opportunities?"
+
+  Disambiguation rule:
+  If the query mentions users/clubs/events but the intent is about how Connect3 works (features, UI, privacy, troubleshooting, recommendations),
+  set requiresSearch = false and use context to suggest what the user can do next in-app.
+  
+  Examples:
+  - "How does Connect3 recommend clubs?" -> false
+  - "Why can't I find any clubs?" -> false
+  - "Can Connect3 show me clubs near me?" -> false (unless user explicitly asks to list clubs)
 
 When in doubt flag false and ask follow-up questions in context to ask user to reword or clarify their intent.
 
