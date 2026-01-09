@@ -34,9 +34,8 @@ export async function POST(req: NextRequest) {
 
     // 2. Validate request body
     const body = await req.json();
-    const { text, fullName, category, mode } = body as {
+    const { text, category, mode } = body as {
       text: string;
-      fullName?: string;
       category?: string; // optional for summary validation
       mode?: "chunk" | "summary"; // optional hint
     };
