@@ -39,7 +39,7 @@ export function SearchProgressIndicator({
           </>
         ))}
 
-      {progress.iterations.map((iteration, index) => {
+      {progress.iterations?.map((iteration, index) => {
         // Determine if this is the current step
         const isCurrent = index === progress.iterations.length - 1;
 

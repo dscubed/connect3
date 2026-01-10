@@ -1,26 +1,35 @@
 "use client";
+
 import { useCallback, useRef } from "react";
 import { ChatMessage, SearchProgress } from "../types";
 import { useAuthStore } from "@/stores/authStore";
 import { RealtimeChannel } from "@supabase/supabase-js";
 
+// 🔴 MODULE LOAD PROOF
+console.log("[useSearchStream] MODULE LOADED");
+
 // Type for setMessages prop
 type MessageUpdater = React.Dispatch<React.SetStateAction<ChatMessage[]>>;
 
-const supabase = useAuthStore.getState().getSupabaseClient();
-
 export function useSearchStream(setMessages: MessageUpdater) {
+  // 🔴 HOOK INVOCATION PROOF
+  console.log("[useSearchStream] hook invoked");
+
+  const supabase = useAuthStore((s) => s.getSupabaseClient());
   const channelRef = useRef<RealtimeChannel | null>(null);
 
   const updateMessage = useCallback(
     (messageId: string, update: Partial<ChatMessage>) => {
-      console.log("Updating message:", messageId, update);
+      console.log("[useSearchStream] updateMessage", { messageId, update });
+
       setMessages((prev) => {
-        const updatedMessage = prev.map((msg) =>
+        const target = prev.find((m) => m.id === messageId);
+        console.log("[useSearchStream] target before update", target);
+        const next = prev.map((msg) =>
           msg.id === messageId ? { ...msg, ...update } : msg
         );
-        console.log("Updated Messages:", updatedMessage);
-        return updatedMessage;
+        console.log("[useSearchStream] messages after update", next);
+        return next;
       });
     },
     [setMessages]
@@ -28,64 +37,103 @@ export function useSearchStream(setMessages: MessageUpdater) {
 
   const updateProgress = useCallback(
     (messageId: string, progressUpdate: SearchProgress) => {
-      console.log("Updating progress for message:", messageId, progressUpdate);
+      console.log("[useSearchStream] updateProgress", {
+        messageId,
+        progressUpdate,
+      });
+
       setMessages((prev) =>
-        // Find matching message and update its progress
-        prev.map((msg) => {
-          if (msg.id !== messageId) return msg;
-          return {
-            ...msg,
-            progress: progressUpdate,
-          };
-        })
+        prev.map((msg) =>
+          msg.id === messageId
+            ? { ...msg, progress: progressUpdate }
+            : msg
+        )
       );
     },
     [setMessages]
   );
 
-  // Connect to stream with authenticated POST request
   const connectStream = useCallback(
     async (messageId: string) => {
+      // 🔴 CONNECT STREAM ENTRY
+      console.log("[useSearchStream] connectStream CALLED", {
+        messageId,
+        ts: Date.now(),
+      });
+
+      if (!supabase) {
+        console.error("[useSearchStream] supabase client is NULL");
+        return;
+      }
+
       if (channelRef.current) {
+        console.log("demonstrating removeChannel", channelRef.current.topic);
         await supabase.removeChannel(channelRef.current);
         channelRef.current = null;
       }
 
-      // Create supabase channel
-      const channel = supabase.channel(`message:${messageId}`);
-      channelRef.current = channel;
-      console.log("Channel:", channel.state);
+      const channelName = `message:${messageId}`;
+      console.log("[useSearchStream] creating channel", channelName);
 
-      // console.log any received events for debugging TODO: remove later
-      channel.on("broadcast", { event: "*" }, (payload) => {
-        console.log("Received event:", payload);
+      const channel = supabase.channel(channelName);
+      channelRef.current = channel;
+
+      // 🔴 LOG EVERY BROADCAST EVENT (for proof only)
+      channel.on("broadcast", {event: "status"}, (payload) => {
+        console.log("[useSearchStream] ANY EVENT RECEIVED", payload);
       });
 
       channel.on("broadcast", { event: "progress" }, (payload) => {
-        console.log("Progress payload:", payload);
-        console.log("Payload data:", payload.payload);
+        console.log("[useSearchStream] progress event", payload);
         updateProgress(messageId, payload.payload as SearchProgress);
       });
-      channel.on("broadcast", { event: "response" }, (payload) => {
-        console.log("Response payload:", payload);
-        updateMessage(messageId, { content: payload.payload.partial });
+
+      channel.on("broadcast", { event: "done" }, ({ payload }) => {
+        const data = payload as any;
+      
+        // server emits { success: true, result: SearchResponse } OR { success: true, response: SearchResponse }
+        const result: any = data?.result ?? data?.response;
+      
+        const structured =
+          result && typeof result === "object"
+            ? result
+            : { summary: "", results: [], followUps: "" };
+      
+        updateMessage(messageId, {
+          status: "completed",
+          content: structured,
+          progress: { step: "completed", message: "Done" } as any,
+        });
+      });      
+
+      channel.on("broadcast", { event: "error" }, (payload) => {
+        console.log("[useSearchStream] ERROR EVENT RECEIVED", payload);
+
+        updateMessage(messageId, {
+          status: "failed",
+          content: (payload.payload as any)?.message ?? "Unknown error",
+        });
       });
 
-      channel.subscribe((status) => {
-        if (status === "SUBSCRIBED") {
-          console.log("Channel subscribed");
-        }
+      channel.subscribe((status, err) => {
+        console.log("[useSearchStream] channel subscribe status", {
+          channelName,
+          status,
+          err,
+        });
       });
     },
-    [updateProgress, updateMessage]
+    [supabase, updateMessage, updateProgress]
   );
 
   const closeStream = useCallback(() => {
+    console.log("[useSearchStream] closeStream called");
+
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
       channelRef.current = null;
     }
-  }, []);
+  }, [supabase]);
 
   return { connectStream, closeStream };
 }

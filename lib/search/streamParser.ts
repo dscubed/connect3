@@ -94,34 +94,38 @@ export const partialParseResponse = (
   text: string,
   fileMap: FileMap
 ): Partial<SearchResponse> => {
-  const response: Partial<SearchResponse> = {};
+  const response: Partial<SearchResponse> = {
+    summary: "",
+    results: [],
+    followUps: "",
+  };
 
-  // Parse summary - handles escaped quotes and incomplete strings
+  // summary
   const summaryMatch = text.match(/"summary"\s*:\s*"((?:[^"\\]|\\.)*)(")?/);
   if (summaryMatch) {
     response.summary = unescapeJsonString(summaryMatch[1]);
   }
 
-  // Parse results array - capture everything after "results": [
+  // results
   const resultsMatch = text.match(/"results"\s*:\s*\[([\s\S]*)/);
   if (resultsMatch) {
     const parsedResults = parsePartialResults(resultsMatch[1]);
-    if (parsedResults.length > 0) {
-      response.results = parsedResults.map(
-        (r): ResultSection => ({
-          header: r.header ?? undefined,
-          text: r.text ?? "",
-          matches: fileMap
-            ? ((r.entity_ids ?? [])
-                .map((id) => fileMap[id])
-                .filter(Boolean) as EntityResult[])
-            : [],
-        })
-      );
-    }
+
+    // ✅ set [] even if empty
+    response.results = parsedResults.map(
+      (r): ResultSection => ({
+        header: r.header ?? undefined,
+        text: r.text ?? "",
+        matches: fileMap
+          ? ((r.entity_ids ?? [])
+              .map((id) => fileMap[id])
+              .filter(Boolean) as EntityResult[])
+          : [],
+      })
+    );
   }
 
-  // Parse followUps
+  // followUps
   const followUpsMatch = text.match(/"followUps"\s*:\s*"((?:[^"\\]|\\.)*)(")?/);
   if (followUpsMatch) {
     response.followUps = unescapeJsonString(followUpsMatch[1]);
@@ -129,3 +133,4 @@ export const partialParseResponse = (
 
   return response;
 };
+

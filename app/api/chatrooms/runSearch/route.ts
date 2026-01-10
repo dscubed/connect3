@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { messageId } = await req.json();
+  console.log(`[runSearchRoute] incoming`, { messageId, userId: user.id });
 
   if (!messageId) {
     return NextResponse.json(
@@ -55,17 +56,42 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const channel = supabase.channel(`message:${messageId}`);
-  console.log("Creating channel for message ID:", channel.state);
+  const channelName = `message:${messageId}`;
+  const channel = supabase.channel(channelName);
+
+  channel.subscribe((status, err) => {
+    console.log(`[runSearchRoute] channel_status`, { messageId, channelName, status, err });
+  });
+  console.log(`[runSearchRoute] channel_created`, { messageId, channelName, state: channel.state });
+
 
   const emit: SSEEmitter = async (type, data) => {
-    // console.log("Emitting event:", type, data);
-    await channel.send({
+    const dataPreview =
+      typeof data === "string"
+        ? data.slice(0, 160)
+        : JSON.stringify(data).slice(0, 240);
+  
+    console.log(`[runSearchRoute] emit_attempt`, {
+      messageId,
+      type,
+      channelState: channel.state,
+      dataPreview,
+    });
+  
+    const res = await channel.send({
       type: "broadcast",
       event: type,
       payload: data,
     });
+  
+    console.log(`[runSearchRoute] emit_result`, { messageId, type, res });
+  
+    // If your res contains an error/status, surface it
+    if ((res as any)?.error) {
+      console.error(`[runSearchRoute] emit_error`, { messageId, type, error: (res as any).error });
+    }
   };
+  
 
   try {
     await emit("status", { step: "started", message: "Starting search..." });
@@ -79,17 +105,22 @@ export async function POST(req: NextRequest) {
     }
 
     const response = await runSearch(messageId, openai, supabase, emit);
+    console.log(`[runSearchRoute] response_ready`, {
+      messageId,
+      summaryLen: response.summary?.length ?? 0,
+      summaryPreview: response.summary?.slice(0, 120),
+    });
 
     await emit("done", {
       success: true,
-      response,
+      result: response,
     });
 
     const { error: completeUpdateError } = await supabase
       .from("chatmessages")
       .update({
         status: "completed",
-        content: JSON.stringify({ result: response }),
+        content: JSON.stringify(response),
       })
       .eq("id", messageId);
 
@@ -98,7 +129,7 @@ export async function POST(req: NextRequest) {
       throw new Error("Failed to update message status");
     }
 
-    return NextResponse.json({ success: true, response });
+    return NextResponse.json({ success: true, response, debug: { messageId, note: "If realtime misses 'done', use this HTTP response." }, });
   } catch (error) {
     console.error("Run search error:", error);
     await emit("error", { message: String(error) });

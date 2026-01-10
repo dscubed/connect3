@@ -1,5 +1,3 @@
-// general/runGeneral.ts
-
 import OpenAI from "openai";
 import type { ResponseInput } from "openai/resources/responses/responses.mjs";
 
@@ -8,6 +6,8 @@ import { normalizeUniversitySlug } from "./uniSlug";
 import { getUniversityVectorStoreId } from "./universities";
 import { runUniversityGeneral } from "./runUniversityGeneral";
 import { runConnect3General } from "./runConnect3General";
+
+import { dbg, mkTraceId, preview } from "./debug";
 
 type RunGeneralArgs = {
   openai: OpenAI;
@@ -101,6 +101,10 @@ export async function runGeneral({
     ],
     tools: [{ type: "web_search_preview" as any }],
   });
+
+  const text = (resp.output_text ?? "").trim();
+  emit?.("debug", { traceId, stage: "final_text_len", len: text.length });
+  return text;
 
   return (resp.output_text ?? "").trim();
 }

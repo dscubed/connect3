@@ -1,13 +1,24 @@
 import OpenAI from "openai";
 import type { ResponseInput } from "openai/resources/responses/responses.mjs";
+import { dbg, mkTraceId, preview, extractOutputText } from "./debug";
 
 export async function runConnect3General(
   openai: OpenAI,
   query: string,
-  prevMessages: ResponseInput
+  prevMessages: ResponseInput,
+  emit?: (event: string, data: unknown) => void,
+  traceId?: string
 ): Promise<string> {
-    const systemPrompt = `
-    You are Connect3's general assistant.
+  const tid = traceId ?? mkTraceId("connect3General");
+
+  dbg(emit, tid, "start", {
+    queryLen: query.length,
+    prevMessagesCount: Array.isArray(prevMessages) ? prevMessages.length : 0,
+    queryPreview: preview(query, 120),
+  });
+
+  const systemPrompt = `
+  You are Connect3's general assistant.
     
     ## Product context
     Connect3 is a student networking app that helps students discover:
@@ -47,17 +58,42 @@ export async function runConnect3General(
     - Use plain language. Avoid unnecessary jargon.
     - Ask at most one clarifying question when needed.
     
-    Now respond to the user's message.
-    `;    
+    Now respond to the user's message.` 
 
-  const resp = await openai.responses.create({
-    model: "gpt-4o-mini",
-    input: [
-      { role: "system", content: systemPrompt },
-      ...prevMessages,
-      { role: "user", content: query },
-    ],
-  });
+  try {
+    const resp = await openai.responses.create({
+      model: "gpt-4o-mini",
+      input: [
+        { role: "system", content: systemPrompt },
+        ...prevMessages,
+        { role: "user", content: query },
+      ],
+    });
 
-  return (resp.output_text ?? "").trim();
+    const text = extractOutputText(resp);
+
+    dbg(emit, tid, "openai_returned", {
+      responseId: resp.id,
+      outputTextLen: (resp.output_text ?? "").length,
+      extractedLen: text.length,
+      extractedPreview: preview(text, 140),
+      outputItems: Array.isArray((resp as any).output) ? (resp as any).output.length : null,
+    });
+
+    // Very useful: flag empty output immediately
+    if (!text) {
+      dbg(emit, tid, "empty_text_warning", {
+        note: "OpenAI responded but extracted text is empty. Check resp.output structure.",
+      });
+    }
+
+    return text;
+  } catch (err: any) {
+    dbg(emit, tid, "error", {
+      message: err?.message ?? String(err),
+      name: err?.name,
+      stack: err?.stack ? preview(err.stack, 240) : undefined,
+    });
+    throw err;
+  }
 }
