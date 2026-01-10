@@ -1,7 +1,8 @@
 import { PlusCircle } from "lucide-react";
 import { SortableCategory } from "./SortableCategory";
 import { CategoryChunks } from "./CategoryChunks";
-import { ChunkEntry, useChunkContext } from "../../hooks/ChunkProvider";
+import { ChunkEntry } from "../../ChunkUtils";
+import { useChunkContext } from "@/components/profile/chunks/hooks/ChunkProvider";
 import { AllCategories, ChunkInput } from "../../ChunkUtils";
 import { Fade } from "@/components/ui/Fade";
 import { Button } from "@/components/ui/button";

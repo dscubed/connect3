@@ -44,7 +44,26 @@ export const allCategoriesList = [
 ];
 export type AllCategories = (typeof allCategoriesList)[number];
 
+// State Types
+export interface ProfileChunk {
+  id: string;
+  text: string;
+  category: AllCategories;
+  order: number;
+}
+
 export type ChunkInput = {
   text: string;
   category: AllCategories | null;
 };
+
+export interface ChunkEntry {
+  id: string;
+  text: string;
+  order: number;
+}
+
+export interface CategoryChunks {
+  category: AllCategories;
+  chunks: ChunkEntry[];
+}

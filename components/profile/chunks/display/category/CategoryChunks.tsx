@@ -5,7 +5,7 @@ import {
 } from "@dnd-kit/sortable";
 import { useDnd } from "../../hooks/useDnD";
 import { AllCategories, ChunkInput } from "../../ChunkUtils";
-import { ChunkEntry } from "../../hooks/ChunkProvider";
+import { ChunkEntry } from "../../ChunkUtils";
 import { ChunkItem } from "../chunks/ChunkItem";
 import { ChunkEditor } from "../ChunkEditor";
 import { Fade } from "@/components/ui/Fade";

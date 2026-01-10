@@ -15,7 +15,7 @@ export function ChunkEditor({
   setChunk: (chunk: ChunkInput) => void;
   chunkId?: string;
 }) {
-  const { addChunk, setChunks } = useChunkContext();
+  const { addChunk, updateChunk } = useChunkContext();
 
   if (chunk.category === null) return null;
 
@@ -23,11 +23,10 @@ export function ChunkEditor({
     if (chunk.text.trim() === "") return;
     // If chunkId is provided, we're editing an existing chunk
     if (chunkId) {
-      setChunks((prev) =>
-        prev.map((c) =>
-          c.id === chunkId ? { ...c, text: chunk.text.trim() } : c
-        )
-      );
+      updateChunk(chunkId, {
+        text: chunk.text.trim(),
+        category: chunk.category!,
+      });
     } else {
       addChunk(chunk.category!, chunk.text.trim());
     }
@@ -76,11 +75,10 @@ export function ChunkEditor({
 
                 // if editing an existing chunk, update it in the store too
                 if (chunkId) {
-                  setChunks((prev) =>
-                    prev.map((c) =>
-                      c.id === chunkId ? { ...c, text: newText } : c
-                    )
-                  );
+                  updateChunk(chunkId, {
+                    text: newText,
+                    category: chunk.category!,
+                  });
                 }
               }}
             />
