@@ -8,7 +8,6 @@ export interface ChunkData {
 }
 
 export interface CategoryOrderData {
-  profile_id: string;
   category: AllCategories;
   order: number;
 }

@@ -4,7 +4,7 @@ import { AllCategories, CategoryOrderData, ChunkInput } from "../ChunkUtils";
 import { useAuthStore } from "@/stores/authStore";
 
 export interface UseChunkExports {
-  orderedCategoryChunks: CategoryChunks[]; // display state
+  orderedCategoryChunks: CategoryChunks[];
   addChunk: (category: AllCategories, text: string) => void;
   updateChunk: (data: ChunkInput) => void;
   removeChunk: (id: string) => void;
@@ -25,6 +25,13 @@ export function useChunks({
 
   // set categoryChunks map based on category and chunk orders
   const orderedCategoryChunks = useMemo(() => {
+    /**
+     * An array of categories with their associated chunks ordered,
+     * - Categories are ordered based on the categoryOrder state.
+     * - Chunks within each category are ordered based on their order property.
+     *
+     * @returns An array of category with respective ordered chunks.
+     */
     return categoryOrder.map(({ category }) => ({
       category,
       chunks: chunks
@@ -48,6 +55,13 @@ export function useChunks({
 
   // Add a new chunk
   const addChunk = (category: AllCategories, text: string) => {
+    /**
+     * Adds a new chunk to the specified category with the provided text.
+     * If the category does not exist in the categoryOrder, it is added.
+     *
+     * @param category - The category to which the new chunk will be added.
+     * @param text - The text content of the new chunk.
+     */
     if (!profile) return;
 
     // Check if category exists if not add it
@@ -75,6 +89,11 @@ export function useChunks({
 
   // Update Chunk
   const updateChunk = (data: ChunkInput) => {
+    /**
+     * Updates an existing chunk with new text and/or category.
+     *
+     * @param data - The chunk data containing id, text, and category.
+     */
     setChunks((prev) =>
       prev.map((chunk) =>
         chunk.id === data.id
@@ -88,8 +107,12 @@ export function useChunks({
     );
   };
 
-  // Remove chunk by Id
   const removeChunk = (id: string) => {
+    /**
+     * Removes a chunk by its ID.
+     *
+     * @param id - The ID of the chunk to be removed.
+     */
     setChunks((prev) => prev.filter((chunk) => chunk.id !== id));
   };
 

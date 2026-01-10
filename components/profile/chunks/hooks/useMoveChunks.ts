@@ -17,8 +17,13 @@ export function useMoveChunks({
   setChunks: React.Dispatch<React.SetStateAction<ProfileChunk[]>>;
   setCategoryOrder: React.Dispatch<React.SetStateAction<CategoryOrderData[]>>;
 }): UseMoveChunksExports {
-  // Move Logic
   const moveCategory = (fromIndex: number, toIndex: number) => {
+    /**
+     * Moves a category from one index to another in the category order.
+     *
+     * @param fromIndex - The current index of the category to move.
+     * @param toIndex - The target index to move the category to.
+     */
     if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) return;
     setCategoryOrder((prev) => {
       const updated = Array.from(prev);
@@ -36,6 +41,13 @@ export function useMoveChunks({
     fromIndex: number,
     toIndex: number
   ) => {
+    /**
+     * Moves a chunk within a specific category from one index to another.
+     *
+     * @param category - The category of the chunk to move.
+     * @param fromIndex - The current index of the chunk to move.
+     * @param toIndex - The target index to move the chunk to.
+     */
     if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) return;
 
     setChunks((prev) => {
