@@ -1,5 +1,5 @@
 import { useSortable } from "@dnd-kit/sortable";
-import { ChunkEntry } from "../../hooks/ChunkProvider";
+import { ChunkEntry } from "../../ChunkUtils";
 import { CSS } from "@dnd-kit/utilities";
 
 export function SortableChunk({

@@ -35,13 +35,17 @@ export function ChunkItem({
         }
       }}
     >
-      {isFocused(chunk.id, category) ? (
-        <ChunkEditor
-          chunk={currentChunk}
-          setChunk={(updatedChunk) => updateChunk(updatedChunk)}
-        />
-      ) : (
-        <SortableChunk key={chunk.id} chunk={chunk} show={isEditing}>
+      <SortableChunk
+        key={chunk.id}
+        chunk={chunk}
+        show={isEditing && isEditingCategory(category)}
+      >
+        {isFocused(chunk.id, category) ? (
+          <ChunkEditor
+            chunk={currentChunk}
+            setChunk={(updatedChunk) => updateChunk(updatedChunk)}
+          />
+        ) : (
           <div className="flex items-baseline gap-2 rounded-lg w-full hover:bg-white/20 transition-all">
             <span
               className="inline-block w-2 h-2 bg-black rounded-full"
@@ -65,8 +69,8 @@ export function ChunkItem({
               </button>
             </Fade>
           </div>
-        </SortableChunk>
-      )}
+        )}
+      </SortableChunk>
     </li>
   );
 }
