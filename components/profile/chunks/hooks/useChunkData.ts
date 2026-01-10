@@ -4,6 +4,14 @@ import { ProfileChunk } from "../ChunkUtils";
 import { CategoryOrderData } from "../ChunkUtils";
 import { uploadProfileToVectorStore } from "@/lib/vectorStores/profile/client";
 
+export interface UseChunkDataExports {
+  fetchChunks: () => Promise<void>;
+  saveChunks: () => Promise<void>;
+  loadingChunks: boolean;
+  savingChunks: boolean;
+  reset: () => void;
+}
+
 export function useChunkData({
   setChunks,
   setCategoryOrder,

@@ -1,13 +1,22 @@
 import { AllCategories, CategoryOrderData } from "../ChunkUtils";
 import { ProfileChunk } from "../ChunkUtils";
 
+export interface UseMoveChunksExports {
+  moveCategory: (fromIndex: number, toIndex: number) => void;
+  moveChunk: (
+    category: AllCategories,
+    fromIndex: number,
+    toIndex: number
+  ) => void;
+}
+
 export function useMoveChunks({
   setChunks,
   setCategoryOrder,
 }: {
   setChunks: React.Dispatch<React.SetStateAction<ProfileChunk[]>>;
   setCategoryOrder: React.Dispatch<React.SetStateAction<CategoryOrderData[]>>;
-}) {
+}): UseMoveChunksExports {
   // Move Logic
   const moveCategory = (fromIndex: number, toIndex: number) => {
     if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) return;

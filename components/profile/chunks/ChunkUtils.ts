@@ -53,8 +53,9 @@ export interface ProfileChunk {
 }
 
 export type ChunkInput = {
+  id: string;
   text: string;
-  category: AllCategories | null;
+  category: AllCategories;
 };
 
 export interface ChunkEntry {
@@ -67,3 +68,5 @@ export interface CategoryChunks {
   category: AllCategories;
   chunks: ChunkEntry[];
 }
+
+export type FocusDirection = "next" | "back";

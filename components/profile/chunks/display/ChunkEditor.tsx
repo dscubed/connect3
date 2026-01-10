@@ -23,14 +23,15 @@ export function ChunkEditor({
     if (chunk.text.trim() === "") return;
     // If chunkId is provided, we're editing an existing chunk
     if (chunkId) {
-      updateChunk(chunkId, {
+      updateChunk({
+        id: chunkId,
         text: chunk.text.trim(),
         category: chunk.category!,
       });
     } else {
       addChunk(chunk.category!, chunk.text.trim());
     }
-    setChunk({ text: "", category: null });
+
     cancel();
   };
 
@@ -75,7 +76,8 @@ export function ChunkEditor({
 
                 // if editing an existing chunk, update it in the store too
                 if (chunkId) {
-                  updateChunk(chunkId, {
+                  updateChunk({
+                    id: chunkId,
                     text: newText,
                     category: chunk.category!,
                   });

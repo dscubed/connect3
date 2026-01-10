@@ -1,9 +1,16 @@
 import { useEffect, useMemo } from "react";
-import { ProfileChunk } from "../ChunkUtils";
+import { CategoryChunks, ProfileChunk } from "../ChunkUtils";
 import { AllCategories, CategoryOrderData, ChunkInput } from "../ChunkUtils";
 import { useAuthStore } from "@/stores/authStore";
 
-export function useChunkActions({
+export interface UseChunkExports {
+  orderedCategoryChunks: CategoryChunks[]; // display state
+  addChunk: (category: AllCategories, text: string) => void;
+  updateChunk: (data: ChunkInput) => void;
+  removeChunk: (id: string) => void;
+}
+
+export function useChunks({
   chunks,
   categoryOrder,
   setChunks,
@@ -13,7 +20,7 @@ export function useChunkActions({
   categoryOrder: CategoryOrderData[];
   setChunks: React.Dispatch<React.SetStateAction<ProfileChunk[]>>;
   setCategoryOrder: React.Dispatch<React.SetStateAction<CategoryOrderData[]>>;
-}) {
+}): UseChunkExports {
   const { profile } = useAuthStore();
 
   // set categoryChunks map based on category and chunk orders
@@ -67,11 +74,10 @@ export function useChunkActions({
   };
 
   // Update Chunk
-  // Update chunk by Id
-  const updateChunk = (id: string, data: ChunkInput) => {
+  const updateChunk = (data: ChunkInput) => {
     setChunks((prev) =>
       prev.map((chunk) =>
-        chunk.id === id
+        chunk.id === data.id
           ? {
               ...chunk,
               text: data.text,
