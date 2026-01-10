@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
       .from("chatmessages")
       .update({
         status: "completed",
-        content: JSON.stringify(response),
+        content: response,
       })
       .eq("id", messageId);
 
