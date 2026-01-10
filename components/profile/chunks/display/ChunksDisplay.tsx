@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-import { AllCategories, ChunkInput } from "../ChunkUtils";
 import { useChunkContext } from "../hooks/ChunkProvider";
 import { useDnd } from "../hooks/useDnD";
 import { closestCenter, DndContext } from "@dnd-kit/core";
@@ -11,20 +9,8 @@ import { CubeLoader } from "@/components/ui/CubeLoader";
 import { Fade } from "@/components/ui/Fade";
 
 export function ChunksDisplay() {
-  const { orderedCategoryChunks, loadingChunks, setEditChunks, isEditing } =
-    useChunkContext();
-  const [newChunks, setNewChunks] = useState<Record<AllCategories, ChunkInput>>(
-    {} as Record<AllCategories, ChunkInput>
-  );
+  const { orderedCategoryChunks, loadingChunks, isEditing } = useChunkContext();
   const { handleCategoryDragEnd, sensors, categoryIds } = useDnd();
-
-  // Reset newChunks when exiting edit mode
-  useEffect(() => {
-    if (!isEditing) {
-      setNewChunks({} as Record<AllCategories, ChunkInput>);
-      setEditChunks({});
-    }
-  }, [isEditing, setEditChunks]);
 
   if (loadingChunks) {
     return (
@@ -55,8 +41,6 @@ export function ChunksDisplay() {
                 key={category}
                 category={category}
                 chunks={chunks}
-                newChunks={newChunks}
-                setNewChunks={setNewChunks}
               />
             ))}
           </SortableContext>

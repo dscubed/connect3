@@ -1,51 +1,53 @@
-import { Textarea } from "@/components/ui/TextArea";
 import { useChunkContext } from "../hooks/ChunkProvider";
-import { Button } from "@/components/ui/button";
 import { AllCategories, ChunkInput } from "../ChunkUtils";
 import { AiEnhanceDialog } from "@/components/profile/edit-modals/AiEnhanceDialog";
+import { Input } from "@/components/ui/input";
+import { useEffect, useRef } from "react";
 
 export function ChunkEditor({
-  cancel,
   chunk,
   setChunk,
-  chunkId,
 }: {
-  cancel: () => void;
   chunk: ChunkInput;
   setChunk: (chunk: ChunkInput) => void;
-  chunkId?: string;
 }) {
-  const { addChunk, updateChunk } = useChunkContext();
+  const { changeFocus, clearFocus, removeChunk } = useChunkContext();
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  if (chunk.category === null) return null;
+  // Focus the input when the component mounts
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
-  const submit = () => {
-    if (chunk.text.trim() === "") return;
-    // If chunkId is provided, we're editing an existing chunk
-    if (chunkId) {
-      updateChunk({
-        id: chunkId,
-        text: chunk.text.trim(),
-        category: chunk.category!,
-      });
-    } else {
-      addChunk(chunk.category!, chunk.text.trim());
-    }
+  if (!chunk.category || !chunk.id) return null;
 
-    cancel();
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (
+      (e.key === "Enter" && !e.shiftKey) ||
+      e.key === "Tab" ||
+      e.key === "ArrowDown"
+    ) {
+      if (chunk.text.trim() === "") return;
       e.preventDefault();
-      submit();
+      changeFocus(chunk.category, "next");
+    }
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      changeFocus(chunk.category, "back");
+      if (chunk.text.trim() === "") removeChunk(chunk.id);
+    }
+    if (chunk.text === "" && e.key === "Backspace") {
+      e.preventDefault();
+      changeFocus(chunk.category, "back");
+      removeChunk(chunk.id);
     }
     if (e.key === "Escape") {
-      cancel();
+      clearFocus(chunk.category);
+      if (chunk.text.trim() === "") removeChunk(chunk.id);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setChunk({ ...chunk, text: e.target.value });
   };
 
@@ -57,13 +59,13 @@ export function ChunkEditor({
           aria-hidden="true"
         />
         <div className="flex w-full items-end gap-2">
-          <Textarea
-            className="flex-1 p-2 min-h-0 border-none outline-none focus-visible:ring-0 focus:ring-0 resize-none !text-lg"
+          <Input
+            ref={inputRef}
+            className="flex-1 p-2 min-h-0 border-none outline-none shadow-none focus-visible:ring-0 focus:ring-0 resize-none !text-lg"
             placeholder={CATEGORY_PLACEHOLDERS[chunk.category]}
             onKeyDown={handleKeyDown}
             onChange={handleChange}
             value={chunk.text}
-            rows={1}
           />
           <div className="items-end min-h-10">
             <AiEnhanceDialog
@@ -71,35 +73,10 @@ export function ChunkEditor({
               fieldType="chunk"
               title="Enhance this highlight"
               onApply={(newText) => {
-                // update what's shown in the editor immediately
                 setChunk({ ...chunk, text: newText });
-
-                // if editing an existing chunk, update it in the store too
-                if (chunkId) {
-                  updateChunk({
-                    id: chunkId,
-                    text: newText,
-                    category: chunk.category!,
-                  });
-                }
               }}
             />
           </div>
-        </div>
-      </div>
-      <div>
-        <div className="flex justify-end gap-2">
-          <Button
-            variant="ghost"
-            onClick={() => {
-              cancel();
-            }}
-          >
-            Cancel
-          </Button>
-          <Button variant="ghost" onClick={() => submit()}>
-            Save
-          </Button>
         </div>
       </div>
     </div>

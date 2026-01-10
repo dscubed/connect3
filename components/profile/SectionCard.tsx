@@ -64,10 +64,10 @@ export function SectionCardHeader({
   return (
     <CardHeader
       className={`w-full flex flex-row items-center justify-between mb-2 !p-4 ${className}`}
-      {...props}
     >
       <h1
         className={`px-4 py-1 my-2 ${colorVariants[variant].header} rounded-2xl relative text-base font-medium transition-all duration-300`}
+        {...props}
       >
         {title}
       </h1>

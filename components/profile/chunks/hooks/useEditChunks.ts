@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import {
   AllCategories,
   CategoryChunks,
+  CategoryOrderData,
   FocusDirection,
   ProfileChunk,
 } from "../ChunkUtils";
@@ -17,17 +18,22 @@ export interface UseEditChunksExports {
   isEditingCategory: (category: AllCategories) => boolean;
   editCategory: (category: AllCategories) => void;
   addCategory: (category: AllCategories) => void;
+  focusChunk: (chunkId: string, category: AllCategories) => void;
+  isFocused: (chunkId: string, category: AllCategories) => boolean;
   changeFocus: (category: AllCategories, direction: FocusDirection) => void;
   hasPendingEdits: () => boolean;
+  initialiseEditState(): void;
 }
 
 export function useEditChunks({
   chunks,
   setChunks,
+  setCategoryOrder,
   orderedCategoryChunks,
 }: {
   chunks: ProfileChunk[];
   setChunks: React.Dispatch<React.SetStateAction<ProfileChunk[]>>;
+  setCategoryOrder: React.Dispatch<React.SetStateAction<CategoryOrderData[]>>;
   orderedCategoryChunks: CategoryChunks[];
 }): UseEditChunksExports {
   // State to hold pre-edit chunks for cancelling edits per category
@@ -74,16 +80,28 @@ export function useEditChunks({
      *
      * @param category - The category for which to revert the chunks.
      */
+
+    const preEdit = preEditChunks[category];
+    if (!preEdit) return;
     setChunks((prev) => {
-      const revertedChunks = prev.filter(
-        (chunk) => chunk.category !== category
-      );
-      const preEditChunk = preEditChunks[category];
-      if (preEditChunk) {
-        revertedChunks.push(...preEditChunk);
-      }
-      return revertedChunks;
+      // Remove current chunks of the category
+      const filtered = prev.filter((chunk) => chunk.category !== category);
+      // Re-add pre-edit chunks
+      return [...filtered, ...preEdit];
     });
+  };
+
+  const clearBlankChunks = (category: AllCategories) => {
+    /**
+     * Clears any blank chunks in a specific category.
+     *
+     * @param category - The category for which to clear blank chunks.
+     */
+    setChunks((prev) =>
+      prev.filter(
+        (chunk) => !(chunk.category === category && chunk.text.trim() === "")
+      )
+    );
   };
 
   const cancelEdits = (category: AllCategories) => {
@@ -104,11 +122,13 @@ export function useEditChunks({
      * Saves the edits for a specific category.
      * - Simply exits edit mode by clearing pre-edit chunks.
      * - Clears the focus for the category
+     * - Clears any blank chunks that may have been added during editing.
      *
      * @param category - The category for which to save the edits.
      */
     clearCategoryPreEdit(category);
     clearFocus(category);
+    clearBlankChunks(category);
   };
 
   const cancelAllEdits = () => {
@@ -175,10 +195,13 @@ export function useEditChunks({
     if (isEditingCategory(category)) return; // return if already editing
 
     // Set pre-edit chunk for the category
-    const categoryChunk = chunks.find((chunk) => chunk.category === category);
+    const categoryChunks = orderedCategoryChunks
+      .find((entry) => entry.category === category)
+      ?.chunks.map((chunk) => ({ ...chunk, category }));
+
     setPreEditChunks((prev) => ({
       ...prev,
-      [category]: categoryChunk ? { ...categoryChunk } : null,
+      [category]: categoryChunks ? [...categoryChunks] : [],
     }));
 
     // Set focus to first chunk in category
@@ -194,6 +217,7 @@ export function useEditChunks({
      * - Used when adding a new category for editing.
      *
      * @param category - The category to which to add the empty chunk.
+     * @returns new chunk id
      */
 
     // Get new order in category for new chunk
@@ -213,16 +237,15 @@ export function useEditChunks({
         order: newOrder,
       },
     ]);
-    setFocusedChunkId((prev) => ({
-      ...prev,
-      [category]: newChunkId,
-    }));
+    return newChunkId;
   };
 
   const addCategory = (category: AllCategories) => {
     /**
-     * Adds a new category for editing by creating an empty chunk.
+     * Adds a new category for editing and creates an empty chunk.
      * - Sets pre-edit chunks to null to indicate new category edit mode.
+     * - Focuses on the newly added empty chunk.
+     * - Adds new category to category order if it doesn't already exist.
      *
      * @param category - The category to add.
      */
@@ -233,7 +256,15 @@ export function useEditChunks({
       ...prev,
       [category]: null,
     }));
-    addEmptyCategoryChunk(category);
+    focusChunk(addEmptyCategoryChunk(category), category);
+
+    // Add to category order if not already present
+    setCategoryOrder((prev) => {
+      if (prev.find((entry) => entry.category === category)) {
+        return prev;
+      }
+      return [...prev, { category, order: prev.length }];
+    });
   };
 
   const getFocusOrder = (
@@ -243,6 +274,8 @@ export function useEditChunks({
     /**
      * Gets the ID of the next chunk to focus on based on the current focused chunk
      * and the specified direction.
+     * - If moving "next" and at the end, adds a new empty chunk and returns its ID.
+     * - If moving "back" and at the start, returns the current focused chunk ID.
      *
      * @param direction - The direction to move focus ("next" or "back").
      * @param category - The category of the chunks.
@@ -257,18 +290,19 @@ export function useEditChunks({
     );
     if (currentIndex === -1) return null;
 
-    // Get next or previous chunk based on direction
     if (direction === "next") {
       if (currentIndex + 1 < categoryChunks.length) {
         return categoryChunks[currentIndex + 1].id;
       }
+      // If no next chunk, add a new empty chunk and return its id
+      return addEmptyCategoryChunk(category);
     } else {
       if (currentIndex - 1 >= 0) {
         return categoryChunks[currentIndex - 1].id;
       }
+      // If no previous chunk, return current focused chunk id
+      return focusedChunkId[category];
     }
-    // If no next or previous chunk, return current focused chunk id
-    return focusedChunkId[category];
   };
 
   const changeFocus = (category: AllCategories, direction: FocusDirection) => {
@@ -280,10 +314,29 @@ export function useEditChunks({
      * @param direction - The direction to move focus ("next" or "back").
      */
     const newFocusId = getFocusOrder(direction, category);
+    if (!newFocusId) return;
     setFocusedChunkId((prev) => ({
       ...prev,
       [category]: newFocusId,
     }));
+  };
+
+  const focusChunk = (chunkId: string, category: AllCategories) => {
+    /**
+     * Sets focus to a specific chunk in a category.
+     * @param chunkId - The ID of the chunk to focus.
+     * @param category - The category of the chunk.
+     *
+     */
+
+    if (
+      !chunkId ||
+      !isEditingCategory(category) ||
+      focusedChunkId[category] === chunkId
+    )
+      return;
+
+    setFocusedChunkId((prev) => ({ ...prev, [category]: chunkId }));
   };
 
   const hasPendingEdits = () => {
@@ -293,6 +346,26 @@ export function useEditChunks({
      * @returns True if any category has pending edits, false otherwise.
      */
     return Object.keys(preEditChunks).length > 0;
+  };
+
+  const initialiseEditState = () => {
+    /**
+     * Initialises the edit state by clearing pre-edit chunks and focused chunk IDs.
+     * - Used for handling enter edit mode
+     */
+    setPreEditChunks({} as Record<AllCategories, ProfileChunk[]>);
+    setFocusedChunkId({} as Record<AllCategories, string | null>);
+  };
+
+  const isFocused = (chunkId: string, category: AllCategories) => {
+    /**
+     * Checks if a specific chunk is currently focused in a category.
+     *
+     * @param chunkId - The ID of the chunk to check.
+     * @param category - The category of the chunk.
+     * @returns True if the chunk is focused, false otherwise.
+     */
+    return focusedChunkId[category] === chunkId;
   };
 
   return {
@@ -307,6 +380,9 @@ export function useEditChunks({
     editCategory,
     addCategory,
     changeFocus,
+    focusChunk,
+    isFocused,
     hasPendingEdits,
+    initialiseEditState,
   };
 }

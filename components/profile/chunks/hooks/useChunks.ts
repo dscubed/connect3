@@ -8,6 +8,7 @@ export interface UseChunkExports {
   addChunk: (category: AllCategories, text: string) => void;
   updateChunk: (data: ChunkInput) => void;
   removeChunk: (id: string) => void;
+  getChunk: (id: string) => ProfileChunk | null;
 }
 
 export function useChunks({
@@ -94,6 +95,7 @@ export function useChunks({
      *
      * @param data - The chunk data containing id, text, and category.
      */
+    if (getChunk(data.id) === null) return;
     setChunks((prev) =>
       prev.map((chunk) =>
         chunk.id === data.id
@@ -116,5 +118,22 @@ export function useChunks({
     setChunks((prev) => prev.filter((chunk) => chunk.id !== id));
   };
 
-  return { orderedCategoryChunks, addChunk, updateChunk, removeChunk };
+  const getChunk = (id: string) => {
+    /**
+     * Retrieves a chunk by its ID.
+     *
+     * @param id - The ID of the chunk to retrieve.
+     * @returns The chunk with the specified ID, or null if not found.
+     */
+    const chunk = chunks.find((chunk) => chunk.id === id) || null;
+    return chunk;
+  };
+
+  return {
+    orderedCategoryChunks,
+    addChunk,
+    updateChunk,
+    removeChunk,
+    getChunk,
+  };
 }

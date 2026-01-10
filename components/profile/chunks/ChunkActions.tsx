@@ -17,7 +17,7 @@ export function ChunkActions() {
     fetchChunks,
     savingChunks,
     isEditing,
-    setIsEditing,
+    setEditingChunks,
   } = useChunkContext();
   return (
     <div className="flex gap-4 animate-fade-in">
@@ -30,7 +30,7 @@ export function ChunkActions() {
               label="Cancel"
               onClick={() => {
                 reset();
-                setIsEditing(false);
+                setEditingChunks(false);
               }}
             />
             {savingChunks ? (
@@ -41,7 +41,7 @@ export function ChunkActions() {
                 label="Save"
                 onClick={() => {
                   saveChunks();
-                  setIsEditing(false);
+                  setEditingChunks(false);
                 }}
               />
             )}
@@ -52,7 +52,7 @@ export function ChunkActions() {
             <ActionButton
               icon={Pencil}
               label="Edit"
-              onClick={() => setIsEditing(true)}
+              onClick={() => setEditingChunks(true)}
             />
             <ActionButton
               icon={RotateCcw}

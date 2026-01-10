@@ -7,7 +7,6 @@ import { SectionCard, SectionCardHeader } from "./SectionCard";
 import { useAuthStore } from "@/stores/authStore";
 import { uploadProfileToVectorStore } from "@/lib/vectorStores/profile/client";
 import { PencilLine } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 export function SummaryCard({
   editingProfile = false,
@@ -75,11 +74,7 @@ export function SummaryCard({
           />
         ) : (
           <div
-            className={cn(
-              "p-2 text-xs flex items-center gap-1 rounded-full animate-fade-in",
-              "border border-muted/80 text-muted/80 shadow-sm focus-visible:ring-0",
-              "hover:bg-transparent hover:text-muted hover:border-muted cursor-pointer"
-            )}
+            className="!bg-transparent !text-muted rounded-full border border-muted/50 !p-1.5 h-fit"
             onClick={() => setIsEditing(true)}
           >
             <PencilLine className="h-4 w-4" />

@@ -209,11 +209,7 @@ export function AiEnhanceDialog({
           type="button"
           variant="ghost"
           size="sm"
-          className={cn(
-            "p-2 text-xs flex items-center gap-1 rounded-full",
-            "border border-muted/80 text-muted/80 shadow-sm focus-visible:ring-0",
-            "hover:bg-transparent hover:text-muted hover:border-muted"
-          )}
+          className="!bg-transparent !text-muted rounded-full border border-muted/50 !p-1.5 h-fit"
         >
           <Sparkles className="h-4 w-4" />
         </Button>
