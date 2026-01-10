@@ -1,4 +1,6 @@
 "use client";
+
+import { AuthShell } from "@/components/auth/AuthShell";
 import { SignUpForm } from "@/components/auth/sign-up-form";
 import LoadingIndicator from "@/components/ui/LoadingSpinner";
 import { useAuthStore } from "@/stores/authStore";
@@ -11,15 +13,12 @@ export default function Page() {
 
   return (
     <>
-      <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-        <div className="w-full max-w-sm">
-          {loading ? <LoadingIndicator /> : <SignUpForm />}
-        </div>
-      </div>
+      <AuthShell>
+        {loading ? <LoadingIndicator /> : <SignUpForm />}
+      </AuthShell>
+
       {user && !user.is_anonymous && !loading && (
-        <AlreadyAuthenticatedDialog
-          onboardingCompleted={profile?.onboarding_completed}
-        />
+        <AlreadyAuthenticatedDialog onboardingCompleted={profile?.onboarding_completed} />
       )}
     </>
   );

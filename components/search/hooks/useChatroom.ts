@@ -3,7 +3,6 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { ChatMessage } from "../types";
 import { useSearchStream } from "./useStreamSearch";
-import { EntityFilterOptions } from "@/components/home/hooks/useSearch";
 
 export function useChatroom(chatroomId: string | null) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -41,7 +40,7 @@ export function useChatroom(chatroomId: string | null) {
 
   // Add New Message from Chatroom
   const addNewMessage = useCallback(
-    async (query: string, selectedEntityFilters: EntityFilterOptions) => {
+    async (query: string) => {
       if (!query.trim() || !chatroomId || !user || inFlight) return;
 
       try {
@@ -55,9 +54,6 @@ export function useChatroom(chatroomId: string | null) {
             content: null, // Will be populated by background search
             user_id: user.id,
             status: "pending", // Initial status
-            users: selectedEntityFilters.users,
-            organisations: selectedEntityFilters.organisations,
-            // events: selectedEntityFilters.events, TODO: Once finished
           })
           .select()
           .single();

@@ -14,18 +14,23 @@ export default function AuthCallbackPage() {
     const maxAttempts = 10;
 
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
       if (session?.user) {
-        // migration check 
+        // migration check
         if (session.user.user_metadata.anonymousId) {
           console.log("Migrating anonymous data for user: ", session.user);
-          toast.info("Migrating existing chats to your new account...")
+          toast.info("Migrating existing chats to your new account...");
           try {
-            const {data, error} = await supabase.rpc('migrate_anonymous_user_data', {
-              old_anonymous_id: session.user.user_metadata.anonymousId,
-              new_user_id: session.user.id,
-            });
+            const { data, error } = await supabase.rpc(
+              "migrate_anonymous_user_data",
+              {
+                old_anonymous_id: session.user.user_metadata.anonymousId,
+                new_user_id: session.user.id,
+              }
+            );
             if (error) {
               toast.error("Failed to migrate anonymous data");
               console.error(error);
@@ -55,7 +60,7 @@ export default function AuthCallbackPage() {
         if (profile?.onboarding_completed) {
           router.replace("/");
         } else {
-          router.replace("/onboarding");
+          router.replace("/profile");
         }
         return true;
       }
@@ -64,7 +69,7 @@ export default function AuthCallbackPage() {
 
     const pollForAuth = async () => {
       const hasAuth = await checkAuth();
-      
+
       if (!hasAuth && attempts < maxAttempts) {
         attempts++;
         setTimeout(pollForAuth, 500);
