@@ -22,7 +22,7 @@ export async function runGeneral({
   query,
   tldr,
   prevMessages,
-  userUniversity = null,
+  userUniversity,
   emit,
 }: RunGeneralArgs): Promise<string> {
   const traceId = `general_${Date.now()}_${Math.random()
@@ -45,7 +45,11 @@ export async function runGeneral({
     return runConnect3General(openai, query, prevMessages);
   }
 
-  const rawUni = plan.university ?? userUniversity;
+  const plannedUni =
+  plan.university && plan.university.trim() !== ""
+    ? plan.university
+    : null;
+  const rawUni = plannedUni ?? userUniversity;
   const uniSlug = normalizeUniversitySlug(rawUni);
   const vectorStoreId = getUniversityVectorStoreId(uniSlug);
 

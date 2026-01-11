@@ -15,7 +15,7 @@ export const runSearch = async (
   emit?: (event: string, data: unknown) => void
 ): Promise<SearchResponse> => {
   // Fetch chatmessage and related data
-  const { query, tldr, prevMessages } = await getContext(
+  const { query, tldr, prevMessages, userUniversity } = await getContext(
     chatmessageId,
     supabase
   );
@@ -30,13 +30,13 @@ export const runSearch = async (
   if (!searchPlan.requiresSearch) {
     if (emit) emit("progress", "Routed to General Chat...");
   
+    console.log("[runSearch] context", { userUniversity });
     const generalText = await runGeneral({
       openai,
       query,
       tldr,
       prevMessages,
-      // optionally pass user's uni slug if you store it
-      // userUniversitySlug: userUniSlugFromDB
+      userUniversity,
     });
   
     // Return in your existing SearchResponse shape

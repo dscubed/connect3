@@ -20,7 +20,7 @@ export const getContext = async (
   // Fetch user TLDR
   const { data: userData, error: userError } = await supabase
     .from("profiles")
-    .select("tldr")
+    .select("tldr, university")
     .eq("id", user_id)
     .single();
 
@@ -28,6 +28,8 @@ export const getContext = async (
   if (!userError && userData) {
     tldr = userData.tldr ?? "";
   }
+
+  const userUniversity = userData?.university ?? null;
 
   // Fetch previous messages (excluding current)
   const CHAT_CONTEXT_LIMIT = 3;
@@ -59,6 +61,7 @@ export const getContext = async (
     query,
     tldr,
     prevMessages,
+    userUniversity,
   };
 };
 
