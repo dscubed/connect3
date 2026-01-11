@@ -20,6 +20,7 @@ export function ChunkItem({
     isFocused,
     getChunk,
     updateChunk,
+    editCategory,
   } = useChunkContext();
 
   const currentChunk = getChunk(chunk.id);
@@ -30,7 +31,11 @@ export function ChunkItem({
   return (
     <li
       onClick={() => {
-        if (isEditing && isEditingCategory(category)) {
+        if (!isEditing) return;
+        if (isEditingCategory(category)) {
+          focusChunk(chunk.id, category);
+        } else {
+          editCategory(category);
           focusChunk(chunk.id, category);
         }
       }}

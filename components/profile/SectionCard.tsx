@@ -55,7 +55,7 @@ export function SectionCardHeader({
   children,
   ...props
 }: {
-  title: string;
+  title: string | React.ReactNode;
   className?: string;
   children?: React.ReactNode;
 }) {

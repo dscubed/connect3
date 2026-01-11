@@ -1,8 +1,8 @@
 import { useChunkContext } from "../hooks/ChunkProvider";
 import { AllCategories, ChunkInput } from "../ChunkUtils";
 import { AiEnhanceDialog } from "@/components/profile/edit-modals/AiEnhanceDialog";
-import { Input } from "@/components/ui/input";
 import { useEffect, useRef } from "react";
+import { Textarea } from "@/components/ui/TextArea";
 
 export function ChunkEditor({
   chunk,
@@ -12,7 +12,7 @@ export function ChunkEditor({
   setChunk: (chunk: ChunkInput) => void;
 }) {
   const { changeFocus, clearFocus, removeChunk } = useChunkContext();
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // Focus the input when the component mounts
   useEffect(() => {
@@ -21,17 +21,19 @@ export function ChunkEditor({
 
   if (!chunk.category || !chunk.id) return null;
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const { selectionStart, selectionEnd, value } = e.currentTarget;
+
     if (
       (e.key === "Enter" && !e.shiftKey) ||
       e.key === "Tab" ||
-      e.key === "ArrowDown"
+      (e.key === "ArrowDown" && selectionEnd === value.length)
     ) {
       if (chunk.text.trim() === "") return;
       e.preventDefault();
       changeFocus(chunk.category, "next");
     }
-    if (e.key === "ArrowUp") {
+    if (e.key === "ArrowUp" && selectionStart === 0) {
       e.preventDefault();
       changeFocus(chunk.category, "back");
       if (chunk.text.trim() === "") removeChunk(chunk.id);
@@ -47,8 +49,12 @@ export function ChunkEditor({
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setChunk({ ...chunk, text: e.target.value });
+  const removeNewLines = (text: string) => {
+    return text.replace(/\n/g, " ");
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setChunk({ ...chunk, text: removeNewLines(e.target.value) });
   };
 
   return (
@@ -59,7 +65,7 @@ export function ChunkEditor({
           aria-hidden="true"
         />
         <div className="flex w-full items-end gap-2">
-          <Input
+          <Textarea
             ref={inputRef}
             className="flex-1 p-2 min-h-0 border-none outline-none shadow-none focus-visible:ring-0 focus:ring-0 resize-none !text-lg"
             placeholder={CATEGORY_PLACEHOLDERS[chunk.category]}

@@ -28,6 +28,12 @@ export function SummaryCard({
     }
   }, [isEditing, profile?.tldr]);
 
+  useEffect(() => {
+    if (!editingProfile) {
+      setIsEditing(false);
+    }
+  }, [editingProfile]);
+
   const editTldr = () => {
     if (!editingProfile) return;
     setIsEditing(true);

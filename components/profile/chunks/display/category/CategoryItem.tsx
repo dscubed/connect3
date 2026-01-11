@@ -11,6 +11,7 @@ import { CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PencilLine } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useEffect } from "react";
 
 interface CategoryItemProps {
   category: AllCategories;
@@ -18,8 +19,31 @@ interface CategoryItemProps {
 }
 
 export function CategoryItem({ category, chunks }: CategoryItemProps) {
-  const { isEditing, editCategory, isEditingCategory, saveEdits, cancelEdits } =
-    useChunkContext();
+  const {
+    isEditing,
+    editCategory,
+    isEditingCategory,
+    saveEdits,
+    cancelEdits,
+    focusedChunkId,
+    focusDiv,
+    cancelDivFocus,
+    focusedDiv,
+  } = useChunkContext();
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        e.key === "Escape" &&
+        !focusedChunkId[category] &&
+        focusedDiv === category
+      ) {
+        cancelDivFocus(category);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [focusedChunkId, focusedDiv, category, cancelDivFocus]);
+
   return (
     <SortableCategory key={category} id={category}>
       {({ attributes, listeners, setNodeRef, style }) => (
@@ -27,6 +51,7 @@ export function CategoryItem({ category, chunks }: CategoryItemProps) {
           className="mb-2 flex flex-col items-start align-start w-full"
           style={style}
           ref={setNodeRef}
+          onClick={() => focusDiv(category)}
           variant="white"
         >
           {/* Category Header (Drag Handle) */}

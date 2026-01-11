@@ -24,7 +24,6 @@ export function useChunks({
 }): UseChunkExports {
   const { profile } = useAuthStore();
 
-  // set categoryChunks map based on category and chunk orders
   const orderedCategoryChunks = useMemo(() => {
     /**
      * An array of categories with their associated chunks ordered,
@@ -46,15 +45,17 @@ export function useChunks({
     }));
   }, [categoryOrder, chunks]);
 
-  // When chunks update if a category has no chunks remove it from categoryOrder
   useEffect(() => {
+    /**
+     * This effect cleans up the categoryOrder state by removing categories
+     * that no longer have any associated chunks.
+     */
     const usedCategories = new Set(chunks.map((chunk) => chunk.category));
     setCategoryOrder((prev) =>
       prev.filter((cat) => usedCategories.has(cat.category))
     );
   }, [chunks, setCategoryOrder]);
 
-  // Add a new chunk
   const addChunk = (category: AllCategories, text: string) => {
     /**
      * Adds a new chunk to the specified category with the provided text.
@@ -88,7 +89,6 @@ export function useChunks({
     });
   };
 
-  // Update Chunk
   const updateChunk = (data: ChunkInput) => {
     /**
      * Updates an existing chunk with new text and/or category.

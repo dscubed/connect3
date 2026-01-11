@@ -23,6 +23,10 @@ export interface UseEditChunksExports {
   changeFocus: (category: AllCategories, direction: FocusDirection) => void;
   hasPendingEdits: () => boolean;
   initialiseEditState(): void;
+
+  focusDiv: (category: AllCategories) => void;
+  cancelDivFocus: (category: AllCategories) => void;
+  focusedDiv: AllCategories | null;
 }
 
 export function useEditChunks({
@@ -44,6 +48,8 @@ export function useEditChunks({
   const [focusedChunkId, setFocusedChunkId] = useState<
     Record<AllCategories, string | null>
   >({} as Record<AllCategories, string | null>);
+  // State to hold focused div category
+  const [focusedDiv, setFocusedDiv] = useState<AllCategories | null>(null);
 
   const clearFocus = (category: AllCategories) => {
     /**
@@ -251,10 +257,10 @@ export function useEditChunks({
      */
     if (chunks.find((chunk) => chunk.category === category)) return;
 
-    // Set null pre-edit chunks and add an empty chunk
+    // Set empty pre-edit chunks and add an empty chunk
     setPreEditChunks((prev) => ({
       ...prev,
-      [category]: null,
+      [category]: [],
     }));
     focusChunk(addEmptyCategoryChunk(category), category);
 
@@ -328,14 +334,9 @@ export function useEditChunks({
      * @param category - The category of the chunk.
      *
      */
+    console.log("Focusing chunk:", chunkId, "in category:", category);
 
-    if (
-      !chunkId ||
-      !isEditingCategory(category) ||
-      focusedChunkId[category] === chunkId
-    )
-      return;
-
+    if (!chunkId || focusedChunkId[category] === chunkId) return;
     setFocusedChunkId((prev) => ({ ...prev, [category]: chunkId }));
   };
 
@@ -345,6 +346,7 @@ export function useEditChunks({
      *
      * @returns True if any category has pending edits, false otherwise.
      */
+    console.log("Checking for pending edits:", preEditChunks);
     return Object.keys(preEditChunks).length > 0;
   };
 
@@ -355,6 +357,7 @@ export function useEditChunks({
      */
     setPreEditChunks({} as Record<AllCategories, ProfileChunk[]>);
     setFocusedChunkId({} as Record<AllCategories, string | null>);
+    setFocusedDiv(null);
   };
 
   const isFocused = (chunkId: string, category: AllCategories) => {
@@ -366,6 +369,28 @@ export function useEditChunks({
      * @returns True if the chunk is focused, false otherwise.
      */
     return focusedChunkId[category] === chunkId;
+  };
+
+  // Div Focus Handlers for cancelling edit mode
+
+  const focusDiv = (category: AllCategories) => {
+    /**
+     * Sets focus to a specific category div.
+     * @param category - The category div to focus.
+     */
+    console.log("Focusing div:", category);
+    setFocusedDiv(category);
+  };
+
+  const cancelDivFocus = (category: AllCategories) => {
+    /**
+     * Clears focus from any category div.
+     * - if there are pending edits in the category, cancels them.
+     *
+     * @param category - The category div to clear focus from.
+     */
+    setFocusedDiv(null);
+    if (isEditingCategory(category)) cancelEdits(category);
   };
 
   return {
@@ -384,5 +409,8 @@ export function useEditChunks({
     isFocused,
     hasPendingEdits,
     initialiseEditState,
+    focusDiv,
+    cancelDivFocus,
+    focusedDiv,
   };
 }

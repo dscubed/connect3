@@ -20,16 +20,21 @@ type ChunkContextType = ChunkHelpers &
   ChunkEditHelpers & {
     // Core editing state
     isEditing: boolean;
-    setEditingChunks: (editing: boolean) => void;
+    exitEdit: () => void;
   };
 
 const ChunkContext = createContext<ChunkContextType | undefined>(undefined);
 
-export function ChunkProvider({ children }: { children: ReactNode }) {
+export function ChunkProvider({
+  children,
+  isEditing,
+}: {
+  children: ReactNode;
+  isEditing: boolean;
+}) {
   // Core chunk states
   const [chunks, setChunks] = useState<ProfileChunk[]>([]);
   const [categoryOrder, setCategoryOrder] = useState<CategoryOrderData[]>([]);
-  const [isEditing, setIsEditing] = useState<boolean>(false);
 
   // Chunk Actions
   const chunkHelpers = useChunks({
@@ -61,26 +66,20 @@ export function ChunkProvider({ children }: { children: ReactNode }) {
     setCategoryOrder,
   });
 
-  const setEditingChunks = (editing: boolean) => {
-    /**
-     * Sets the editing state and initialises edit state if entering edit mode.
-     * @param editing - Boolean indicating whether to enter or exit edit mode.
-     */
-    setIsEditing(editing);
-    if (editing) {
-      editHelpers.initialiseEditState();
-    }
+  const exitEdit = () => {
+    editHelpers.cancelAllEdits();
+    editHelpers.initialiseEditState();
   };
 
   return (
     <ChunkContext.Provider
       value={{
-        isEditing,
-        setEditingChunks,
         ...chunkHelpers,
         ...moveHelpers,
         ...dataHelpers,
         ...editHelpers,
+        isEditing,
+        exitEdit,
       }}
     >
       {children}
