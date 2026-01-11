@@ -31,7 +31,7 @@ function isClubContentUrl(url: string): boolean {
 
     if (!p.startsWith("/buddy-up/clubs/clubs-listing")) return false;
 
-    const parts = p.split("/").filter(Boolean); // e.g. ["buddy-up","clubs","mathematics-statistics-society"]
+    const parts = p.split("/").filter(Boolean);
 
     // Exclude the section landing page itself: /buddy-up/clubs/
     if (parts.length <= 2) return false;
