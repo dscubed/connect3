@@ -50,7 +50,7 @@ You are a university help assistant for ${uniSlug}.
       { role: "system", content: uniKbSystem },
       { role: "user", content: query },
     ],
-    tools: [{ type: "file_search", vector_store_ids: [vectorStoreId] }],
+    tools: [{ type: "file_search", vector_store_ids: [vectorStoreId], max_num_results: 3,}],
   });
 
   const kbHit = hasFileCitations(uniResp);
