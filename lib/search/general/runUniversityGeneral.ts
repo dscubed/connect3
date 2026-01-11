@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { countWebSearchCalls } from "./countWebSearches";
 
 type RunUniversityGeneralOpts = {
   traceId?: string;
@@ -27,38 +28,20 @@ export async function runUniversityGeneral(
 ): Promise<string> {
   const traceId = opts?.traceId ?? "uni_no_trace";
 
-  opts?.emit?.("debug", { traceId, stage: "start", uniSlug, vectorStoreId });
+  console.log("[runUniversityGeneral] start", {
+    traceId,
+    uniSlug,
+    vectorStoreId,
+  });
 
   const uniKbSystem = `
 You are a university help assistant for ${uniSlug}.
-
-## Grounding rules (high priority)
-- Use ONLY the retrieved documents from the university knowledge base to answer.
-- If the answer is not contained in the retrieved documents, say: "I couldn't find this in the university knowledge base." (Do not guess.)
-- Do not invent links. Only include links that appear in retrieved content or are directly supported by citations.
-
-## Link-forward response style
-When you see a relevant URL in the retrieved content, surface it to the user.
-- Always include a short "Key links" section if at least one useful link is available.
-- Prefer the most official/useful links (e.g. official university pages, forms, service pages).
-- Provide 1–5 links max.
-- Each link should have a 3–8 word label and a one-line reason.
+...
 `;
 
-const uniWebSystem = `
+  const uniWebSystem = `
 You are a university help assistant for ${uniSlug}.
-
-The internal university knowledge base had no relevant matches. Use web search to answer.
-
-## Source preferences
-- Prefer official university pages (the university's own domain), then government/official partners.
-- Avoid random blogs/SEO pages unless there is no official info.
-
-## Link-forward response style
-- Always include a "Key links" section with 2–6 links.
-- Pick the most directly useful pages (official handbook/fees/enrolment/support/contact forms).
-- Give each link a short label and a one-line reason.
-- If sources conflict or are unclear, say what you found and what you couldn’t confirm.
+...
 `;
 
   const uniResp = await openai.responses.create({
@@ -72,7 +55,10 @@ The internal university knowledge base had no relevant matches. Use web search t
 
   const kbHit = hasFileCitations(uniResp);
 
-  opts?.emit?.("debug", { traceId, stage: "kb_check", kbHit });
+  console.log("[runUniversityGeneral] kb_check", {
+    traceId,
+    kbHit,
+  });
 
   if (!kbHit) {
     const webResp = await openai.responses.create({
@@ -82,6 +68,14 @@ The internal university knowledge base had no relevant matches. Use web search t
         { role: "user", content: query },
       ],
       tools: [{ type: "web_search_preview" as any }],
+    });
+
+    console.log("[runUniversityGeneral] web_search_usage", {
+      traceId,
+      webCalls: countWebSearchCalls(webResp),
+      inputTokens: webResp.usage?.input_tokens,
+      outputTokens: webResp.usage?.output_tokens,
+      totalTokens: webResp.usage?.total_tokens,
     });
 
     return (webResp.output_text ?? "").trim();

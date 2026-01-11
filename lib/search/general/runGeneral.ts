@@ -6,21 +6,14 @@ import { normalizeUniversitySlug } from "./uniSlug";
 import { getUniversityVectorStoreId } from "./universities";
 import { runUniversityGeneral } from "./runUniversityGeneral";
 import { runConnect3General } from "./runConnect3General";
-
-import { dbg, mkTraceId, preview } from "./debug";
+import { countWebSearchCalls } from "./countWebSearches";
 
 type RunGeneralArgs = {
   openai: OpenAI;
   query: string;
   tldr: string;
   prevMessages: ResponseInput;
-
-  /**
-   * Optional: user's university from DB/profile
-   * (can be human-readable or slug)
-   */
   userUniversity?: string | null;
-
   emit?: (event: string, data: unknown) => void;
 };
 
@@ -36,39 +29,36 @@ export async function runGeneral({
     .toString(16)
     .slice(2)}`;
 
-  // 1) Decide if uni-related
   const plan = await planGeneral(openai, query, tldr, prevMessages);
-  emit?.("debug", { traceId, stage: "planGeneral", plan });
 
-  // 2) Not uni-related → Connect3 general chatbot
+  console.log("[runGeneral] planGeneral", {
+    traceId,
+    plan,
+  });
+
   if (!plan.uniRelated) {
-    emit?.("debug", {
+    console.log("[runGeneral] route", {
       traceId,
-      stage: "route",
       route: "connect3_general",
     });
 
     return runConnect3General(openai, query, prevMessages);
   }
 
-  // 3) Resolve university
   const rawUni = plan.university ?? userUniversity;
   const uniSlug = normalizeUniversitySlug(rawUni);
   const vectorStoreId = getUniversityVectorStoreId(uniSlug);
 
-  emit?.("debug", {
+  console.log("[runGeneral] uniResolution", {
     traceId,
-    stage: "uniResolution",
     rawUni,
     uniSlug,
     vectorStoreIdExists: Boolean(vectorStoreId),
   });
 
-  // 4) Uni-related + vector store exists → hit vector store (with web fallback inside)
   if (uniSlug && vectorStoreId) {
-    emit?.("debug", {
+    console.log("[runGeneral] route", {
       traceId,
-      stage: "route",
       route: "uni_vector_store",
       uniSlug,
     });
@@ -79,10 +69,8 @@ export async function runGeneral({
     });
   }
 
-  // 5) Uni-related but no vector store → direct web search
-  emit?.("debug", {
+  console.log("[runGeneral] route", {
     traceId,
-    stage: "route",
     route: "web_only_fallback",
     reason: !uniSlug
       ? "unknown_university"
@@ -102,9 +90,25 @@ export async function runGeneral({
     tools: [{ type: "web_search_preview" as any }],
   });
 
-  const text = (resp.output_text ?? "").trim();
-  emit?.("debug", { traceId, stage: "final_text_len", len: text.length });
-  return text;
+  emit?.(
+    "progress",
+    `WEB SEARCH usage: calls=${countWebSearchCalls(resp)} tokens=${resp.usage?.total_tokens}`
+  );
 
-  return (resp.output_text ?? "").trim();
+  console.log("[runGeneral] web_search_usage", {
+    traceId,
+    webCalls: countWebSearchCalls(resp),
+    inputTokens: resp.usage?.input_tokens,
+    outputTokens: resp.usage?.output_tokens,
+    totalTokens: resp.usage?.total_tokens,
+  });
+
+  const text = (resp.output_text ?? "").trim();
+
+  console.log("[runGeneral] final_text_len", {
+    traceId,
+    len: text.length,
+  });
+
+  return text;
 }
