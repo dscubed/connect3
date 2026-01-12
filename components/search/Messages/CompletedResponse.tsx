@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
 import { SearchResponse } from "@/lib/search/types";
 import { ResultSection } from "./QueryResult";
-import { QuickLinks } from "@/components/ui/quickLinks";
-import { Markdown } from "@/components/ui/markdown";
+import { QuickLinks } from "@/components/search/Messages/quickLinks";
+import { Markdown } from "@/components/search/Messages/markdown";
 import { extractLinksFromMarkdown } from "@/lib/search/general/extractLinks";
 
 export function CompletedResponse({
@@ -10,6 +10,13 @@ export function CompletedResponse({
 }: {
   content: Partial<SearchResponse>;
 }) {
+  const links = [
+    ...(content.summary ? extractLinksFromMarkdown(content.summary, "summary") : []),
+    ...(content.followUps ? extractLinksFromMarkdown(content.followUps, "followUps") : []),
+    ...((content.results || []).flatMap((r) =>
+      r?.text ? extractLinksFromMarkdown(r.text, "result") : []
+    )),
+  ];
   return (
     <motion.div
       className="space-y-6 leading-relaxed !mt-0"
@@ -17,6 +24,7 @@ export function CompletedResponse({
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
     >
+      <QuickLinks links={links} />
       {/* Result */}
       {content.summary && (
         <motion.div
