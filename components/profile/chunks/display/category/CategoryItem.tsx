@@ -1,78 +1,101 @@
-import { GripVertical, PlusCircle } from "lucide-react";
 import { SortableCategory } from "./SortableCategory";
 import { CategoryChunks } from "./CategoryChunks";
-import { ChunkEntry, useChunkContext } from "../../hooks/ChunkProvider";
-import { AllCategories, ChunkInput } from "../../ChunkUtils";
-import { Fade } from "@/components/ui/Fade";
+import { ChunkEntry } from "../../ChunkUtils";
+import { useChunkContext } from "@/components/profile/chunks/hooks/ChunkProvider";
+import { AllCategories } from "../../ChunkUtils";
+import {
+  SectionCard,
+  SectionCardHeader,
+} from "@/components/profile/SectionCard";
+import { CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { PencilLine } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useEffect } from "react";
 
 interface CategoryItemProps {
   category: AllCategories;
   chunks: ChunkEntry[];
-  newChunks: Record<AllCategories, ChunkInput>;
-  setNewChunks: React.Dispatch<
-    React.SetStateAction<Record<AllCategories, ChunkInput>>
-  >;
 }
 
-export function CategoryItem({
-  category,
-  chunks,
-  newChunks,
-  setNewChunks,
-}: CategoryItemProps) {
-  const { isEditing } = useChunkContext();
+export function CategoryItem({ category, chunks }: CategoryItemProps) {
+  const {
+    isEditing,
+    editCategory,
+    isEditingCategory,
+    saveEdits,
+    cancelEdits,
+    focusedChunkId,
+    focusDiv,
+    cancelDivFocus,
+    focusedDiv,
+  } = useChunkContext();
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        e.key === "Escape" &&
+        !focusedChunkId[category] &&
+        focusedDiv === category
+      ) {
+        cancelDivFocus(category);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [focusedChunkId, focusedDiv, category, cancelDivFocus]);
+
   return (
     <SortableCategory key={category} id={category}>
       {({ attributes, listeners, setNodeRef, style }) => (
-        <div
-          ref={setNodeRef}
+        <SectionCard
           className="mb-2 flex flex-col items-start align-start w-full"
           style={style}
+          ref={setNodeRef}
+          onClick={() => focusDiv(category)}
+          variant="white"
         >
           {/* Category Header (Drag Handle) */}
-          <div
-            className="flex items-center align-center mb-2 gap-2 hover:bg-white/10 rounded-md w-full"
+          <SectionCardHeader
+            title={category}
             {...(isEditing ? { ...attributes, ...listeners } : {})}
           >
-            <h1
-              className={`relative text-2xl font-semibold flex items-center justify-center transition-all duration-300
-                ${isEditing ? "pl-6" : "p-0"}`}
-            >
-              <Fade
-                show={isEditing}
-                className="absolute left-0 mr-1 hover:cursor-grab"
-              >
-                <GripVertical className="h-5 w-5" />
-              </Fade>
-              {category}
-            </h1>
-            <Fade
-              show={isEditing}
-              className="flex items-center cursor-pointer transition-colors"
-            >
+            {!isEditingCategory(category) && isEditing && (
               <Button
-                onClick={() => {
-                  setNewChunks((prev) => ({
-                    ...prev,
-                    [category]: { text: "", category },
-                  }));
-                }}
-                variant={"ghost"}
-                className="px-2 py-1 h-fit"
+                variant="ghost"
+                className="!bg-transparent !text-muted rounded-full border border-muted/50 !p-1.5 h-fit"
+                onClick={() => editCategory(category)}
               >
-                <PlusCircle className="!size-5" />
+                <PencilLine className="!size-4" />
               </Button>
-            </Fade>
-          </div>
-          {/* Category Chunks */}
-          <CategoryChunks
-            chunks={chunks}
-            category={category}
-            newChunks={newChunks}
-            setNewChunks={setNewChunks}
-          />
-        </div>
+            )}
+          </SectionCardHeader>
+          <CardContent className="w-full">
+            {/* Category Chunks */}
+            <CategoryChunks chunks={chunks} category={category} />
+            {isEditingCategory(category) && (
+              <div className="w-full flex flex-row justify-end mt-2 gap-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => saveEdits(category)}
+                  className={cn(
+                    "!bg-transparent text-muted hover:text-card-foreground"
+                  )}
+                >
+                  Save
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => cancelEdits(category)}
+                  className={cn(
+                    "!bg-transparent text-muted hover:text-card-foreground"
+                  )}
+                >
+                  Cancel
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </SectionCard>
       )}
     </SortableCategory>
   );

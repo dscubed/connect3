@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { Edit3 } from "lucide-react";
 import EditAvatarModal from "./edit-modals/EditAvatarModal";
+import { cn } from "@/lib/utils";
 
 interface ProfilePictureProps {
   avatar: string | null;
@@ -17,10 +18,12 @@ export default function ProfilePicture({
 
   return (
     <div className="relative w-fit">
-      <motion.div
-        className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-secondary bg-secondary-foreground"
-        whileHover={{ scale: 1.02 }}
-        transition={{ duration: 0.2 }}
+      <div
+        className={cn(
+          "relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4",
+          "border-secondary bg-secondary-foreground",
+          editingProfile && "hover:scale-105 transition-all"
+        )}
       >
         {avatar && (
           <Image
@@ -31,7 +34,7 @@ export default function ProfilePicture({
             priority
           />
         )}
-      </motion.div>
+      </div>
       {/* Edit Avatar Button */}
       {editingProfile && (
         <motion.button

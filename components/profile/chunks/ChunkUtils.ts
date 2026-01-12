@@ -8,7 +8,6 @@ export interface ChunkData {
 }
 
 export interface CategoryOrderData {
-  profile_id: string;
   category: AllCategories;
   order: number;
 }
@@ -44,7 +43,29 @@ export const allCategoriesList = [
 ];
 export type AllCategories = (typeof allCategoriesList)[number];
 
-export type ChunkInput = {
+// State Types
+export interface ProfileChunk {
+  id: string;
   text: string;
-  category: AllCategories | null;
+  category: AllCategories;
+  order: number;
+}
+
+export type ChunkInput = {
+  id: string;
+  text: string;
+  category: AllCategories;
 };
+
+export interface ChunkEntry {
+  id: string;
+  text: string;
+  order: number;
+}
+
+export interface CategoryChunks {
+  category: AllCategories;
+  chunks: ChunkEntry[];
+}
+
+export type FocusDirection = "next" | "back";

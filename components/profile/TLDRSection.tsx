@@ -98,7 +98,6 @@ export default function TLDRSection({ tldr }: TLDRSectionProps) {
               fieldType="external_tldr"
               onApply={handleApplyFromAi}
               title="Enhance your TLDR"
-              triggerLabel="Enhance"
             />
           </div>
         </div>

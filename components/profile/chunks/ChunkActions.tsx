@@ -1,14 +1,4 @@
-"use client";
-
-import {
-  FileUp,
-  MessageCircle,
-  Pencil,
-  PencilOff,
-  RotateCcw,
-  Save,
-} from "lucide-react";
-import { parseDocument } from "@/lib/parsers/documentParser";
+import { FileUp, MessageCircle, Save, Undo } from "lucide-react";
 import { useChunkContext } from "./hooks/ChunkProvider";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -18,59 +8,34 @@ import FileUploadCube from "@/components/profile/cube/FileUploadCube";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import { toast } from "sonner";
 import { useAuthStore } from "@/stores/authStore";
+import { parseDocument } from "@/lib/parsers/documentParser";
 
 export function ChunkActions() {
+  const { reset, saveChunks, savingChunks, saveAllEdits } = useChunkContext();
   const [resumeOpen, setResumeOpen] = useState(false);
 
-  const {
-    reset,
-    saveChunks,
-    fetchChunks,
-    savingChunks,
-    isEditing,
-    setIsEditing,
-  } = useChunkContext();
   return (
     <div className="flex gap-4 animate-fade-in">
       <div className="flex gap-2">
-        {isEditing ? (
-          <>
-            {/* Save and Cancel for Editing */}
-            <ActionButton
-              icon={PencilOff}
-              label="Cancel"
-              onClick={() => {
-                reset();
-                setIsEditing(false);
-              }}
-            />
-            {savingChunks ? (
-              <ActionButton icon={Save} label="Saving..." disabled={true} />
-            ) : (
-              <ActionButton
-                icon={Save}
-                label="Save"
-                onClick={() => {
-                  saveChunks();
-                  setIsEditing(false);
-                }}
-              />
-            )}
-          </>
+        {/* Save and Cancel for Editing */}
+        <ActionButton
+          icon={Undo}
+          label="Revert"
+          onClick={() => {
+            reset();
+          }}
+        />
+        {savingChunks ? (
+          <ActionButton icon={Save} label="Saving..." disabled={true} />
         ) : (
-          <>
-            {/* Edit and Refresh for Viewing */}
-            <ActionButton
-              icon={Pencil}
-              label="Edit"
-              onClick={() => setIsEditing(true)}
-            />
-            <ActionButton
-              icon={RotateCcw}
-              label="Refresh"
-              onClick={() => fetchChunks()}
-            />
-          </>
+          <ActionButton
+            icon={Save}
+            label="Save"
+            onClick={() => {
+              saveAllEdits();
+              saveChunks();
+            }}
+          />
         )}
       </div>
       {/* Separator */}
@@ -157,7 +122,11 @@ const ResumeUploadModal = ({
       const response = await makeAuthenticatedRequest("/api/profiles/resume", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ profileId: user.id, fileName: resume[0].name, text: resumeText }),
+        body: JSON.stringify({
+          profileId: user.id,
+          fileName: resume[0].name,
+          text: resumeText,
+        }),
       });
 
       if (!response.ok) {
