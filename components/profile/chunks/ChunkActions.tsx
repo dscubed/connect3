@@ -8,7 +8,7 @@ import FileUploadCube from "@/components/profile/cube/FileUploadCube";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import { toast } from "sonner";
 import { useAuthStore } from "@/stores/authStore";
-import { parseDocument } from "@/lib/parsers/documentParser";
+import { parseDocument } from "@/lib/resume/parsers/documentParser";
 
 export function ChunkActions() {
   const { reset, saveChunks, savingChunks, saveAllEdits } = useChunkContext();
