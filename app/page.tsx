@@ -2,7 +2,6 @@
 import Sidebar from "@/components/sidebar/Sidebar";
 import HeroSection from "@/components/home/HeroSection";
 import React, { useState } from "react";
-import { AuthButton } from "@/components/auth/auth-button";
 import { SearchBar } from "@/components/home/SearchBar";
 
 export default function Home() {
@@ -14,13 +13,6 @@ export default function Home() {
         <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
 
         <main className="flex-1 relative w-full">
-          {/* Top Navigation Bar */}
-          <div className="fixed top-2 right-2 z-40 p-4 safe-area-inset-top">
-            <div className="flex justify-end">
-              <AuthButton />
-            </div>
-          </div>
-
           <div
             className="flex flex-col h-screen overflow-y-auto overflow-x-hidden px-4 md:px-6 w-full"
             style={{

@@ -6,6 +6,7 @@ import { SidebarLink } from "./SidebarLink";
 import { usePathname } from "next/navigation";
 import SidebarHeader from "./SidebarHeader";
 import RecentChatrooms from "./RecentChatrooms";
+import { SidebarAuthButton } from "./authbutton/SidebarAuthButton";
 
 interface SidebarProps {
   open?: boolean;
@@ -133,7 +134,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           initial={false}
           animate={{ x: isDesktop ? "0%" : sidebarOpen ? "0%" : "-100%" }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
-          className={`z-50 flex flex-col px-4 gap-2 h-screen bg-white backdrop-blur-xl shadow-xl pt-12 md:pt-6 safe-area-inset-top
+          className={`z-50 flex flex-col px-4 gap-2 h-screen bg-white backdrop-blur-xl shadow-xl pt-12 md:pt-6 safe-area-inset-top justify-between
             ${isDesktop ? "w-fit relative md:shadow-none" : "w-fit"}
           `}
         >
@@ -166,6 +167,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                 />
               ))}
             </nav>
+          </div>
+          {/* Auth button at bottom */}
+          <div className="pb-12">
+            <SidebarAuthButton />
           </div>
         </motion.aside>
       </div>
