@@ -1,12 +1,18 @@
 import pLimit from "p-limit";
 import * as cheerio from "cheerio";
+import path from "node:path";
 
 import { SITES } from "./config";
 import { loadRobots } from "./robots";
 import { fetchHtml } from "./fetch";
 import { extractToMarkdown } from "./extract";
 import { writePage } from "./write";
-import { canonicalizeUrl } from "./hash";
+import { canonicalizeUrl } from "../kb/hash";
+
+import { MaxPriorityQueue } from "../kb/priorityQueue";
+import { collectBlockStats, removeBoilerplate } from "../kb/boilerplate";
+
+/* -------------------- helpers -------------------- */
 
 function classifySection(url: string): string {
   const u = url.toLowerCase();
@@ -45,22 +51,15 @@ function canonicalizeUrlSafe(input: string): string | null {
   }
 }
 
-function isClubContentUrl(url: string): boolean {
-  try {
-    const u = new URL(url);
-    const p = u.pathname.toLowerCase();
-
-    if (!p.startsWith("/buddy-up/clubs/clubs-listing")) return false;
-
-    const parts = p.split("/").filter(Boolean);
-
-    // Exclude the section landing page itself: /buddy-up/clubs/
-    if (parts.length <= 2) return false;
-
-    return true; // looks like an individual club page
-  } catch {
-    return false;
-  }
+function scoreUrl(url: string): number {
+  const u = url.toLowerCase();
+  let score = 0;
+  if (u.includes("/support/")) score += 10;
+  if (u.includes("/clubs/")) score += 8;
+  if (u.includes("/volunteer")) score += 6;
+  if (u.split("/").filter(Boolean).length > 5) score += 3;
+  if (u.endsWith("/")) score -= 1;
+  return score;
 }
 
 function extractLinks(baseUrl: string, html: string): string[] {
@@ -71,32 +70,24 @@ function extractLinks(baseUrl: string, html: string): string[] {
     const raw = String($(el).attr("href") ?? "").trim();
     if (!raw) return;
 
-    // Skip non-page URLs
     if (
       raw.startsWith("mailto:") ||
       raw.startsWith("tel:") ||
       raw.startsWith("javascript:") ||
       raw.startsWith("#")
-    ) {
-      return;
-    }
+    ) return;
 
-    // Skip common file types (PDFs, images, docs, archives, etc.)
     if (
       /\.(pdf|jpg|jpeg|png|gif|webp|svg|doc|docx|ppt|pptx|xls|xlsx|zip|rar)$/i.test(
         raw
       )
-    ) {
-      return;
-    }
+    ) return;
 
     try {
-      const absolute = new URL(raw, baseUrl).toString();
-      const canonical = canonicalizeUrlSafe(absolute);
+      const abs = new URL(raw, baseUrl).toString();
+      const canonical = canonicalizeUrlSafe(abs);
       if (canonical) out.add(canonical);
-    } catch {
-      // ignore malformed
-    }
+    } catch {}
   });
 
   return Array.from(out);
@@ -106,44 +97,49 @@ async function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+/* -------------------- main -------------------- */
+
+type ExtractedPage = {
+  url: string;
+  title: string;
+  markdown: string;
+  section: string;
+};
+
 async function runSite(site: (typeof SITES)[number]) {
-  console.log(`\n== Scraping ${site.siteId} ==`);
+  console.log(`\n=== SCRAPING ${site.siteId.toUpperCase()} ===`);
+
   const robots = await loadRobots(site.baseUrl);
+
   const allowPrefixesCanonical = site.allowPrefixes
     .map((p) => canonicalizeUrlSafe(p))
     .filter((p): p is string => Boolean(p));
 
-  // Priority queues: clubs first, then everything else
-  const hiQueue: string[] = [];
-  const loQueue: string[] = [];
+  const pq = new MaxPriorityQueue<string>();
+  const enqueue = (url: string) => pq.push(url, scoreUrl(url));
 
-  // Seed queues
   for (const s of site.seeds) {
     const canonical = canonicalizeUrlSafe(s);
-    if (!canonical) continue;
-    if (isClubContentUrl(canonical)) hiQueue.push(canonical);
-    else loQueue.push(canonical);
+    if (canonical) enqueue(canonical);
   }
 
   const seen = new Set<string>();
-
   const outDir = `scripts/kb_scrapes/${site.siteId}`;
+  console.log("OUT DIR (absolute):", path.resolve(outDir));
 
-  // Keep concurrency low to be polite
   const limit = pLimit(2);
 
-  let saved = 0;
   let fetched = 0;
+  let extractedCount = 0;
 
-  const takeNext = () => (hiQueue.length ? hiQueue.shift()! : loQueue.shift()!);
-  const queueLength = () => hiQueue.length + loQueue.length;
+  const extractedPages: ExtractedPage[] = [];
 
-  while (queueLength() > 0 && saved < site.maxPages) {
+  while (pq.size() > 0 && extractedCount < site.maxPages) {
     const batch: string[] = [];
 
-    // Build a small batch of URLs to fetch
-    while (queueLength() > 0 && batch.length < 5) {
-      const u = takeNext();
+    while (pq.size() > 0 && batch.length < 5) {
+      const u = pq.pop();
+      if (!u) break;
 
       if (seen.has(u)) continue;
       seen.add(u);
@@ -155,9 +151,7 @@ async function runSite(site: (typeof SITES)[number]) {
           allowPrefixesCanonical,
           site.denySubstrings
         )
-      ) {
-        continue;
-      }
+      ) continue;
 
       batch.push(u);
     }
@@ -167,75 +161,99 @@ async function runSite(site: (typeof SITES)[number]) {
     await Promise.all(
       batch.map((url) =>
         limit(async () => {
-          // Respect robots.txt
           if (!robots.isAllowed(url, "Connect3KBCollector")) return;
 
-          // Politeness delay (add a bit of jitter)
           await sleep(site.delayMs + Math.floor(Math.random() * 300));
 
           let html = "";
           try {
             html = await fetchHtml(url);
           } catch (e) {
-            console.warn(`Fetch failed: ${url}`, e);
+            console.warn("FETCH FAILED:", url);
             return;
           }
-          if (!html) return;
+
           fetched += 1;
 
-          // ALWAYS discover links, even if we skip saving this page
           const links = extractLinks(site.baseUrl, html);
           for (const l of links) {
-            if (seen.has(l)) continue;
-            if (
-              !shouldKeepUrl(
-                l,
-                site.allowPrefixes,
-                allowPrefixesCanonical,
-                site.denySubstrings
-              )
-            ) {
-              continue;
-            }
-
-            if (isClubContentUrl(l)) hiQueue.push(l);
-            else loQueue.push(l);
+            if (!seen.has(l)) enqueue(l);
           }
 
-          // Extract readable content to markdown
           let title = url;
           let markdown = "";
+
           try {
             const extracted = extractToMarkdown(html, url);
             title = extracted.title;
             markdown = extracted.markdown;
           } catch (e) {
-            console.warn(`Extract failed: ${url}`, e);
+            console.warn("EXTRACT FAILED:", url);
             return;
           }
 
-          // Skip saving very thin pages (but links have already been queued)
-          if (markdown.trim().length < 200) return;
+          if (markdown.trim().length < 200) {
+            console.log("SKIPPED (thin pre-debloat):", url);
+            return;
+          }
 
-          const filename = writePage({
-            outDir,
-            siteId: site.siteId,
+          extractedPages.push({
             url,
             title,
             markdown,
             section: classifySection(url),
           });
 
-          saved += 1;
-          console.log(
-            `Saved (${saved}) [fetched=${fetched}, hi=${hiQueue.length}, lo=${loQueue.length}]: ${filename}`
-          );
+          extractedCount += 1;
+          console.log(`EXTRACTED ${extractedCount}:`, url);
         })
       )
     );
   }
 
-  console.log(`Done ${site.siteId}: saved ${saved} pages (fetched ${fetched})`);
+  console.log("\n--- PHASE 2 STATS ---");
+  console.log("Fetched pages:", fetched);
+  console.log("Extracted pages:", extractedPages.length);
+
+  if (extractedPages.length === 0) {
+    console.warn("⚠️  NO PAGES EXTRACTED — NOTHING TO WRITE");
+    return;
+  }
+
+  const stats = collectBlockStats(extractedPages);
+
+  let written = 0;
+  let skippedAfterDebloat = 0;
+
+  for (const p of extractedPages) {
+    const { cleaned, removedBlocks } = removeBoilerplate(p.markdown, stats, {
+      minPages: 8,
+      minPct: 0.06,
+      minBlockChars: 60,
+    });
+
+    if (cleaned.trim().length < 150) {
+      skippedAfterDebloat += 1;
+      console.log("SKIPPED (thin post-debloat):", p.url);
+      continue;
+    }
+
+    const filename = writePage({
+      outDir,
+      siteId: site.siteId,
+      url: p.url,
+      title: p.title,
+      markdown: cleaned,
+      section: p.section,
+    });
+
+    written += 1;
+    console.log("WROTE FILE:", filename, `(removed blocks: ${removedBlocks})`);
+  }
+
+  console.log("\n--- WRITE SUMMARY ---");
+  console.log("Written files:", written);
+  console.log("Skipped after debloat:", skippedAfterDebloat);
 }
 
 async function main() {

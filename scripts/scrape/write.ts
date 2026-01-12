@@ -1,13 +1,13 @@
 import fs from "fs";
 import path from "path";
-import { sha1, canonicalizeUrl, normalizeTextForHash } from "./hash"; // adjust path
+import { sha1, canonicalizeUrl, normalizeTextForHash } from "../kb/hash"; // adjust path
 
 export function writePage(args: {
   outDir: string;
   siteId: string;
-  url: string;       // fetched URL
+  url: string; // canonical URL preferred (but we will canonicalize again defensively)
   title: string;
-  markdown: string;  // cleaned markdown
+  markdown: string; // FINAL markdown (after Phase 2 de-bloat)
   section?: string | null;
 }) {
   fs.mkdirSync(args.outDir, { recursive: true });
@@ -16,7 +16,6 @@ export function writePage(args: {
   const doc_id = sha1(canonical_url);
   const content_hash = sha1(normalizeTextForHash(args.markdown));
 
-  // Stable filename: title changes won't create a new file
   const filename = `${args.siteId}__${doc_id}.md`;
 
   const safeTitle = args.title.replace(/\n/g, " ").trim();
