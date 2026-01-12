@@ -4,30 +4,19 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useDnd } from "../../hooks/useDnD";
-import { AllCategories, ChunkInput } from "../../ChunkUtils";
-import { ChunkEntry } from "../../hooks/ChunkProvider";
+import { AllCategories } from "../../ChunkUtils";
+import { ChunkEntry } from "../../ChunkUtils";
 import { ChunkItem } from "../chunks/ChunkItem";
-import { ChunkEditor } from "../ChunkEditor";
-import { Fade } from "@/components/ui/Fade";
 
 interface CategoryChunksProps {
   chunks: ChunkEntry[];
-  newChunks: Record<AllCategories, ChunkInput>;
-  setNewChunks: React.Dispatch<
-    React.SetStateAction<Record<AllCategories, ChunkInput>>
-  >;
   category: AllCategories;
 }
 
-export function CategoryChunks({
-  chunks,
-  category,
-  newChunks,
-  setNewChunks,
-}: CategoryChunksProps) {
+export function CategoryChunks({ chunks, category }: CategoryChunksProps) {
   const { sensors, handleChunkDragEnd } = useDnd();
   return (
-    <ul className="space-y-2 w-full">
+    <ul className="w-full">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -44,26 +33,6 @@ export function CategoryChunks({
           </>
         </SortableContext>
       </DndContext>
-      <li>
-        <Fade show={newChunks[category] !== undefined} className="w-full">
-          <ChunkEditor
-            chunk={newChunks[category] || { text: "", category }}
-            setChunk={(chunk) =>
-              setNewChunks((prev) => ({
-                ...prev,
-                [category]: chunk,
-              }))
-            }
-            cancel={() =>
-              setNewChunks((prev) => {
-                const updated = { ...prev };
-                delete updated[category];
-                return updated;
-              })
-            }
-          />
-        </Fade>
-      </li>
     </ul>
   );
 }

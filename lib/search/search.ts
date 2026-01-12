@@ -114,7 +114,7 @@ export const getEventText = async (
   }
   const { data: creatorData, error: creatorError } = await supabase
     .from("profiles")
-    .select("first_name, last_name, university")
+    .select("first_name, university")
     .eq("id", eventData.creator_profile_id)
     .single();
   if (creatorError || !creatorData) {
@@ -122,45 +122,48 @@ export const getEventText = async (
   }
   const { data: collaboratorsData, error: collaboratorsError } = await supabase
     .from("event_collaborators")
-    .select(`profiles ( first_name, last_name )`)
+    .select(`profiles ( first_name )`)
     .eq("event_id", eventId);
   if (collaboratorsError || !collaboratorsData) {
     throw new Error(
       `Error fetching collaborators: ${collaboratorsError?.message}`
     );
   }
+  type CollaboratorNames = { first_name?: string };
   const collaborators = collaboratorsData
-    .flatMap((item: any) => item.profiles)
-    .map((profile: any) =>
-      `${profile.first_name || ""} ${profile.last_name || ""}`.trim()
-    );
-  const creatorName =
-    `${creatorData.first_name || ""} ${creatorData.last_name || ""}`.trim() ||
-    "Unknown";
-  const text = `${eventData.name || "Untitled Event"} (${eventData.type?.join(", ") || "No type"
-    })
-Location: ${eventData.location_type}${eventData.city?.length > 0 ? " in " + eventData.city.join(", ") : ""
-    }
+    .flatMap((item: { profiles: CollaboratorNames[] }) => item.profiles)
+    .map((profile: CollaboratorNames) => `${profile.first_name || ""}`.trim());
+  const creatorName = `${creatorData.first_name || ""}`.trim() || "Unknown";
+  const text = `${eventData.name || "Untitled Event"} (${
+    eventData.type?.join(", ") || "No type"
+  })
+Location: ${eventData.location_type}${
+    eventData.city?.length > 0 ? " in " + eventData.city.join(", ") : ""
+  }
 Pricing: ${eventData.pricing === "free" ? "Free" : "Paid"}
-Creator: ${creatorName}${collaborators.length > 0
+Creator: ${creatorName}${
+    collaborators.length > 0
       ? "\nCollaborators: " + collaborators.join(", ")
       : ""
-    }
+  }
 Start: ${new Date(eventData.start).toLocaleString()}
-End: ${new Date(eventData.end).toLocaleString()}${eventData.booking_link?.length > 0
+End: ${new Date(eventData.end).toLocaleString()}${
+    eventData.booking_link?.length > 0
       ? "\n" +
-      eventData.booking_link
-        .map((link: string) => `Booking: ${link}`)
-        .join("\n")
+        eventData.booking_link
+          .map((link: string) => `Booking: ${link}`)
+          .join("\n")
       : ""
-    }${eventData.university?.length > 0
+  }${
+    eventData.university?.length > 0
       ? "\nUniversities: " + eventData.university.join(", ")
       : ""
-    }
-${eventData.description?.length > 0
-      ? eventData.description
-      : "No description provided."
-    }`;
+  }
+${
+  eventData.description?.length > 0
+    ? eventData.description
+    : "No description provided."
+}`;
   return text;
 };
 
