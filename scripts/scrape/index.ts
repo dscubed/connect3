@@ -7,7 +7,8 @@ import { loadRobots } from "./robots";
 import { fetchHtml } from "./fetch";
 import { extractToMarkdown } from "./extract";
 import { writePage } from "./write";
-import { canonicalizeUrl } from "../kb/hash";
+import { canonicalizeUrl, sha1 } from "../kb/hash";
+import { writeChunksFromPage } from "../kb/writeChunks";
 
 import { MaxPriorityQueue } from "../kb/priorityQueue";
 import { collectBlockStats, removeBoilerplate } from "../kb/boilerplate";
@@ -238,6 +239,10 @@ async function runSite(site: (typeof SITES)[number]) {
       continue;
     }
 
+    const canonical_url = canonicalizeUrl(p.url);
+    const doc_id = sha1(canonical_url);
+
+    // keep writing the page-level md if you want (optional)
     const filename = writePage({
       outDir,
       siteId: site.siteId,
@@ -245,6 +250,17 @@ async function runSite(site: (typeof SITES)[number]) {
       title: p.title,
       markdown: cleaned,
       section: p.section,
+    });
+
+    // NEW: write chunk files
+    writeChunksFromPage({
+      siteId: site.siteId,
+      outDir,
+      canonical_url,
+      doc_id,
+      title: p.title,
+      section: p.section,
+      markdown: cleaned,
     });
 
     written += 1;
