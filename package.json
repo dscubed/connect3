@@ -6,7 +6,8 @@
     "start": "next start",
     "lint": "next lint",
     "scrape:kb": "tsx scripts/scrape/index.ts",
-    "kb:upload:umsu": "tsx scripts/kb/upload-umsu-vector-store.ts"
+    "kb:upload:umsu": "tsx scripts/kb/upload-umsu-vector-store.ts",
+    "kb:upload": "tsx scripts/kb/upload-kb-vs.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -43,6 +44,8 @@
     "react-icons": "^5.5.0",
     "react-markdown": "^10.1.0",
     "react-textarea-autosize": "^8.5.9",
+    "rehype-external-links": "^3.0.0",
+    "remark-gfm": "^4.0.1",
     "robots-parser": "^3.0.1",
     "sharp": "^0.34.4",
     "sonner": "^2.0.7",

@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
 import { SearchResponse } from "@/lib/search/types";
 import { ResultSection } from "./QueryResult";
-import ReactMarkdown from "react-markdown";
+import { QuickLinks } from "@/components/ui/quickLinks";
+import { Markdown } from "@/components/ui/markdown";
+import { extractLinksFromMarkdown } from "@/lib/search/general/extractLinks";
 
 export function CompletedResponse({
   content,
@@ -23,7 +25,7 @@ export function CompletedResponse({
           animate={{ opacity: 0.95, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <ReactMarkdown>{content.summary}</ReactMarkdown>
+          <Markdown>{content.summary}</Markdown>
         </motion.div>
       )}
 
@@ -40,7 +42,7 @@ export function CompletedResponse({
           animate={{ opacity: 0.95, y: 0 }}
           transition={{ duration: 0.5, delay: 1.2 }}
         >
-          <ReactMarkdown>{content.followUps}</ReactMarkdown>
+          <Markdown>{content.followUps}</Markdown>
         </motion.div>
       )}
     </motion.div>
