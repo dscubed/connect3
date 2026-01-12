@@ -70,6 +70,7 @@ export interface SearchResponse {
   summary: string;
   results: ResultSection[];
   followUps: string;
+  quickLinks?: { url: string; label: string; source: "kb" | "web" }[];
 }
 
 export interface EntityResult {
