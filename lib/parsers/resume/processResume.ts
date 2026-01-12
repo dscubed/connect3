@@ -1,11 +1,11 @@
 import { fetchUserDetails } from "@/lib/users/fetchUserDetails";
-import { SupabaseClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
+import { chunkResume } from "./chunkResume";
 
-export const parseResume = async (
+export const processResume = async (
   text: string,
   profileId: string,
-  chunksText: string,
+  chunkTexts: string[],
   openai: OpenAI
 ) => {
   // Get user name for validation
@@ -22,6 +22,19 @@ export const parseResume = async (
   const fullname = user.full_name;
 
   // Call Validation
+  if (!validateResume(text, fullname, openai)) {
+    throw new Error("Resume validation failed");
+  }
 
   // Call chunkResume
+  return chunkResume(text, chunkTexts, openai);
+};
+
+const validateResume = (
+  resumeText: string,
+  fullName: string,
+  openai: OpenAI
+): boolean => {
+  // Validate..
+  return true;
 };
