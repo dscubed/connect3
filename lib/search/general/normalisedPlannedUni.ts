@@ -24,6 +24,11 @@ export function normalisedPlannedUni(input: unknown): string | null {
     return null;
   }
 
+  // Reject bare slashes or path-only tokens
+if (s === "/" || s === "\\") {
+  return null;
+}
+
   // If it accidentally returns a path-like token
   if (s.startsWith("/") && s.length <= 20 && (lower.includes("null") || lower.includes("undefined"))) {
     return null;

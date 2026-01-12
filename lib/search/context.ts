@@ -50,8 +50,7 @@ export const getContext = async (
   const prevMessages: ResponseInput = [];
   for (let i = 0; i < (historyData?.length ?? 0); i++) {
     const msg = historyData![i];
-    const content =
-      typeof msg.content === "string" ? JSON.parse(msg.content) : msg.content;
+    const content = msg.content;
 
     prevMessages.push({ role: "user", content: msg.query });
     prevMessages.push({ role: "assistant", content: contentToString(content) });
@@ -67,7 +66,37 @@ export const getContext = async (
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const contentToString = (content: any): string => {
-  // TODO: Update when finished with pipeline
-  console.log("contentToString content:", content);
+  if (content == null) return "";
+
+  if (typeof content === "string") {
+    let s = content.trim();
+    if (!s) return "";
+
+    // Try up to 2 parses to handle double-stringified JSON
+    for (let i = 0; i < 2; i++) {
+      try {
+        const parsed: any = JSON.parse(s);
+        if (typeof parsed === "string") {
+          s = parsed.trim();
+          continue;
+        }
+        return contentToString(parsed);
+      } catch {
+        return s;
+      }
+    }
+
+    return s;
+  }
+
+  if (typeof content === "object") {
+    const unwrapped: any = (content as any)?.result ?? content;
+    if (typeof unwrapped === "string") return unwrapped.trim();
+    if (unwrapped && typeof unwrapped === "object") {
+      if (typeof unwrapped.summary === "string") return unwrapped.summary.trim();
+      if (typeof unwrapped.content === "string") return unwrapped.content.trim();
+    }
+  }
+
   return "";
 };
