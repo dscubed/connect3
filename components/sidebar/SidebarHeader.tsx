@@ -28,14 +28,14 @@ export default function SidebarHeader({
           onMouseLeave={() => setHeaderHovering(false)}
         >
           <LogoAnimated
-            width={24}
-            height={24}
+            width={20}
+            height={20}
             onHover={true}
             hovering={headerHovering}
           />
         </Link>
       ) : (
-        <Sidebar className="h-6 w-6" onClick={() => setChatroomsOpen(true)} />
+        <Sidebar className="h-5 w-5" onClick={() => setChatroomsOpen(true)} />
       )}
     </div>
   );

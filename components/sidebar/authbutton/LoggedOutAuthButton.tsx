@@ -24,8 +24,8 @@ export function LoggedOutAuthButton() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center justify-center w-10 h-10 rounded-full text-muted hover:text-black hover:bg-muted/15 hover:scale-105 transition-all focus:outline-none">
-          <User className="w-5 h-5" />
+        <button className="flex items-center justify-center w-8 h-8 rounded-full text-muted hover:text-black hover:bg-muted/15 hover:scale-105 transition-all focus:outline-none border border-muted/50">
+          <User className="w-4 h-4" />
         </button>
       </DropdownMenuTrigger>
 

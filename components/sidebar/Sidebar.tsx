@@ -111,7 +111,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     onClick={() => setChatroomsOpen(false)}
                     className="p-1.5 rounded-lg hover:bg-muted/15 transition-colors text-muted hover:text-black"
                   >
-                    <SidebarIcon className="h-6 w-6" />
+                    <SidebarIcon className="h-5 w-5" />
                   </button>
                 </div>
 

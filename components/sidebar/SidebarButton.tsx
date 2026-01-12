@@ -17,7 +17,7 @@ export default function SidebarButton({
           : "text-muted hover:bg-black/5 hover:text-black"
       }`}
     >
-      {Icon && <Icon className="h-6 w-6" />}
+      {Icon && <Icon className="h-5 w-5" />}
       {label && (
         <span className="text-sm flex-1 min-w-0 truncate" title={label}>
           {label}
