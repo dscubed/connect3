@@ -28,28 +28,26 @@ export const runSearch = async (
 
   // Route to general chatbot if no search required
   if (!searchPlan.requiresSearch) {
-    if (emit) emit("progress", "Routed to General Chat...");
-  
-    console.log("[runSearch] context", { userUniversity });
-    const lastTurn =
+  if (emit) emit("progress", "Routed to General Chat...");
+
+  console.log("[runSearch] context", { userUniversity });
+
+  const lastTurn =
     Array.isArray(prevMessages) && prevMessages.length >= 2
       ? prevMessages.slice(-2)
       : [];
-    const generalText = await runGeneral({
-      openai,
-      query,
-      tldr,
-      prevMessages: lastTurn,
-      userUniversity,
-    });
+
+  const generalResp = await runGeneral({
+    openai,
+    query,
+    tldr,
+    prevMessages: lastTurn,
+    userUniversity,
+    emit,
+  });
   
-    // Return in your existing SearchResponse shape
-    return {
-      summary: generalText,
-      results: [],
-      followUps: "",
-    };
-  }
+  return generalResp;
+}
 
   // Filter searches if required
   let filters: EntityFilters = {

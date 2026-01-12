@@ -4,19 +4,32 @@ import { ResultSection } from "./QueryResult";
 import { QuickLinks } from "@/components/search/Messages/quickLinks";
 import { Markdown } from "@/components/search/Messages/markdown";
 import { extractLinksFromMarkdown } from "@/lib/search/general/extractLinks";
+import type { ExtractedLink } from "@/lib/search/general/extractLinks";
 
 export function CompletedResponse({
   content,
 }: {
   content: Partial<SearchResponse>;
 }) {
-  const links = [
+  // Prefer structured links if present (no need for the LLM to print them in the summary)
+  const structuredLinks: ExtractedLink[] =
+    (content.quickLinks ?? []).map((l) => ({
+      url: l.url,
+      label: l.label,
+      source: "summary", // maps into your ExtractedLink union; UI doesn’t care
+    })) ?? [];
+
+  // Fallback: extract from markdown
+  const extractedLinks: ExtractedLink[] = [
     ...(content.summary ? extractLinksFromMarkdown(content.summary, "summary") : []),
     ...(content.followUps ? extractLinksFromMarkdown(content.followUps, "followUps") : []),
     ...((content.results || []).flatMap((r) =>
       r?.text ? extractLinksFromMarkdown(r.text, "result") : []
     )),
   ];
+
+  const links = structuredLinks.length ? structuredLinks : extractedLinks;
+
   return (
     <motion.div
       className="space-y-6 leading-relaxed !mt-0"
@@ -25,7 +38,7 @@ export function CompletedResponse({
       transition={{ duration: 0.8 }}
     >
       <QuickLinks links={links} />
-      {/* Result */}
+
       {content.summary && (
         <motion.div
           className="prose prose-neutral max-w-none prose-p:leading-relaxed prose-li:my-1"
@@ -37,12 +50,10 @@ export function CompletedResponse({
         </motion.div>
       )}
 
-      {/* Results */}
       {(content.results || []).map((result, userIndex) => {
         return <ResultSection key={userIndex} result={result} />;
       })}
 
-      {/* Follow-up questions */}
       {content.followUps && (
         <motion.div
           className="prose prose-neutral max-w-none prose-p:leading-relaxed"
