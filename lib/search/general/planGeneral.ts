@@ -15,7 +15,6 @@ export type GeneralPlan = z.infer<typeof GeneralPlanSchema>;
 export async function planGeneral(
   openai: OpenAI,
   query: string,
-  tldr: string,
   prevMessages: ResponseInput,
   emit?: (event: string, data: unknown) => void,
   traceId?: string
@@ -24,19 +23,17 @@ export async function planGeneral(
 
   dbg(emit, tid, "start", {
     queryLen: query.length,
-    tldrLen: tldr.length,
     prevMessagesCount: Array.isArray(prevMessages) ? prevMessages.length : 0,
     queryPreview: preview(query, 120),
   });
 
   const systemPrompt = `
-  You are a routing classifier for a chatbot.
+  You are a routing classifier for a chatbot. Decide if the user needs UNIVERSITY-specific knowledge.
 
-  Decide if the user is asking something that should be answered using UNIVERSITY knowledge.
   University-related includes:
   - university policies, enrollment, subjects, timetables, campus locations, services, clubs (uni-specific), scholarships (uni-specific)
-  - “at my uni…”, “on campus…”, “unimelb / monash / nus / etc.”
-  - If the university is unknown or not explicitly mentioned, return null (not an empty string)
+  - “at my uni…”, “on campus…”, “unimelb / monash / uwa / etc.”
+  - If the university is unknown or not explicitly mentioned, set university=null (not an empty string)
   
   NOT university-related includes:
   - greetings, small talk, jokes, generic life advice
@@ -49,8 +46,6 @@ export async function planGeneral(
     "university": string | null,
     "reason": string
   }
-  
-  If the query is uniRelated but the specific university is unclear, set university=null.
   `;
 
   try {
@@ -59,7 +54,6 @@ export async function planGeneral(
       input: [
         { role: "system", content: systemPrompt },
         ...prevMessages,
-        { role: "system", content: `User TLDR: ${tldr}` },
         { role: "user", content: query },
       ],
       text: { format: zodTextFormat(GeneralPlanSchema, "general_plan") },
