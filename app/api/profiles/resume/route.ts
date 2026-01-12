@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
-import { parseDocument } from "@/lib/parsers/documentParser";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -25,11 +24,10 @@ export async function POST(req: NextRequest) {
   const contentType = (req.headers.get("content-type") || "").toLowerCase();
   let profileId: string | undefined;
   let resumeText = "";
-  let fileName = "";
 
   try {
     if (contentType.includes("application/json")) {
-      // JSON payload: { profileId, fileName?, text }
+      // JSON payload: { profileId, text }
       const body = await req.json().catch(() => null);
       if (!body || typeof body !== "object") {
         return NextResponse.json(
@@ -39,46 +37,12 @@ export async function POST(req: NextRequest) {
       }
       profileId = body.profileId;
       resumeText = (body.text || "").trim();
-      fileName = body.fileName || "uploaded_text";
       if (!profileId || !resumeText) {
         return NextResponse.json(
           { error: "Missing profileId or text" },
           { status: 400 }
         );
       }
-    } else {
-      // FormData file upload (resume)
-      let formData: FormData;
-      try {
-        formData = await req.formData();
-      } catch (err) {
-        console.error("Failed to parse form data:", err);
-        return NextResponse.json(
-          { error: "Invalid form submission" },
-          { status: 400 }
-        );
-      }
-      const file = formData.get("resume") as File;
-      profileId = formData.get("profileId") as string;
-      if (!file || !profileId) {
-        return NextResponse.json(
-          { error: "Missing file or profileId" },
-          { status: 400 }
-        );
-      }
-
-      const parseResult = await parseDocument(file);
-      if (!parseResult.success) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: parseResult.error || "Failed to parse resume",
-          },
-          { status: 400 }
-        );
-      }
-      resumeText = parseResult.text || "";
-      fileName = file.name;
     }
 
     // Ensure the profileId matches the authenticated user
@@ -89,6 +53,8 @@ export async function POST(req: NextRequest) {
     // Validate Resume content with LLM
     const authHeader = req.headers.get("authorization") || "";
 
+    // TODO: Skip validation for now
+    /*
     const validateRes = await fetch(
       new URL("/api/validate/text", req.url).toString(),
       {
@@ -122,6 +88,7 @@ export async function POST(req: NextRequest) {
     ) {
       return NextResponse.json({ success: false, validation }, { status: 400 });
     }
+    */
 
     // Call LLM to extract resume into profile chunks
     const chunkRes = await fetch(

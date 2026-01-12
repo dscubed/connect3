@@ -124,7 +124,6 @@ const ResumeUploadModal = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           profileId: user.id,
-          fileName: resume[0].name,
           text: resumeText,
         }),
       });
