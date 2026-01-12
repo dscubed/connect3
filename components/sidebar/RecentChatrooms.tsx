@@ -4,35 +4,24 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { useRecentChats } from "../home/hooks/useRecentChats";
 import { Button } from "@/components/ui/button";
-
-import { SidebarLink } from "@/components/sidebar/SidebarLink";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-import { MoreHorizontal, Pencil, Trash2, Check, X } from "lucide-react";
+import { ChatroomLink } from "@/components/sidebar/ChatroomLink";
+import { Check, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useAuthStore } from "@/stores/authStore";
 
 interface RecentChatroomsProps {
-  userId: string | null;
   guest?: boolean;
   chatroomId?: string;
 }
 
 export default function RecentChatrooms({
-  userId,
   guest,
   chatroomId,
 }: RecentChatroomsProps) {
   const router = useRouter();
 
-  const currentPathForHighlight = chatroomId
-    ? `/search?chatroom=${chatroomId}`
-    : "";
+  const { user } = useAuthStore();
+  const userId = user?.id ?? null;
 
   const { chatrooms, loading, renameChatroom, deleteChatroom } =
     useRecentChats();
@@ -42,10 +31,11 @@ export default function RecentChatrooms({
   const [busyId, setBusyId] = React.useState<string | null>(null);
 
   if (!userId)
-    return <span className="text-xs text-black/30">Not logged in</span>;
-  if (loading) return <span className="text-xs text-black/30">Loading...</span>;
+    return <span className="text-xs text-black/30 px-2">Not logged in</span>;
+  if (loading)
+    return <span className="text-xs text-black/30 px-2">Loading...</span>;
   if (chatrooms.length === 0)
-    return <span className="text-xs text-black/30">No chatrooms</span>;
+    return <span className="text-xs text-black/30 px-2">No chatrooms</span>;
 
   async function onRenameSave(id: string) {
     setBusyId(id);
@@ -88,101 +78,64 @@ export default function RecentChatrooms({
 
       {/* Chatroom list */}
       <div
-        className={`flex flex-col gap-2 w-full ${
+        className={`flex flex-col gap-1 w-full ${
           guest ? "opacity-60 pointer-events-none blur-sm" : ""
         }`}
       >
         {chatrooms.map((chat) => {
           const isRenaming = renamingId === chat.id;
           const isBusy = busyId === chat.id;
-
           const href = `/search?chatroom=${chat.id}`;
+          const isActive = chatroomId === chat.id;
 
           return (
-            <div key={chat.id} className="flex items-start gap-1">
-              <div className="flex-1 min-w-0">
-                {!isRenaming ? (
-                  <SidebarLink
-                    label={chat.title}
-                    href={href}
-                    pathName={currentPathForHighlight}
+            <div key={chat.id}>
+              {!isRenaming ? (
+                <ChatroomLink
+                  title={chat.title ?? "Untitled"}
+                  href={href}
+                  isActive={isActive}
+                  disabled={isBusy}
+                  onRename={() => {
+                    setRenamingId(chat.id);
+                    setRenameValue(chat.title ?? "");
+                  }}
+                  onDelete={() => onDelete(chat.id)}
+                />
+              ) : (
+                <div className="px-2 py-1">
+                  <Input
+                    value={renameValue}
+                    onChange={(e) => setRenameValue(e.target.value)}
+                    className="w-full bg-white border border-black/10 rounded-md px-2 py-1.5 text-sm text-black outline-none focus:border-violet-400 focus:ring-1 focus:ring-violet-400"
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") onRenameSave(chat.id);
+                      if (e.key === "Escape") setRenamingId(null);
+                    }}
+                    disabled={isBusy}
+                    placeholder="Enter chatroom name..."
                   />
-                ) : (
-                  <div className="flex flex-col items-end">
-                    <div
-                      className="flex items-center gap-2 rounded-lg bg-black/[0.03]"
-                      onClick={(e) => e.stopPropagation()}
+                  <div className="flex justify-end gap-1 mt-1.5">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 px-2 hover:bg-black/5"
+                      onClick={() => setRenamingId(null)}
+                      disabled={isBusy}
                     >
-                      <Input
-                        value={renameValue}
-                        onChange={(e) => setRenameValue(e.target.value)}
-                        className="w-full bg-black/5 border border-black/10 rounded-md px-2 py-1 text-sm text-black outline-none"
-                        autoFocus
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") onRenameSave(chat.id);
-                          if (e.key === "Escape") setRenamingId(null);
-                        }}
-                        disabled={isBusy}
-                      />
-                    </div>
-                    <div className="flex flex-row gap-2 mt-2 animate-fade-in">
-                      <Button
-                        className="p-1 rounded hover:bg-black/5 disabled:opacity-50 h-fit"
-                        onClick={() => onRenameSave(chat.id)}
-                        disabled={isBusy}
-                        aria-label="Save rename"
-                        variant="ghost"
-                      >
-                        <Check className="w-4 h-4 text-black/70" />
-                      </Button>
-                      <Button
-                        className="p-1 rounded hover:bg-black/5 disabled:opacity-50 h-fit"
-                        onClick={() => setRenamingId(null)}
-                        disabled={isBusy}
-                        aria-label="Cancel rename"
-                        variant="ghost"
-                      >
-                        <X className="w-4 h-4 text-black/70" />
-                      </Button>
-                    </div>
+                      <X className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 px-2 hover:bg-violet-100 text-violet-600"
+                      onClick={() => onRenameSave(chat.id)}
+                      disabled={isBusy}
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                    </Button>
                   </div>
-                )}
-              </div>
-
-              {/* DROPDOWN: stop propagation so it won't trigger navigation */}
-              {!guest && (
-                <div onClick={(e) => e.stopPropagation()}>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        className="p-2 rounded-md hover:bg-black/5 transition disabled:opacity-50"
-                        disabled={isBusy}
-                        aria-label="Chatroom options"
-                      >
-                        <MoreHorizontal className="w-4 h-4 text-black/50" />
-                      </button>
-                    </DropdownMenuTrigger>
-
-                    <DropdownMenuContent align="end" className="w-40">
-                      <DropdownMenuItem
-                        onClick={() => {
-                          setRenamingId(chat.id);
-                          setRenameValue(chat.title ?? "");
-                        }}
-                      >
-                        <Pencil className="w-4 h-4 mr-2" />
-                        Rename
-                      </DropdownMenuItem>
-
-                      <DropdownMenuItem
-                        className="text-red-500 focus:text-red-500"
-                        onClick={() => onDelete(chat.id)}
-                      >
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
               )}
             </div>

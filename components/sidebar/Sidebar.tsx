@@ -1,12 +1,10 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Calendar, UsersRound, Home } from "lucide-react";
+import { Menu, X, Calendar, UsersRound, Home, SidebarIcon } from "lucide-react";
 import { SidebarLink } from "./SidebarLink";
 import { usePathname } from "next/navigation";
 import SidebarHeader from "./SidebarHeader";
-import { useAuthStore } from "@/stores/authStore";
-
 import RecentChatrooms from "./RecentChatrooms";
 
 interface SidebarProps {
@@ -16,9 +14,9 @@ interface SidebarProps {
 }
 
 const sidebarLinks = [
-  { icon: Home, label: "Home", href: "/" },
-  { icon: Calendar, label: "Events", href: "/events" },
-  { icon: UsersRound, label: "Clubs", href: "/clubs" },
+  { icon: Home, href: "/" },
+  { icon: Calendar, href: "/events" },
+  { icon: UsersRound, href: "/clubs" },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -28,10 +26,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
-  const sidebarRef = useRef<HTMLElement>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
   const pathName = usePathname();
-
-  const user = useAuthStore((s) => s.user);
+  const [chatroomsOpen, setChatroomsOpen] = useState(false);
 
   const sidebarOpen = open !== undefined ? open : internalOpen;
   const setSidebarOpen = onOpenChange || setInternalOpen;
@@ -53,6 +50,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         !(event.target as HTMLElement).closest("[data-menu-button]")
       ) {
         setSidebarOpen(false);
+        setChatroomsOpen(false);
       }
     };
 
@@ -60,8 +58,16 @@ const Sidebar: React.FC<SidebarProps> = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [sidebarOpen, isDesktop, setSidebarOpen]);
 
+  useEffect(() => {
+    if (!isDesktop) {
+      setSidebarOpen(false);
+      setChatroomsOpen(false);
+    }
+  }, [isDesktop, setSidebarOpen]);
+
   return (
     <>
+      {/* Mobile menu button */}
       {!sidebarOpen && (
         <button
           data-menu-button
@@ -82,58 +88,104 @@ const Sidebar: React.FC<SidebarProps> = ({
         </button>
       )}
 
-      <motion.aside
+      {/* Sidebar container - relative wrapper for positioning */}
+      <div
         ref={sidebarRef}
-        initial={false}
-        animate={{ x: isDesktop ? "0%" : sidebarOpen ? "0%" : "-100%" }}
-        transition={{ duration: 0.3, ease: "easeInOut" }}
-        className={`z-50 flex flex-col h-screen bg-white backdrop-blur-xl shadow-2xl border-r-2 border-muted/20
-          ${
-            isDesktop
-              ? "w-64 px-4 relative md:shadow-none md:backdrop-blur-none md:transform-none"
-              : "fixed top-0 left-0 w-64"
-          }
-        `}
+        className={`${isDesktop ? "relative" : "fixed top-0 left-0 z-30"}`}
       >
-        <button
-          onClick={() => setSidebarOpen(false)}
-          className="absolute top-6 right-4 flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 border border-white/10 hover:bg-white/15 transition-all md:hidden safe-area-inset-top"
+        {/* Chatrooms panel - behind main sidebar */}
+        <AnimatePresence>
+          {chatroomsOpen && (
+            <motion.div
+              initial={{ x: -200, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -200, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className={`absolute top-0 left-full h-screen w-64 bg-white/95 backdrop-blur-xl border-l border-black/5 pt-12 md:pt-6 px-3 z-40 shadow-lg`}
+            >
+              <div className="flex flex-col h-full">
+                {/* Close button for chatrooms panel */}
+                <div className="flex justify-end mb-4">
+                  <button
+                    onClick={() => setChatroomsOpen(false)}
+                    className="p-1.5 rounded-lg hover:bg-muted/15 transition-colors text-muted hover:text-black"
+                  >
+                    <SidebarIcon className="h-6 w-6" />
+                  </button>
+                </div>
+
+                {/* Chatrooms header */}
+                <div className="text-md text-black/50 px-1 mb-3 tracking-wide">
+                  Your Chats
+                </div>
+
+                {/* Chatrooms list - uncomment RecentChatrooms when ready */}
+                <div className="flex-1 overflow-y-auto pr-1 scrollbar-hide">
+                  <RecentChatrooms chatroomId={chatroomId} />
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Main sidebar */}
+        <motion.aside
+          initial={false}
+          animate={{ x: isDesktop ? "0%" : sidebarOpen ? "0%" : "-100%" }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          className={`z-50 flex flex-col px-4 gap-2 h-screen bg-white backdrop-blur-xl shadow-xl pt-12 md:pt-6 safe-area-inset-top
+            ${isDesktop ? "w-fit relative md:shadow-none" : "w-fit"}
+          `}
         >
-          <X className="h-4 w-4" />
-        </button>
+          {/* Mobile close button */}
+          {sidebarOpen && !isDesktop && (
+            <button
+              onClick={() => {
+                setSidebarOpen(false);
+                setChatroomsOpen(false);
+              }}
+              className="absolute top-4 -right-10 flex items-center justify-center w-8 h-8 rounded-lg bg-white shadow-md transition-all z-50"
+            >
+              <X className="h-4 w-4 text-muted" />
+            </button>
+          )}
 
-        <div className="flex flex-col gap-4 pt-8 px-2 md:px-0 md:pt-6 safe-area-inset-top">
-          <SidebarHeader />
+          <div className="flex flex-col gap-4">
+            <SidebarHeader
+              chatroomsOpen={chatroomsOpen}
+              setChatroomsOpen={setChatroomsOpen}
+            />
 
-          <nav className="mt-2 flex flex-col gap-1.5">
-            {sidebarLinks.map((link) => (
-              <SidebarLink
-                key={link.label}
-                icon={link.icon}
-                label={link.label}
-                href={link.href}
-                pathName={pathName}
-              />
-            ))}
-          </nav>
-
-          {/* Chatrooms */}
-          <div className="mt-4">
-            <div className="text-xs font-semibold text-black/50 px-1 mb-2">
-              Chatrooms
-            </div>
-
-            <div className=" overflow-y-auto pr-1 scrollbar-hide">
-              <RecentChatrooms
-                userId={user?.id ?? null}
-                chatroomId={chatroomId}
-              />
-            </div>
+            <nav className="mt-2 flex flex-col gap-1.5">
+              {sidebarLinks.map((link) => (
+                <SidebarLink
+                  key={link.href}
+                  icon={link.icon}
+                  href={link.href}
+                  pathName={pathName}
+                />
+              ))}
+            </nav>
           </div>
-        </div>
+        </motion.aside>
+      </div>
 
-        <div />
-      </motion.aside>
+      {/* Mobile overlay backdrop when sidebar is open */}
+      <AnimatePresence>
+        {!isDesktop && sidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-muted/15 backdrop-blur-sm z-20"
+            onClick={() => {
+              setSidebarOpen(false);
+              setChatroomsOpen(false);
+            }}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 };
