@@ -6,22 +6,43 @@ import { loadRobots } from "./robots";
 import { fetchHtml } from "./fetch";
 import { extractToMarkdown } from "./extract";
 import { writePage } from "./write";
+import { canonicalizeUrl } from "./hash";
+
+function classifySection(url: string): string {
+  const u = url.toLowerCase();
+  if (u.includes("/support/")) return "support";
+  if (u.includes("/buddy-up/clubs/")) return "clubs";
+  if (u.includes("/buddy-up/")) return "buddy-up";
+  if (u.includes("/express-yourself/")) return "express-yourself";
+  if (u.includes("/about/")) return "about";
+  return "unknown";
+}
+
+function startsWithPrefix(url: string, prefix: string) {
+  return url === prefix || url.startsWith(prefix + "/");
+}
 
 function shouldKeepUrl(
   url: string,
   allowPrefixes: string[],
+  allowPrefixesCanonical: string[],
   denySubstrings: string[]
 ) {
-  if (!allowPrefixes.some((p) => url.startsWith(p))) return false;
+  const allowed =
+    allowPrefixes.some((p) => startsWithPrefix(url, p)) ||
+    allowPrefixesCanonical.some((p) => startsWithPrefix(url, p));
+
+  if (!allowed) return false;
   if (denySubstrings.some((d) => url.includes(d))) return false;
   return true;
 }
 
-function normalizeUrl(absolute: string): string {
-  const u = new URL(absolute);
-  u.hash = "";
-  u.search = ""; // strip query params
-  return u.toString();
+function canonicalizeUrlSafe(input: string): string | null {
+  try {
+    return canonicalizeUrl(input);
+  } catch {
+    return null;
+  }
 }
 
 function isClubContentUrl(url: string): boolean {
@@ -71,7 +92,8 @@ function extractLinks(baseUrl: string, html: string): string[] {
 
     try {
       const absolute = new URL(raw, baseUrl).toString();
-      out.add(normalizeUrl(absolute));
+      const canonical = canonicalizeUrlSafe(absolute);
+      if (canonical) out.add(canonical);
     } catch {
       // ignore malformed
     }
@@ -87,6 +109,9 @@ async function sleep(ms: number) {
 async function runSite(site: (typeof SITES)[number]) {
   console.log(`\n== Scraping ${site.siteId} ==`);
   const robots = await loadRobots(site.baseUrl);
+  const allowPrefixesCanonical = site.allowPrefixes
+    .map((p) => canonicalizeUrlSafe(p))
+    .filter((p): p is string => Boolean(p));
 
   // Priority queues: clubs first, then everything else
   const hiQueue: string[] = [];
@@ -94,9 +119,10 @@ async function runSite(site: (typeof SITES)[number]) {
 
   // Seed queues
   for (const s of site.seeds) {
-    const n = normalizeUrl(s);
-    if (isClubContentUrl(n)) hiQueue.push(n);
-    else loQueue.push(n);
+    const canonical = canonicalizeUrlSafe(s);
+    if (!canonical) continue;
+    if (isClubContentUrl(canonical)) hiQueue.push(canonical);
+    else loQueue.push(canonical);
   }
 
   const seen = new Set<string>();
@@ -122,7 +148,16 @@ async function runSite(site: (typeof SITES)[number]) {
       if (seen.has(u)) continue;
       seen.add(u);
 
-      if (!shouldKeepUrl(u, site.allowPrefixes, site.denySubstrings)) continue;
+      if (
+        !shouldKeepUrl(
+          u,
+          site.allowPrefixes,
+          allowPrefixesCanonical,
+          site.denySubstrings
+        )
+      ) {
+        continue;
+      }
 
       batch.push(u);
     }
@@ -138,7 +173,13 @@ async function runSite(site: (typeof SITES)[number]) {
           // Politeness delay (add a bit of jitter)
           await sleep(site.delayMs + Math.floor(Math.random() * 300));
 
-          const html = await fetchHtml(url);
+          let html = "";
+          try {
+            html = await fetchHtml(url);
+          } catch (e) {
+            console.warn(`Fetch failed: ${url}`, e);
+            return;
+          }
           if (!html) return;
           fetched += 1;
 
@@ -146,7 +187,16 @@ async function runSite(site: (typeof SITES)[number]) {
           const links = extractLinks(site.baseUrl, html);
           for (const l of links) {
             if (seen.has(l)) continue;
-            if (!shouldKeepUrl(l, site.allowPrefixes, site.denySubstrings)) continue;
+            if (
+              !shouldKeepUrl(
+                l,
+                site.allowPrefixes,
+                allowPrefixesCanonical,
+                site.denySubstrings
+              )
+            ) {
+              continue;
+            }
 
             if (isClubContentUrl(l)) hiQueue.push(l);
             else loQueue.push(l);
@@ -173,6 +223,7 @@ async function runSite(site: (typeof SITES)[number]) {
             url,
             title,
             markdown,
+            section: classifySection(url),
           });
 
           saved += 1;

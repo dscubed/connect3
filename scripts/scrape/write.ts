@@ -1,36 +1,39 @@
 import fs from "fs";
 import path from "path";
-import crypto from "crypto";
-
-function slugify(s: string) {
-  return s
-    .toLowerCase()
-    .replace(/https?:\/\//g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "")
-    .slice(0, 120);
-}
+import { sha1, canonicalizeUrl, normalizeTextForHash } from "./hash"; // adjust path
 
 export function writePage(args: {
   outDir: string;
   siteId: string;
-  url: string;
+  url: string;       // fetched URL
   title: string;
-  markdown: string;
+  markdown: string;  // cleaned markdown
+  section?: string | null;
 }) {
   fs.mkdirSync(args.outDir, { recursive: true });
 
-  const hash = crypto.createHash("sha1").update(args.url).digest("hex").slice(0, 10);
-  const filename = `${args.siteId}__${slugify(args.title)}__${hash}.md`;
+  const canonical_url = canonicalizeUrl(args.url);
+  const doc_id = sha1(canonical_url);
+  const content_hash = sha1(normalizeTextForHash(args.markdown));
+
+  // Stable filename: title changes won't create a new file
+  const filename = `${args.siteId}__${doc_id}.md`;
+
+  const safeTitle = args.title.replace(/\n/g, " ").trim();
+  const section = (args.section ?? "unknown").trim();
 
   const body = `---
 site: ${args.siteId}
 url: ${args.url}
-title: ${args.title.replace(/\n/g, " ")}
+canonical_url: ${canonical_url}
+doc_id: ${doc_id}
+title: ${safeTitle}
+section: ${section}
+content_hash: ${content_hash}
 fetched_at: ${new Date().toISOString()}
 ---
 
-# ${args.title}
+# ${safeTitle}
 
 ${args.markdown}
 `;
