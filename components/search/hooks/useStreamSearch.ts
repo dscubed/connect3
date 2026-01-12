@@ -78,14 +78,20 @@ export function useSearchStream(setMessages: MessageUpdater) {
       const channel = supabase.channel(channelName);
       channelRef.current = channel;
 
-      // 🔴 LOG EVERY BROADCAST EVENT (for proof only)
-      channel.on("broadcast", {event: "status"}, (payload) => {
-        console.log("[useSearchStream] ANY EVENT RECEIVED", payload);
+      channel.on("broadcast", { event: "status" }, (payload) => {
+        console.log("[useSearchStream] status event", payload);
+        const raw = (payload as any)?.payload;
+        const progressUpdate =
+          typeof raw === "string" ? { message: raw } : (raw as SearchProgress);
+        updateProgress(messageId, progressUpdate);
       });
 
       channel.on("broadcast", { event: "progress" }, (payload) => {
         console.log("[useSearchStream] progress event", payload);
-        updateProgress(messageId, payload.payload as SearchProgress);
+        const raw = (payload as any)?.payload;
+        const progressUpdate =
+          typeof raw === "string" ? { message: raw } : (raw as SearchProgress);
+        updateProgress(messageId, progressUpdate);
       });
 
       channel.on("broadcast", { event: "done" }, ({ payload }) => {

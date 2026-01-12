@@ -21,6 +21,9 @@ export function SearchProgressIndicator({
 
   return (
     <div className="flex flex-col space-y-4">
+      {progress.message && (
+        <div className="animate-pulse text-white/70">{progress.message}</div>
+      )}
       {/* Context */}
       {progress.context &&
         (!progress.context.end ? (
@@ -41,7 +44,7 @@ export function SearchProgressIndicator({
 
       {progress.iterations?.map((iteration, index) => {
         // Determine if this is the current step
-        const isCurrent = index === progress.iterations.length - 1;
+        const isCurrent = index === progress.iterations!.length - 1;
 
         // Classes for faded vs. active
         const faded = "text-white/30";

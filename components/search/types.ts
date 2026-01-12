@@ -37,8 +37,10 @@ export interface SearchProgress {
     data?: string;
     end?: Date;
   };
-  iterations: SearchIteration[];
+  iterations?: SearchIteration[];
   generating?: boolean;
+  message?: string;
+  step?: string;
 }
 
 interface SearchAction {

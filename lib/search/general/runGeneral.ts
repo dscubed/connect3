@@ -90,6 +90,8 @@ export async function runGeneral({
 }: RunGeneralArgs): Promise<SearchResponse> {
   const traceId = `general_${Date.now()}_${Math.random().toString(16).slice(2)}`;
 
+  emit?.("status", { step: "general_plan", message: "Planning response..." });
+
   const heuristic = heuristicPlan(query, userUniversity);
   const plan =
     heuristic ??
@@ -99,6 +101,10 @@ export async function runGeneral({
 
   // -------- non-uni → Connect3 --------
   if (!plan.uniRelated) {
+    emit?.("status", {
+      step: "general_connect3",
+      message: "Answering as Connect3 assistant...",
+    });
     const text = await runConnect3General(openai, query, prevMessages);
     return {
       summary: text,
@@ -123,6 +129,10 @@ export async function runGeneral({
 
   // -------- KB path --------
   if (uniSlug && vectorStoreId) {
+    emit?.("status", {
+      step: "general_kb",
+      message: "Checking university knowledge base...",
+    });
     return runUniversityGeneral(openai, query, uniSlug, vectorStoreId, {
       traceId,
       emit,
@@ -130,6 +140,10 @@ export async function runGeneral({
   }
 
   // -------- web fallback --------
+  emit?.("status", {
+    step: "general_web_fallback",
+    message: "Knowledge base unavailable, using web search...",
+  });
   const resp = await openai.responses.create({
     model: "gpt-4o-mini",
     input: [

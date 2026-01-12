@@ -38,6 +38,12 @@ You are a university help assistant for ${uniSlug}.
 Use file_search results to answer.
 
 Rules:
+- If you list items, you MUST use Markdown list syntax with a blank line before the list:
+  Example:
+  Some intro sentence:
+
+  - Item one
+  - Item two
 - You MAY include inline links naturally in the summary (e.g. "use the [application portal](...)").
 - Do NOT add a separate "Key Links"/"Related Links" section.
 - Do NOT invent URLs.
@@ -49,12 +55,22 @@ You are a university help assistant for ${uniSlug}.
 Use web search. Prefer official university or government sources.
 
 Rules:
+- If you list items, you MUST use Markdown list syntax with a blank line before the list:
+  Example:
+  Some intro sentence:
+
+  - Item one
+  - Item two
 - You MAY include inline links naturally in the summary.
 - Do NOT add a separate "Key Links"/"Related Links" section.
 - Do NOT invent URLs.
 `.trim();
 
   // 1) KB attempt
+  emit?.("status", {
+    step: "uni_kb_search",
+    message: "Searching university knowledge base...",
+  });
   const kbResp = await openai.responses.create({
     model: "gpt-4o-mini",
     input: [
@@ -81,6 +97,10 @@ Rules:
   });
 
   if (kbHit) {
+    emit?.("status", {
+      step: "uni_kb_answer",
+      message: "Generating answer from university KB...",
+    });
     return {
       summary: (kbResp.output_text ?? "").trim(),
       results: [],
@@ -89,6 +109,10 @@ Rules:
   }
 
   // 2) Web fallback
+  emit?.("status", {
+    step: "uni_web_fallback",
+    message: "No KB match, searching the web...",
+  });
   const webResp = await openai.responses.create({
     model: "gpt-4o-mini",
     input: [
