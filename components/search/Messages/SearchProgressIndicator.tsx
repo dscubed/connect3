@@ -22,23 +22,23 @@ export function SearchProgressIndicator({
   return (
     <div className="flex flex-col space-y-4">
       {progress.message && (
-        <div className="animate-pulse text-white/70">{progress.message}</div>
+        <div className="animate-pulse text-black/80">{progress.message}</div>
       )}
       {/* Context */}
       {progress.context &&
         (!progress.context.end ? (
-          <div className="animate-pulse text-white/70">
+          <div className="animate-pulse text-black/80">
             Analyzing Context...
           </div>
         ) : (
           <>
-            <div className="text-white/30">
+            <div className="text-black/50">
               {`Thought for: ${formatDuration(
                 progress.context.start,
                 progress.context.end
               )}`}
             </div>
-            <div className="text-white/30">{progress.context.data}</div>
+            <div className="text-black/50">{progress.context.data}</div>
           </>
         ))}
 
@@ -47,9 +47,9 @@ export function SearchProgressIndicator({
         const isCurrent = index === progress.iterations!.length - 1;
 
         // Classes for faded vs. active
-        const faded = "text-white/30";
-        const active = "text-white/90";
-        const pulse = "animate-pulse text-white/70";
+        const faded = "text-black/40";
+        const active = "text-black/90";
+        const pulse = "animate-pulse text-black/80";
 
         return (
           <div key={index}>
@@ -97,7 +97,7 @@ export function SearchProgressIndicator({
         );
       })}
       {progress.generating && (
-        <div className="animate-pulse text-white/70">
+        <div className="animate-pulse text-black/80">
           Generating Response...
         </div>
       )}

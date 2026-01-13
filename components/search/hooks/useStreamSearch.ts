@@ -121,11 +121,30 @@ export function useSearchStream(setMessages: MessageUpdater) {
         });
       });
 
-      channel.subscribe((status, err) => {
-        console.log("[useSearchStream] channel subscribe status", {
-          channelName,
-          status,
-          err,
+      await new Promise<void>((resolve) => {
+        const timeout = setTimeout(() => {
+          console.warn("[useSearchStream] subscribe timeout, continuing");
+          resolve();
+        }, 8000);
+
+        channel.subscribe((status, err) => {
+          console.log("[useSearchStream] channel subscribe status", {
+            channelName,
+            status,
+            err,
+          });
+
+          if (err) {
+            clearTimeout(timeout);
+            console.warn("[useSearchStream] subscribe error, continuing", err);
+            resolve();
+            return;
+          }
+
+          if (status === "SUBSCRIBED") {
+            clearTimeout(timeout);
+            resolve();
+          }
         });
       });
     },
