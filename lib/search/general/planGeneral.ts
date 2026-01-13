@@ -33,7 +33,7 @@ export async function planGeneral(
   University-related includes:
   - university policies, enrollment, subjects, timetables, campus locations, services, clubs (uni-specific), scholarships (uni-specific)
   - “at my uni…”, “on campus…”, “unimelb / monash / uwa / etc.”
-  - If the university is unknown or not explicitly mentioned, set university=null (not an empty string)
+  - If the university is unknown or not explicitly mentioned, you MUST set university=null (not an empty string or 'your university')
   
   NOT university-related includes:
   - greetings, small talk, jokes, generic life advice
