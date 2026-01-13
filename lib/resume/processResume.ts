@@ -1,6 +1,18 @@
 import { fetchUserDetails } from "@/lib/users/fetchUserDetails";
 import OpenAI from "openai";
+import { zodTextFormat } from "openai/helpers/zod.mjs";
+import z from "zod";
 import { chunkResume } from "./chunkResume";
+import { sanitizeResumeText } from "./sanitizeResume";
+
+// Validation schema
+const ValidationSchema = z.object({
+  safe: z.boolean(),
+  relevant: z.boolean(),
+  belongsToUser: z.boolean(),
+  templateResume: z.boolean(),
+  reason: z.string(),
+});
 
 export const processResume = async (
   text: string,
@@ -21,20 +33,93 @@ export const processResume = async (
 
   const fullname = user.full_name;
 
-  // Call Validation
-  if (!validateResume(text, fullname, openai)) {
-    throw new Error("Resume validation failed");
+  // Sanitize resume text (remove sensitive info)
+  const sanitizedText = sanitizeResumeText(text);
+
+  // Validate sanitized resume
+  const validationResult = await validateResume(
+    sanitizedText,
+    fullname,
+    openai
+  );
+
+  if (!validationResult.safe || !validationResult.relevant) {
+    throw new Error(
+      `Resume validation failed: ${validationResult.reason}`
+    );
   }
 
-  // Call chunkResume
-  return chunkResume(text, chunkTexts, openai);
+  if (!validationResult.belongsToUser) {
+    throw new Error(
+      `Resume does not appear to belong to ${fullname}: ${validationResult.reason}`
+    );
+  }
+
+  if (validationResult.templateResume) {
+    throw new Error(
+      `Resume appears to be a template with placeholder content: ${validationResult.reason}`
+    );
+  }
+
+  // Call chunkResume with sanitized text
+  return chunkResume(sanitizedText, chunkTexts, openai);
 };
 
-const validateResume = (
+const validateResume = async (
   resumeText: string,
   fullName: string,
   openai: OpenAI
-): boolean => {
-  // Validate..
-  return true;
+): Promise<z.infer<typeof ValidationSchema>> => {
+  const systemPrompt = `
+    You are a validation engine for a profile-building app. 
+    The user's legal full name is: "${fullName || "..."}".
+
+    Your job is to analyse the user-uploaded resume text (provided in the user message) 
+    and fill in the following fields:
+
+    - "safe": whether the text avoids harmful, illegal, NSFW, or disallowed content.
+    - "relevant": whether the text contains information that could help describe a personal or professional profile
+      (e.g. work experience, education, skills, interests, biography, portfolio description).
+    - "belongsToUser": whether the text appears to be primarily about this user ("${fullName}"), and not another person.
+    - "templateResume": true if the text appears to be a resume or CV template with mostly placeholder/filler content 
+      (for example, lorem ipsum, generic nonsense sentences, or obviously fake placeholder paragraphs) rather than a real, specific resume.
+    - "reason": a single short sentence explaining why you set "belongsToUser" / "safe" / "relevant" the way you did.
+
+    Rules for "belongsToUser":
+    - If the main person described in the text has a different name from "${fullName}", set "belongsToUser": false.
+    - If the text clearly describes "${fullName}" (or a very close variant like including a middle name or initials), set "belongsToUser": true.
+    - If you are uncertain who the text is about, set "belongsToUser": false.
+    - Do NOT guess that a different full name refers to the same user.
+    - Standard resume-style statements ("Led a team...", "Developed...") count as describing the user.
+
+    Note: The resume text has already been sanitized to remove sensitive information like phone numbers, 
+    email addresses, physical addresses, and academic marks (WAM/GPA). Focus on validating the content 
+    structure and relevance, not on detecting sensitive information.
+
+    Respond ONLY as a single JSON object matching this schema:
+    {
+      "safe": boolean,
+      "relevant": boolean,
+      "belongsToUser": boolean,
+      "templateResume": boolean,
+      "reason": string
+    }
+
+    "reason" MUST be exactly one sentence.
+  `.trim();
+
+  const response = await openai.responses.parse({
+    model: "gpt-4o-mini",
+    input: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: resumeText },
+    ],
+    text: { format: zodTextFormat(ValidationSchema, "validation") },
+  });
+
+  if (!response.output_parsed) {
+    throw new Error("Failed to parse validation response");
+  }
+
+  return response.output_parsed;
 };

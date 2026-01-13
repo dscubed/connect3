@@ -44,20 +44,40 @@ Given a list of existing profile chunks and new resume text, return a JSON objec
 Category Descriptions:
 ${userCategoryDescriptionText}
 
+CRITICAL INSTRUCTIONS FOR CONCISE CHUNKS:
+- Chunk text MUST be concise: maximum 200 characters, ideally 100-150 characters.
+- Extract only the most essential information: key facts, achievements, skills, or responsibilities.
+- Remove filler words, redundant phrases, and unnecessary details.
+- Focus on what makes this information unique and valuable.
+- Use bullet-point style or short sentences when possible.
+
+SENSITIVE INFORMATION EXCLUSION:
+- DO NOT include phone numbers, email addresses, physical addresses, or academic marks (WAM/GPA).
+- If the resume text contains such information, exclude it from the chunk text entirely.
+- Focus on professional achievements, skills, education (without marks), and experience.
+
 Instructions:
 - Respond in JSON format with an object containing "updatedChunks" and "newChunks" arrays.
 - Each "updatedChunks" object should have "id", "category", and "text" fields.
 - Each "newChunks" object should have "category" and "text" fields.
 - Only include updated chunks in "updatedChunks" (e.g. graduated, promoted, left job, additional skills, etc.)
 - Only include truly new chunks in "newChunks" (not present in the existing list).
-- Chunk text should be concise, max 200 characters, and retain key information.
 - Use only the provided categories.
 - Return only the JSON object, no extra text.
 
-Example:
+Examples of GOOD concise chunks:
+- "Software Engineer at Tech Corp (2020-2023). Built scalable APIs using Node.js and React."
+- "Bachelor of Computer Science from University of Melbourne, 2016-2020."
+- "Proficient in Python, JavaScript, TypeScript, and cloud platforms (AWS, GCP)."
+
+Examples of BAD verbose chunks (too long):
+- "I worked as a Software Engineer at Tech Corp from 2020 to 2023. During my time there, I was responsible for building scalable APIs using Node.js and React. I also collaborated with cross-functional teams and participated in code reviews."
+- "I completed my Bachelor of Computer Science degree at the University of Melbourne from 2016 to 2020. I studied various subjects including algorithms, data structures, and software engineering."
+
+Example response:
 {
   "updatedChunks": [
-    { "id": "123", "category": "Education", "text": "Bachelor of Science in Computer Science from XYZ University, 2015-2019. Graduated with honors." }
+    { "id": "123", "category": "Education", "text": "Bachelor of Science in Computer Science from XYZ University, 2015-2019." }
   ],
   "newChunks": [
     { "category": "Skills", "text": "Proficient in JavaScript, Python, and C++." }

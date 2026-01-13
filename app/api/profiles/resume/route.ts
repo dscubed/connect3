@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import OpenAI from "openai";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
+import { processResume } from "@/lib/resume/processResume";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SECRET_KEY!
 );
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 export async function POST(req: NextRequest) {
   const authResult = await authenticateRequest(req);
@@ -50,82 +56,47 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Validate Resume content with LLM
-    const authHeader = req.headers.get("authorization") || "";
+    // Get existing chunks for comparison
+    const { data: existingChunksData, error: fetchError } = await supabase
+      .from("profile_chunks")
+      .select("id, text, category")
+      .eq("profile_id", profileId)
+      .order("order", { ascending: true });
 
-    // TODO: Skip validation for now
-    /*
-    const validateRes = await fetch(
-      new URL("/api/validate/text", req.url).toString(),
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          cookie: req.headers.get("cookie") || "",
-          ...(authHeader ? { Authorization: authHeader } : {}),
-        },
-        body: JSON.stringify({
-          text: resumeText,
-          fullName: `${(user as any)?.first_name || ""} ${
-            (user as any)?.last_name || ""
-          }`.trim(),
-        }),
-      }
-    );
-    if (!validateRes.ok) {
-      const errText = await validateRes.text();
+    if (fetchError) {
+      console.error("Error fetching existing chunks:", fetchError);
       return NextResponse.json(
-        { success: false, error: "Validation failed", details: errText },
-        { status: 502 }
+        { success: false, error: "Failed to fetch existing chunks" },
+        { status: 500 }
       );
     }
-    const validation = await validateRes.json();
-    if (
-      !validation.safe ||
-      !validation.relevant ||
-      !validation.belongsToUser ||
-      validation.templateResume
-    ) {
-      return NextResponse.json({ success: false, validation }, { status: 400 });
-    }
-    */
 
-    // Call LLM to extract resume into profile chunks
-    const chunkRes = await fetch(
-      new URL("/api/onboarding/chunkText", req.url).toString(),
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          cookie: req.headers.get("cookie") || "",
-          ...(authHeader ? { Authorization: authHeader } : {}),
-        },
-        body: JSON.stringify({ text: resumeText }),
-      }
+    // Format existing chunks as text array for processResume
+    const chunkTexts =
+      existingChunksData?.map((chunk) => chunk.text) || [];
+
+    // Process resume using new processResume function
+    // This will sanitize, validate, and chunk the resume
+    const chunkResult = await processResume(
+      resumeText,
+      profileId,
+      chunkTexts,
+      openai
     );
-    if (!chunkRes.ok) {
-      const errText = await chunkRes.text();
-      return NextResponse.json(
-        { success: false, error: "Chunking failed", details: errText },
-        { status: 502 }
-      );
-    }
-    const chunkData = await chunkRes.json();
-    if (!chunkData.success || !Array.isArray(chunkData.chunks)) {
-      return NextResponse.json(
-        { success: false, error: "Invalid chunk response" },
-        { status: 502 }
-      );
-    }
-    const chunksFromLLM = chunkData.chunks as Array<{
-      category: string;
-      content: string;
-      chunk_id?: string;
-    }>;
+
+    // Combine updated and new chunks
+    const allChunks = [
+      ...chunkResult.updatedChunks,
+      ...chunkResult.newChunks.map((chunk) => ({
+        id: crypto.randomUUID(),
+        category: chunk.category,
+        text: chunk.text,
+      })),
+    ];
 
     // Build categories and upsert category order
     const categories = Array.from(
-      new Set(chunksFromLLM.map((c) => c.category))
+      new Set(allChunks.map((c) => c.category))
     );
     const categoriesPayload = categories.map((c, i) => ({
       profile_id: profileId,
@@ -164,13 +135,12 @@ export async function POST(req: NextRequest) {
     // Prepare chunks (assign ids and order per category)
     const orderMap: Record<string, number> = {};
     categories.forEach((c) => (orderMap[c] = 0));
-    const chunksToUpsert = chunksFromLLM.map((ch) => {
-      const id = ch.chunk_id || crypto.randomUUID();
+    const chunksToUpsert = allChunks.map((ch) => {
       const order = orderMap[ch.category]++;
       return {
-        id,
+        id: ch.id,
         profile_id: profileId,
-        text: ch.content,
+        text: ch.text,
         category: ch.category,
         order,
       };
@@ -178,11 +148,7 @@ export async function POST(req: NextRequest) {
 
     // Delete old chunks not present in new set
     const newIds = chunksToUpsert.map((c) => c.id);
-    const { data: existingChunks } = await supabase
-      .from("profile_chunks")
-      .select("id")
-      .eq("profile_id", profileId);
-    const existingChunkIds = (existingChunks || []).map((c: any) => c.id);
+    const existingChunkIds = (existingChunksData || []).map((c: any) => c.id);
     const toDeleteChunkIds = existingChunkIds.filter(
       (id: string) => !newIds.includes(id)
     );
@@ -215,6 +181,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Trigger vector store upload (non-blocking)
+    const authHeader = req.headers.get("authorization") || "";
     try {
       await fetch(
         new URL("/api/vector-store/uploadProfile", req.url).toString(),
