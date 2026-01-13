@@ -5,6 +5,7 @@ import { chunkMarkdown } from "./chunkMarkdown";
 
 export type PageForChunking = {
   siteId: string;
+  kbSlug?: string;
   outDir: string;            // e.g. scripts/kb_scrapes/umsu
   canonical_url: string;
   doc_id: string;
@@ -14,6 +15,7 @@ export type PageForChunking = {
 };
 
 export function writeChunksFromPage(p: PageForChunking) {
+  const kbSlug = p.kbSlug ?? p.siteId;
   const chunksDir = path.join(p.outDir, "chunks");
   fs.mkdirSync(chunksDir, { recursive: true });
 
@@ -31,7 +33,7 @@ export function writeChunksFromPage(p: PageForChunking) {
 
     const body = `---
 site: ${p.siteId}
-kb_slug: ${p.siteId}
+kb_slug: ${kbSlug}
 doc_id: ${p.doc_id}
 chunk_id: ${c.chunk_id}
 chunk_type: ${c.chunk_type}

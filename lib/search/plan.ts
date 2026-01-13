@@ -76,6 +76,13 @@ Connect3 product questions (DO NOT require search):
 - "How do I edit my profile / TLDR / chunks?"
 - "What information do you store about me?"
 
+General university questions (DO NOT require search):
+- "What is the census date?"
+- "How do I apply for special consideration?"
+- "What are the academic misconduct rules?"
+- "How do I enroll or withdraw?"
+- "What services does the student union offer?"
+
 Important distinction:
 - If the user is asking ABOUT the Connect3 app, its features, privacy, or how it works → requiresSearch = false.
 - Only set requiresSearch = true when the user is asking to retrieve specific Connect3 directory content (users/organisations/events), e.g.:

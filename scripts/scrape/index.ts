@@ -176,7 +176,7 @@ async function runSite(site: (typeof SITES)[number]) {
 
           fetched += 1;
 
-          const links = extractLinks(site.baseUrl, html);
+          const links = extractLinks(url, html);
           for (const l of links) {
             if (!seen.has(l)) enqueue(l);
           }
@@ -255,6 +255,7 @@ async function runSite(site: (typeof SITES)[number]) {
     // NEW: write chunk files
     writeChunksFromPage({
       siteId: site.siteId,
+      kbSlug: site.kbSlug,
       outDir,
       canonical_url,
       doc_id,

@@ -35,6 +35,7 @@ export function normalizeUniversitySlug(input: string | null | undefined): strin
 
       // RMIT
       "rmit": "rmit",
+      "rmit university": "rmit",
     };
   
     // Exact match

@@ -4,7 +4,7 @@ import type { ResponseInput } from "openai/resources/responses/responses.mjs";
 
 import { planGeneral } from "./planGeneral";
 import { normalizeUniversitySlug } from "./uniSlug";
-import { getUniversityVectorStoreId } from "./universities";
+import { getUniversityVectorStores } from "./universities";
 import { runUniversityGeneral } from "./runUniversityGeneral";
 import { runConnect3General } from "./runConnect3General";
 import { countWebSearchCalls } from "./countWebSearches";
@@ -26,6 +26,33 @@ type RunGeneralArgs = {
 };
 
 // ---------- heuristics (unchanged logic) ----------
+type UniKbIntent = "official" | "union" | "both";
+
+function detectUniKbIntent(query: string): UniKbIntent {
+  const q = query.toLowerCase();
+
+  // Strong official/admin signals
+  if (
+    /(special consideration|application|apply|deadline|policy|procedure|rules|regulation|appeal|enrol|enroll|census|withdraw|academic misconduct|plagiarism|assessment|exam|graduation|visa|fees)/.test(
+      q
+    )
+  ) {
+    return "official";
+  }
+
+  // Strong union signals
+  if (
+    /(advocacy|student union|umsu|msa|guild|club|clubs|society|societies|events|volunteer|welfare|food|free|support service|representation|campaign)/.test(
+      q
+    )
+  ) {
+    return "union";
+  }
+
+  // Ambiguous / informational
+  return "both";
+}
+
 function detectUniversityFromQuery(query: string): string | null {
   const q = query.toLowerCase();
   if (/\bunimelb\b|\buniversity of melbourne\b|\bmelbourne uni\b/.test(q))
@@ -118,24 +145,34 @@ export async function runGeneral({
 
   const rawUni = plannedUni ?? (userUniversity ?? null);
   const uniSlug = normalizeUniversitySlug(rawUni);
-  const vectorStoreId = getUniversityVectorStoreId(uniSlug);
+  const vectorStores = getUniversityVectorStores(uniSlug);
+  const intent = detectUniKbIntent(query);
 
   console.log("[runGeneral] uniResolution", {
     traceId,
     rawUni,
     uniSlug,
-    vectorStoreIdExists: Boolean(vectorStoreId),
+    vectorStores,
+    intent,
+  });
+  console.log("[runGeneral] kb_selection", {
+    traceId,
+    uniSlug,
+    intent,
+    officialStore: vectorStores.official ?? null,
+    unionStore: vectorStores.union ?? null,
   });
 
   // -------- KB path --------
-  if (uniSlug && vectorStoreId) {
+  if (uniSlug && (vectorStores.official || vectorStores.union)) {
     emit?.("status", {
       step: "general_kb",
       message: "Checking university knowledge base...",
     });
-    return runUniversityGeneral(openai, query, uniSlug, vectorStoreId, {
+    return runUniversityGeneral(openai, query, uniSlug, vectorStores, {
       traceId,
       emit,
+      intent,
     });
   }
 

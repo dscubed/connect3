@@ -3,7 +3,8 @@
 // Usage:
 //   tsx scripts/kb/sync-kb-vector-store-chunks.ts <kbSlug> <chunksDir> <domain>
 // Example:
-//   tsx scripts/kb/sync-kb-vector-store-chunks.ts umsu scripts/kb_scrapes/umsu/chunks umsu.unimelb.edu.au
+//   tsx scripts/kb/sync-kb-vector-store-chunks.ts unimelb_su scripts/kb_scrapes/umsu/chunks umsu.unimelb.edu.au
+//   tsx scripts/kb/sync-kb-vector-store-chunks.ts unimelb_official scripts/kb_scrapes/unimelb/chunks unimelb.edu.au
 
 import fs from "node:fs";
 import path from "node:path";
@@ -65,7 +66,7 @@ function usageAndExit() {
 }
 
 function envKeyForStoreId(kbSlug: string) {
-  return `OPENAI_VECTOR_STORE_ID_${kbSlug.toUpperCase()}`;
+  return `OPENAI_VS_${kbSlug.toUpperCase().replace(/[^A-Z0-9]+/g, "_")}`;
 }
 
 // minimal frontmatter parser (key: value)
@@ -238,7 +239,7 @@ async function main() {
 
   const vectorStoreId = await ensureVectorStore(openai, kbSlug, domain);
 
-  const local = loadLocalChunks(chunksDirAbs).filter(c => c.kb_slug === kbSlug || kbSlug === "umsu");
+  const local = loadLocalChunks(chunksDirAbs).filter(c => c.kb_slug === kbSlug);
   console.log(`Found ${local.length} chunk files in ${chunksDirAbs}`);
 
   const existingRows = await fetchAllChunkRows(supabase, kbSlug);
