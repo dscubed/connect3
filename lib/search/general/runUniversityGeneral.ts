@@ -178,9 +178,11 @@ ${storesToQuery[1] ? `- Secondary: ${storesToQuery[1].source}` : ""}
     const outputs = answerResp?.output ?? [];
     for (const o of outputs) {
       if (o?.type !== "message") continue;
-      const content = o?.content ?? [];
+      const content = Array.isArray(o?.content) ? o.content : [];
       for (const c of content) {
-        const anns = c?.annotations ?? [];
+        const anns = Array.isArray((c as any)?.annotations)
+          ? (c as any).annotations
+          : [];
         if (anns.some((a: any) => a?.type === "file_citation")) return true;
       }
     }
