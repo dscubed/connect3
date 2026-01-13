@@ -24,13 +24,13 @@ export const ResumeUploadModal = ({
   isOpen: boolean;
   onClose: () => void;
 }) => {
-  const [resume, setResume] = useState<File[]>([]);
+  const [resume, setResume] = useState<File | null>(null);
 
   const [result, setResult] = useState<ResumeChunkResult | null>(null);
 
   const reset = () => {
     setResult(null);
-    setResume([]);
+    setResume(null);
     onClose();
   };
 
@@ -48,8 +48,8 @@ export const ResumeUploadModal = ({
               transition={{ duration: 0.25, ease: "easeInOut" }}
             >
               <ResumeUploadContent
-                files={resume}
-                setFiles={setResume}
+                file={resume}
+                setFile={setResume}
                 onClose={onClose}
                 setResult={setResult}
               />

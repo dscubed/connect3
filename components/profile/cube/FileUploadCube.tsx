@@ -2,18 +2,15 @@
 import { useState, useRef } from "react";
 import { useCubeAnimation } from "./hooks/useCubeAnimation";
 import { useFileHandlers } from "./hooks/useFileHandlers";
-import { CUBE_CONFIG } from "./utils/cubeUtils";
 import { CubeContainer } from "./CubeContainer";
 import { FileList } from "./FileList";
 
 export const FileUploadCube = ({
-  onFileUpload,
-  files,
-  onFileRemove,
+  file,
+  onFileChange,
 }: {
-  onFileUpload: (file: File) => void;
-  files: File[];
-  onFileRemove: (index: number) => void;
+  file: File | null;
+  onFileChange: (file: File | null) => void;
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -22,11 +19,11 @@ export const FileUploadCube = ({
 
   const { cubeRotate, cube } = useCubeAnimation(isPaused);
   const { isEating, isDeleting, handleDrop, handleFileSelect, removeFile } =
-    useFileHandlers(files, onFileUpload, onFileRemove);
+    useFileHandlers(file, onFileChange);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    if (files.length < CUBE_CONFIG.MAX_FILES) {
+    if (!file) {
       setIsDragging(true);
     }
   };
@@ -43,8 +40,7 @@ export const FileUploadCube = ({
       setIsDragging(false);
       handleDrop(e);
     },
-    onClick: () =>
-      files.length < CUBE_CONFIG.MAX_FILES && fileInputRef.current?.click(),
+    onClick: () => !file && fileInputRef.current?.click(),
     onMouseEnter: () => {
       setIsHovered(true);
       setIsPaused(true);
@@ -65,9 +61,9 @@ export const FileUploadCube = ({
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-center gap-4">
+      <div className="flex flex-col items-center justify-center gap-4">
         <CubeContainer
-          files={files}
+          file={file}
           isDragging={isDragging}
           isHovered={isHovered}
           isEating={isEating}
@@ -83,10 +79,10 @@ export const FileUploadCube = ({
           accept=".pdf,.doc,.docx,.txt"
           onChange={handleFileSelect}
           className="hidden"
-          disabled={files.length >= CUBE_CONFIG.MAX_FILES}
+          disabled={!!file}
         />
 
-        {files.length > 0 && <FileList files={files} onRemove={removeFile} />}
+        {file && <FileList file={file} onRemove={removeFile} />}
       </div>
     </div>
   );

@@ -10,7 +10,7 @@ import FloatingParticles from "./FloatingParticles";
 import { getFaceBg, getCubeScale, CUBE_CONFIG } from "./utils/cubeUtils";
 
 interface CubeContainerProps {
-  files: File[];
+  file: File | null;
   isDragging: boolean;
   isHovered: boolean;
   isEating: boolean;
@@ -28,7 +28,7 @@ interface CubeContainerProps {
 }
 
 export const CubeContainer: React.FC<CubeContainerProps> = ({
-  files,
+  file,
   isDragging,
   isHovered,
   isEating,
@@ -45,13 +45,14 @@ export const CubeContainer: React.FC<CubeContainerProps> = ({
   onTouchEnd,
 }) => {
   const { SIZE: cubeSize, HALF: cubeHalf } = CUBE_CONFIG;
+  const hasFile = !!file;
 
   return (
     <motion.div
       className="relative w-52 h-52"
       style={{ perspective: "800px" }}
       animate={{
-        scale: files.length > 0 ? 0.9 : 1,
+        scale: hasFile ? 0.9 : 1,
       }}
       transition={{ duration: 0.6, ease: "easeInOut" }}
     >
@@ -83,41 +84,39 @@ export const CubeContainer: React.FC<CubeContainerProps> = ({
           className={`${
             isDragging
               ? "border-background/60 bg-background/20"
-              : `${getFaceBg(files.length)}`
+              : `${getFaceBg(hasFile)}`
           } backdrop-blur-md flex items-center justify-center`}
           cubePosition={{ x: cube.x, y: cube.y, z: cube.z + cubeHalf }}
           cubeRotation={{ x: 0, y: 0, z: 0 }}
         >
-          <FrontFaceContent files={files} isEating={isEating} />
+          <FrontFaceContent hasFile={hasFile} isEating={isEating} />
           <EatingParticles isEating={isEating} />
         </CubeFace>
 
         {/* Back Face */}
         <CubeFace
-          className={`${getFaceBg(
-            files.length
-          )} flex items-center justify-center`}
+          className={`${getFaceBg(hasFile)} flex items-center justify-center`}
           cubePosition={{ x: cube.x, y: cube.y, z: cube.z - cubeHalf }}
           cubeRotation={{ x: 0, y: 180, z: 0 }}
         />
 
         {/* Right Face */}
         <CubeFace
-          className={`${getFaceBg(files.length)}`}
+          className={`${getFaceBg(hasFile)}`}
           cubePosition={{ x: cube.x + cubeHalf, y: cube.y, z: cube.z }}
           cubeRotation={{ x: 0, y: 90, z: 90 }}
         />
 
         {/* Left Face */}
         <CubeFace
-          className={`${getFaceBg(files.length)}`}
+          className={`${getFaceBg(hasFile)}`}
           cubePosition={{ x: cube.x - cubeHalf, y: cube.y, z: cube.z }}
           cubeRotation={{ x: 0, y: -90, z: 90 }}
         />
 
         {/* Top Face */}
         <CubeFace
-          className={`${getFaceBg(files.length)} overflow-hidden origin-bottom`}
+          className={`${getFaceBg(hasFile)} overflow-hidden origin-bottom`}
           cubePosition={{
             x: cube.x,
             y: cube.y - cubeSize,
@@ -134,7 +133,7 @@ export const CubeContainer: React.FC<CubeContainerProps> = ({
 
         {/* Bottom Face */}
         <CubeFace
-          className={`${getFaceBg(files.length)} overflow-hidden`}
+          className={`${getFaceBg(hasFile)} overflow-hidden`}
           cubePosition={{ x: cube.x, y: cube.y + cubeHalf, z: cube.z }}
           cubeRotation={{ x: -90, y: 0, z: 0 }}
         />

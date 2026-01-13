@@ -11,9 +11,8 @@ export const CUBE_CONFIG = {
   },
 };
 
-export const getFaceBg = (filesLength: number): string => {
-  if (filesLength === 0)
-    return "bg-background/40 border-foreground/50 border-2";
+export const getFaceBg = (hasFile: boolean): string => {
+  if (!hasFile) return "bg-background/40 border-foreground/50 border-2";
   return "bg-green-400/10 border-green-600/40";
 };
 

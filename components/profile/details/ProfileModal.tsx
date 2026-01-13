@@ -23,7 +23,7 @@ interface ProfileModalProps {
 export function ProfileModal({ isOpen, setIsOpen }: ProfileModalProps) {
   const { profile, updateProfile } = useAuthStore.getState();
   const [firstName, setFirstName] = useState(profile?.first_name || "");
-  const [lastName, setLastName] = useState(profile?.last_name || null);
+  const [lastName, setLastName] = useState(profile?.last_name || "");
   const [university, setUniversity] = useState<University | null>(
     (profile?.university as University) || null
   );

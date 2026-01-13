@@ -8,13 +8,13 @@ import { ResumeChunkResult } from "./ChunkResumeModal";
 import { useState } from "react";
 
 export function ResumeUploadContent({
-  files,
-  setFiles,
+  file,
+  setFile,
   onClose,
   setResult,
 }: {
-  files: File[];
-  setFiles: (files: File[]) => void;
+  file: File | null;
+  setFile: (file: File | null) => void;
   onClose: () => void;
   setResult: (result: ResumeChunkResult) => void;
 }) {
@@ -22,7 +22,7 @@ export function ResumeUploadContent({
   const [fileProcessing, setFileProcessing] = useState(false);
 
   const handleProcessResume = async () => {
-    if (files.length === 0) {
+    if (!file) {
       toast.error("Please upload a resume before processing.");
       return;
     }
@@ -34,7 +34,7 @@ export function ResumeUploadContent({
     setFileProcessing(true);
     // Parse the file on the client and send text to the server
     try {
-      const parseResult = await parseDocument(files[0]);
+      const parseResult = await parseDocument(file);
       if (!parseResult.success) {
         toast.error(parseResult.error || "Failed to parse resume.");
         return;
@@ -58,9 +58,7 @@ export function ResumeUploadContent({
         return;
       }
 
-      toast.success(
-        `Resume ${files.map((f) => f.name).join(", ")} processed successfully!`
-      );
+      toast.success(`Resume ${file?.name} processed successfully!`);
 
       setResult((await response.json()).chunks);
     } catch (err) {
@@ -81,9 +79,8 @@ export function ResumeUploadContent({
       </DialogDescription>
 
       <FileUploadCube
-        files={files}
-        onFileUpload={(file: File) => setFiles([file])}
-        onFileRemove={() => setFiles([])}
+        file={file}
+        onFileChange={(file: File | null) => setFile(file)}
       />
 
       <div className="flex flex-row w-full justify-center gap-6 mt-12">
@@ -98,7 +95,7 @@ export function ResumeUploadContent({
           variant="default"
           className="block shadow-lg text-background bg-foreground hover:bg-foreground/80"
           onClick={handleProcessResume}
-          disabled={files.length === 0 || fileProcessing}
+          disabled={!file || fileProcessing}
         >
           {fileProcessing ? "Processing..." : "Process Resume"}
         </Button>
