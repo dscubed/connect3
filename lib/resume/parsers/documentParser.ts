@@ -1,5 +1,4 @@
 import { parsePDF, parseDOCX, parseTXT, ParseResult } from '.';
-import { toast } from 'sonner';
 
 export type { ParseResult };
 
@@ -26,11 +25,12 @@ export async function parseDocument(file: File): Promise<ParseResult> {
     })();
     
     if (!result.success) {
-      toast.error(`Failed to parse ${file.name}: ${result.error}`);
+      // Server-side: log parsing failures instead of using client-only toasts
+      console.error(`Failed to parse ${file.name}: ${result.error}`);
     }
     return result;
   } catch (error) {
-    toast.error(`Failed to parse ${file.name}`);
+    console.error(`Failed to parse ${file.name}`, error);
     throw error;
   }
 }

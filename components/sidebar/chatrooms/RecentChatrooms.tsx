@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { useRecentChats } from "../home/hooks/useRecentChats";
+import { useRecentChats } from "./useRecentChats";
 import { Button } from "@/components/ui/button";
 import { ChatroomLink } from "@/components/sidebar/ChatroomLink";
 import { Check, X } from "lucide-react";

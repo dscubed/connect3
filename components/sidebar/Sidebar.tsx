@@ -5,7 +5,7 @@ import { Menu, X, Calendar, UsersRound, Home, SidebarIcon } from "lucide-react";
 import { SidebarLink } from "./SidebarLink";
 import { usePathname } from "next/navigation";
 import SidebarHeader from "./SidebarHeader";
-import RecentChatrooms from "./RecentChatrooms";
+import RecentChatrooms from "./chatrooms/RecentChatrooms";
 import { SidebarAuthButton } from "./authbutton/SidebarAuthButton";
 
 interface SidebarProps {
