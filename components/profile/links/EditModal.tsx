@@ -12,7 +12,6 @@ import { EditLinksDisplay } from "./EditLinksDisplay";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
 import { LinkTypeInput } from "./LinkTypeInput";
-import { Link } from "lucide-react";
 import { uploadProfileToVectorStore } from "@/lib/vectorStores/profile/client";
 
 interface EditModalProps {
@@ -40,8 +39,6 @@ export function EditModal({
   const [prevLinks, setPrevLinks] = useState<LinkItem[]>(links);
   const [saving, setSaving] = useState(false);
   const { getSupabaseClient, profile } = useAuthStore.getState();
-  const [url, setUrl] = useState("");
-  const [showUrlInput, setShowUrlInput] = useState(false);
 
   const supabase = getSupabaseClient();
 
@@ -202,64 +199,41 @@ export function EditModal({
             <div className="animate-fade-in">
               {/* Inputs */}
               <div className="flex gap-2 py-2 rounded-md mb-2 items-center">
-                <LinkTypeInput
-                  addingState={addingLink}
-                  setAddingState={setAddingLink}
-                  links={links.map((link) => link.type)}
-                />
+                {addingLink.details && (
+                  <LinkTypeInput
+                    addingState={addingLink}
+                    setAddingState={setAddingLink}
+                    links={links.map((link) => link.type)}
+                  />
+                )}
                 <Input
-                  placeholder="Link Details (e.g., URL or username)"
+                  placeholder="Paste URL or enter username"
                   value={addingLink.details}
+                  autoFocus
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       e.preventDefault();
                       addLink();
                     }
                   }}
-                  onChange={(e) =>
-                    setAddingLink({
-                      ...addingLink,
-                      details: e.target.value,
-                    })
-                  }
+                  onChange={(e) => {
+                    const inputValue = e.target.value;
+                    const detectedLink = UrlToLinkDetails(inputValue);
+                    
+                    if (detectedLink) {
+                      setAddingLink({
+                        typeInput: LinkTypes[detectedLink.type].label,
+                        type: detectedLink.type,
+                        details: detectedLink.details,
+                      });
+                    } else {
+                      setAddingLink({
+                        ...addingLink,
+                        details: inputValue,
+                      });
+                    }
+                  }}
                 />
-                <div>
-                  <Button
-                    variant="ghost"
-                    className="!p-0 hover:bg-transparent"
-                    onClick={() => {
-                      setShowUrlInput(!showUrlInput);
-                      setUrl("");
-                    }}
-                  >
-                    <Link className="ml-1 size-6" />
-                  </Button>
-                  {showUrlInput && (
-                    <div className="absolute left-1/2 translate-y-2 bg-transparent p-2 rounded-md border border-secondary-foreground/50 backdrop-blur-md">
-                      <Input
-                        style={{
-                          width: `${Math.max(url.length, 18)}ch`,
-                          maxWidth: "30ch",
-                        }} // 18ch for placeholder fallback
-                        className="px-2 py-1 min-w-64 w-fit border-none focus-visible:ring-0 shadow-none"
-                        placeholder="Paste your URL here"
-                        value={url}
-                        onChange={(e) => {
-                          setUrl(e.target.value);
-                          const details = UrlToLinkDetails(e.target.value);
-                          if (details) {
-                            setAddingLink({
-                              typeInput: LinkTypes[details.type].label,
-                              type: details.type,
-                              details: details.details,
-                            });
-                            setShowUrlInput(false);
-                          }
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
               </div>
               {/* Actions */}
               <div className="flex gap-2 animate-fade-in">
