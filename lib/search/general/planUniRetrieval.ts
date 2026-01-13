@@ -59,7 +59,7 @@ export function planUniRetrieval(query: string): UniRetrievalPlan {
   const preferLinks = intent !== "NARROW" || isResource;
 
   const maxNumResults =
-    intent === "NARROW" ? 4 : intent === "BROAD" ? 6 : 8;
+    intent === "NARROW" ? 3 : intent === "BROAD" ? 5 : 6;
 
   const chunkTypes: UniRetrievalPlan["chunkTypes"] = includeOverviews
     ? ["section", "page_overview"]

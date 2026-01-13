@@ -270,6 +270,11 @@ function buildContextPack(chunks: RetrievedChunk[], maxChars = 12000): string {
   return buf.trim();
 }
 
+function estimateTokens(text: string | undefined): number {
+  if (!text) return 0;
+  return Math.ceil(text.length / 4);
+}
+
 async function retrieveFromStore(args: {
   openai: OpenAI;
   query: string;
@@ -285,9 +290,18 @@ async function retrieveFromStore(args: {
       {
         role: "system",
         content: `
-You are a retriever. Use file_search to find the most relevant passages.
-Do NOT answer the question.
-You MUST return the file_search results.
+You are a retriever.
+
+Your task is to use file_search to find the most relevant passages from the knowledge base.
+
+Rules:
+- Do NOT answer the question.
+- Do NOT summarise or paraphrase content.
+- Only return chunks that directly help answer the question.
+- If multiple chunks contain the same information, return only the single best chunk.
+- Prefer specific policy, procedure, or instructional content over general overview pages.
+- Return at most the most relevant results provided by file_search.
+- You MUST return file_search results and nothing else.
 `.trim(),
       },
       { role: "user", content: query },
@@ -390,7 +404,7 @@ Rules:
       query,
       vectorStoreId: store.id,
       source: store.source,
-      maxNumResults: 8,
+      maxNumResults: 6,
     });
     allChunks.push(...chunks);
     console.log("[runUniversityGeneral] retrieval", {
@@ -401,11 +415,22 @@ Rules:
     });
   }
 
-  const contextPack = buildContextPack(allChunks);
+  const MAX_CONTEXT_TOKENS = 2000;
+  let used = 0;
+  const selectedChunks: RetrievedChunk[] = [];
+
+  for (const chunk of allChunks) {
+    const tokens = estimateTokens(chunk.text);
+    if (used + tokens > MAX_CONTEXT_TOKENS) break;
+    selectedChunks.push(chunk);
+    used += tokens;
+  }
+
+  const contextPack = buildContextPack(selectedChunks);
 
   if (contextPack.length > 0) {
-    const hasOfficial = allChunks.some((c) => c.source === "Official");
-    const hasUnion = allChunks.some((c) => c.source === "Student Union");
+    const hasOfficial = selectedChunks.some((c) => c.source === "Official");
+    const hasUnion = selectedChunks.some((c) => c.source === "Student Union");
     const sourceRule =
       hasOfficial && hasUnion
         ? "Label key facts with [Official] or [Student Union] based on SOURCE, and prefer [Official] when conflicts exist."
