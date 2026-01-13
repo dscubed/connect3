@@ -30,7 +30,6 @@ export const runSearch = async (
   if (!searchPlan.requiresSearch) {
   if (emit) emit("progress", "Routed to General Chat...");
 
-  console.log("[runSearch] context", { userUniversity });
 
   const lastTurn =
     Array.isArray(prevMessages) && prevMessages.length >= 2
@@ -73,7 +72,6 @@ export const runSearch = async (
     openai
   );
   if (emit) emit("progress", "Completed Search...");
-  console.log("Search Results:", results);
 
   // Generate the final response
   const response = await generateResponse(
@@ -83,7 +81,6 @@ export const runSearch = async (
     fileMap,
     emit
   );
-  console.log("Final Response:", response);
 
   return response;
 };

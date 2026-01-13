@@ -148,20 +148,6 @@ export async function runGeneral({
   const vectorStores = getUniversityVectorStores(uniSlug);
   const intent = detectUniKbIntent(query);
 
-  console.log("[runGeneral] uniResolution", {
-    traceId,
-    rawUni,
-    uniSlug,
-    vectorStores,
-    intent,
-  });
-  console.log("[runGeneral] kb_selection", {
-    traceId,
-    uniSlug,
-    intent,
-    officialStore: vectorStores.official ?? null,
-    unionStore: vectorStores.union ?? null,
-  });
 
   // -------- KB path --------
   if (uniSlug && (vectorStores.official || vectorStores.union)) {

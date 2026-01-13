@@ -57,7 +57,6 @@ const searchSingleEntity = async (
     filters,
   };
 
-  console.log(`Vector Search Tool for ${entityType}:`, vectorSearchTool);
 
   const response = await openai.responses.parse({
     model: "gpt-4o-mini",
@@ -84,7 +83,6 @@ const searchSingleEntity = async (
 
   const fileResults = await Promise.all(
     outputParsed.fileIds.map(async (fileId) => {
-      console.log(`Found file ID: ${fileId}`);
       const { fileContent, id } = await getFileContent(
         fileId,
         supabase,

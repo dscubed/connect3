@@ -302,36 +302,6 @@ You MUST return the file_search results.
     include: ["file_search_call.results"] as any,
   });
 
-  const o = resp.output?.find((x: any) => x?.type === "file_search_call");
-  console.log("[file_search_call] type:", o?.type);
-  console.log("[file_search_call] results typeof:", typeof o?.results);
-  console.log("[file_search_call] results keys:", o?.results ? Object.keys(o.results) : null);
-
-  // show a tiny sample (first item) without dumping everything
-  const sample =
-    (Array.isArray(o?.results) && o.results[0]) ||
-    (o?.results?.results?.[0]) ||
-    (o?.results?.data?.[0]) ||
-    (o?.results?.items?.[0]) ||
-    null;
-
-  console.log("[file_search_call] sample result:", sample);
-  console.log("[file_search_call] sample keys:", sample ? Object.keys(sample) : null);
-
-  console.log(
-    "[retrieveFromStore] output debug",
-    resp.output?.map((o: any) => ({
-      type: o?.type,
-      tool_name: o?.tool_name ?? o?.name ?? o?.tool?.name,
-      output_is_array: Array.isArray(o?.output),
-      output_results: Array.isArray(o?.output?.results),
-      results: Array.isArray(o?.results),
-      content_has_results:
-        Array.isArray(o?.content) && o.content.some((c: any) => Array.isArray(c?.results)),
-      keys: o ? Object.keys(o) : [],
-    }))
-  );
-
   const chunks = extractFileSearchResults(resp, source);
   return { chunks, usage: resp.usage };
 }
@@ -346,13 +316,6 @@ export async function runUniversityGeneral(
   const traceId = opts?.traceId ?? "uni_no_trace";
   const emit = opts?.emit;
   const intent = opts?.intent ?? "both";
-
-  console.log("[runUniversityGeneral] start", {
-    traceId,
-    uniSlug,
-    vectorStores,
-    intent,
-  });
 
   const uniKbSystem = `
 You are a university help assistant for ${uniSlug}.
@@ -440,13 +403,6 @@ Rules:
 
   const contextPack = buildContextPack(allChunks);
 
-  console.log("[runUniversityGeneral] kb_check", {
-    traceId,
-    intent,
-    retrievedCount: allChunks.length,
-    contextChars: contextPack.length,
-  });
-
   if (contextPack.length > 0) {
     const hasOfficial = allChunks.some((c) => c.source === "Official");
     const hasUnion = allChunks.some((c) => c.source === "Student Union");
@@ -494,14 +450,6 @@ Rules:
     "progress",
     `WEB SEARCH usage: calls=${countWebSearchCalls(webResp)} tokens=${webResp.usage?.total_tokens}`
   );
-
-  console.log("[runUniversityGeneral] web_search_usage", {
-    traceId,
-    webCalls: countWebSearchCalls(webResp),
-    inputTokens: webResp.usage?.input_tokens,
-    outputTokens: webResp.usage?.output_tokens,
-    totalTokens: webResp.usage?.total_tokens,
-  });
 
   return {
     summary: (webResp.output_text ?? "").trim(),
