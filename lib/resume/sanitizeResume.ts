@@ -6,28 +6,22 @@
  * Removes phone numbers from text (supports various formats)
  */
 export function removePhoneNumbers(text: string): string {
-  // Match various phone number formats:
-  // - Australian: 04XX XXX XXX, +61 4XX XXX XXX, (04) XXXX XXXX
-  // - International: +XX XXXX XXXX, (XXX) XXX-XXXX
-  // - Common formats: XXX-XXX-XXXX, XXX.XXX.XXXX, XXX XXX XXXX
+  // Match various phone number formats more precisely:
   const phonePatterns = [
-    // Australian mobile: 04XX XXX XXX or 04XXXXXXXX
-    /\b0?4\d{2}[\s-]?\d{3}[\s-]?\d{3}\b/g,
-    // Australian with country code: +61 4XX XXX XXX
-    /\+\s*61\s*4\d{2}[\s-]?\d{3}[\s-]?\d{3}\b/g,
+    // Australian mobile: 04XX XXX XXX or 04XXXXXXXX (must start with 04)
+    /\b04\d{2}[\s.-]?\d{3}[\s.-]?\d{3}\b/g,
+    // Australian with country code: +61 4XX XXX XXX or +61 426-469-111
+    /\+\s*61\s*4\d{2}[\s.-]?\d{3}[\s.-]?\d{3}\b/g,
     // Australian landline: (0X) XXXX XXXX
     /\(0\d\)\s*\d{4}\s*\d{4}\b/g,
-    // International formats: +XX XXXX XXXX
-    /\+\d{1,3}[\s-]?\d{1,4}[\s-]?\d{1,4}[\s-]?\d{1,9}\b/g,
-    // US/Common formats: (XXX) XXX-XXXX, XXX-XXX-XXXX, XXX.XXX.XXXX
-    /\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b/g,
-    // Generic: XXX XXX XXXX (3-4 groups of digits)
-    /\b\d{3,4}[\s-]?\d{3,4}[\s-]?\d{3,4}\b/g,
+    // US format: (XXX) XXX-XXXX or XXX-XXX-XXXX (requires dashes or parentheses)
+    /\(\d{3}\)\s*\d{3}[\s.-]\d{4}\b/g,
+    /\b\d{3}-\d{3}-\d{4}\b/g,
   ];
 
   let sanitized = text;
   for (const pattern of phonePatterns) {
-    sanitized = sanitized.replace(pattern, "[Phone number removed]");
+    sanitized = sanitized.replace(pattern, "[Phone removed]");
   }
   return sanitized;
 }
@@ -42,44 +36,26 @@ export function removeEmailAddresses(text: string): string {
 }
 
 /**
- * Removes physical addresses from text
+ * Removes physical addresses from text (less aggressive version)
  */
 export function removeAddresses(text: string): string {
   let sanitized = text;
-  
-  // Common address patterns
+
+  // Only match clear street addresses with number + street type
   const addressPatterns = [
-    // Street addresses: "123 Main Street", "45 Unit 2 Smith Rd"
-    /\b\d+\s+(?:Unit\s+)?[A-Za-z0-9\s]+(?:Street|St|Road|Rd|Avenue|Ave|Drive|Dr|Lane|Ln|Way|Boulevard|Blvd|Court|Ct|Place|Pl|Crescent|Cres|Terrace|Tce)\b/gi,
-    // Postcodes (Australian: 4 digits, US: 5 digits, UK: various)
-    /\b\d{4,5}\b(?=\s*(?:VIC|NSW|QLD|SA|WA|TAS|NT|ACT|Australia|USA|United States|UK|United Kingdom)?)/gi,
-    // State abbreviations (Australian states)
+    // Street addresses: "123 Main Street", "45 Smith Rd" (number followed by name and street type)
+    /\b\d+[A-Za-z]?\s+[A-Za-z]+(?:\s+[A-Za-z]+)?\s+(?:Street|St|Road|Rd|Avenue|Ave|Drive|Dr|Lane|Ln|Way|Boulevard|Blvd|Court|Ct|Place|Pl|Crescent|Cres|Terrace|Tce|Highway|Hwy)\b/gi,
+    // Unit/Apartment addresses: "Unit 5, 123 Main St"
+    /\b(?:Unit|Apt|Apartment|Suite)\s+\d+[A-Za-z]?\s*,?\s*\d+\s+[A-Za-z\s]+(?:Street|St|Road|Rd|Avenue|Ave|Drive|Dr|Lane|Ln)\b/gi,
+    // Australian postcode with state: "VIC 3000" or "NSW 2000"
     /\b(?:VIC|NSW|QLD|SA|WA|TAS|NT|ACT)\s+\d{4}\b/gi,
-    // Common address keywords followed by details
-    /\b(?:Address|Residence|Location):\s*[A-Za-z0-9\s,]+(?:Street|St|Road|Rd|Avenue|Ave|Drive|Dr)\b/gi,
   ];
 
   for (const pattern of addressPatterns) {
     sanitized = sanitized.replace(pattern, "[Address removed]");
   }
 
-  // Remove lines that are primarily addresses (heuristic)
-  const lines = sanitized.split("\n");
-  const filteredLines = lines.filter((line) => {
-    const trimmed = line.trim();
-    // Skip lines that look like addresses (contain street/road keywords with numbers)
-    if (
-      /\d+/.test(trimmed) &&
-      /(?:Street|St|Road|Rd|Avenue|Ave|Drive|Dr|Lane|Ln|Way|Boulevard|Blvd|Court|Ct|Place|Pl)/i.test(
-        trimmed
-      )
-    ) {
-      return false;
-    }
-    return true;
-  });
-
-  return filteredLines.join("\n");
+  return sanitized;
 }
 
 /**
@@ -88,7 +64,7 @@ export function removeAddresses(text: string): string {
 export function removeAcademicMarks(text: string): string {
   let sanitized = text;
 
-  // Patterns for WAM/GPA mentions
+  // Patterns for WAM/GPA mentions - only when explicitly labeled
   const markPatterns = [
     // WAM: 78.5, WAM:78.5, WAM 78.5
     /\bWAM\s*[:=]?\s*\d+\.?\d*\b/gi,
@@ -96,39 +72,15 @@ export function removeAcademicMarks(text: string): string {
     /\bGPA\s*[:=]?\s*\d+\.?\d*(?:\s*\/\s*\d+\.?\d*)?\b/gi,
     // Weighted Average Mark: 78.5
     /\bWeighted\s+Average\s+Mark\s*[:=]?\s*\d+\.?\d*\b/gi,
-    // Average: 78, Average mark: 78.5
-    /\bAverage\s+(?:mark|grade|score)?\s*[:=]?\s*\d+\.?\d*\b/gi,
     // Grade Point Average: 3.8
-    /\bGrade\s+Point\s+Average\s*[:=]?\s*\d+\.?\d*\b/gi,
-    // Academic marks in education sections (e.g., "Graduated with 78.5 WAM")
-    /\b(?:graduated|completed|achieved|obtained)\s+(?:with\s+)?(?:a\s+)?(?:WAM|GPA|average|mark)\s+of\s+\d+\.?\d*\b/gi,
-    // Standalone high marks that might be WAM (e.g., "78.5" on its own line in education)
-    /^\s*\d{2,3}\.?\d*\s*$/gm, // Lines with just a number (likely a mark)
+    /\bGrade\s+Point\s+Average\s*[:=]?\s*\d+\.?\d*(?:\s*\/\s*\d+\.?\d*)?\b/gi,
   ];
 
   for (const pattern of markPatterns) {
     sanitized = sanitized.replace(pattern, "[Academic mark removed]");
   }
 
-  // Remove lines that are primarily about academic marks
-  const lines = sanitized.split("\n");
-  const filteredLines = lines.filter((line) => {
-    const trimmed = line.trim().toLowerCase();
-    // Skip lines that are primarily about marks
-    if (
-      (trimmed.includes("wam") || trimmed.includes("gpa")) &&
-      /\d+/.test(trimmed)
-    ) {
-      return false;
-    }
-    // Skip lines that are just numbers (likely marks)
-    if (/^\d{2,3}\.?\d*$/.test(trimmed)) {
-      return false;
-    }
-    return true;
-  });
-
-  return filteredLines.join("\n");
+  return sanitized;
 }
 
 /**
@@ -138,22 +90,27 @@ export function removeAcademicMarks(text: string): string {
  */
 export function sanitizeResumeText(text: string): string {
   let sanitized = text;
+  console.log("Original Resume Text:", sanitized);
 
   // Apply all sanitization functions in order
   sanitized = removePhoneNumbers(sanitized);
+  console.log("After removing phone numbers:", sanitized);
   sanitized = removeEmailAddresses(sanitized);
+  console.log("After removing email addresses:", sanitized);
   sanitized = removeAddresses(sanitized);
+  console.log("After removing addresses:", sanitized);
   sanitized = removeAcademicMarks(sanitized);
+  console.log("After removing academic marks:", sanitized);
 
   // Clean up multiple consecutive "[... removed]" markers
   sanitized = sanitized.replace(
-    /\[(?:Phone number|Email|Address|Academic mark) removed\]\s*(?:\[(?:Phone number|Email|Address|Academic mark) removed\]\s*)+/g,
-    "[Sensitive information removed]"
+    /\[(?:Phone|Email|Address|Academic mark) removed\]\s*(?:\[(?:Phone|Email|Address|Academic mark) removed\]\s*)+/g,
+    "[Sensitive info removed]"
   );
 
-  // Clean up excessive whitespace
+  // Clean up excessive whitespace but preserve structure
   sanitized = sanitized.replace(/\n{3,}/g, "\n\n");
-  sanitized = sanitized.replace(/[ \t]+/g, " ");
+  sanitized = sanitized.replace(/[ \t]{2,}/g, " ");
 
   return sanitized.trim();
 }

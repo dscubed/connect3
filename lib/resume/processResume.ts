@@ -1,25 +1,22 @@
 import { fetchUserDetails } from "@/lib/users/fetchUserDetails";
 import OpenAI from "openai";
-import { zodTextFormat } from "openai/helpers/zod.mjs";
-import z from "zod";
 import { chunkResume } from "./chunkResume";
 import { sanitizeResumeText } from "./sanitizeResume";
-
-// Validation schema
-const ValidationSchema = z.object({
-  safe: z.boolean(),
-  relevant: z.boolean(),
-  belongsToUser: z.boolean(),
-  templateResume: z.boolean(),
-  reason: z.string(),
-});
+import { validateResume } from "./validateResume";
+import { ProfileChunk } from "@/components/profile/chunks/ChunkUtils";
 
 export const processResume = async (
   text: string,
   profileId: string,
-  chunkTexts: string[],
+  chunks: ProfileChunk[],
   openai: OpenAI
 ) => {
+  // Convert existing chunks to text format for context
+  const chunksText = chunksToText(chunks);
+
+  console.log("Received Resume Text:", `${text.slice(0, 500)}...`);
+  console.log("Received Chunks", `${chunksText.slice(0, 500)}...`);
+
   // Get user name for validation
   const user = await fetchUserDetails(profileId);
   if (user === null) {
@@ -36,6 +33,8 @@ export const processResume = async (
   // Sanitize resume text (remove sensitive info)
   const sanitizedText = sanitizeResumeText(text);
 
+  console.log("Sanitized Resume Text:", sanitizedText);
+
   // Validate sanitized resume
   const validationResult = await validateResume(
     sanitizedText,
@@ -44,9 +43,7 @@ export const processResume = async (
   );
 
   if (!validationResult.safe || !validationResult.relevant) {
-    throw new Error(
-      `Resume validation failed: ${validationResult.reason}`
-    );
+    throw new Error(`Resume validation failed: ${validationResult.reason}`);
   }
 
   if (!validationResult.belongsToUser) {
@@ -55,71 +52,37 @@ export const processResume = async (
     );
   }
 
-  if (validationResult.templateResume) {
-    throw new Error(
-      `Resume appears to be a template with placeholder content: ${validationResult.reason}`
-    );
-  }
-
   // Call chunkResume with sanitized text
-  return chunkResume(sanitizedText, chunkTexts, openai);
+  return chunkResume(sanitizedText, chunksText, openai);
 };
 
-const validateResume = async (
-  resumeText: string,
-  fullName: string,
-  openai: OpenAI
-): Promise<z.infer<typeof ValidationSchema>> => {
-  const systemPrompt = `
-    You are a validation engine for a profile-building app. 
-    The user's legal full name is: "${fullName || "..."}".
+const chunksToText = (chunks: ProfileChunk[]) => {
+  if (chunks.length === 0) return "";
 
-    Your job is to analyse the user-uploaded resume text (provided in the user message) 
-    and fill in the following fields:
-
-    - "safe": whether the text avoids harmful, illegal, NSFW, or disallowed content.
-    - "relevant": whether the text contains information that could help describe a personal or professional profile
-      (e.g. work experience, education, skills, interests, biography, portfolio description).
-    - "belongsToUser": whether the text appears to be primarily about this user ("${fullName}"), and not another person.
-    - "templateResume": true if the text appears to be a resume or CV template with mostly placeholder/filler content 
-      (for example, lorem ipsum, generic nonsense sentences, or obviously fake placeholder paragraphs) rather than a real, specific resume.
-    - "reason": a single short sentence explaining why you set "belongsToUser" / "safe" / "relevant" the way you did.
-
-    Rules for "belongsToUser":
-    - If the main person described in the text has a different name from "${fullName}", set "belongsToUser": false.
-    - If the text clearly describes "${fullName}" (or a very close variant like including a middle name or initials), set "belongsToUser": true.
-    - If you are uncertain who the text is about, set "belongsToUser": false.
-    - Do NOT guess that a different full name refers to the same user.
-    - Standard resume-style statements ("Led a team...", "Developed...") count as describing the user.
-
-    Note: The resume text has already been sanitized to remove sensitive information like phone numbers, 
-    email addresses, physical addresses, and academic marks (WAM/GPA). Focus on validating the content 
-    structure and relevance, not on detecting sensitive information.
-
-    Respond ONLY as a single JSON object matching this schema:
-    {
-      "safe": boolean,
-      "relevant": boolean,
-      "belongsToUser": boolean,
-      "templateResume": boolean,
-      "reason": string
+  // Order Chunks by alphabetical category then by order within category
+  const orderedChunks = [...chunks].sort((a, b) => {
+    if (a.category === b.category) {
+      return a.order - b.order;
     }
-
-    "reason" MUST be exactly one sentence.
-  `.trim();
-
-  const response = await openai.responses.parse({
-    model: "gpt-4o-mini",
-    input: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: resumeText },
-    ],
-    text: { format: zodTextFormat(ValidationSchema, "validation") },
+    return a.category.localeCompare(b.category);
   });
 
-  if (!response.output_parsed) {
-    throw new Error("Failed to parse validation response");
+  // Group chunks by category
+  const grouped: Record<string, ProfileChunk[]> = {};
+  for (const chunk of orderedChunks) {
+    if (!grouped[chunk.category]) grouped[chunk.category] = [];
+    grouped[chunk.category].push(chunk);
   }
 
-  return response.output_parsed;
+  // Build the text output
+  const sections = Object.entries(grouped).map(([category, chunks]) => {
+    const lines = [
+      category,
+      "---",
+      ...chunks.map((chunk) => `- ID: ${chunk.id}\n${chunk.text}`),
+    ];
+    return lines.join("\n");
+  });
+
+  return sections.join("\n\n");
 };

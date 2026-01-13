@@ -87,12 +87,13 @@ Example response:
 
 export const chunkResume = async (
   resumeText: string,
-  chunkTexts: string[],
+  chunksText: string,
   openai: OpenAI
 ): Promise<ChunkResumeResult> => {
   // Format existing chunks for the prompt
-  const existingChunksText = chunkTexts.join("\n---\n");
-  const userPrompt = `Existing Chunks:\n${existingChunksText}\n\nResume Text:\n${resumeText}`;
+  const userPrompt = `Existing Chunks:\n${
+    chunksText != "" ? chunksText : "None"
+  }\n\nResume Text:\n${resumeText}`;
 
   const response = await openai.responses.parse({
     model: "gpt-4o-mini",
