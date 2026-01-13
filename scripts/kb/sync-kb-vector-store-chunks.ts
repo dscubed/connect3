@@ -8,6 +8,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import crypto from "node:crypto";
 import dotenv from "dotenv";
 import OpenAI from "openai";
 import pLimit from "p-limit";
@@ -67,6 +68,29 @@ function usageAndExit() {
 
 function envKeyForStoreId(kbSlug: string) {
   return `OPENAI_VS_${kbSlug.toUpperCase().replace(/[^A-Z0-9]+/g, "_")}`;
+}
+
+function clampAttr(
+  s: string | null | undefined,
+  maxLen: number,
+  label = "attr"
+): string | undefined {
+  if (!s) return undefined;
+
+  const v = String(s);
+
+  if (v.length <= maxLen) return v;
+
+  // Keep a stable tail so truncated strings remain distinguishable
+  // while still under maxLen.
+  const hash = crypto.createHash("sha1").update(v).digest("hex").slice(0, 10);
+  const suffix = `...#${hash}`;
+
+  const keep = Math.max(0, maxLen - suffix.length);
+  const out = v.slice(0, keep) + suffix;
+
+  // Absolute safety
+  return out.length <= maxLen ? out : out.slice(0, maxLen);
 }
 
 // minimal frontmatter parser (key: value)
@@ -306,7 +330,7 @@ async function main() {
           canonical_url: u.local.canonical_url,
           section: u.local.section,
           chunk_hash: u.local.chunk_hash,
-          heading_path: u.local.heading_path,
+          heading_path: clampAttr(u.local.heading_path, 512, "heading_path") || "",
         };
 
         const { vector_store_file_id } = await attachFile(openai, vectorStoreId, u.local.filePath, attrs);
@@ -344,7 +368,7 @@ async function main() {
           canonical_url: c.canonical_url,
           section: c.section,
           chunk_hash: c.chunk_hash,
-          heading_path: c.heading_path,
+          heading_path: clampAttr(c.heading_path, 512, "heading_path") || "",
         };
 
         const { vector_store_file_id } = await attachFile(openai, vectorStoreId, c.filePath, attrs);
