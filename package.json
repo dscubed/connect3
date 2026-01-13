@@ -8,7 +8,8 @@
     "scrape:kb": "tsx scripts/scrape/index.ts",
     "kb:upload:umsu": "tsx scripts/kb/upload-umsu-vector-store.ts",
     "kb:upload": "tsx scripts/kb/upload-kb-vs.ts",
-    "chunk:sync": "tsx scripts/kb/sync-kb-vector-store-chunks.ts"
+    "chunk:sync": "tsx scripts/kb/sync-kb-vector-store-chunks.ts",
+    "rechunk": "tsx scripts/kb/rechunk-from-pages.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
