@@ -44,7 +44,7 @@ export function ProfilePageContent({
             <CoverImage editingProfile={editingProfile} />
 
             <ChunkProvider isEditing={editingProfile}>
-              <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8">
+              <div className="max-w-3xl mx-auto px-4 md:px-6 lg:px-8">
                 <motion.div
                   className="relative -mt-20 mb-8"
                   initial={{ opacity: 0, y: 20 }}

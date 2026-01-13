@@ -96,7 +96,7 @@ export function SummaryCard({
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                 setNewTldr(e.target.value)
               }
-              className="w-full focus-visible:ring-0 resize-none min-h-0 border-none !text-lg placeholder:italic py-0 px-2 !leading-relaxed placeholder:text-muted"
+              className="w-full focus-visible:ring-0 resize-none min-h-0 border-none !text-base placeholder:italic py-0 px-2 !leading-relaxed placeholder:text-muted"
               placeholder="Add a short summary of yourself to allow others to get to know you better and make your profile more discoverable."
               onKeyDown={handleKeyDown}
             />
@@ -118,12 +118,12 @@ export function SummaryCard({
             </div>
           </>
         ) : newTldr.length > 0 ? (
-          <span className="leading-relaxed text-lg px-2" onClick={editTldr}>
+          <span className="leading-relaxed text-base px-2" onClick={editTldr}>
             {newTldr}
           </span>
         ) : (
           <span
-            className="flex leading-relaxed text-lg px-2 italic text-muted"
+            className="flex leading-relaxed text-base px-2 italic text-muted"
             onClick={editTldr}
           >
             Add a short summary of yourself to allow others to get to know you

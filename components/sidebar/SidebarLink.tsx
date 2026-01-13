@@ -4,7 +4,7 @@ import SidebarButton from "./SidebarButton";
 
 interface SidebarLinkProps {
   icon?: React.ElementType;
-  label: string;
+  label?: string;
   href?: string;
   pathName?: string;
 }
