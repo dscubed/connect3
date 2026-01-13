@@ -33,7 +33,7 @@ export const processResume = async (
   // Sanitize resume text (remove sensitive info)
   const sanitizedText = sanitizeResumeText(text);
 
-  console.log("Sanitized Resume Text:", sanitizedText);
+  console.log("Sanitized Resume Text:", sanitizedText.slice(0, 500) + "...");
 
   // Validate sanitized resume
   const validationResult = await validateResume(

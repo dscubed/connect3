@@ -20,7 +20,7 @@ export const CubeFace = ({
   const { x: rotateX = 0, y: rotateY = 0, z: rotateZ = 0 } = cubeRotation;
   return (
     <motion.div
-      className={`absolute w-52 h-52 rounded-md border transition-all duration-300 
+      className={`absolute w-48 h-48 rounded-md border transition-all duration-300 
         ${className} backdrop-blur-sm
       `}
       animate={{ x, y, z, rotateX, rotateY, rotateZ }}

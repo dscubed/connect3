@@ -90,17 +90,12 @@ export function removeAcademicMarks(text: string): string {
  */
 export function sanitizeResumeText(text: string): string {
   let sanitized = text;
-  console.log("Original Resume Text:", sanitized);
 
   // Apply all sanitization functions in order
   sanitized = removePhoneNumbers(sanitized);
-  console.log("After removing phone numbers:", sanitized);
   sanitized = removeEmailAddresses(sanitized);
-  console.log("After removing email addresses:", sanitized);
   sanitized = removeAddresses(sanitized);
-  console.log("After removing addresses:", sanitized);
   sanitized = removeAcademicMarks(sanitized);
-  console.log("After removing academic marks:", sanitized);
 
   // Clean up multiple consecutive "[... removed]" markers
   sanitized = sanitized.replace(

@@ -1,6 +1,6 @@
 export const CUBE_CONFIG = {
-  SIZE: 208, // w-48 h-48 = 192px
-  HALF: 104, // cubeSize / 2 for positioning faces
+  SIZE: 192, // w-48 h-48 = 192px
+  HALF: 96, // cubeSize / 2 for positioning faces
   MAX_FILES: 1,
   ALLOWED_TYPES: ["pdf", "doc", "docx", "txt"],
   MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
