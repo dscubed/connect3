@@ -34,7 +34,7 @@ function LinkButton({ link, copy }: { link: LinkItem; copy?: boolean }) {
       key={link.id}
       variant="ghost"
       size="icon"
-      className="px-2 py-1"
+      className="px-2 py-1 text-muted"
       asChild
       onClick={() => {
         if (copy) {

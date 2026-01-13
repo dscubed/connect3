@@ -32,7 +32,7 @@ export function ActionsButton({
         {user?.id === profile.id && (
           <Button
             variant="outline"
-            className="text-lg bg-secondary-foreground font-medium text-secondary hover:scale-105 hover:bg-secondary-foreground hover:text-secondary transition-all rounded-2xl"
+            className="text-lg !bg-foreground font-medium !text-white border-[3px] border-white hover:scale-105 transition-all rounded-full py-5 shadow-none"
             onClick={handleEditToggle}
           >
             {editingProfile ? "Finish" : "Edit Profile"}
