@@ -28,9 +28,11 @@ const ChunkContext = createContext<ChunkContextType | undefined>(undefined);
 export function ChunkProvider({
   children,
   isEditing,
+  profileId,
 }: {
   children: ReactNode;
   isEditing: boolean;
+  profileId: string;
 }) {
   // Core chunk states
   const [chunks, setChunks] = useState<ProfileChunk[]>([]);
@@ -56,6 +58,7 @@ export function ChunkProvider({
     setCategoryOrder,
     chunks,
     categoryOrder,
+    id: profileId,
   });
 
   // Edit Operations

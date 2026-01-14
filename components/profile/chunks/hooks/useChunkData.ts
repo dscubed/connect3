@@ -1,5 +1,5 @@
-import { Profile, useAuthStore } from "@/stores/authStore";
-import { useCallback, useState } from "react";
+import { useAuthStore } from "@/stores/authStore";
+import { useCallback, useEffect, useState } from "react";
 import { AllCategories, ProfileChunk } from "../ChunkUtils";
 import { CategoryOrderData } from "../ChunkUtils";
 import { uploadProfileToVectorStore } from "@/lib/vectorStores/profile/client";
@@ -17,12 +17,15 @@ export function useChunkData({
   setCategoryOrder,
   chunks,
   categoryOrder,
+  id,
 }: {
   setChunks: React.Dispatch<React.SetStateAction<ProfileChunk[]>>;
   setCategoryOrder: React.Dispatch<React.SetStateAction<CategoryOrderData[]>>;
   chunks: ProfileChunk[];
   categoryOrder: CategoryOrderData[];
+  id?: string;
 }) {
+  const [profileId, setProfileId] = useState<string | null>(id || null);
   const { user, getSupabaseClient, profile } = useAuthStore.getState();
   const supabase = getSupabaseClient();
 
@@ -33,8 +36,16 @@ export function useChunkData({
   const [loadingChunks, setLoadingChunks] = useState<boolean>(true);
   const [savingChunks, setSavingChunks] = useState<boolean>(false);
 
+  useEffect(() => {
+    if (id) {
+      setProfileId(id);
+    } else {
+      setProfileId(user?.id || "");
+    }
+  }, [id, user?.id]);
+
   const fetchChunksFromSupabase = useCallback(
-    async (profile: Profile) => {
+    async (profileId: string) => {
       /**
        * Fetches chunks and category order for a given profile from Supabase.
        *
@@ -44,7 +55,7 @@ export function useChunkData({
       const { data: chunksData, error: chunksError } = await supabase
         .from("profile_chunks")
         .select("id, text, category, order")
-        .eq("profile_id", profile.id);
+        .eq("profile_id", profileId);
 
       if (chunksError) {
         console.error("Error fetching chunks:", chunksError);
@@ -54,7 +65,7 @@ export function useChunkData({
       const { data: categoryOrderData, error: categoryError } = await supabase
         .from("profile_chunk_categories")
         .select("category, order")
-        .eq("profile_id", profile.id)
+        .eq("profile_id", profileId)
         .order("order", { ascending: true });
 
       if (categoryError) {
@@ -106,10 +117,10 @@ export function useChunkData({
 
     setLoadingChunks(true);
     try {
-      if (!profile) return;
+      if (!profileId) return;
 
       const { chunksData, categoryOrderData } = await fetchChunksFromSupabase(
-        profile
+        profileId
       );
 
       // Set fetched data to current state
@@ -119,7 +130,7 @@ export function useChunkData({
     } finally {
       setLoadingChunks(false);
     }
-  }, [profile, setFetchedChunks, fetchChunksFromSupabase]);
+  }, [profileId, setFetchedChunks, fetchChunksFromSupabase]);
 
   const reset = () => {
     /**
@@ -230,14 +241,16 @@ export function useChunkData({
      * @param deletedChunkIds - An array of chunk IDs to be deleted.
      * @param deletedCategories - An array of categories to be deleted.
      */
-    if (!profile) return;
+
+    // If given ID (for another profile), skip deletion
+    if (id) return;
 
     // Delete removed categories
     if (deletedCategories.length > 0) {
       const { error: delCatError } = await supabase
         .from("profile_chunk_categories")
         .delete()
-        .eq("profile_id", profile.id)
+        .eq("profile_id", profileId)
         .in("category", deletedCategories);
       if (delCatError) {
         console.error("Error deleting categories:", delCatError);
@@ -250,7 +263,7 @@ export function useChunkData({
       const { error: delChunkError } = await supabase
         .from("profile_chunks")
         .delete()
-        .eq("profile_id", profile.id)
+        .eq("profile_id", profileId)
         .in("id", deletedChunkIds);
       if (delChunkError) {
         console.error("Error deleting chunks:", delChunkError);

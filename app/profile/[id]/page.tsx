@@ -4,6 +4,7 @@ import { CubeLoader } from "@/components/ui/CubeLoader";
 import { ProfilePageContent } from "../ProfilePageContent";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Sidebar from "@/components/sidebar/Sidebar";
 
 export default function ProfilePage() {
   const { id } = useParams();
@@ -12,6 +13,7 @@ export default function ProfilePage() {
   const { getSupabaseClient } = useAuthStore();
   const supabase = getSupabaseClient();
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -56,10 +58,17 @@ export default function ProfilePage() {
   }
 
   return (
-    <ProfilePageContent
-      editingProfile={EDITING_PROFILE_VISITOR}
-      setEditingProfile={SET_EDITING_PROFILE_VISITOR}
-      profile={profile}
-    />
+    <div className="min-h-screen relative overflow-hidden">
+      <div className="flex relative z-10">
+        <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
+        <main className="flex-1 pt-16 md:pt-0 relative">
+          <ProfilePageContent
+            editingProfile={EDITING_PROFILE_VISITOR}
+            setEditingProfile={SET_EDITING_PROFILE_VISITOR}
+            profile={profile}
+          />
+        </main>
+      </div>
+    </div>
   );
 }
