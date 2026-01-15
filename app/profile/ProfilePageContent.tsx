@@ -8,23 +8,55 @@ import { ChunkProvider } from "@/components/profile/chunks/hooks/ChunkProvider";
 import { LinksSection } from "@/components/profile/LinksSection";
 import { ActionsButton } from "@/components/profile/ActionsButton";
 import { Profile } from "@/stores/authStore";
-import { useEffect } from "react";
 import { SummaryCard } from "@/components/profile/SummaryCard";
+import {
+  ProfileProvider,
+  useProfileContext,
+} from "@/components/profile/ProfileProvider";
 
 interface ProfilePageContentProps {
   editingProfile: boolean;
   setEditingProfile: (editing: boolean) => void;
-  profile: Profile;
+  /** Pass profileId to fetch, or pass profile directly if already loaded */
+  profileId?: string;
+  profile?: Profile;
 }
 
 export function ProfilePageContent({
   editingProfile,
   setEditingProfile,
-  profile,
+  profileId,
+  profile: initialProfile,
 }: ProfilePageContentProps) {
-  useEffect(() => {
-    console.log("Rendering ProfilePageContent for profile:", profile);
-  }, [profile]);
+  // Determine the profileId to use
+  const id = profileId ?? initialProfile?.id;
+
+  if (!id) {
+    return (
+      <div className="min-h-[200px] flex items-center justify-center">
+        <p className="text-muted">No profile ID provided.</p>
+      </div>
+    );
+  }
+
+  return (
+    <ProfileProvider profileId={id} initialProfile={initialProfile}>
+      <ProfilePageContentInner
+        editingProfile={editingProfile}
+        setEditingProfile={setEditingProfile}
+      />
+    </ProfileProvider>
+  );
+}
+
+function ProfilePageContentInner({
+  editingProfile,
+  setEditingProfile,
+}: {
+  editingProfile: boolean;
+  setEditingProfile: (editing: boolean) => void;
+}) {
+  const { profile } = useProfileContext();
 
   return (
     <div
@@ -36,7 +68,7 @@ export function ProfilePageContent({
     >
       <CoverImage editingProfile={editingProfile} />
 
-      <ChunkProvider isEditing={editingProfile} profileId={profile.id}>
+      <ChunkProvider isEditing={editingProfile} visitingProfileId={profile.id}>
         <div className="max-w-3xl mx-auto px-4 md:px-6 lg:px-8">
           <motion.div
             className="relative -mt-20 mb-8"
@@ -47,7 +79,7 @@ export function ProfilePageContent({
             <div className="flex flex-col gap-6">
               <div className="flex flex-row justify-between">
                 <ProfilePicture
-                  avatar={profile.avatar_url ?? null}
+                  avatar={profile.avatar_url}
                   editingProfile={editingProfile}
                 />
                 <ActionsButton

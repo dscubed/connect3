@@ -1,5 +1,5 @@
 import { useAuthStore } from "@/stores/authStore";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AllCategories, ProfileChunk } from "../ChunkUtils";
 import { CategoryOrderData } from "../ChunkUtils";
 import { uploadProfileToVectorStore } from "@/lib/vectorStores/profile/client";
@@ -17,17 +17,20 @@ export function useChunkData({
   setCategoryOrder,
   chunks,
   categoryOrder,
-  id,
+  visitingProfileId,
 }: {
   setChunks: React.Dispatch<React.SetStateAction<ProfileChunk[]>>;
   setCategoryOrder: React.Dispatch<React.SetStateAction<CategoryOrderData[]>>;
   chunks: ProfileChunk[];
   categoryOrder: CategoryOrderData[];
-  id?: string;
+  visitingProfileId: string | undefined;
 }) {
-  const [profileId, setProfileId] = useState<string | null>(id || null);
   const { user, getSupabaseClient, profile } = useAuthStore.getState();
   const supabase = getSupabaseClient();
+
+  console.log("Visitor Id received:", visitingProfileId);
+  const isVisiting = visitingProfileId && visitingProfileId !== user?.id;
+  const profileId = visitingProfileId || user?.id || "";
 
   const [prevChunks, setPrevChunks] = useState<ProfileChunk[]>([]);
   const [prevCategoryOrder, setPrevCategoryOrder] = useState<
@@ -36,13 +39,16 @@ export function useChunkData({
   const [loadingChunks, setLoadingChunks] = useState<boolean>(true);
   const [savingChunks, setSavingChunks] = useState<boolean>(false);
 
+  // Track current profileId to handle race conditions
+  const currentProfileIdRef = useRef<string>(profileId);
+
+  // Update ref whenever profileId changes
   useEffect(() => {
-    if (id) {
-      setProfileId(id);
-    } else {
-      setProfileId(user?.id || "");
-    }
-  }, [id, user?.id]);
+    currentProfileIdRef.current = profileId;
+    // Clear chunks immediately when switching profiles
+    setChunks([]);
+    setCategoryOrder([]);
+  }, [profileId, setChunks, setCategoryOrder]);
 
   const fetchChunksFromSupabase = useCallback(
     async (profileId: string) => {
@@ -52,10 +58,15 @@ export function useChunkData({
        * @param profile - The profile whose chunks are to be fetched.
        * @returns An object containing arrays of fetched chunks and category order data.
        */
-      const { data: chunksData, error: chunksError } = await supabase
+      console.log("Fetching chunks for profileId:", profileId);
+
+      const chunksResponse = await supabase
         .from("profile_chunks")
         .select("id, text, category, order")
         .eq("profile_id", profileId);
+      const { data: chunksData, error: chunksError } = chunksResponse;
+
+      console.log("Fetched chunks:", chunksResponse);
 
       if (chunksError) {
         console.error("Error fetching chunks:", chunksError);
@@ -97,6 +108,7 @@ export function useChunkData({
        * @param chunksData - The fetched profile chunks.
        * @param categoryOrderData - The fetched category order data.
        */
+      console.log("Setting fetched chunks as", chunksData);
       setChunks(chunksData as ProfileChunk[]);
       setCategoryOrder(categoryOrderData as CategoryOrderData[]);
 
@@ -114,23 +126,50 @@ export function useChunkData({
      * - Fetches category order from "profile_chunk_categories" table.
      * - Sets the fetched data to both current state and previous state for change tracking.
      */
+    if (!profileId) {
+      console.log("No profileId, skipping fetch");
+      return;
+    }
+
+    // Capture the profileId we're fetching for
+    const fetchingForId = profileId;
 
     setLoadingChunks(true);
+
     try {
-      if (!profileId) return;
+      console.log("Starting to load chunks for:", fetchingForId);
 
       const { chunksData, categoryOrderData } = await fetchChunksFromSupabase(
-        profileId
+        fetchingForId
       );
 
-      // Set fetched data to current state
-      setFetchedChunks({ chunksData, categoryOrderData });
+      // Only apply results if this is still the current profile
+      if (currentProfileIdRef.current === fetchingForId) {
+        console.log("Applying chunks for:", fetchingForId);
+        setFetchedChunks({ chunksData, categoryOrderData });
+      } else {
+        console.log(
+          "Discarding stale fetch result for:",
+          fetchingForId,
+          "current is:",
+          currentProfileIdRef.current
+        );
+      }
     } catch (error) {
       console.error("Failed to load chunks:", error);
     } finally {
-      setLoadingChunks(false);
+      // Only update loading state if still on the same profile
+      if (currentProfileIdRef.current === fetchingForId) {
+        setLoadingChunks(false);
+      }
     }
   }, [profileId, setFetchedChunks, fetchChunksFromSupabase]);
+
+  useEffect(() => {
+    if (profileId && profileId !== "") {
+      fetchChunks();
+    }
+  }, [profileId, fetchChunks]);
 
   const reset = () => {
     /**
@@ -242,8 +281,7 @@ export function useChunkData({
      * @param deletedCategories - An array of categories to be deleted.
      */
 
-    // If given ID (for another profile), skip deletion
-    if (id) return;
+    if (isVisiting) return;
 
     // Delete removed categories
     if (deletedCategories.length > 0) {
@@ -335,6 +373,8 @@ export function useChunkData({
      * - Updates previous state to current state upon successful save.
      * - Updates the profile in the vector store on successful save.
      */
+    if (isVisiting) return;
+
     if (!profile || savingChunks || user?.id !== profile.id) return;
     setSavingChunks(true);
 

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { Building2 } from "lucide-react";
 import { FastAverageColor } from "fast-average-color";
 import { Club } from "@/types/clubs/club";
 
@@ -25,17 +24,10 @@ export function ClubListCard({
         .then((color) => {
           // Lighten the color by blending with white (e.g., 70% white)
           const lighten = (c: number) => Math.round(c + (255 - c) * 0.7);
-          const [r, g, b, a = 255] = color.value; // alpha defaults to 255 if not present
+          const [r, g, b = 255] = color.value; // alpha defaults to 255 if not present
           const lr = lighten(r),
             lg = lighten(g),
             lb = lighten(b);
-
-          console.log(club.first_name, "logo average color:", {
-            lr,
-            lg,
-            lb,
-            a,
-          });
 
           setBgColor(`rgb(${lr}, ${lg}, ${lb})`);
         })
@@ -69,19 +61,15 @@ export function ClubListCard({
           }}
         >
           <div className="w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center">
-            {club.avatar_url ? (
-              <Image
-                ref={imgRef}
-                src={club.avatar_url || "/placeholder.png"}
-                alt={`${club.first_name} logo`}
-                width={48}
-                height={48}
-                className="w-full h-full object-cover drop-shadow-md"
-                crossOrigin="anonymous"
-              />
-            ) : (
-              <Building2 className="w-8 h-8 sm:w-12 sm:h-12" />
-            )}
+            <Image
+              ref={imgRef}
+              src={club.avatar_url || "/placeholder.png"}
+              alt={`${club.first_name} logo`}
+              width={48}
+              height={48}
+              className="w-full h-full object-cover drop-shadow-md"
+              crossOrigin="anonymous"
+            />
           </div>
         </div>
 

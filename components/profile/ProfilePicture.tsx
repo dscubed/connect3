@@ -25,15 +25,13 @@ export default function ProfilePicture({
           editingProfile && "hover:scale-105 transition-all"
         )}
       >
-        {avatar && (
-          <Image
-            src={avatar}
-            alt={`User Avatar`}
-            fill
-            className="object-cover"
-            priority
-          />
-        )}
+        <Image
+          src={avatar || "/placeholder.png"}
+          alt={`User Avatar`}
+          fill
+          className="object-cover"
+          priority
+        />
       </div>
       {/* Edit Avatar Button */}
       {editingProfile && (

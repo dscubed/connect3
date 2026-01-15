@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { motion } from "framer-motion";
-import { Building2, ChevronLeft, Loader2 } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { Club } from "@/types/clubs/club";
 import { ProfilePageContent } from "@/app/profile/ProfilePageContent";
-import { Profile, useAuthStore } from "@/stores/authStore";
 
 export function ClubDetailPanel({
   club,
@@ -12,51 +11,6 @@ export function ClubDetailPanel({
   club: Club;
   onBack?: () => void;
 }) {
-  const { getSupabaseClient } = useAuthStore();
-  const supabase = getSupabaseClient();
-
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      console.log("Fetching profile for id:", club.id);
-      if (!club.id) {
-        setLoading(false);
-        return;
-      }
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", club.id)
-        .single();
-      if (!error) {
-        setProfile(data);
-      }
-      setLoading(false);
-    };
-    fetchProfile();
-  }, [supabase, club.id]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex items-center gap-4">
-          <Loader2 className="animate-spin w-8 h-8" />
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!profile) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Profile not found.</p>
-      </div>
-    );
-  }
-
   return (
     <motion.div
       key={club.id}
@@ -77,10 +31,11 @@ export function ClubDetailPanel({
         </button>
       )}
 
+      {/* ProfilePageContent handles fetching with race condition protection */}
       <ProfilePageContent
         editingProfile={false}
         setEditingProfile={() => {}}
-        profile={profile}
+        profileId={club.id}
       />
     </motion.div>
   );

@@ -20,8 +20,6 @@ export function LinksSection({ editingProfile, profile }: LinksSectionProps) {
   const supabase = getSupabaseClient();
 
   useEffect(() => {
-    console.log("Fetching links for profile:", profile);
-
     if (!profile || loading || fetched) return;
     const fetchLinks = async () => {
       const { data, error } = await supabase

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/stores/authStore";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { UniversityInput } from "./UniversityInput";
 import { University } from "./univeristies";
 import { uploadProfileToVectorStore } from "@/lib/vectorStores/profile/client";
@@ -27,10 +27,6 @@ export function ProfileModal({ isOpen, setIsOpen }: ProfileModalProps) {
   const [university, setUniversity] = useState<University | null>(
     (profile?.university as University) || null
   );
-
-  useEffect(() => {
-    console.log("University changed:", university);
-  }, [university]);
 
   if (!profile) {
     return null;
