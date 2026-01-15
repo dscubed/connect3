@@ -1,31 +1,46 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Sidebar from "@/components/sidebar/Sidebar";
 import { ClubDetailPanel } from "@/components/clubs/ClubDetailPanel";
 import { ClubsHeader } from "@/components/clubs/HeaderSection";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import { Club } from "@/types/clubs/club";
-import { breakpointLarge } from "@/hooks/useMediaQuery";
+import { useBreakpointLarge } from "@/hooks/useMediaQuery";
 import useInfiniteScroll from "@/hooks/useInfiniteScroll";
 import { toast } from "sonner";
 import { ClubListCard } from "@/components/clubs/ClubListCard";
+import ClubFilters from "@/components/clubs/ClubFilters";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 
 export default function ClubsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedClub, setSelectedClub] = useState<Club | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [search, setSearch] = useState("");
+
+  // Debounce search to avoid too many API calls
+  const debouncedSearch = useDebouncedValue(search, 300);
+
+  // Track previous search to detect when it actually changes
+  const prevSearchRef = useRef(debouncedSearch);
 
   const clubListRef = useRef<HTMLDivElement>(null);
-  const isDesktop = breakpointLarge();
+  const isDesktop = useBreakpointLarge();
+
+  // Memoize query params to prevent unnecessary re-fetches
+  const queryParams = useMemo(
+    () => (debouncedSearch ? { search: debouncedSearch } : undefined),
+    [debouncedSearch]
+  );
 
   const {
     items: clubs,
     error,
     isLoading,
     isValidating,
-  } = useInfiniteScroll<Club>(clubListRef, "/api/clubs");
+  } = useInfiniteScroll<Club>(clubListRef, "/api/clubs", { queryParams });
 
   // Set initial selected club once data loads
   useEffect(() => {
@@ -34,6 +49,21 @@ export default function ClubsPage() {
       setLoaded(true);
     }
   }, [isLoading, clubs, loaded]);
+
+  // Reset selection only when search query actually changes
+  useEffect(() => {
+    // Check if search actually changed (not just clubs loading more)
+    if (prevSearchRef.current !== debouncedSearch) {
+      prevSearchRef.current = debouncedSearch;
+
+      // Wait a tick for new data to load, then select first result
+      if (!isValidating && clubs.length > 0) {
+        setSelectedClub(clubs[0]);
+      } else if (!isValidating && clubs.length === 0) {
+        setSelectedClub(null);
+      }
+    }
+  }, [debouncedSearch, clubs, isValidating]);
 
   const handleClubSelect = (club: Club) => {
     setSelectedClub(club);
@@ -48,17 +78,45 @@ export default function ClubsPage() {
     toast.error("Could not get clubs");
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex h-screen overflow-hidden">
-        <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
-        <div className="min-h-screen w-full flex flex-col justify-center items-center">
+  // Helper component for loading/empty states in the list
+  const ClubListContent = () => {
+    if (isLoading) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 gap-3">
           <CubeLoader size={32} />
-          <p>Loading clubs...</p>
+          <p className="text-muted text-sm">Loading clubs...</p>
         </div>
-      </div>
+      );
+    }
+
+    if (clubs.length === 0) {
+      return (
+        <div className="p-4 text-sm text-muted">
+          {debouncedSearch
+            ? `No clubs found for "${debouncedSearch}"`
+            : "No clubs found."}
+        </div>
+      );
+    }
+
+    return (
+      <>
+        {clubs.map((club) => (
+          <ClubListCard
+            key={club.id}
+            club={club}
+            isSelected={selectedClub?.id === club.id}
+            onClick={() => handleClubSelect(club)}
+          />
+        ))}
+        {isValidating && (
+          <div className="flex justify-center py-4">
+            <CubeLoader size={24} />
+          </div>
+        )}
+      </>
     );
-  }
+  };
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -70,30 +128,14 @@ export default function ClubsPage() {
           {/* Left Panel - Club List */}
           <div className="w-80 xl:w-96 border-r border-white/10 backdrop-blur-sm overflow-hidden flex flex-col">
             <ClubsHeader clubCount={clubs.length} isLoading={isValidating} />
+            <ClubFilters search={search} setSearch={setSearch} />
 
             {/* Club List */}
             <div
               className="flex-1 overflow-y-auto p-5 space-y-3 scrollbar-hide"
               ref={clubListRef}
             >
-              {clubs.map((club) => (
-                <ClubListCard
-                  key={club.id}
-                  club={club}
-                  isSelected={selectedClub?.id === club.id}
-                  onClick={() => handleClubSelect(club)}
-                />
-              ))}
-
-              {clubs.length === 0 && (
-                <div className="p-4 text-sm text-muted">No clubs found.</div>
-              )}
-
-              {isValidating && (
-                <div className="flex justify-center">
-                  <CubeLoader size={32} />
-                </div>
-              )}
+              <ClubListContent />
             </div>
           </div>
 
@@ -101,7 +143,13 @@ export default function ClubsPage() {
           <div className="flex-1 overflow-hidden">
             <div className="h-full overflow-y-auto p-6 lg:p-8 scrollbar-hide">
               <AnimatePresence mode="wait">
-                {selectedClub && <ClubDetailPanel club={selectedClub} />}
+                {selectedClub ? (
+                  <ClubDetailPanel club={selectedClub} />
+                ) : (
+                  <div className="h-full flex items-center justify-center text-muted">
+                    {isLoading ? "Loading..." : "Select a club to view details"}
+                  </div>
+                )}
               </AnimatePresence>
             </div>
           </div>
@@ -122,32 +170,14 @@ export default function ClubsPage() {
                   clubCount={clubs.length}
                   isLoading={isValidating}
                 />
+                <ClubFilters search={search} setSearch={setSearch} />
 
                 {/* Club List */}
                 <div
                   className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 scrollbar-hide"
                   ref={clubListRef}
                 >
-                  {clubs.map((club) => (
-                    <ClubListCard
-                      key={club.id}
-                      club={club}
-                      isSelected={selectedClub?.id === club.id}
-                      onClick={() => handleClubSelect(club)}
-                    />
-                  ))}
-
-                  {clubs.length === 0 && (
-                    <div className="p-4 text-sm text-white/60">
-                      No clubs found.
-                    </div>
-                  )}
-
-                  {isValidating && (
-                    <div className="flex justify-center">
-                      <CubeLoader size={32} />
-                    </div>
-                  )}
+                  <ClubListContent />
                 </div>
               </motion.div>
             ) : (
@@ -156,7 +186,7 @@ export default function ClubsPage() {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
-                className="h-full bg-black overflow-hidden"
+                className="h-full overflow-hidden"
               >
                 <div className="h-full overflow-y-auto p-4 sm:p-6 scrollbar-hide">
                   {selectedClub && (

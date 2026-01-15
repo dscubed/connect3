@@ -12,7 +12,7 @@ export function ClubsHeader({
         <h1 className="text-xl sm:text-2xl font-bold">Clubs and Societies</h1>
       </div>
       <p className="text-muted text-xs sm:text-sm font-medium">
-        {clubCount} clubs affiliated with connect3
+        Displaying {clubCount} clubs
         {isLoading && " (loading more...)"}
       </p>
     </div>

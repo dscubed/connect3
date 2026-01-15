@@ -24,10 +24,10 @@ export function ClubDetailPanel({
       {onBack && (
         <button
           onClick={onBack}
-          className="lg:hidden mt-12 flex items-center gap-2 text-white/60 hover:text-white mb-4 p-2 -ml-2 rounded-lg hover:bg-white/5 transition-colors"
+          className="lg:hidden top-16 flex items-center gap-2 text-muted mb-4 p-2 -ml-2 rounded-lg transition-colors absolute z-50 backdrop-blur-sm border border-muted/50 bg-background/50"
         >
           <ChevronLeft className="w-5 h-5" />
-          <span className="text-sm">Back to clubs</span>
+          <span className="text-sm">Back</span>
         </button>
       )}
 

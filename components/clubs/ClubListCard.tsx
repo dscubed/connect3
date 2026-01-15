@@ -53,14 +53,14 @@ export function ClubListCard({
       >
         {/* Logo */}
         <div
-          className={`rounded-lg sm:rounded-xl p-2 sm:p-3 flex-shrink-0 border ${
+          className={`rounded-lg sm:rounded-xl flex-shrink-0 border overflow-hidden ${
             isSelected ? "border-white" : "border-white"
           }`}
           style={{
             background: club.avatar_url && bgColor ? bgColor : undefined,
           }}
         >
-          <div className="w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center">
+          <div className="w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center">
             <Image
               ref={imgRef}
               src={club.avatar_url || "/placeholder.png"}

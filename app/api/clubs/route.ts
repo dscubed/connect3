@@ -9,11 +9,13 @@ const supabase = createClient(
 /**
  * Cursor based paginated retrieval of clubs (organisations)
  * Fetches from profiles table where account_type = 'organisation'
+ * Supports search query param for filtering by name or university
  */
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const cursor = searchParams.get("cursor");
   const limit = parseInt(searchParams.get("limit") || "10");
+  const search = searchParams.get("search");
 
   try {
     let query = supabase
@@ -21,6 +23,14 @@ export async function GET(request: NextRequest) {
       .select("id, first_name, university, created_at, avatar_url")
       .eq("account_type", "organisation")
       .order("created_at", { ascending: false });
+
+    // Add search filter if provided (case-insensitive contains)
+    if (search && search.trim() !== "") {
+      // Search in first_name OR university using ilike (case-insensitive)
+      query = query.or(
+        `first_name.ilike.%${search}%,university.ilike.%${search}%`
+      );
+    }
 
     if (cursor) {
       query = query.lt("created_at", cursor);
