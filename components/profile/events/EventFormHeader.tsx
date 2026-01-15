@@ -5,14 +5,11 @@ import AddEventForm from "./AddEventForm";
 import { useAuthStore } from "@/stores/authStore";
 import { HostedEvent } from "@/types/events/event";
 import { toast } from "sonner";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export default function EventFormHeader() {
   const { makeAuthenticatedRequest } = useAuthStore();
   const [addingEvent, setAddingEvent] = useState<boolean>(false);
-
-  const handleAddButtonClick = () => {
-    setAddingEvent(true);
-  };
 
   const handleFormCancel = () => {
     setAddingEvent(false);
@@ -71,28 +68,30 @@ export default function EventFormHeader() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0 }}
     >
-      {addingEvent ? (
-        <div className="flex flex-col gap-2 w-full">
-          {/* event form */}
-          <AddEventForm
-            onSubmit={handleFormSubmit}
-            onCancel={handleFormCancel}
-          />
-        </div>
-      ) : (
-        // header
-        <button
-          className="w-full flex items-center justify-between group"
-          onClick={handleAddButtonClick}
+      <Sheet onOpenChange={setAddingEvent} open={addingEvent}>
+        <SheetTrigger asChild>
+          <button className="w-full flex items-center justify-between group">
+            <div className="flex items-center gap-4">
+              <h3 className="text-xl font-semibold">Add Event</h3>
+              <span className="text-sm px-3 py-1 rounded-full">
+                <Plus className="h-5 w-5 text-muted/70 group-hover:text-muted transition-colors" />
+              </span>
+            </div>
+          </button>
+        </SheetTrigger>
+        <SheetContent
+          hideCloseButton
+          side="bottom"
+          className="flex flex-col items-center pt-12"
         >
-          <div className="flex items-center gap-4">
-            <h3 className="text-xl font-semibold">Add Event</h3>
-            <span className="text-sm px-3 py-1 rounded-full">
-              <Plus className="h-5 w-5 text-muted/70 group-hover:text-muted transition-colors" />
-            </span>
+          <div className="flex justify-center max-w-3xl w-full pt-12 px-12 max-h-[60vh] overflow-y-auto scrollbar-hide">
+            <AddEventForm
+              onSubmit={handleFormSubmit}
+              onCancel={handleFormCancel}
+            />
           </div>
-        </button>
-      )}
+        </SheetContent>
+      </Sheet>
     </motion.div>
   );
 }

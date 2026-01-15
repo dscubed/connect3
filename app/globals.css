@@ -13,6 +13,14 @@
   color: rgb(var(--foreground)) !important;
 }
 
+/* Sheet background change */
+[data-slot="sheet-content"] {
+  background-color: white !important;
+}
+
+
+
+
 @layer base {
   :root {
     --background: 249 236 255;

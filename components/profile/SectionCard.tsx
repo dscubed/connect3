@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { Card, CardHeader } from "../ui/card";
 import React, { createContext, forwardRef, useContext } from "react";
 
-type ColorVariant = "default" | "blue" | "muted" | "white";
+type ColorVariant = "default" | "blue" | "muted" | "white" | "events";
 
 const colorVariants = {
   default: {
@@ -20,6 +20,10 @@ const colorVariants = {
   white: {
     card: "bg-white border-gray-200",
     header: "bg-gray-200",
+  },
+  events: {
+    card: "bg-white border-foreground/30",
+    header: "bg-foreground/30",
   },
 };
 
