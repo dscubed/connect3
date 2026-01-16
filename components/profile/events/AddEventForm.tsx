@@ -145,11 +145,20 @@ export default function AddEventForm({
     setIsSubmitting(true);
 
     try {
+      // Combine date and time properly
+      const startDateTime = new Date(start!);
+      const [startHours, startMinutes] = startTime.split(":").map(Number);
+      startDateTime.setHours(startHours, startMinutes, 0, 0);
+
+      const endDateTime = new Date(end!);
+      const [endHours, endMinutes] = endTime.split(":").map(Number);
+      endDateTime.setHours(endHours, endMinutes, 0, 0);
+
       const eventData = {
         creator_profile_id: user.id,
         name,
-        start: new Date(`${start}T${startTime}`),
-        end: new Date(`${end}T${endTime}`),
+        start: startDateTime,
+        end: endDateTime,
         description,
         type,
         collaborators: collaborators.map((c) => c.id),
@@ -177,7 +186,7 @@ export default function AddEventForm({
           id="name"
           type="text"
           placeholder="Event Name"
-          className="!text-4xl border-none focus-visible:ring-0 shadow-none font-medium"
+          className="!text-4xl border-none focus-visible:ring-0 shadow-none font-medium !h-fit"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
@@ -420,7 +429,7 @@ export default function AddEventForm({
                           <Badge
                             key={type}
                             variant={"secondary"}
-                            className="capitalize rounded-xl !bg-background px-3"
+                            className="capitalize rounded-xl !!bg-muted/20 px-3 font-medium"
                           >
                             {type}
                           </Badge>

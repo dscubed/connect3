@@ -72,9 +72,8 @@ export default function EventFormHeader() {
         <SheetTrigger asChild>
           <button className="w-full flex items-center justify-between group">
             <div className="flex items-center gap-4">
-              <h3 className="text-xl font-semibold">Add Event</h3>
-              <span className="text-sm px-3 py-1 rounded-full">
-                <Plus className="h-5 w-5 text-muted/70 group-hover:text-muted transition-colors" />
+              <span className="text-sm p-1 rounded-full border border-muted/50">
+                <Plus className="h-4 w-4 text-muted/70 group-hover:text-muted transition-colors" />
               </span>
             </div>
           </button>

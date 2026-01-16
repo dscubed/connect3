@@ -111,10 +111,11 @@ export default function CollaboratorForm({
       <Input
         id="collaborators"
         type="text"
-        placeholder="Add Collaborators"
+        placeholder="Enter Collaborators"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         disabled={disabled}
+        className="border-none outline-none focus-visible:ring-0 shadow-none"
       />
       {searchLoading && (
         <div className="text-sm text-gray-500">Searching...</div>
