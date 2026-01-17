@@ -20,8 +20,7 @@ export default function RecentChatrooms({
 }: RecentChatroomsProps) {
   const router = useRouter();
 
-  const { user } = useAuthStore();
-  const userId = user?.id ?? null;
+  const { user, profile } = useAuthStore();
 
   const { chatrooms, loading, renameChatroom, deleteChatroom } =
     useRecentChats();
@@ -30,7 +29,7 @@ export default function RecentChatrooms({
   const [renameValue, setRenameValue] = React.useState<string>("");
   const [busyId, setBusyId] = React.useState<string | null>(null);
 
-  if (!userId)
+  if (!user || !profile)
     return <span className="text-xs text-black/30 px-2">Not logged in</span>;
   if (loading)
     return <span className="text-xs text-black/30 px-2">Loading...</span>;
