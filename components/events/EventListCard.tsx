@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { Calendar, MapPin, Users, Globe } from "lucide-react";
 import { type Event } from "@/lib/schemas/events/event";
+import { Character } from "../characters";
 import useSWR from "swr";
 
 export function EventListCard({
@@ -22,6 +23,8 @@ export function EventListCard({
     (url) => fetch(url).then((res) => res.json())
   );
 
+  if (isLoadingCreator) return;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -30,36 +33,35 @@ export function EventListCard({
       className={`cursor-pointer rounded-xl sm:rounded-2xl border transition-all duration-300 ${
         isSelected
           ? "bg-primary border-white/20 shadow-xl shadow-black/10"
-          : "bg-secondary border-white/20 hover:bg-primary/80 hover:shadow-lg hover:shadow-black/5"
+          : " border-muted/20 hover:bg-primary/80 hover:shadow-lg hover:shadow-black/5"
       }`}
     >
       <div className="p-3 sm:p-5 flex items-start gap-3 sm:gap-4">
+        
         {/* Logo */}
         <div
-          className={`rounded-lg sm:rounded-xl p-2 sm:p-3 flex-shrink-0 border ${
+          className={`w-12 md:w-20 aspect-square rounded-lg sm:rounded-xl flex justify-center items-center border ${
             isSelected
               ? "border-white bg-foreground/50"
               : "border-white bg-muted"
           }`}
         >
-          <div className="w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center">
-            {event.thumbnail ? (
-              <Image
-                src={"/placeholder.png"}
-                alt={`${event.name} logo`}
-                width={48}
-                height={48}
-                className="object-contain max-h-8 sm:max-h-12 rounded-md grayscale"
-              />
-            ) : (
-              <Calendar className="w-8 h-8 sm:w-12 sm:h-12 text-white/80" />
-            )}
-          </div>
+          {!isLoadingCreator ? (
+            <Image
+              src={creator.avatar_url}
+              alt={`${event.name} logo`}
+              width={128}
+              height={128}
+              className="w-full h-full object-cover rounded-md"
+            />
+          ) : (
+            <Calendar className="w-8 h-8 sm:w-12 sm:h-12 text-white/80" />
+          )}
         </div>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <h3 className="text-black  font-semibold text-sm sm:text-base mb-1 sm:mb-1.5 truncate">
+          <h3 className="text-secondary-foreground  font-semibold text-sm sm:text-base mb-1 sm:mb-1.5 truncate">
             {event.name}
           </h3>
 
@@ -77,7 +79,7 @@ export function EventListCard({
           
           {/* Event details */}
           <div className="space-y-1">
-            <p className="text-white/50 text-xs sm:text-sm line-clamp-1 leading-relaxed flex items-center gap-1">
+            <p className="text-muted text-xs sm:text-sm line-clamp-1 leading-relaxed flex items-center gap-1">
               <Calendar className="size-3" />
               {new Date(event.start).toLocaleDateString()} -{" "}
               {new Date(event.end).toLocaleDateString()}
