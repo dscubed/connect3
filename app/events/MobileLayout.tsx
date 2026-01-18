@@ -3,7 +3,8 @@ import { useRef, useState } from "react";
 import EventsHeader from "@/components/events/HeaderSection";
 import EventFilters from "@/components/events/EventFilters";
 import { EventListCard } from "@/components/events/EventListCard";
-import { EventCategory, HostedEvent } from "@/types/events/event";
+import { EventCategory } from "@/types/events/event";
+import { type Event } from "@/lib/schemas/events/event";
 import { EventDetailPanel } from "@/components/events/EventDetailPanel";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import { filterEvents } from "@/lib/events/eventUtils";
@@ -18,14 +19,14 @@ export default function MobileLayout() {
     error,
     isLoading,
     isValidating,
-  } = useInfiniteScroll<HostedEvent>(eventListRef, "/api/events");
+  } = useInfiniteScroll<Event>(eventListRef, "/api/events");
   const [search, setSearch] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<
     EventCategory | "All"
   >("All");
-  const [selectedEvent, setSelectedEvent] = useState<HostedEvent | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
-  const handleEventSelect = (event: HostedEvent) => {
+  const handleEventSelect = (event: Event) => {
     setSelectedEvent(event);
     setShowDetails(true);
   };
@@ -79,7 +80,7 @@ export default function MobileLayout() {
                 className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 scrollbar-hide"
                 ref={eventListRef}
               >
-                {filtered.map((event: HostedEvent) => (
+                {filtered.map((event: Event) => (
                   <EventListCard
                     key={event.id}
                     event={event}

@@ -7,40 +7,34 @@ import {
   MapPin,
   DollarSign,
   Link as LinkIcon,
+  Users,
+  Globe,
+  Hash,
 } from "lucide-react";
-import { HostedEvent } from "@/types/events/event";
+import { type Event } from "@/lib/schemas/events/event";
 import useSWR from "swr";
+import parse from 'html-react-parser'; 
 
 interface EventDetailPanelProps {
-  event: HostedEvent;
+  event: Event;
   onBack?: () => void;
 }
 
 export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
+  console.log(event.category)
   const {
     data: creator,
     error: creatorError,
     isLoading: isLoadingCreator,
   } = useSWR(
-    event.creator_profile_id ? `/api/users/${event.creator_profile_id}` : null,
+    `/api/users/${event.creatorProfileId}`,
     (url) => fetch(url).then((res) => res.json())
   );
 
-  const {
-    data: collaborators,
-    error: collaboratorError,
-    isLoading: isLoadingCollaborators,
-  } = useSWR(event.id ? `/api/events/${event.id}/collaborators` : null, (url) =>
-    fetch(url).then((res) => res.json())
-  );
-
   let organiserString = "";
-  if (!isLoadingCollaborators && !isLoadingCreator) {
-    const collaboratorNames = collaborators.map(
-      (collaborator: { first_name: string }) => collaborator.first_name
-    );
-    const formatted = collaboratorNames.join(", ");
-    organiserString = `${creator.full_name}, ${formatted}`;
+  if (!isLoadingCreator) { 
+    console.log(creator);
+    organiserString = creator ? creator.full_name : "Unknown";
   }
 
   return (
@@ -68,9 +62,9 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
         <div className="flex flex-row items-center sm:items-start gap-6">
           <div className="rounded-xl sm:rounded-2xl p-3 sm:p-4 flex-shrink-0 border-2 border-white/20 bg-secondary shadow-lg shadow-black/10 mx-auto sm:mx-0">
             <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
-              {event.thumbnailUrl ? (
+              {event.thumbnail ? (
                 <Image
-                  src={event.thumbnailUrl}
+                  src={event.thumbnail}
                   alt={`${event.name} logo`}
                   width={80}
                   height={80}
@@ -88,9 +82,9 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
             <div className="flex flex-col gap-1">
               {/* organiser information */}
               <span className="text-muted text-sm md:text-md">
-                {isLoadingCreator || isLoadingCollaborators ? (
+                {isLoadingCreator ? (
                   <p>Fetching organisers...</p>
-                ) : creatorError || collaboratorError ? (
+                ) : creatorError ? (
                   <p>Hosted By: Unknown</p>
                 ) : (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -98,6 +92,8 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
                   </motion.div>
                 )}
               </span>
+              
+              {/* Event dates */}
               <p className="text-muted text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
                 <Calendar className="size-4" />
                 {new Date(event.start).toLocaleDateString()} -{" "}
@@ -114,24 +110,28 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
                 })}
               </p>
 
-              {/* event location */}
+              {/* Event capacity */}
               <p className="text-muted text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
-                <MapPin className="size-4 text-muted" />
-                {event.city
-                  .map(
-                    (city) =>
-                      city.charAt(0).toUpperCase() +
-                      city.replace("-", " ").slice(1)
-                  )
-                  .join(", ")}
-                {" | "}
-                {event.location_type === "virtual" ? "Online" : "In-Person"}
+                <Users className="size-4" />
+                Capacity: {event.capacity}
               </p>
 
-              {/* event pricing */}
+              {/* Currency */}
               <p className="text-muted text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
-                <DollarSign className="size-4 text-muted" />
-                {event.pricing === "free" ? "Free" : "Paid"}
+                <DollarSign className="size-4" />
+                Currency: {event.currency}
+              </p>
+
+              {/* Online/In-person */}
+              <p className="text-muted text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
+                {event.isOnline ? <Globe className="size-4" /> : <MapPin className="size-4" />}
+                {event.isOnline ? "Online" : "In-Person"}
+              </p>
+
+              {/* Category */}
+              <p className="text-muted text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
+                <Hash className="size-4" />
+                {event.category.type} - {event.category.category} ({event.category.subcategory})
               </p>
             </div>
           </div>
@@ -141,39 +141,85 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
       {/* Main Content */}
       <div className="sm:rounded-2xl p-4 sm:p-6 lg:p-7 mb-4 sm:mb-6">
         <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">About</h2>
-        <p className="leading-relaxed text-sm sm:text-base text-muted">
-          {event.description}
-        </p>
+        <span className="leading-relaxed text-sm sm:text-base text-muted">
+          { parse(event.description || "No description provided.")}
+        </span>
       </div>
+
+      {/* Location Details */}
+      {!event.isOnline && (
+        <div className="rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-7 mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Location</h2>
+          <div className="space-y-2">
+            <p className="text-sm sm:text-base text-muted flex items-center gap-2">
+              <MapPin className="size-4" />
+              <span>{event.location.venue}</span>
+            </p>
+            <p className="text-sm sm:text-base text-muted flex items-center gap-2">
+              <MapPin className="size-4" />
+              <span>{event.location.address}</span>
+            </p>
+            <p className="text-sm sm:text-base text-muted flex items-center gap-2">
+              <MapPin className="size-4" />
+              <span>{event.location.city}, {event.location.country}</span>
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Event Details */}
       <div className="space-y-4 mb-6">
-        {/* Booking Links */}
-        {event.booking_link && event.booking_link.length > 0 && (
+        {/* Booking Link */}
+        {event.bookingUrl && (
           <div className="rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-7 mb-4 sm:mb-6">
-            <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">
-              {" "}
-              Booking Links
-            </h2>
+            <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Booking</h2>
             <div className="space-y-2">
-              {event.booking_link.map((link, index) => (
-                <a
-                  key={index}
-                  href={link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between p-3 sm:p-4 rounded-lg sm:rounded-xl bg-foreground hover:bg-foreground/60 border border-white/10 transition-all shadow-sm hover:shadow-md"
-                >
-                  <LinkIcon className="w-4 h-4 text-white/60" />
-                  <span className="text-white/90 text-sm sm:text-base truncate">
-                    {link}
-                  </span>
-                </a>
-              ))}
+              <a
+                href={event.bookingUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between p-3 sm:p-4 rounded-lg sm:rounded-xl bg-foreground hover:bg-foreground/60 border border-white/10 transition-all shadow-sm hover:shadow-md"
+              >
+                <LinkIcon className="w-4 h-4 text-white/60" />
+                <span className="text-white/90 text-sm sm:text-base truncate">
+                  {event.bookingUrl}
+                </span>
+              </a>
             </div>
           </div>
         )}
+
+        {/* Published At */}
+        <div className="rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-7 mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Published</h2>
+          <p className="text-sm sm:text-base text-muted">
+            {new Date(event.publishedAt).toLocaleString()}
+          </p>
+        </div>
+
+        {/* Additional Details */}
+        <div className="rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-7 mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Additional Info</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <p className="text-xs text-muted uppercase tracking-wide mb-1">Event ID</p>
+              <p className="text-sm sm:text-base text-white">{event.id}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted uppercase tracking-wide mb-1">Creator Profile ID</p>
+              <p className="text-sm sm:text-base text-white">{event.creatorProfileId}</p>
+            </div>
+            {event.openaiFileId && (
+              <>
+                <div>
+                  <p className="text-xs text-muted uppercase tracking-wide mb-1">AI File ID</p>
+                  <p className="text-sm sm:text-base text-white">{event.openaiFileId}</p>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </motion.div>
-  );
+ );
 }

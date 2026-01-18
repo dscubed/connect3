@@ -1,14 +1,14 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { Calendar } from "lucide-react";
-import { HostedEvent } from "@/types/events/event";
+import { Calendar, MapPin, Users, Globe } from "lucide-react";
+import { type Event } from "@/lib/schemas/events/event";
 
 export function EventListCard({
   event,
   isSelected,
   onClick,
 }: {
-  event: HostedEvent;
+  event: Event;
   isSelected: boolean;
   onClick: () => void;
 }) {
@@ -33,9 +33,9 @@ export function EventListCard({
           }`}
         >
           <div className="w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center">
-            {event.thumbnailUrl ? (
+            {event.thumbnail ? (
               <Image
-                src={event.thumbnailUrl || "/placeholder.png"}
+                src={event.thumbnail || "/placeholder.png"}
                 alt={`${event.name} logo`}
                 width={48}
                 height={48}
@@ -49,13 +49,34 @@ export function EventListCard({
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <h3 className="text-white font-semibold text-sm sm:text-base mb-1 sm:mb-1.5 truncate">
+          <h3 className="text-black  font-semibold text-sm sm:text-base mb-1 sm:mb-1.5 truncate">
             {event.name}
           </h3>
-          <p className="text-white/50 text-xs sm:text-sm line-clamp-2 leading-relaxed">
-            {new Date(event.start).toLocaleDateString()} -{" "}
-            {new Date(event.end).toLocaleDateString()}
-          </p>
+          
+          {/* Event details */}
+          <div className="space-y-1">
+            <p className="text-white/50 text-xs sm:text-sm line-clamp-1 leading-relaxed flex items-center gap-1">
+              <Calendar className="size-3" />
+              {new Date(event.start).toLocaleDateString()} -{" "}
+              {new Date(event.end).toLocaleDateString()}
+            </p>
+            
+            <p className="text-white/50 text-xs sm:text-sm line-clamp-1 leading-relaxed flex items-center gap-1">
+              {!event.isOnline ? <MapPin className="size-3" /> : <Globe className="size-3" />}
+              {!event.isOnline 
+                ? `${event.location.venue}, ${event.location.city}` 
+                : "Online"}
+            </p>
+            
+            <p className="text-white/50 text-xs sm:text-sm line-clamp-1 leading-relaxed flex items-center gap-1">
+              <Users className="size-3" />
+              Capacity: {event.capacity}
+            </p>
+            
+            <p className="text-white/50 text-xs sm:text-sm line-clamp-1 leading-relaxed">
+              {event.category.type} - {event.category.category}
+            </p>
+          </div>
         </div>
       </div>
     </motion.div>
