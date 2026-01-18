@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// KEEP THIS UP TO DATE WITH THE EVENT SCHEMA IN THE SUPABASE EDGE FUNCTION
+// KEEP THIS UP TO DATE WITH THE EVENT SCHEMA IN THE EDGE FUNCTION
 
 const locationSchema = z.object({
   venue: z.string(),
@@ -17,6 +17,17 @@ const categorySchema = z.object({
   subcategory: z.string(),
 });
 
+const pricingSchema = z.object({
+  min: z.number().int().nonnegative(),
+  max: z.number().int().nonnegative(),
+}).refine(
+  (data: any) => data.max >= data.min,
+  {
+    message: "Max must be greater than min",
+    path: ["max"],
+  }
+);
+
 const eventSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -26,12 +37,13 @@ const eventSchema = z.object({
   start: z.string().datetime(),
   end: z.string().datetime(),
   publishedAt: z.string().datetime(),
-  isOnline: z.boolean(),
   capacity: z.number().int().positive(),
-  currency: z.string().length(3).transform(s => s.toUpperCase()),
   thumbnail: z.string().url().optional(),
+  currency: z.string().length(3).transform(s => s.toUpperCase()),
   category: categorySchema,
+  isOnline: z.boolean(),
   location: locationSchema,
+  pricing: pricingSchema,
   openaiFileId: z.string().optional(), // id in vector database
 });
 
@@ -39,3 +51,4 @@ export { eventSchema, locationSchema, categorySchema };
 export type Event = z.infer<typeof eventSchema>;
 export type Location = z.infer<typeof locationSchema>;
 export type Category = z.infer<typeof categorySchema>;
+export type Pricing = z.infer<typeof pricingSchema>;

@@ -1,8 +1,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { Calendar, MapPin, Users, Globe } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { type Event } from "@/lib/schemas/events/event";
-import { Character } from "../characters";
 import useSWR from "swr";
 
 export function EventListCard({

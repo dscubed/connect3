@@ -31,6 +31,7 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
   );
 
   let organiserString = "";
+  console.log(event.pricing);
   if (!isLoadingCreator) { 
     console.log(creator);
     organiserString = creator ? creator.full_name : "Unknown";
@@ -114,7 +115,7 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
               {/* Currency */}
               <p className="text-white/80 text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
                 <DollarSign className="size-4" />
-                Currency: {event.currency}
+                {event.pricing.min === 0 && event.pricing.max === 0 ? "Free" : `${event.pricing.min} - ${event.pricing.max}`}
               </p>
 
               {/* Online/In-person */}
@@ -135,11 +136,15 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
         </span>
       </div>
 
-      {/* Location Details */}
-      {!event.isOnline && (
-        <div className="rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-7 mb-4 sm:mb-6">
+      <div className="flex border border-muted/20 rounded-xl sm:rounded-2xl">
+        {/* Location Details */}
+        <div className="rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-7 mb-4 sm:mb-6 w-1/2">
           <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Location</h2>
-          <div className="space-y-2">
+          {
+            event.isOnline ? (
+              <p>Event is Online</p>
+            ) :
+            <div className="space-y-2">
             <p className="text-sm sm:text-base text-muted flex items-center gap-2">
               <MapPin className="size-4" />
               <span>{event.location.venue}</span>
@@ -153,37 +158,33 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
               <span>{event.location.city}, {event.location.country}</span>
             </p>
           </div>
+          }
         </div>
-      )}
-
-      {/* Event Details */}
-      <div className="space-y-4 mb-6">
-        {/* Booking Link */}
-        {event.bookingUrl && (
-          <div className="rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-7 mb-4 sm:mb-6">
-            <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Booking</h2>
-            <div className="space-y-2">
-              <a
-                href={event.bookingUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-between p-3 sm:p-4 rounded-lg sm:rounded-xl bg-foreground hover:bg-foreground/60 border border-white/10 transition-all shadow-sm hover:shadow-md"
-              >
-                <LinkIcon className="w-4 h-4 text-white/60" />
-                <span className="text-white/90 text-sm sm:text-base truncate">
-                  {event.bookingUrl}
-                </span>
-              </a>
+        {/* Event Details */}
+        <div className="space-y-4 mb-6 w-1/2">
+          {/* Booking Link */}
+          {event.bookingUrl && (
+            <div className="rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-7 mb-4 sm:mb-6">
+              <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Links</h2>
+              <div className="space-y-2">
+                <a
+                  href={event.bookingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between  border border-muted/20
+                  p-3 sm:p-4 rounded-lg sm:rounded-xl
+                  hover:bg-card transition-all shadow-sm hover:shadow-md"
+                >
+                  <div className="flex items-center gap-2">
+                    <LinkIcon className="w-4 h-4 text-muted" />
+                    <span className="text-muted text-sm sm:text-base truncate">
+                      Humanitix
+                    </span>
+                  </div>
+                </a>
+              </div>
             </div>
-          </div>
-        )}
-
-        {/* Published At */}
-        <div className="rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-7 mb-4 sm:mb-6">
-          <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Published</h2>
-          <p className="text-sm sm:text-base text-muted">
-            {new Date(event.publishedAt).toLocaleString()}
-          </p>
+          )}
         </div>
       </div>
     </motion.div>

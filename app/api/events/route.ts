@@ -1,7 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
-import { eventSchema, type Event } from "@/lib/schemas/events/event";
-import { z } from "zod";
+import { type Event } from "@/lib/schemas/events/event";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -10,6 +9,7 @@ const supabase = createClient(
 
 /**
  * Transform database event record to match our event schema
+ * This should match the database schema but double check
  */
 function transformDbEventToEventSchema(dbEvent: any): Event {
   // Map the database fields to the schema fields
@@ -18,7 +18,7 @@ function transformDbEventToEventSchema(dbEvent: any): Event {
     name: dbEvent.name,
     creatorProfileId: dbEvent.creator_profile_id,
     description: dbEvent.description,
-    bookingUrl: dbEvent.booking_link,
+    bookingUrl: dbEvent.booking_url,
     start: dbEvent.start,
     end: dbEvent.end,
     publishedAt: dbEvent.created_at || new Date().toISOString(),
@@ -39,7 +39,10 @@ function transformDbEventToEventSchema(dbEvent: any): Event {
       city: dbEvent.event_locations?.city || 'TBA',
       country: dbEvent.event_locations?.country || 'TBA'
     },
-    openaiFileId: dbEvent.openai_file_id
+    pricing: {
+      min: dbEvent.event_pricings.min,
+      max: dbEvent.event_pricings.max, 
+    },
   };
 }
 
@@ -57,6 +60,10 @@ export async function GET(request: NextRequest) {
       .from("events")
       .select(`
         *,
+        event_pricings!inner (
+          min,
+          max
+        ),
         event_categories!inner (
           type,
           category,
@@ -80,6 +87,7 @@ export async function GET(request: NextRequest) {
     query = query.limit(limit + 1);
 
     const { data, error } = await query;
+
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });

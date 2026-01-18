@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { Event, Category, Location } from "@/lib/schemas/events/event";
 
 // Export the HostedEvent type based on the schema

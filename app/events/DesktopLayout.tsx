@@ -63,7 +63,7 @@ export default function DesktopLayout() {
   return (
     <div className="flex flex-1 overflow-hidden">
       {/* Left Panel - Event List */}
-      <div className="w-80 xl:w-96 border-r border-white/10 backdrop-blur-sm overflow-hidden flex flex-col">
+      <div className="w-80 xl:w-[34rem]  border-r border-white/10 backdrop-blur-sm overflow-hidden flex flex-col">
         <EventsHeader eventCount={events.length} isLoading={isValidating} />
         <EventFilters
           search={search}
