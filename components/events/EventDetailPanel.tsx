@@ -31,6 +31,8 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
     (url) => fetch(url).then((res) => res.json())
   );
 
+  console.log(event.thumbnail);
+
   let organiserString = "";
   if (!isLoadingCreator) { 
     console.log(creator);

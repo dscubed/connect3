@@ -25,7 +25,7 @@ function transformDbEventToEventSchema(dbEvent: any): Event {
     isOnline: dbEvent.location_type === 'online',
     capacity: dbEvent.capacity || 50, // default capacity
     currency: dbEvent.currency || 'USD', // default currency
-    thumbnail: dbEvent.thumbnail_url,
+    thumbnail: dbEvent.thumbnail,
     category: {
       type: dbEvent.event_categories?.type || 'other',
       category: dbEvent.event_categories?.category || 'general',
