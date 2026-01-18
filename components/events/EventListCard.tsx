@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { Calendar, MapPin, Users, Globe } from "lucide-react";
 import { type Event } from "@/lib/schemas/events/event";
+import useSWR from "swr";
 
 export function EventListCard({
   event,
@@ -12,6 +13,15 @@ export function EventListCard({
   isSelected: boolean;
   onClick: () => void;
 }) {
+  const {
+    data: creator,
+    error: creatorError,
+    isLoading: isLoadingCreator,
+  } = useSWR(
+    `/api/users/${event.creatorProfileId}`,
+    (url) => fetch(url).then((res) => res.json())
+  );
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -35,7 +45,7 @@ export function EventListCard({
           <div className="w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center">
             {event.thumbnail ? (
               <Image
-                src={event.thumbnail || "/placeholder.png"}
+                src={"/placeholder.png"}
                 alt={`${event.name} logo`}
                 width={48}
                 height={48}
@@ -52,6 +62,18 @@ export function EventListCard({
           <h3 className="text-black  font-semibold text-sm sm:text-base mb-1 sm:mb-1.5 truncate">
             {event.name}
           </h3>
+
+          <span className="text-foreground text-sm md:text-md font-semibold">
+            {isLoadingCreator ? (
+              <p>Fetching organisers...</p>
+            ) : creatorError ? (
+              <p>Unknown</p>
+            ) : (
+              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                {creator.full_name || "Unknown"}
+              </motion.p>
+            )}
+          </span>
           
           {/* Event details */}
           <div className="space-y-1">
@@ -61,7 +83,7 @@ export function EventListCard({
               {new Date(event.end).toLocaleDateString()}
             </p>
             
-            <p className="text-white/50 text-xs sm:text-sm line-clamp-1 leading-relaxed flex items-center gap-1">
+            {/* <p className="text-white/50 text-xs sm:text-sm line-clamp-1 leading-relaxed flex items-center gap-1">
               {!event.isOnline ? <MapPin className="size-3" /> : <Globe className="size-3" />}
               {!event.isOnline 
                 ? `${event.location.venue}, ${event.location.city}` 
@@ -75,7 +97,7 @@ export function EventListCard({
             
             <p className="text-white/50 text-xs sm:text-sm line-clamp-1 leading-relaxed">
               {event.category.type} - {event.category.category}
-            </p>
+            </p> */}
           </div>
         </div>
       </div>

@@ -21,7 +21,6 @@ interface EventDetailPanelProps {
 }
 
 export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
-  console.log(event.category)
   const {
     data: creator,
     error: creatorError,
@@ -30,8 +29,6 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
     `/api/users/${event.creatorProfileId}`,
     (url) => fetch(url).then((res) => res.json())
   );
-
-  console.log(event.thumbnail);
 
   let organiserString = "";
   if (!isLoadingCreator) { 
@@ -59,31 +56,27 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
         </button>
       )}
 
-      {/* Header with Logo */}
-      <div className="relative rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
-        <div className="flex flex-row items-center sm:items-start gap-6">
-          <div className="rounded-xl sm:rounded-2xl p-3 sm:p-4 flex-shrink-0 border-2 border-white/20 bg-secondary shadow-lg shadow-black/10 mx-auto sm:mx-0">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
-              {event.thumbnail ? (
-                <Image
-                  src={event.thumbnail}
-                  alt={`${event.name} logo`}
-                  width={80}
-                  height={80}
-                  className="object-contain max-h-16 sm:max-h-20 drop-shadow-lg"
-                />
-              ) : (
-                <Calendar className="w-16 h-16 sm:w-20 sm:h-20 text-white/80" />
-              )}
-            </div>
-          </div>
+      {/* Header background image */}
+      <div 
+        className="relative rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6 h-64 sm:h-72 lg:h-80 overflow-hidden"
+        style={{
+          backgroundImage: event.thumbnail ? `url(${event.thumbnail})` : 'none',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        {/* Dark overlay for text readability shown only when there is a thumbnail */}
+        <div className="absolute bg-gradient-to-b inset-0 bg-linear-to-b  from-black/70 via-black/50 to-transparent"></div>
+
+        {/* actual content  */}
+        <div className="relative z-10 flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
           <div className="flex-1 text-left min-w-0">
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 sm:mb-3 leading-tight">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 sm:mb-3 leading-tight text-white">
               {event.name}
             </h1>
             <div className="flex flex-col gap-1">
               {/* organiser information */}
-              <span className="text-muted text-sm md:text-md">
+              <span className="text-white/90 text-sm md:text-md">
                 {isLoadingCreator ? (
                   <p>Fetching organisers...</p>
                 ) : creatorError ? (
@@ -96,12 +89,12 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
               </span>
               
               {/* Event dates */}
-              <p className="text-muted text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
+              <p className="text-white/80 text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
                 <Calendar className="size-4" />
                 {new Date(event.start).toLocaleDateString()} -{" "}
                 {new Date(event.end).toLocaleDateString()}
               </p>
-              <p className="text-muted text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
+              <p className="text-white/80 text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
                 <Clock className="size-4" />
                 {new Date(event.start).toLocaleTimeString([], {
                   timeStyle: "short",
@@ -113,27 +106,21 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
               </p>
 
               {/* Event capacity */}
-              <p className="text-muted text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
+              <p className="text-white/80 text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
                 <Users className="size-4" />
                 Capacity: {event.capacity}
               </p>
 
               {/* Currency */}
-              <p className="text-muted text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
+              <p className="text-white/80 text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
                 <DollarSign className="size-4" />
                 Currency: {event.currency}
               </p>
 
               {/* Online/In-person */}
-              <p className="text-muted text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
-                {event.isOnline ? <Globe className="size-4" /> : <MapPin className="size-4" />}
+              <p className="text-white/80 text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
+                {event.isOnline ? <Globe className="size-4 text-white/80" /> : <MapPin className="size-4 text-white/80" />}
                 {event.isOnline ? "Online" : "In-Person"}
-              </p>
-
-              {/* Category */}
-              <p className="text-muted text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
-                <Hash className="size-4" />
-                {event.category.type} - {event.category.category} ({event.category.subcategory})
               </p>
             </div>
           </div>
@@ -197,29 +184,6 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
           <p className="text-sm sm:text-base text-muted">
             {new Date(event.publishedAt).toLocaleString()}
           </p>
-        </div>
-
-        {/* Additional Details */}
-        <div className="rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-7 mb-4 sm:mb-6">
-          <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Additional Info</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <p className="text-xs text-muted uppercase tracking-wide mb-1">Event ID</p>
-              <p className="text-sm sm:text-base text-white">{event.id}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted uppercase tracking-wide mb-1">Creator Profile ID</p>
-              <p className="text-sm sm:text-base text-white">{event.creatorProfileId}</p>
-            </div>
-            {event.openaiFileId && (
-              <>
-                <div>
-                  <p className="text-xs text-muted uppercase tracking-wide mb-1">AI File ID</p>
-                  <p className="text-sm sm:text-base text-white">{event.openaiFileId}</p>
-                </div>
-              </>
-            )}
-          </div>
         </div>
       </div>
     </motion.div>

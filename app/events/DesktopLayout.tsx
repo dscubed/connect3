@@ -65,13 +65,12 @@ export default function DesktopLayout() {
       {/* Left Panel - Event List */}
       <div className="w-80 xl:w-96 border-r border-white/10 backdrop-blur-sm overflow-hidden flex flex-col">
         <EventsHeader eventCount={events.length} isLoading={isValidating} />
-        {/* add this back later */}
-        {/* <EventFilters
+        <EventFilters
           search={search}
           setSearch={setSearch}
           selectedCategory={selectedCategory}
           setSelectedCategory={setSelectedCategory}
-        /> */}
+        />
         <div
           className="flex-1 overflow-y-auto p-5 space-y-3 scrollbar-hide"
           ref={eventListRef}
