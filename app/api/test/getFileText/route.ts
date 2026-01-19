@@ -17,13 +17,11 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const textData = await getFileText(id, supabase);
-    const text =
-      textData.profile + "\n" + textData.links + "\n" + textData.chunks;
+    const text = await getFileText(id, supabase);
 
     return NextResponse.json({ data: text }, { status: 200 });
   } catch (error) {
-    console.error("Error in GET /api/test/getChunks:", error);
+    console.error("Error in GET /api/test/getFileText:", error);
     return NextResponse.json(
       { error: (error as Error).message },
       { status: 500 }

@@ -1,77 +1,55 @@
 "use client";
-import { motion } from "framer-motion";
-import { Briefcase, MapPin } from "lucide-react";
-import { useProfileModals } from "@/components/profile/hooks/useProfileModals";
-import ProfileModals from "@/components/profile/edit-modals/ProfileModals";
-
-interface Profile {
-  first_name?: string;
-  last_name?: string;
-  status?: string;
-  location?: string;
-  tldr?: string;
-}
+import { useState } from "react";
+import { ProfileModal } from "./details/ProfileModal";
+import { Profile } from "@/stores/authStore";
+import { universities, University } from "./details/univeristies";
+import { cn } from "@/lib/utils";
 
 interface UserDetailsProps {
   profile: Profile;
+  editingProfile: boolean;
 }
 
-export default function UserDetails({ profile }: UserDetailsProps) {
-  const {
-    handleOpen,
-    handleClose,
-    handleSave,
-    editing,
-    setField,
-    openModal: modal,
-  } = useProfileModals(profile);
+export default function UserDetails({
+  profile,
+  editingProfile,
+}: UserDetailsProps) {
+  const [modalOpen, setModalOpen] = useState(false);
 
   return (
-    <div className="flex-1 md:pb-4">
+    <div
+      className="flex-1 md:pb-4"
+      onClick={() => {
+        if (editingProfile) {
+          setModalOpen(true);
+        }
+      }}
+    >
       {/* Name */}
-      <div className="flex items-center gap-2 mb-2">
-        <motion.h1
-          className="text-3xl md:text-4xl font-bold cursor-pointer"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => handleOpen("name")}
+      <div className="flex flex-col gap-2 mb-2">
+        <h1
+          className={cn(
+            "text-4xl font-medium",
+            editingProfile && "hover:scale-105 transition-all cursor-pointer"
+          )}
         >
           {profile.first_name} {profile.last_name || ""}
-        </motion.h1>
+        </h1>
+        {/* University */}
+        <h1
+          className={cn(
+            "text-xl font-normal text-muted/80 flex items-center gap-2",
+            editingProfile && "hover:scale-105 transition-all cursor-pointer "
+          )}
+        >
+          {profile.university && profile.university in universities
+            ? universities[profile.university as University].name
+            : "-"}
+        </h1>
       </div>
 
-      {/* Status */}
-      <motion.div
-        className="flex items-center gap-2 text-muted mb-3 cursor-pointer"
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        onClick={() => handleOpen("status")}
-      >
-        <Briefcase className="h-4 w-4" />
-        <span className="text-lg text-muted">
-          {profile.status || "Add your current status"}
-        </span>
-      </motion.div>
-
-      {/* Location */}
-      <motion.div
-        className="flex items-center gap-2 text-muted mb-4 cursor-pointer"
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        onClick={() => handleOpen("location")}
-      >
-        <MapPin className="h-4 w-4" />
-        <span>{profile.location || "Location not set"}</span>
-      </motion.div>
-
       {/* Modals */}
-      <ProfileModals
-        modal={modal}
-        editing={editing}
-        setField={setField}
-        handleClose={handleClose}
-        handleSave={handleSave}
-      />
+      <ProfileModal isOpen={modalOpen} setIsOpen={setModalOpen} />
     </div>
   );
 }

@@ -43,8 +43,18 @@ export const createChatroom = async (query: string) => {
     .single();
 
   if (messageError || !messageData) {
-    console.error("❌ Error creating initial message:", messageError);
-    toast.error("Failed to create initial message. Please try again.");
+    console.error("❌ Error creating initial message:", {
+      error: messageError,
+      message: messageError?.message,
+      details: messageError?.details,
+      hint: messageError?.hint,
+      code: messageError?.code,
+      data: messageData,
+    });
+    toast.error(
+      messageError?.message ||
+        "Failed to create initial message. Please try again."
+    );
     return;
   }
 

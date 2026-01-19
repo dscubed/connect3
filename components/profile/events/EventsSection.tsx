@@ -9,15 +9,22 @@ import { useAuthStore } from "@/stores/authStore";
 
 export default function EventsSection() {
   const { user } = useAuthStore();
-  
+
   const eventDisplayRef = useRef<HTMLDivElement | null>(null);
-  const { items: events, isLoading, isValidating } = useInfiniteScroll<HostedEvent>(eventDisplayRef, user ? `/api/users/${user.id}/events` : null);
+  const {
+    items: events,
+    isLoading,
+    isValidating,
+  } = useInfiniteScroll<HostedEvent>(
+    eventDisplayRef,
+    user ? `/api/users/${user.id}/events` : null
+  );
   if (!user) return;
   if (isLoading) {
     return (
       <div>
         <CubeLoader size={60} />
-        <span className="text-white/70">Loading events...</span>
+        <span className="text-muted">Loading events...</span>
       </div>
     );
   }
@@ -32,15 +39,25 @@ export default function EventsSection() {
       <div className="space-y-6">
         <EventFormHeader />
         <div className="h-96">
-          <div className="flex flex-col overflow-y-auto p-5 space-y-3 scrollbar-hide h-5/6" ref={eventDisplayRef}>
-          {events.map((event, i) => {
-            return <ProfileEventListCard key={i} index={i}  event={event} />
-          })}
-          { isValidating && <p>Loading...</p>}
+          <div
+            className="flex flex-col overflow-y-auto p-5 space-y-3 scrollbar-hide h-5/6"
+            ref={eventDisplayRef}
+          >
+            {events.length === 0 && !isValidating ? (
+              <p className="text-muted">No events hosted yet.</p>
+            ) : (
+              <>
+                {events.map((event, i) => {
+                  return (
+                    <ProfileEventListCard key={i} index={i} event={event} />
+                  );
+                })}
+              </>
+            )}
+            {isValidating && <p>Loading...</p>}
+          </div>
         </div>
-        </div>
-        
       </div>
-    </motion.div>  
+    </motion.div>
   );
 }

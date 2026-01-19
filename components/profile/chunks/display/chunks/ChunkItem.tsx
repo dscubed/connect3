@@ -1,7 +1,7 @@
 import { Trash } from "lucide-react";
 import { ChunkEditor } from "../ChunkEditor";
-import { ChunkEntry, useChunkContext } from "../../hooks/ChunkProvider";
-import { AllCategories } from "../../ChunkUtils";
+import { useChunkContext } from "../../hooks/ChunkProvider";
+import { AllCategories, ChunkEntry } from "../../ChunkUtils";
 import { Fade } from "@/components/ui/Fade";
 import { SortableChunk } from "./SortableChunk";
 
@@ -12,49 +12,53 @@ export function ChunkItem({
   chunk: ChunkEntry;
   category: AllCategories;
 }) {
-  const { removeChunk, editChunks, setEditChunks, isEditing } =
-    useChunkContext();
+  const {
+    removeChunk,
+    isEditing,
+    isEditingCategory,
+    focusChunk,
+    isFocused,
+    getChunk,
+    updateChunk,
+    editCategory,
+  } = useChunkContext();
+
+  const currentChunk = getChunk(chunk.id);
+  if (!currentChunk) {
+    return null;
+  }
 
   return (
     <li
       onClick={() => {
-        setEditChunks((prev) => {
-          if (!isEditing) return prev;
-          return {
-            ...prev,
-            [chunk.id]: { text: chunk.text, category },
-          };
-        });
+        if (!isEditing) return;
+        if (isEditingCategory(category)) {
+          focusChunk(chunk.id, category);
+        } else {
+          editCategory(category);
+          focusChunk(chunk.id, category);
+        }
       }}
     >
-      {editChunks[chunk.id] ? (
-        <ChunkEditor
-          chunk={editChunks[chunk.id]}
-          setChunk={(updatedChunk) =>
-            setEditChunks((prev) => ({
-              ...prev,
-              [chunk.id]: updatedChunk,
-            }))
-          }
-          cancel={() =>
-            setEditChunks((prev) => {
-              const updated = { ...prev };
-              delete updated[chunk.id];
-              return updated;
-            })
-          }
-          chunkId={chunk.id}
-        />
-      ) : (
-        <SortableChunk key={chunk.id} chunk={chunk} show={isEditing}>
+      <SortableChunk
+        key={chunk.id}
+        chunk={chunk}
+        show={isEditing && isEditingCategory(category)}
+      >
+        {isFocused(chunk.id, category) ? (
+          <ChunkEditor
+            chunk={currentChunk}
+            setChunk={(updatedChunk) => updateChunk(updatedChunk)}
+          />
+        ) : (
           <div className="flex items-baseline gap-2 rounded-lg w-full hover:bg-white/20 transition-all">
             <span
               className="inline-block w-2 h-2 bg-black rounded-full"
               aria-hidden="true"
             />
-            <span className="flex-1 p-2 text-base">{chunk.text}</span>
+            <span className="flex-1 p-1 text-base">{chunk.text}</span>
             <Fade
-              show={isEditing}
+              show={isEditing && isEditingCategory(category)}
               className="p-1 text-muted hover:text-red-500 transition-colors"
             >
               <button
@@ -70,8 +74,8 @@ export function ChunkItem({
               </button>
             </Fade>
           </div>
-        </SortableChunk>
-      )}
+        )}
+      </SortableChunk>
     </li>
   );
 }

@@ -5,7 +5,8 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { AllCategories } from "../ChunkUtils";
-import { ChunkEntry, useChunkContext } from "./ChunkProvider";
+import { useChunkContext } from "./ChunkProvider";
+import { ChunkEntry } from "../ChunkUtils";
 
 export function useDnd() {
   const { moveCategory, orderedCategoryChunks, moveChunk } = useChunkContext();

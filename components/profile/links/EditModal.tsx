@@ -8,12 +8,12 @@ import { LinkItem, LinkType, LinkTypes, UrlToLinkDetails } from "./LinksUtils";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
-import { LinksDisplay } from "./LinksDisplay";
+import { EditLinksDisplay } from "./EditLinksDisplay";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
 import { LinkTypeInput } from "./LinkTypeInput";
 import { Link } from "lucide-react";
-import { uploadProfileToVectorStore } from "@/lib/vectorStores/client";
+import { uploadProfileToVectorStore } from "@/lib/vectorStores/profile/client";
 
 interface EditModalProps {
   links: LinkItem[];
@@ -196,7 +196,7 @@ export function EditModal({
         </DialogHeader>
         <div className="mt-4 flex flex-col">
           {/* Display Existing Links Here */}
-          <LinksDisplay links={links} editFunctions={editFunctions} />
+          <EditLinksDisplay links={links} editFunctions={editFunctions} />
           {/* Add Links */}
           {addingLink ? (
             <div className="animate-fade-in">

@@ -14,7 +14,7 @@ interface SearchBarUIProps {
 }
 
 const DEFAULT_CONTAINER_CLASSNAME =
-  "rounded-2xl border border-foreground/20 px-4 py-3 backdrop-blur shadow-xl hover:shadow-white/10";
+  "rounded-3xl border border-foreground/20 px-4 py-3 backdrop-blur shadow-xl hover:shadow-white/10";
 
 const SearchBarUIComponent: React.FC<SearchBarUIProps> = ({
   query,
@@ -43,7 +43,7 @@ const SearchBarUIComponent: React.FC<SearchBarUIProps> = ({
   return (
     <form onSubmit={handleSubmit} className="w-full">
       <div
-        className={`bg-background text-foreground mx-auto max-w-2xl flex flex-col items-center ${containerClassName} transition-all ${
+        className={`bg-background text-foreground mx-auto max-w-3xl flex flex-col items-center ${containerClassName} transition-all ${
           disabled || isLoading
             ? "opacity-50 pointer-events-none grayscale"
             : ""

@@ -1,13 +1,18 @@
-import { useAuthStore } from "@/stores/authStore";
-import { LinksDisplay } from "./links/LinksDisplay";
+import { Profile, useAuthStore } from "@/stores/authStore";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { EditLinkButton } from "./links/EditLinkButton";
 import { EditModal } from "./links/EditModal";
 import { LinkItem } from "./links/LinksUtils";
+import { LinksDisplay } from "./links/LinksDisplay";
 
-export function LinksSection() {
-  const { profile, loading, getSupabaseClient } = useAuthStore.getState();
+interface LinksSectionProps {
+  editingProfile: boolean;
+  profile: Profile;
+}
+
+export function LinksSection({ editingProfile, profile }: LinksSectionProps) {
+  const { loading, getSupabaseClient } = useAuthStore.getState();
   const [linkData, setLinkData] = useState<LinkItem[]>([]);
   const [fetched, setFetched] = useState(false);
   const [displayEditModal, setDisplayEditModal] = useState(false);
@@ -19,27 +24,36 @@ export function LinksSection() {
     const fetchLinks = async () => {
       const { data, error } = await supabase
         .from("profile_links")
-        .select("id, type, details");
+        .select("id, type, details")
+        .eq("profile_id", profile.id);
       if (error || !data) {
         toast.error(`Error fetching links: ${error.message}`);
         return;
       }
       setLinkData(data as LinkItem[]);
       setFetched(true);
-      console.log("Fetched links:", data);
     };
     fetchLinks();
   }, [profile, loading, supabase, fetched]);
 
   return (
-    <div className="w-full flex flex-col gap-2 mb-12">
-      <div className="flex gap-2 items-center">
-        <h2 className="text-2xl font-semibold">Links</h2>
-        <EditLinkButton onClick={() => setDisplayEditModal(true)} />
-      </div>
+    <>
+      {!loading && (
+        <div className="flex items-center gap-4 animate-fade-in h-fit">
+          {linkData.length > 0 ? (
+            <LinksDisplay links={linkData} />
+          ) : (
+            <p>No links added</p>
+          )}
 
-      {/* Links content goes here */}
-      <LinksDisplay links={linkData} />
+          {editingProfile && (
+            <div className="flex h-full items-center animate-fade-in">
+              <span className="h-6 border-l border-secondary-foreground mr-2" />
+              <EditLinkButton onClick={() => setDisplayEditModal(true)} />
+            </div>
+          )}
+        </div>
+      )}
 
       <EditModal
         open={displayEditModal}
@@ -47,6 +61,6 @@ export function LinksSection() {
         links={linkData}
         setLinks={setLinkData}
       />
-    </div>
+    </>
   );
 }

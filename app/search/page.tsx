@@ -5,7 +5,7 @@ import { CubeLoader } from "@/components/ui/CubeLoader";
 
 function SearchPageFallback() {
   return (
-    <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
+    <div className="flex h-screen items-center justify-center bg-gray-50">
       <CubeLoader />
     </div>
   );

@@ -1,52 +1,60 @@
-import { Textarea } from "@/components/ui/TextArea";
 import { useChunkContext } from "../hooks/ChunkProvider";
-import { Button } from "@/components/ui/button";
 import { AllCategories, ChunkInput } from "../ChunkUtils";
 import { AiEnhanceDialog } from "@/components/profile/edit-modals/AiEnhanceDialog";
+import { useEffect, useRef } from "react";
+import { Textarea } from "@/components/ui/TextArea";
 
 export function ChunkEditor({
-  cancel,
   chunk,
   setChunk,
-  chunkId,
 }: {
-  cancel: () => void;
   chunk: ChunkInput;
   setChunk: (chunk: ChunkInput) => void;
-  chunkId?: string;
 }) {
-  const { addChunk, setChunks } = useChunkContext();
+  const { changeFocus, clearFocus, removeChunk } = useChunkContext();
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  if (chunk.category === null) return null;
+  // Focus the input when the component mounts
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
-  const submit = () => {
-    if (chunk.text.trim() === "") return;
-    // If chunkId is provided, we're editing an existing chunk
-    if (chunkId) {
-      setChunks((prev) =>
-        prev.map((c) =>
-          c.id === chunkId ? { ...c, text: chunk.text.trim() } : c
-        )
-      );
-    } else {
-      addChunk(chunk.category!, chunk.text.trim());
-    }
-    setChunk({ text: "", category: null });
-    cancel();
-  };
+  if (!chunk.category || !chunk.id) return null;
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    const { selectionStart, selectionEnd, value } = e.currentTarget;
+
+    if (
+      (e.key === "Enter" && !e.shiftKey) ||
+      e.key === "Tab" ||
+      (e.key === "ArrowDown" && selectionEnd === value.length)
+    ) {
+      if (chunk.text.trim() === "") return;
       e.preventDefault();
-      submit();
+      changeFocus(chunk.category, "next");
+    }
+    if (e.key === "ArrowUp" && selectionStart === 0) {
+      e.preventDefault();
+      changeFocus(chunk.category, "back");
+      if (chunk.text.trim() === "") removeChunk(chunk.id);
+    }
+    if (chunk.text === "" && e.key === "Backspace") {
+      e.preventDefault();
+      changeFocus(chunk.category, "back");
+      removeChunk(chunk.id);
     }
     if (e.key === "Escape") {
-      cancel();
+      clearFocus(chunk.category);
+      if (chunk.text.trim() === "") removeChunk(chunk.id);
     }
+  };
+
+  const removeNewLines = (text: string) => {
+    return text.replace(/\n/g, " ");
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setChunk({ ...chunk, text: e.target.value });
+    setChunk({ ...chunk, text: removeNewLines(e.target.value) });
   };
 
   return (
@@ -58,47 +66,23 @@ export function ChunkEditor({
         />
         <div className="flex w-full items-end gap-2">
           <Textarea
-            className="flex-1 p-2 min-h-0 border-none outline-none focus-visible:ring-0 focus:ring-0 resize-none md:text-md"
+            ref={inputRef}
+            className="flex-1 p-2 min-h-0 border-none outline-none shadow-none focus-visible:ring-0 focus:ring-0 resize-none !text-base"
             placeholder={CATEGORY_PLACEHOLDERS[chunk.category]}
             onKeyDown={handleKeyDown}
             onChange={handleChange}
             value={chunk.text}
-            rows={1}
           />
           <div className="items-end min-h-10">
-          <AiEnhanceDialog
-            initialText={chunk.text}
-            fieldType="chunk"
-            title="Enhance this highlight"
-            triggerLabel="Enhance"
-            onApply={(newText) => {
-              // update what's shown in the editor immediately
-              setChunk({ ...chunk, text: newText });
-
-              // if editing an existing chunk, update it in the store too
-              if (chunkId) {
-                setChunks((prev) =>
-                  prev.map((c) => (c.id === chunkId ? { ...c, text: newText } : c))
-                );
-              }
-            }}
-          />
+            <AiEnhanceDialog
+              initialText={chunk.text}
+              fieldType="chunk"
+              title="Enhance this highlight"
+              onApply={(newText) => {
+                setChunk({ ...chunk, text: newText });
+              }}
+            />
           </div>
-        </div>
-      </div>
-      <div>
-        <div className="flex justify-end gap-2">
-          <Button
-            variant="ghost"
-            onClick={() => {
-              cancel();
-            }}
-          >
-            Cancel
-          </Button>
-          <Button variant="ghost" onClick={() => submit()}>
-            Save
-          </Button>
         </div>
       </div>
     </div>

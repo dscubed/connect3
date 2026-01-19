@@ -1,15 +1,16 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { LinkTypes } from "@/components/profile/links/LinksUtils";
+import {
+  universities,
+  University,
+} from "@/components/profile/details/univeristies";
 
-export async function getOrderedChunks(
-  profileId: string,
-  supabase: SupabaseClient
-) {
+async function getOrderedChunks(profileId: string, supabase: SupabaseClient) {
   const { data: chunksData, error: chunksError } = await supabase
     .from("profile_chunks")
     .select("text, category, order")
     .eq("profile_id", profileId)
-    .order("created_at", { ascending: true });
+    //.order("created_at", { ascending: true });
   if (chunksError || !chunksData) {
     throw new Error(`Error fetching profile chunks: ${chunksError.message}`);
   }
@@ -24,12 +25,22 @@ export async function getOrderedChunks(
     );
   }
 
-  const orderedChunks = categoryOrderData.map(({ category }) => ({
+  /*const orderedChunks = categoryOrderData.map(({ category }) => ({
+    category,
+    chunks: chunksData
+      .filter((chunk) => chunk.category === category)
+      .sort((a, b) => a.order - b.order),
+  }));*/
+
+  const orderedChunks = categoryOrderData
+  .sort((a, b) => a.order - b.order)
+  .map(({ category }) => ({
     category,
     chunks: chunksData
       .filter((chunk) => chunk.category === category)
       .sort((a, b) => a.order - b.order),
   }));
+
 
   return {
     orderedChunks,
@@ -39,7 +50,7 @@ export async function getOrderedChunks(
 async function getProfileData(profileId: string, supabase: SupabaseClient) {
   const { data, error } = await supabase
     .from("profiles")
-    .select("first_name, last_name, account_type, tldr")
+    .select("first_name, last_name, account_type, university, tldr")
     .eq("id", profileId)
     .single();
   if (error || !data) {
@@ -72,11 +83,15 @@ export async function getFileText(profileId: string, supabase: SupabaseClient) {
   const profileChunks = await getOrderedChunks(profileId, supabase);
   const profileLinks = await getProfileLinks(profileId, supabase);
 
+  const tldr = profileData.tldr || "";
+
+  const name = `${profileData.first_name ?? ""} ${profileData.last_name ?? ""}`.trim() || "Unknown";
   const profileText = `
-  ${profileData.first_name} ${profileData.last_name} (${
-    profileData.account_type
-  })
-  ${profileData.tldr.length > 0 ? profileData.tldr : "No summary provided."}`;
+  ${name} (${profileData.account_type})
+  University: ${
+    universities[profileData.university as University]?.name || "Not specified"
+  }
+  ${tldr.length > 0 ? tldr : "No summary provided."}`;
 
   const linksText = profileLinks
     .map((link) => `${link.type}: ${link.details}`)
@@ -90,11 +105,8 @@ export async function getFileText(profileId: string, supabase: SupabaseClient) {
     }
   }
 
-  const data = {
-    profile: profileText.trim(),
-    links: linksText.trim(),
-    chunks: chunkText.trim(),
-  };
+  const text =
+    profileText.trim() + "\n" + linksText.trim() + "\n" + chunkText.trim();
 
-  return data;
+  return text;
 }

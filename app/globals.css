@@ -18,7 +18,7 @@
     --background: 249 236 255;
     --foreground: 133 78 203;
     --card: 249 236 255;
-    --card-foreground: 133 78 203;
+    --card-foreground: 0 0 0;
     --popover: 255 255 255;
     --popover-foreground: 0 0 0;
     --primary: 249 236 255;
@@ -126,4 +126,21 @@
     background-color: hsla(0, 0%, 0%, 1);
     background-image: radial-gradient(circle at 85% 80%, hsla(266.99999999999983, 1%, 8%, 0.7) 9%, transparent 55%), radial-gradient(circle at 60% 24%, hsla(335.9999999999997, 2%, 15%, 0.6) 5%, transparent 72%), radial-gradient(circle at 13% 82%, hsla(53.999999999999886, 0%, 0%, 0.3) 5%, transparent 52%), radial-gradient(circle at 24% 7%, hsla(299, 4%, 25%, 0.8) 13%, transparent 68%);
     background-blend-mode: normal, normal, normal, normal;
+}
+
+/* 3D flip card utilities */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
 }

@@ -1,91 +1,74 @@
-import z from "zod";
+import OpenAI from "openai";
 import {
-  AgentState,
   EntityResult,
+  FileMap,
+  FileResult,
   ResultSection,
   SearchResponse,
-} from "./type";
-import { OpenAI } from "openai";
+} from "./types";
+import { z } from "zod";
 import { zodTextFormat } from "openai/helpers/zod.mjs";
 import { partialParseResponse } from "./streamParser";
 
-const formatEntitiesSummary = (entities: EntityResult[]): string => {
-  if (entities.length === 0) {
-    return "No entities were found.";
-  }
-  let summary = "Entities found:\n";
-  for (const entity of entities) {
-    summary += `ID: ${entity.id} (${entity.type}): ${entity.reason}\n`;
-    for (const file of entity.relevantFiles) {
-      summary += `\t-File ID: ${file.file_id}, Summary: ${file.summary}\n`;
-    }
-  }
-  return summary;
-};
-
-const SearchResponseSchema = z.object({
+const LLMSearchResultSchema = z.object({
   summary: z.string(),
   results: z.array(
     z.object({
-      header: z.string().nullable(),
+      header: z.string(),
       text: z.string(),
-      entity_ids: z.array(z.string()),
+      fileIds: z.array(z.string()),
     })
   ),
   followUps: z.string(),
 });
 
 export const generateResponse = async (
-  query: string,
-  state: AgentState,
+  searchResults: FileResult[],
+  context: string,
   openai: OpenAI,
-  emit: (event: string, data: unknown) => void
+  fileMap: FileMap,
+  emit?: (event: string, data: unknown) => void
 ): Promise<SearchResponse> => {
-  // Create a map which maps its entity IDs to EntityResults\
-  const entityMap = new Map<string, EntityResult>();
-  for (const entity of state.entities) {
-    entityMap.set(entity.id, entity);
-  }
+  const results = searchResults
+    .map((res) => `${res.fileId}:\n${res.text}`)
+    .join("\n\n");
+  const systemPrompt = `You are an expert search result summarizer. Given a user query and a set of search results, you will generate a concise summary and suggest follow-up questions.
 
-  console.log("Generating response for user...");
-  state.progress.generating = true;
-  emit("progress", state.progress);
+        Your task is to analyze the search results and return a JSON object in the following format:
+        {
+            "summary": "<concise summary of the search results>",
+            "results": [
+                {
+                    "header": "<header for result>",
+                    "text": "<detailed text for result>",
+                    "fileIds": [<list of file IDs that contributed to this result>]
+                },
+                ...
+            ],
+            "followUps": "<suggested follow-up questions>"
+        }
+        Each result section should have no more than 3 matches.
 
-  const prompt = `You are to summarise the search results for a user query. 
-    
-    Structure of JSON response:
-    {
-        "summary": "A brief summary of the search results.",
-        "results": [
-            {
-                "header": "Optional header for this result section",
-                "text": "Detailed text about this result section.",
-                "entity_ids": [ // List ids of entities found in this section ]
-            }
-        ],
-        "followUps": "Suggested follow-up questions or actions for the user."
-    }
+        Text should be short and concise (max 2 sentences per result) use bullet points if necessary.
+        summary and followUps should be no more than 2 sentences each.
 
-    Results should be ranked from most relevant to least relevant.
-    Each separate result section should have a separation of concerns.
-    Only use sections for complex queries with each section addressing a different part of the query.
-    If the query is simple, return a single result section summarising all findings.
-    `;
+        Search responses were designed to capture as many relevant documents as possible.
+        You do not need to use all search results only pick results that allow you to best generate a response to the user's query.
+        Only pick the search results which fit in with what the user is looking for.
 
-  const entities_summary = formatEntitiesSummary(state.entities);
+        If there are no matches you can identify any partial matches and indicate that in the summary.
+        If there are no matches thats fine just indicate that in the summary.`;
 
   const stream = await openai.responses.create({
-    model: "gpt-5-mini",
-    reasoning: {
-      effort: "low",
-    },
+    model: "gpt-4o-mini",
     input: [
-      { role: "system", content: prompt },
-      { role: "system", content: `Context Summary: ${state.summary}` },
-      { role: "system", content: `Entities Found: \n${entities_summary}` },
-      { role: "user", content: `User Query: ${query}` },
+      { role: "system", content: systemPrompt },
+      { role: "system", content: `Search Context: ${context}` },
+      { role: "user", content: `Search Results:\n${results}` },
     ],
-    text: { format: zodTextFormat(SearchResponseSchema, "search_response") },
+    text: {
+      format: zodTextFormat(LLMSearchResultSchema, "search_response"),
+    },
     stream: true,
   });
 
@@ -94,8 +77,8 @@ export const generateResponse = async (
   for await (const event of stream) {
     if (event.type === "response.output_text.delta" && "delta" in event) {
       textContent += event.delta;
-      const partial = partialParseResponse(textContent, entityMap);
-      emit("response", { partial });
+      const partial = partialParseResponse(textContent, fileMap);
+      if (emit) emit("response", { partial });
     }
   }
 
@@ -107,26 +90,26 @@ export const generateResponse = async (
     throw new Error(`Failed to parse JSON response: ${textContent}`);
   }
 
-  const validated = SearchResponseSchema.safeParse(parsed);
+  const validated = LLMSearchResultSchema.safeParse(parsed);
   if (!validated.success) {
     throw new Error(`Invalid response schema: ${validated.error.message}`);
   }
 
   // Convert to SearchResponse format
-  const searchResults: ResultSection[] = [];
+  const outputResults: ResultSection[] = [];
   for (const result of validated.data.results) {
-    searchResults.push({
+    outputResults.push({
       header: result.header ?? undefined,
       text: result.text,
-      matches: result.entity_ids
-        .map((id) => entityMap.get(id))
+      matches: result.fileIds
+        .map((id) => fileMap[id])
         .filter(Boolean) as EntityResult[],
     });
   }
 
   return {
     summary: validated.data.summary,
-    results: searchResults,
+    results: outputResults,
     followUps: validated.data.followUps,
   };
 };
