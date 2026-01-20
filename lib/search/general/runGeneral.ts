@@ -58,7 +58,7 @@ export async function runGeneral({
         undefined,
         tldr,
       );
-      return { markdown: text, entities: [] };
+      return { markdown: text };
     }
 
     // -------- University-specific query --------
@@ -129,6 +129,5 @@ Format your response in clear markdown.`,
 
   return {
     markdown: (resp.output_text ?? "").trim(),
-    entities: [],
   };
 }

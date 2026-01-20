@@ -78,7 +78,6 @@ export function useSearchStream(setMessages: MessageUpdater) {
               status: "processing",
               content: {
                 markdown: data.partial.markdown ?? "",
-                entities: data.partial.entities ?? [],
               },
             });
           }
@@ -88,16 +87,15 @@ export function useSearchStream(setMessages: MessageUpdater) {
           const data = payload as { result?: ChatMessage["content"] };
           updateMessage(messageId, {
             status: "completed",
-            content: data?.result ?? { markdown: "", entities: [] },
+            content: data?.result ?? { markdown: "" },
             progress: { step: "completed", message: "Done" },
           });
         })
         .on("broadcast", { event: "error" }, ({ payload }) => {
           console.log("[stream] error", payload);
-          const data = payload as { message?: string };
           updateMessage(messageId, {
             status: "failed",
-            content: { markdown: data?.message ?? "Error", entities: [] },
+            content: null,
           });
         });
 

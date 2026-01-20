@@ -13,7 +13,7 @@ import MatchResults from "../MatchResult/MatchResults";
 export function CompletedResponse({
   content,
 }: {
-  content: Partial<SearchResponse> | unknown;
+  content: Partial<SearchResponse>;
 }) {
   // Normalize content to the new markdown format (handles legacy format too)
   const normalized = normalizeToMarkdownResponse(content);

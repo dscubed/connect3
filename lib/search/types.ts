@@ -71,8 +71,6 @@ export interface ResultSection {
 export interface SearchResponse {
   /** The full markdown response including inline @@@type:id@@@ entity markers */
   markdown: string;
-  /** Extracted entity references from the markdown */
-  entities: EntityResult[];
   /** Optional quick links extracted from the response */
   quickLinks?: { url: string; label: string; source: "kb" | "web" }[];
 }

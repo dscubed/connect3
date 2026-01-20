@@ -84,7 +84,6 @@ Rules:
 
     return {
       markdown: (webResp.output_text ?? "").trim(),
-      entities: [],
     };
   }
 
@@ -180,7 +179,6 @@ ${storesToQuery[1] ? `- Secondary: ${storesToQuery[1].source}` : ""}
     });
     return {
       markdown: (answerResp.output_text ?? "").trim(),
-      entities: [],
     };
   }
 
@@ -222,6 +220,5 @@ Rules:
 
   return {
     markdown: (webResp.output_text ?? "").trim(),
-    entities: [],
   };
 }

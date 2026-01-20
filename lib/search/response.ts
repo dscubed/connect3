@@ -1,6 +1,5 @@
 import OpenAI from "openai";
 import { FileMap, FileResult, SearchResponse } from "./types";
-import { parseMarkdownEntities } from "./markdownParser";
 
 export const generateResponse = async (
   searchResults: FileResult[],
@@ -75,16 +74,11 @@ Would you like me to find more specific matches?`;
     if (event.type === "response.output_text.delta" && "delta" in event) {
       markdown += event.delta;
       // Emit partial markdown for streaming UI updates
-      const partial = parseMarkdownEntities(markdown);
-      if (emit) emit("response", { partial });
+      if (emit) emit("response", { partial: { markdown } });
     }
   }
 
-  // Parse final response
-  const { entities } = parseMarkdownEntities(markdown);
-
   return {
     markdown: markdown.trim(),
-    entities,
   };
 };
