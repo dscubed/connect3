@@ -11,6 +11,7 @@ export interface Profile {
   created_at: string;
   updated_at: string;
   onboarding_completed: boolean;
+  humanitix_event_integration_setup: boolean;
   name_provided: boolean;
   location?: string;
   tldr?: string;
