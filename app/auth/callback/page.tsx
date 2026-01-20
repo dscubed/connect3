@@ -29,7 +29,7 @@ export default function AuthCallbackPage() {
               {
                 old_anonymous_id: session.user.user_metadata.anonymousId,
                 new_user_id: session.user.id,
-              }
+              },
             );
             if (error) {
               toast.error("Failed to migrate anonymous data");

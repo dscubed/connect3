@@ -15,7 +15,9 @@ export default async function Page({
             Sorry, something went wrong.
           </h1>
           <p className="text-sm text-black/70">
-            {params?.error ? `Code error: ${params.error}` : "An unspecified error occurred."}
+            {params?.error
+              ? `Code error: ${params.error}`
+              : "An unspecified error occurred."}
           </p>
         </div>
       </div>

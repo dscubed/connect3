@@ -49,7 +49,10 @@ export function ForgotPasswordForm({
           </p>
 
           <div className="pt-6 text-sm">
-            <Link href="/auth/login" className="text-[#7c4dff] hover:underline">
+            <Link
+              href="/auth/login"
+              className="text-foreground hover:underline"
+            >
               Back to login
             </Link>
           </div>
@@ -80,7 +83,7 @@ export function ForgotPasswordForm({
                 className={cn(
                   "h-12 rounded-full border-2 border-black/10 bg-white px-5",
                   "text-black placeholder:text-black/40",
-                  "focus-visible:ring-0 focus-visible:border-[#7c4dff]"
+                  "focus-visible:ring-0 focus-visible:border-foreground",
                 )}
               />
             </div>
@@ -92,8 +95,8 @@ export function ForgotPasswordForm({
               disabled={isLoading}
               className={cn(
                 "h-12 w-full rounded-full text-white font-semibold",
-                "bg-[#7c4dff] hover:bg-[#6b3dff]",
-                "disabled:opacity-60"
+                "bg-foreground hover:bg-foreground/80",
+                "disabled:opacity-60",
               )}
             >
               {isLoading ? "Sending..." : "Send reset email"}
@@ -106,7 +109,10 @@ export function ForgotPasswordForm({
 
             <div className="text-center text-sm text-black/70">
               Remember your password?{" "}
-              <Link href="/auth/login" className="text-[#7c4dff] hover:underline">
+              <Link
+                href="/auth/login"
+                className="text-foreground hover:underline"
+              >
                 Login
               </Link>
             </div>

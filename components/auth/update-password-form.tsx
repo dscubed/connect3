@@ -63,7 +63,7 @@ export function UpdatePasswordForm({
               className={cn(
                 "h-12 rounded-full border-2 border-black/10 bg-white px-5",
                 "text-black placeholder:text-black/40",
-                "focus-visible:ring-0 focus-visible:border-[#7c4dff]"
+                "focus-visible:ring-0 focus-visible:border-foreground",
               )}
             />
           </div>
@@ -75,8 +75,8 @@ export function UpdatePasswordForm({
             disabled={isLoading}
             className={cn(
               "h-12 w-full rounded-full text-white font-semibold",
-              "bg-[#7c4dff] hover:bg-[#6b3dff]",
-              "disabled:opacity-60"
+              "bg-foreground hover:bg-foreground/70",
+              "disabled:opacity-60",
             )}
           >
             {isLoading ? "Saving..." : "Save new password"}

@@ -21,6 +21,7 @@ export default function Page() {
 
   useEffect(() => {
     const email = localStorage.getItem("pendingVerificationEmail");
+    console.log("Pending verification email:", email);
     if (email) setPendingEmail(email);
   }, []);
 
@@ -74,30 +75,28 @@ export default function Page() {
             <h1 className="text-4xl font-black tracking-tight text-black">
               Thank you for signing up!
             </h1>
-            <p className="text-sm text-black/70">Check your email to confirm</p>
+            <p className="text-sm text-muted">Check your email to confirm</p>
           </div>
 
-          <p className="text-sm text-black/70 leading-relaxed">
+          <p className="text-sm text-muted leading-relaxed">
             You&apos;ve successfully signed up. Please check your email to
             confirm your account before signing in.
           </p>
 
           <Button
-            variant="outline"
             onClick={handleResendVerification}
             disabled={isResending || !pendingEmail}
             className={cn(
-              "h-12 w-full rounded-full border-2",
-              "border-black/10 bg-white text-black",
-              "hover:bg-black/5",
-              (!pendingEmail || isResending) && "opacity-60 cursor-not-allowed"
+              "mt-1 h-12 w-full rounded-full text-sm font-semibold text-white",
+              "bg-foreground hover:bg-foreground/70",
+              (!pendingEmail || isResending) && "opacity-60 cursor-not-allowed",
             )}
           >
             {isResending
               ? "Sending..."
               : !pendingEmail
-              ? "Unable to Resend"
-              : "Resend Confirmation"}
+                ? "Unable to Resend"
+                : "Resend Confirmation"}
           </Button>
         </div>
       )}
