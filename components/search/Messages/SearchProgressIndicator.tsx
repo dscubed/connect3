@@ -1,106 +1,41 @@
-import { SearchProgress } from "../types";
+import { CheckCircle2, Loader } from "lucide-react";
+import { ProgressAction } from "../utils";
+import { cn } from "@/lib/utils";
 
 export function SearchProgressIndicator({
   progress,
 }: {
-  progress: SearchProgress | undefined;
+  progress?: ProgressAction[];
 }) {
-  if (!progress) {
+  if (!progress || progress.length === 0 || progress == undefined) {
     return <div className="flex flex-col space-y-4">Starting Search...</div>;
   }
-
-  // Helper function for converting 2 dates to a duration string
-  const formatDuration = (start: Date, end: Date) => {
-    const endDate = new Date(end);
-    const startDate = new Date(start);
-    const durationMs = endDate.getTime() - startDate.getTime();
-    const seconds = Math.floor((durationMs / 1000) % 60);
-    const minutes = Math.floor(durationMs / (1000 * 60));
-    return `${minutes}m ${seconds}s`;
-  };
+  console.log("[ProgressIndicator] rendering:", progress);
 
   return (
     <div className="flex flex-col space-y-4">
-      {progress.message && (
-        <div className="animate-pulse text-black/80">{progress.message}</div>
-      )}
-      {/* Context */}
-      {progress.context &&
-        (!progress.context.end ? (
-          <div className="animate-pulse text-black/80">
-            Analyzing Context...
-          </div>
-        ) : (
-          <>
-            <div className="text-black/50">
-              {`Thought for: ${formatDuration(
-                progress.context.start,
-                progress.context.end
-              )}`}
-            </div>
-            <div className="text-black/50">{progress.context.data}</div>
-          </>
-        ))}
-
-      {progress.iterations?.map((iteration, index) => {
-        // Determine if this is the current step
-        const isCurrent = index === progress.iterations!.length - 1;
-
-        // Classes for faded vs. active
-        const faded = "text-black/40";
-        const active = "text-black/90";
-        const pulse = "animate-pulse text-black/80";
-
-        return (
-          <div key={index}>
-            {/* Searching */}
-            {iteration.searching && Array.isArray(iteration.searching.data) && (
-              <div className={`flex flex-col ${isCurrent ? active : faded}`}>
-                <div>Searching...</div>
-                {iteration.searching.data.map(
-                  (query: string, qIndex: number) => (
-                    <div key={qIndex} className={isCurrent ? pulse : ""}>
-                      {query}
-                    </div>
-                  )
-                )}
-                {iteration.searching.end ? (
-                  <div className={`italic ${isCurrent ? active : faded}`}>
-                    Search Finished
-                  </div>
-                ) : null}
-              </div>
+      {progress.map((action, index) => (
+        <div key={index} className="relative flex flex-col animate-fade-in">
+          {index < progress.length - 1 && (
+            <span className="absolute left-2 top-6 h-full w-px bg-black z-0" />
+          )}
+          <div className="flex items-center space-x-2">
+            {action.status === "complete" ? (
+              <CheckCircle2 className="w-5 h-5 bg-white" />
+            ) : (
+              <Loader className="w-5 h-5 animate-spin text-muted bg-white" />
             )}
-
-            {/* Refining */}
-            {iteration.refining &&
-              (!iteration.refining.end ? (
-                <div className={isCurrent ? pulse : faded}>
-                  Refining Results...
-                </div>
-              ) : (
-                <div className={`italic ${isCurrent ? active : faded}`}>
-                  Refining returned {iteration.refining.data} results
-                </div>
-              ))}
-            {iteration.reasoning &&
-              (!iteration.reasoning.end ? (
-                <div className={isCurrent ? pulse : faded}>
-                  Reasoning Next Steps...
-                </div>
-              ) : (
-                <div className={`italic ${isCurrent ? active : faded}`}>
-                  {iteration.reasoning.data}
-                </div>
-              ))}
+            <span
+              className={cn(
+                "font-medium",
+                action.status === "start" && "text-muted animate-pulse",
+              )}
+            >
+              {action.message}
+            </span>
           </div>
-        );
-      })}
-      {progress.generating && (
-        <div className="animate-pulse text-black/80">
-          Generating Response...
         </div>
-      )}
+      ))}
     </div>
   );
 }

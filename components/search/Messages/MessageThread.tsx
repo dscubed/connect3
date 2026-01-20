@@ -1,7 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import { CompletedResponse } from "./CompletedResponse";
-import { UserProfile, ChatMessage } from "../types";
+import { UserProfile, ChatMessage } from "../utils";
 import { SearchProgressIndicator } from "./SearchProgressIndicator";
 import UserAvatar from "../MatchResult/UserAvatar";
 import { useAuthStore } from "@/stores/authStore";

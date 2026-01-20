@@ -1,6 +1,6 @@
 "use client";
 import { MessageThread } from "./MessageThread";
-import { ChatMessage, UserProfile } from "../types";
+import { ChatMessage, UserProfile } from "../utils";
 
 interface MessageListProps {
   messages: ChatMessage[];
@@ -19,7 +19,7 @@ export function MessageList({
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8 px-8">
+    <div className="max-w-3xl mx-auto space-y-8 px-8 pb-12">
       {messages.map((message, index) => (
         <MessageThread
           key={message.id}

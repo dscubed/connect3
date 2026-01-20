@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuthStore } from "@/stores/authStore";
-import { ChatMessage } from "../types";
+import { ChatMessage } from "../utils";
 import { useSearchStream } from "./useStreamSearch";
 import { normalizeToMarkdownResponse } from "@/lib/search/markdownParser";
 import type { SearchResponse } from "@/lib/search/types";

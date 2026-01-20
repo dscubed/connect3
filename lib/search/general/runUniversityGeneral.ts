@@ -78,7 +78,7 @@ Rules:
     });
 
     emit?.(
-      "progress",
+      "status",
       `WEB SEARCH usage: calls=${countWebSearchCalls(webResp)} tokens=${webResp.usage?.total_tokens}`,
     );
 
@@ -214,7 +214,7 @@ Rules:
   });
 
   emit?.(
-    "progress",
+    "status",
     `WEB SEARCH usage: calls=${countWebSearchCalls(webResp)} tokens=${webResp.usage?.total_tokens}`,
   );
 

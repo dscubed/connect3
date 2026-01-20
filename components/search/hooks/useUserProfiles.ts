@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { UserProfile } from "@/components/search/types";
+import { UserProfile } from "@/components/search/utils";
 
 interface UserProfilesState {
   profiles: Map<string, UserProfile>;

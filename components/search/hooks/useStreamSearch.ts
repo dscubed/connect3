@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef } from "react";
-import { ChatMessage, SearchProgress } from "../types";
+import { ChatMessage, ProgressAction } from "../utils";
 import { useAuthStore } from "@/stores/authStore";
 import { RealtimeChannel } from "@supabase/supabase-js";
 import type { EntityResult } from "@/lib/search/types";
@@ -24,11 +24,14 @@ export function useSearchStream(setMessages: MessageUpdater) {
   );
 
   const updateProgress = useCallback(
-    (messageId: string, progressUpdate: SearchProgress) => {
+    (messageId: string, progressUpdate: ProgressAction[]) => {
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === messageId ? { ...msg, progress: progressUpdate } : msg,
         ),
+      );
+      console.log(
+        `[progress] updated for message:, ${messageId}, ${progressUpdate}`,
       );
     },
     [setMessages],
@@ -60,12 +63,10 @@ export function useSearchStream(setMessages: MessageUpdater) {
       channel
         .on("broadcast", { event: "status" }, ({ payload }) => {
           console.log("[stream] status", payload);
-          const p = payload as SearchProgress;
-          updateProgress(messageId, p);
         })
         .on("broadcast", { event: "progress" }, ({ payload }) => {
           console.log("[stream] progress", payload);
-          const p = payload as SearchProgress;
+          const p = payload as ProgressAction[];
           updateProgress(messageId, p);
         })
         .on("broadcast", { event: "response" }, ({ payload }) => {
@@ -88,7 +89,6 @@ export function useSearchStream(setMessages: MessageUpdater) {
           updateMessage(messageId, {
             status: "completed",
             content: data?.result ?? { markdown: "" },
-            progress: { step: "completed", message: "Done" },
           });
         })
         .on("broadcast", { event: "error" }, ({ payload }) => {

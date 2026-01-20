@@ -12,6 +12,7 @@ import { runUniversityGeneral } from "./runUniversityGeneral";
 import { runConnect3General } from "./runConnect3General";
 import { countWebSearchCalls } from "./countWebSearches";
 import type { SearchResponse } from "../types";
+import { ProgressAction } from "@/components/search/utils";
 
 type RunGeneralArgs = {
   openai: OpenAI;
@@ -20,6 +21,12 @@ type RunGeneralArgs = {
   prevMessages: ResponseInput;
   userUniversity?: string | null;
   emit?: (event: string, data: unknown) => void;
+  progress: ProgressAction[];
+  updateProgress: (
+    progress: ProgressAction[],
+    step: ProgressAction,
+    emit?: (event: string, data: unknown) => void,
+  ) => ProgressAction[];
 };
 
 export async function runGeneral({
@@ -29,15 +36,35 @@ export async function runGeneral({
   prevMessages,
   userUniversity,
   emit,
+  progress,
+  updateProgress,
 }: RunGeneralArgs): Promise<SearchResponse> {
   // Step 1: Route the query using LLM classification
+
+  progress = updateProgress(
+    progress,
+    {
+      step: "routing",
+      status: "start",
+      message: "Classifying query...",
+    },
+    emit,
+  );
   const routing = await routeQuery(
     openai,
     query,
     prevMessages,
     userUniversity,
-    emit,
     tldr,
+  );
+  progress = updateProgress(
+    progress,
+    {
+      step: "routing",
+      status: "complete",
+      message: "Classified query.",
+    },
+    emit,
   );
 
   console.log("[runGeneral] routing", routing);
@@ -46,10 +73,6 @@ export async function runGeneral({
   switch (routing.route) {
     // -------- Connect3 app help --------
     case "connect3": {
-      emit?.("status", {
-        step: "general_connect3",
-        message: "Answering as Connect3 assistant...",
-      });
       const text = await runConnect3General(
         openai,
         query,
@@ -66,10 +89,16 @@ export async function runGeneral({
       const vectorStores = getVectorStores(routing.university);
 
       if (vectorStores.official || vectorStores.union) {
-        emit?.("status", {
-          step: "general_kb",
-          message: `Searching ${routing.university} knowledge base...`,
-        });
+        progress = updateProgress(
+          progress,
+          {
+            step: "general_kb",
+            status: "start",
+            message: "Querying university knowledge base...",
+          },
+          emit,
+        );
+
         return runUniversityGeneral(
           openai,
           query,
@@ -80,20 +109,32 @@ export async function runGeneral({
       }
 
       // Fall through to web if no KB configured
-      emit?.("status", {
-        step: "general_web_fallback",
-        message: "University KB not available, searching web...",
-      });
+      // Remove previous KB progress entry
+      progress.pop();
+      progress = updateProgress(
+        progress,
+        {
+          step: "websearch",
+          status: "start",
+          message: "University KB not available, searching web...",
+        },
+        emit,
+      );
       return webSearch(openai, query, emit);
     }
 
     // -------- General web search --------
     case "web":
     default: {
-      emit?.("status", {
-        step: "general_web",
-        message: "Searching the web...",
-      });
+      progress = updateProgress(
+        progress,
+        {
+          step: "websearch",
+          status: "start",
+          message: "Searching the web...",
+        },
+        emit,
+      );
       return webSearch(openai, query, emit);
     }
   }
@@ -123,7 +164,7 @@ Format your response in clear markdown.`,
   });
 
   emit?.(
-    "progress",
+    "status",
     `WEB SEARCH: calls=${countWebSearchCalls(resp)} tokens=${resp.usage?.total_tokens}`,
   );
 

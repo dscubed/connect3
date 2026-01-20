@@ -143,11 +143,8 @@ export async function routeQuery(
   query: string,
   prevMessages: ResponseInput,
   userUniversity?: string | null,
-  emit?: (event: string, data: unknown) => void,
   tldr?: string,
 ): Promise<RouterResult> {
-  emit?.("status", { step: "routing", message: "Classifying query..." });
-
   try {
     const resp = await openai.responses.parse({
       model: "gpt-4o-mini",
