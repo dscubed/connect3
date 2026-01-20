@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
-import { SearchResponse } from "@/lib/search/type";
-import { QueryResult } from "./QueryResult";
+import { SearchResponse } from "@/lib/search/types";
+import { ResultSection } from "./QueryResult";
 
 export function CompletedResponse({
   content,
@@ -9,7 +9,7 @@ export function CompletedResponse({
 }) {
   return (
     <motion.div
-      className="space-y-6 text-white/80 leading-relaxed"
+      className="space-y-6 leading-relaxed !mt-0"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
@@ -18,7 +18,7 @@ export function CompletedResponse({
       {content.summary && (
         <motion.p
           initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={{ opacity: 0.8, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           {content.summary}
@@ -27,14 +27,14 @@ export function CompletedResponse({
 
       {/* Results */}
       {(content.results || []).map((result, userIndex) => {
-        return <QueryResult key={userIndex} result={result} />;
+        return <ResultSection key={userIndex} result={result} />;
       })}
 
       {/* Follow-up questions */}
       {content.followUps && (
         <motion.p
           initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={{ opacity: 0.8, y: 0 }}
           transition={{ duration: 0.5, delay: 1.2 }}
         >
           {content.followUps}

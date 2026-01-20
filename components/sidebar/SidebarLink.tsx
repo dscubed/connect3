@@ -3,8 +3,8 @@ import Link from "next/link";
 import SidebarButton from "./SidebarButton";
 
 interface SidebarLinkProps {
-  icon: React.ElementType;
-  label: string;
+  icon?: React.ElementType;
+  label?: string;
   href?: string;
   pathName?: string;
 }
@@ -14,7 +14,7 @@ export const SidebarLink: React.FC<SidebarLinkProps> = ({
   label,
   href,
   pathName,
-}: SidebarLinkProps & { icon: React.ElementType }) => {
+}: SidebarLinkProps) => {
   const content = (
     <SidebarButton Icon={Icon} label={label} active={href === pathName} />
   );

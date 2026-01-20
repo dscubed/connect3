@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { createClient } from "@/lib/supabase/client";
-import type { User, Session } from "@supabase/supabase-js";
+import type { User, Session, Subscription } from "@supabase/supabase-js";
 
 export interface Profile {
   id: string;
@@ -11,11 +11,13 @@ export interface Profile {
   created_at: string;
   updated_at: string;
   onboarding_completed: boolean;
+  humanitix_event_integration_setup: boolean;
   name_provided: boolean;
   location?: string;
   tldr?: string;
   cover_image_url?: string;
   status?: string;
+  university?: string | null;
   account_type?: "user" | "organisation";
 }
 
@@ -24,6 +26,7 @@ interface AuthState {
   profile: Profile | null;
   loading: boolean;
   session: Session | null;
+  authSub: Subscription | null;
   initialize: () => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (fields: Partial<Profile>) => Promise<void>;
@@ -53,8 +56,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   profile: null,
   loading: true,
   session: null,
+  authSub: null,
 
   initialize: async () => {
+    if (get().authSub) return; // Already initialized
+
     const supabase = createClient();
 
     // Get initial session and user
@@ -73,7 +79,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
 
     // Listen for changes
-    supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       const isAnon = session?.user?.is_anonymous ?? false;
       set({ user: session?.user ?? null, session, loading: false });
       if (session?.user && !isAnon) {
@@ -82,6 +90,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ profile: null });
       }
     });
+    set({ authSub: subscription });
   },
 
   signOut: async () => {
@@ -117,13 +126,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       throw new Error("Authentication required. Please log in.");
     }
 
+    // Build headers so FormData requests don't get an explicit Content-Type
+    const isFormData = options.body instanceof FormData;
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${session.access_token}`,
+      ...((options.headers as Record<string, string>) || {}),
+    };
+    if (!isFormData) {
+      headers["Content-Type"] = "application/json";
+    } else {
+      delete headers["Content-Type"];
+      delete headers["content-type"];
+    }
+
     const response = await fetch(url, {
       ...options,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session.access_token}`,
-        ...options.headers,
-      },
+      headers,
     });
 
     if (response.status === 401) {

@@ -85,7 +85,7 @@ export default function EditAvatarModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showCloseButton>
+      <DialogContent showCloseButton={true}>
         <DialogHeader>
           <DialogTitle>Upload New Avatar</DialogTitle>
         </DialogHeader>

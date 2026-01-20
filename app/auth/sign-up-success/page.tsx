@@ -63,7 +63,7 @@ export default function Page() {
         !profile.onboarding_completed
       ) {
         localStorage.removeItem("pendingVerificationEmail");
-        router.replace("/onboarding");
+        router.replace("/profile");
       }
     }
   }, [user, profile, router]);

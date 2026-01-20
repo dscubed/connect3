@@ -2,72 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Hide shadcn dialog close button globally */
-[data-slot="dialog-close"] {
-  display: none !important;
-}
+
 /* Add blur effect to shadcn dialog overlay */
 [data-slot="dialog-overlay"] {
   backdrop-filter: blur(8px);
   background: rgba(0,0,0,0.2);
 }
 [data-sonner-toast] {
-  background: #222 !important; /* or any solid color you prefer */
+  background: rgb(var(--background)) !important; /* or any solid color you prefer */
+  color: rgb(var(--foreground)) !important;
 }
 
 @layer base {
   :root {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --background: 249 236 255;
+    --foreground: 133 78 203;
+    --card: 249 236 255;
+    --card-foreground: 0 0 0;
+    --popover: 255 255 255;
+    --popover-foreground: 0 0 0;
+    --primary: 249 236 255;
+    --primary-foreground: 133 78 203;
+    --secondary: 241 241 241;
+    --secondary-foreground: 0 0 0;
+    --muted: 113 113 123;
+    --muted-foreground: 102 102 102;
+    --accent: 249 236 255;
+    --accent-foreground: 133 78 203;
+    --destructive: 130 29 29;
+    --destructive-foreground: 250 250 250;
+    --border: 38 38 38;
+    --input: 38 38 38;
+    --ring: 212 212 212;
+    --chart-1: 51 92 204;
+    --chart-2: 51 183 153;
+    --chart-3: 255 183 77;
+    --chart-4: 170 77 204;
+    --chart-5: 232 51 102;
     --radius: 0.5rem;
   }
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --background: 249 236 255;
+    --foreground: 133 78 203;
+    --card: 249 236 255;
+    --card-foreground: 133 78 203;
+    --popover: 255 255 255;
+    --popover-foreground: 0 0 0;
+    --primary: 249 236 255;
+    --primary-foreground: 133 78 203;
+    --secondary: 241 241 241;
+    --secondary-foreground: 0 0 0;
+    --muted: 170 170 170;
+    --muted-foreground: 102 102 102;
+    --accent: 249 236 255;
+    --accent-foreground: 133 78 203;
+    --destructive: 130 29 29;
+    --destructive-foreground: 250 250 250;
+    --border: 38 38 38;
+    --input: 38 38 38;
+    --ring: 212 212 212;
+    --chart-1: 51 92 204;
+    --chart-2: 51 183 153;
+    --chart-3: 255 183 77;
+    --chart-4: 170 77 204;
+    --chart-5: 232 51 102;
   }
 }
 
@@ -75,11 +73,11 @@
   * {
     @apply border-border;
   }
-  html {
+  /* html {
     @apply dark;
-  }
+  } */
   body {
-    @apply bg-background text-foreground;
+    @apply bg-white text-black;
   }
 }
 
@@ -93,8 +91,56 @@
   display: none;  /* Chrome, Safari, Opera */
 }
 
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease;
+  }
+  .animate-fade-out {
+    animation: fadeOut 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-12px);
+    }
+  }
+}
+
 .animated-gradient {
     background-color: hsla(0, 0%, 0%, 1);
     background-image: radial-gradient(circle at 85% 80%, hsla(266.99999999999983, 1%, 8%, 0.7) 9%, transparent 55%), radial-gradient(circle at 60% 24%, hsla(335.9999999999997, 2%, 15%, 0.6) 5%, transparent 72%), radial-gradient(circle at 13% 82%, hsla(53.999999999999886, 0%, 0%, 0.3) 5%, transparent 52%), radial-gradient(circle at 24% 7%, hsla(299, 4%, 25%, 0.8) 13%, transparent 68%);
     background-blend-mode: normal, normal, normal, normal;
+}
+
+/* 3D flip card utilities */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
 }

@@ -1,47 +1,21 @@
-import React, { useRef, useEffect } from "react";
+import * as React from "react";
+import TextareaAutosize from "react-textarea-autosize";
 import { cn } from "@/lib/utils";
 
-interface TextAreaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  className?: string;
+function Textarea({
+  className,
+  ...props
+}: React.ComponentProps<typeof TextareaAutosize>) {
+  return (
+    <TextareaAutosize
+      data-slot="textarea"
+      className={cn(
+        "border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 aria-invalid:border-destructive flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+        className
+      )}
+      {...props}
+    />
+  );
 }
 
-export const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
-  ({ className, onChange, value, ...props }, ref) => {
-    const internalRef = useRef<HTMLTextAreaElement>(null);
-    const textareaRef =
-      (ref as React.RefObject<HTMLTextAreaElement>) || internalRef;
-
-    // Auto-resize on value change
-    useEffect(() => {
-      const textarea = textareaRef.current;
-      if (textarea) {
-        textarea.style.height = "auto"; // Reset height
-        textarea.style.height = `${textarea.scrollHeight}px`; // Set to content height
-      }
-    }, [value, textareaRef]);
-
-    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const textarea = e.target;
-      textarea.style.height = "auto";
-      textarea.style.height = `${textarea.scrollHeight}px`;
-      onChange?.(e);
-    };
-
-    return (
-      <textarea
-        ref={textareaRef}
-        value={value}
-        onChange={handleChange}
-        className={cn(
-          "w-full bg-transparent outline-none resize-none overflow-y-auto",
-          className
-        )}
-        rows={1}
-        {...props}
-      />
-    );
-  }
-);
-
-TextArea.displayName = "TextArea";
+export { Textarea };

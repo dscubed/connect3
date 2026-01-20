@@ -5,7 +5,8 @@ const nextConfig: NextConfig = {
     domains: [
       "lh3.googleusercontent.com", 
       "nsjrzxbtxsqmsdgevszv.supabase.co",
-      "images.unsplash.com" // Added for placeholder images
+      "images.unsplash.com", // Added for placeholder images
+      "cdn.filestackcontent.com", // humanitix event thumbnails
     ],
   },
 };

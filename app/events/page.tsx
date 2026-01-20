@@ -3,16 +3,16 @@ import { useState } from "react";
 import Sidebar from "@/components/sidebar/Sidebar";
 import DesktopLayout from "./DesktopLayout";
 import MobileLayout from "./MobileLayout";
-import { breakpointLarge } from "@/hooks/useMediaQuery";
+import { useBreakpointLarge } from "@/hooks/useMediaQuery";
 
 export default function EventsPage() {
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
-  const isDesktop = breakpointLarge();
+  const isDesktop = useBreakpointLarge();
 
   return (
-    <div className="flex h-screen  bg-black overflow-hidden">
+    <div className="flex h-screen overflow-hidden">
       <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
-      { isDesktop ? <DesktopLayout /> : <MobileLayout /> }
+      {isDesktop ? <DesktopLayout /> : <MobileLayout />}
     </div>
   );
 }

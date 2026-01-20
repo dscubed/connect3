@@ -1,7 +1,10 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import Image from "next/image";
-import { ChunkData } from "@/components/profile/chunks/ChunkUtils";
+import {
+  CategoryOrderData,
+  ChunkData,
+} from "@/components/profile/chunks/ChunkUtils";
 import { ChunksList } from "./ChunksList";
 import { useEffect } from "react";
 
@@ -14,6 +17,7 @@ export interface UserProfileProps {
     location?: string;
     tldr?: string;
     chunks?: ChunkData[];
+    categoryOrder?: CategoryOrderData[];
     chunkLoading?: boolean;
   } | null;
   isOpen: boolean;
@@ -110,6 +114,7 @@ export const UserProfile = ({ user, isOpen, onClose }: UserProfileProps) => {
                   {/* Chunks List */}
                   <ChunksList
                     chunks={user.chunks || []}
+                    categoryOrder={user.categoryOrder || []}
                     chunksLoading={user.chunkLoading || false}
                   />
                 </div>

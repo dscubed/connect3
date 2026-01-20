@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { AuthInitializer } from "@/components/auth/AuthInitializer";
@@ -13,6 +13,13 @@ export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
   title: "connect3",
   description: "connect3 - AI-powered knowledge assistant",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  // Use "cover" to extend content to the screen edges
+  viewportFit: "cover",
 };
 
 const geistSans = Geist({

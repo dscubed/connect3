@@ -4,19 +4,27 @@ import { EventDetailPanel } from "@/components/events/EventDetailPanel";
 import EventsHeader from "@/components/events/HeaderSection";
 import EventFilters from "@/components/events/EventFilters";
 import { EventListCard } from "@/components/events/EventListCard";
-import { EventCategory, HostedEvent } from "@/types/events/event";
+import { EventCategory } from "@/types/events/event";
 import { useEffect, useRef, useState } from "react";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import { filterEvents } from "@/lib/events/eventUtils";
+import { type Event } from "@/lib/schemas/events/event";
 import { toast } from "sonner";
 import useInfiniteScroll from "@/hooks/useInfiniteScroll";
 
 export default function DesktopLayout() {
   const eventListRef = useRef<HTMLDivElement>(null);
-  const { items: events, error, isLoading, isValidating } = useInfiniteScroll<HostedEvent>(eventListRef, "/api/events");
-  const [selectedEvent, setSelectedEvent] = useState<HostedEvent | null>(null);
+  const {
+    items: events,
+    error,
+    isLoading,
+    isValidating,
+  } = useInfiniteScroll<Event>(eventListRef, "/api/events");
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [search, setSearch] = useState<string>("");
-  const [selectedCategory, setSelectedCategory] = useState<EventCategory | "All">("All");
+  const [selectedCategory, setSelectedCategory] = useState<
+    EventCategory | "All"
+  >("All");
   const [loaded, setLoaded] = useState<boolean>(false);
 
   useEffect(() => {
@@ -28,7 +36,7 @@ export default function DesktopLayout() {
     }
   }, [isLoading, events, loaded]);
 
-  const handleEventSelect = (event: HostedEvent) => {
+  const handleEventSelect = (event: Event) => {
     setSelectedEvent(event);
   };
 
@@ -37,21 +45,25 @@ export default function DesktopLayout() {
   }
 
   if (isLoading) {
-    return ( 
-      <div className="min-h-screen w-full flex flex-col justify-center items-center bg-black">
+    return (
+      <div className="min-h-screen w-full flex flex-col justify-center items-center">
         <CubeLoader size={32} />
         <p>Loading events...</p>
-      </div> 
-    )
+      </div>
+    );
   }
 
   // perform event filtering by name and category
-  const filtered = filterEvents(events, search, selectedCategory === "All" ? null : selectedCategory);
+  const filtered = filterEvents(
+    events,
+    search,
+    selectedCategory === "All" ? null : selectedCategory
+  );
 
   return (
     <div className="flex flex-1 overflow-hidden">
       {/* Left Panel - Event List */}
-      <div className="w-80 xl:w-96 border-r border-white/10 bg-black/50 backdrop-blur-sm overflow-hidden flex flex-col">
+      <div className="w-80 xl:w-[34rem]  border-r border-white/10 backdrop-blur-sm overflow-hidden flex flex-col">
         <EventsHeader eventCount={events.length} isLoading={isValidating} />
         <EventFilters
           search={search}
@@ -59,36 +71,39 @@ export default function DesktopLayout() {
           selectedCategory={selectedCategory}
           setSelectedCategory={setSelectedCategory}
         />
-        <div className="flex-1 overflow-y-auto p-5 space-y-3 scrollbar-hide" ref={eventListRef}>
+        <div
+          className="flex-1 overflow-y-auto p-5 space-y-3 scrollbar-hide"
+          ref={eventListRef}
+        >
           {filtered.map((event) => (
-            <EventListCard 
+            <EventListCard
               key={event.id}
-              event={event} 
-              isSelected={ selectedEvent ? selectedEvent.id === event.id : false}
+              event={event}
+              isSelected={selectedEvent ? selectedEvent.id === event.id : false}
               onClick={() => handleEventSelect(event)}
             />
           ))}
-                  
-          {filtered.length === 0 && (
-            <div className="p-4 text-sm text-white/60">
-              No events found.
-            </div>
-          )} 
 
-          { isValidating && <div className="flex justify-center">
-            <CubeLoader size={32} />
-          </div> }
+          {filtered.length === 0 && (
+            <div className="p-4 text-sm text-muted">No events found.</div>
+          )}
+
+          {isValidating && (
+            <div className="flex justify-center">
+              <CubeLoader size={32} />
+            </div>
+          )}
         </div>
       </div>
 
       {/* Right Panel - Event Details */}
-      <div className="flex-1 bg-black overflow-hidden">
+      <div className="flex-1 overflow-hidden">
         <div className="h-full overflow-y-auto p-6 lg:p-8 scrollbar-hide">
           <AnimatePresence mode="wait">
-            {selectedEvent && <EventDetailPanel event={selectedEvent} /> }
+            {selectedEvent && <EventDetailPanel event={selectedEvent} />}
           </AnimatePresence>
         </div>
       </div>
-    </div> 
-  )
+    </div>
+  );
 }

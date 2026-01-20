@@ -9,7 +9,10 @@ interface EntityTypeBadgeProps {
   className?: string;
 }
 
-export const EntityTypeBadge = ({ entityTypes, className }: EntityTypeBadgeProps) => {
+export const EntityTypeBadge = ({
+  entityTypes,
+  className,
+}: EntityTypeBadgeProps) => {
   if (!entityTypes) return null;
 
   const searchingBoth = entityTypes.users && entityTypes.organisations;
@@ -28,28 +31,36 @@ export const EntityTypeBadge = ({ entityTypes, className }: EntityTypeBadgeProps
       )}
     >
       <Sparkles className="h-3.5 w-3.5 text-blue-500 animate-pulse" />
-      
+
       {searchingBoth && (
         <>
           <Users className="h-3.5 w-3.5 text-blue-500" />
-          <span className="text-xs font-medium text-blue-600 dark:text-blue-400">People</span>
+          <span className="text-xs font-medium text-blue-600 dark:text-blue-400">
+            People
+          </span>
           <span className="text-xs text-muted-foreground">&</span>
           <Building2 className="h-3.5 w-3.5 text-purple-500" />
-          <span className="text-xs font-medium text-purple-600 dark:text-purple-400">Clubs</span>
+          <span className="text-xs font-medium text-purple-600 dark:text-purple-400">
+            Clubs
+          </span>
         </>
       )}
-      
+
       {searchingUsers && (
         <>
           <Users className="h-3.5 w-3.5 text-blue-500" />
-          <span className="text-xs font-medium text-blue-600 dark:text-blue-400">People</span>
+          <span className="text-xs font-medium text-blue-600 dark:text-blue-400">
+            People
+          </span>
         </>
       )}
-      
+
       {searchingOrgs && (
         <>
           <Building2 className="h-3.5 w-3.5 text-purple-500" />
-          <span className="text-xs font-medium text-purple-600 dark:text-purple-400">Clubs</span>
+          <span className="text-xs font-medium text-purple-600 dark:text-purple-400">
+            Clubs
+          </span>
         </>
       )}
     </div>

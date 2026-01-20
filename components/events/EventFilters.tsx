@@ -12,7 +12,9 @@ interface EventFiltersProps {
   search: string;
   setSearch: React.Dispatch<React.SetStateAction<string>>;
   selectedCategory: EventCategory | "All";
-  setSelectedCategory: React.Dispatch<React.SetStateAction<EventCategory | "All">>;
+  setSelectedCategory: React.Dispatch<
+    React.SetStateAction<EventCategory | "All">
+  >;
 }
 
 export default function EventFilters({
@@ -21,7 +23,16 @@ export default function EventFilters({
   selectedCategory,
   setSelectedCategory,
 }: EventFiltersProps) {
-  const categoryOptions = ["All", "networking", "study", "fun", "workshop", "competition", "panel", "miscellaneous"] as const;
+  const categoryOptions = [
+    "All",
+    "networking",
+    "study",
+    "fun",
+    "workshop",
+    "competition",
+    "panel",
+    "miscellaneous",
+  ] as const;
   return (
     <div className="p-4 flex-row gap-4 flex w-full">
       {/* Search Input */}
@@ -30,19 +41,19 @@ export default function EventFilters({
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Search events..."
-        className="w-full bg-white/5 border border-white/10 rounded-md px-3 py-2 text-sm placeholder:text-white/40"
+        className="bg-background w-full rounded-2xl px-3 py-2 text-sm outline-none border-none placeholder:text-foreground/50 text-foreground shadow-md"
       />
       {/* Category Dropdown */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className="justify-between bg-white/5 border border-white/10 rounded-md px-3 py-2 text-sm"
+            className="justify-between rounded-2xl px-3 py-2 text-sm border-none text-foreground shadow-md"
           >
             <Filter className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-full max-h-56 overflow-y-auto scrollbar-hide">
+        <DropdownMenuContent className="w-full max-h-56 overflow-y-auto scrollbar-hide border-none px-2">
           {categoryOptions.map((cat) => (
             <DropdownMenuItem
               key={cat}
@@ -57,4 +68,3 @@ export default function EventFilters({
     </div>
   );
 }
-

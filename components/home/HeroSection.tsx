@@ -1,12 +1,16 @@
 import React from "react";
 import Logo from "@/components/logo/Logo";
+import { HeroPanels } from "./HeroPanels";
 
 const HeroSection: React.FC = () => (
-  <div className="flex flex-col sm:flex-row sm:gap-4 mt-12 text-center py-8">
-    <Logo className="mx-auto mb-6 h-12 w-12 sm:h-16 sm:w-16 text-gray-100" />
-    <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.1] text-white">
-      connect3
-    </h1>
+  <div className="flex flex-col w-full">
+    <div className="flex flex-row gap-2 mt-6 mb-2 py-8 justify-center items-center">
+      <Logo className="h-12 w-12 sm:h-14 sm:w-14" />
+      <h1 className="text-4xl font-extrabold tracking-tight leading-[1.1]">
+        Connect3
+      </h1>
+    </div>
+    <HeroPanels />
   </div>
 );
 
