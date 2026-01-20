@@ -33,19 +33,13 @@ export function LoggedInAuthButton() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="flex items-center justify-center w-8 h-8 rounded-full bg-black text-white hover:scale-105 transition-transform focus:outline-none">
-          {profile?.avatar_url ? (
-            <Image
-              src={profile.avatar_url}
-              alt="Avatar"
-              width={32}
-              height={32}
-              className="w-full h-full rounded-full object-cover"
-            />
-          ) : (
-            <span className="text-sm font-medium">
-              {profile?.first_name?.charAt(0)?.toUpperCase() || "?"}
-            </span>
-          )}
+          <Image
+            src={profile?.avatar_url || "/placeholder.png"}
+            alt="Avatar"
+            width={32}
+            height={32}
+            className="w-full h-full rounded-full object-cover"
+          />
         </button>
       </DropdownMenuTrigger>
 

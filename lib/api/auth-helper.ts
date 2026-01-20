@@ -87,12 +87,31 @@ export class AuthHelper {
     try {
       const headers = await this.getAuthHeaders();
 
+      // Normalize existing headers (Headers object or plain record)
+      let originalHeaders: Record<string, string> = {};
+      if (options.headers instanceof Headers) {
+        (options.headers as Headers).forEach((value, key) => {
+          originalHeaders[key] = value;
+        });
+      } else {
+        originalHeaders = (options.headers as Record<string, string>) || {};
+      }
+
+      // Merge auth headers and original headers, but allow FormData to control Content-Type
+      const mergedHeaders: Record<string, string> = {
+        ...headers,
+        ...originalHeaders,
+      };
+
+      const isFormData = options.body instanceof FormData;
+      if (isFormData) {
+        delete mergedHeaders["Content-Type"];
+        delete mergedHeaders["content-type"];
+      }
+
       const response = await fetch(url, {
         ...options,
-        headers: {
-          ...headers,
-          ...options.headers,
-        },
+        headers: mergedHeaders,
       });
 
       // Handle auth errors globally

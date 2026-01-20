@@ -1,19 +1,20 @@
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { validateFile, CUBE_CONFIG } from '../utils/cubeUtils';
+import { useState } from "react";
+import { toast } from "sonner";
+import { validateFile, CUBE_CONFIG } from "../utils/cubeUtils";
 
 export const useFileHandlers = (
-  files: File[],
-  onFileUpload: (file: File) => void,
-  onFileRemove: (index: number) => void
+  file: File | null,
+  onFileChange: (file: File | null) => void
 ) => {
   const [isEating, setIsEating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleFileUpload = (file: File) => {
-    if (files.length >= CUBE_CONFIG.MAX_FILES) return;
+  const handleFileUpload = (newFile: File) => {
+    console.log("Existing File?", file);
+    if (file) return; // Already has a file
+    console.log("Uploading file:", newFile);
 
-    const validation = validateFile(file);
+    const validation = validateFile(newFile);
     if (!validation.isValid) {
       toast.error(validation.error);
       return;
@@ -21,7 +22,7 @@ export const useFileHandlers = (
 
     setIsEating(true);
     setTimeout(() => {
-      onFileUpload(file);
+      onFileChange(newFile);
       setIsEating(false);
     }, CUBE_CONFIG.ANIMATION_DURATION.EATING);
   };
@@ -35,16 +36,19 @@ export const useFileHandlers = (
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("File input changed:", e.target.files);
     const selectedFiles = e.target.files;
     if (selectedFiles && selectedFiles.length > 0) {
       handleFileUpload(selectedFiles[0]);
     }
+    // Reset input value so the same file can be selected again
+    e.target.value = "";
   };
 
-  const removeFile = (index: number) => {
+  const removeFile = () => {
     setIsDeleting(true);
     setTimeout(() => {
-      onFileRemove(index);
+      onFileChange(null);
       setIsDeleting(false);
     }, CUBE_CONFIG.ANIMATION_DURATION.DELETING);
   };

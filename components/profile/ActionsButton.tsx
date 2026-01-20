@@ -3,6 +3,7 @@ import { useChunkContext } from "./chunks/hooks/ChunkProvider";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { toast } from "sonner";
 
 export function ActionsButton({
   profile,
@@ -14,14 +15,21 @@ export function ActionsButton({
   setEditingProfile: (editing: boolean) => void;
 }) {
   const { user } = useAuthStore();
-  const { hasPendingEdits } = useChunkContext();
+  const { hasPendingEdits, saveChunks, savingChunks } = useChunkContext();
   const [pendingModalOpen, setPendingModalOpen] = useState(false);
 
   const handleEditToggle = () => {
-    // If finishing editing, reset chunk edits and exit chunk editing mode
-    if (editingProfile && hasPendingEdits()) {
-      setPendingModalOpen(true);
-      return;
+    // If finishing editing save chunks if no pending edits
+    if (editingProfile) {
+      if (hasPendingEdits()) {
+        setPendingModalOpen(true);
+        return;
+      }
+      if (savingChunks) {
+        toast.error("Profile is currently being saved. Try again later.");
+        return;
+      }
+      saveChunks();
     }
     setEditingProfile(!editingProfile);
   };

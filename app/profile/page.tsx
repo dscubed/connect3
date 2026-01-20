@@ -3,8 +3,10 @@ import { useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import { ProfilePageContent } from "./ProfilePageContent";
+import Sidebar from "@/components/sidebar/Sidebar";
 
 export default function ProfilePage() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
   const { user, profile, loading } = useAuthStore();
 
@@ -28,10 +30,17 @@ export default function ProfilePage() {
   }
 
   return (
-    <ProfilePageContent
-      editingProfile={editingProfile}
-      setEditingProfile={setEditingProfile}
-      profile={profile}
-    />
+    <div className="min-h-screen relative overflow-hidden">
+      <div className="flex relative z-10">
+        <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
+        <main className="flex-1 pt-16 md:pt-0 relative">
+          <ProfilePageContent
+            editingProfile={editingProfile}
+            setEditingProfile={setEditingProfile}
+            profile={profile}
+          />
+        </main>
+      </div>
+    </div>
   );
 }

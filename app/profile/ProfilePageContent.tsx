@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import Sidebar from "@/components/sidebar/Sidebar";
 import CoverImage from "@/components/profile/CoverImage";
 import ProfilePicture from "@/components/profile/ProfilePicture";
 import UserDetails from "@/components/profile/UserDetails";
@@ -9,84 +8,107 @@ import { ChunkProvider } from "@/components/profile/chunks/hooks/ChunkProvider";
 import { LinksSection } from "@/components/profile/LinksSection";
 import { ActionsButton } from "@/components/profile/ActionsButton";
 import { Profile } from "@/stores/authStore";
-import { useEffect, useState } from "react";
 import { SummaryCard } from "@/components/profile/SummaryCard";
+import {
+  ProfileProvider,
+  useProfileContext,
+} from "@/components/profile/ProfileProvider";
 
 interface ProfilePageContentProps {
   editingProfile: boolean;
   setEditingProfile: (editing: boolean) => void;
-  profile: Profile;
+  /** Pass profileId to fetch, or pass profile directly if already loaded */
+  profileId?: string;
+  profile?: Profile;
 }
 
 export function ProfilePageContent({
   editingProfile,
   setEditingProfile,
-  profile,
+  profileId,
+  profile: initialProfile,
 }: ProfilePageContentProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  // Determine the profileId to use
+  const id = profileId ?? initialProfile?.id;
 
-  useEffect(() => {
-    console.log("Rendering ProfilePageContent for profile:", profile);
-  }, [profile]);
+  if (!id) {
+    return (
+      <div className="min-h-[200px] flex items-center justify-center">
+        <p className="text-muted">No profile ID provided.</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      <div className="flex relative z-10">
-        <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
-        <main className="flex-1 pt-16 md:pt-0 relative">
-          <div
-            className="h-screen w-full max-w-[100vw] overflow-y-auto"
-            style={{
-              scrollbarWidth: "thin",
-              scrollbarColor: "rgba(255,255,255,0.3) transparent",
-            }}
+    <ProfileProvider profileId={id} initialProfile={initialProfile}>
+      <ProfilePageContentInner
+        editingProfile={editingProfile}
+        setEditingProfile={setEditingProfile}
+      />
+    </ProfileProvider>
+  );
+}
+
+function ProfilePageContentInner({
+  editingProfile,
+  setEditingProfile,
+}: {
+  editingProfile: boolean;
+  setEditingProfile: (editing: boolean) => void;
+}) {
+  const { profile } = useProfileContext();
+
+  return (
+    <div
+      className="h-screen w-full max-w-[100vw] overflow-y-auto"
+      style={{
+        scrollbarWidth: "thin",
+        scrollbarColor: "rgba(255,255,255,0.3) transparent",
+      }}
+    >
+      <CoverImage editingProfile={editingProfile} />
+
+      <ChunkProvider isEditing={editingProfile} visitingProfileId={profile.id}>
+        <div className="max-w-3xl mx-auto px-4 md:px-6 lg:px-8">
+          <motion.div
+            className="relative -mt-20 mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <CoverImage editingProfile={editingProfile} />
-
-            <ChunkProvider isEditing={editingProfile}>
-              <div className="max-w-3xl mx-auto px-4 md:px-6 lg:px-8">
-                <motion.div
-                  className="relative -mt-20 mb-8"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                >
-                  <div className="flex flex-col gap-6">
-                    <div className="flex flex-row justify-between">
-                      <ProfilePicture
-                        avatar={profile.avatar_url ?? null}
-                        editingProfile={editingProfile}
-                      />
-                      <ActionsButton
-                        profile={profile}
-                        setEditingProfile={setEditingProfile}
-                        editingProfile={editingProfile}
-                      />
-                    </div>
-                    <div className="flex flex-row justify-between">
-                      <UserDetails
-                        profile={profile}
-                        editingProfile={editingProfile}
-                      />
-                      <LinksSection
-                        editingProfile={editingProfile}
-                        profile={profile}
-                      />
-                    </div>
-                  </div>
-                </motion.div>
-                <SummaryCard editingProfile={editingProfile} />
-
-                {/* Events form for organisations only */}
-                {profile.account_type === "organisation" && <EventsSection />}
-
-                {/* Chunks Section */}
-                <ChunksSection editingProfile={editingProfile} />
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-row justify-between">
+                <ProfilePicture
+                  avatar={profile.avatar_url}
+                  editingProfile={editingProfile}
+                />
+                <ActionsButton
+                  profile={profile}
+                  setEditingProfile={setEditingProfile}
+                  editingProfile={editingProfile}
+                />
               </div>
-            </ChunkProvider>
-          </div>
-        </main>
-      </div>
+              <div className="flex flex-row justify-between">
+                <UserDetails
+                  profile={profile}
+                  editingProfile={editingProfile}
+                />
+                <LinksSection
+                  editingProfile={editingProfile}
+                  profile={profile}
+                />
+              </div>
+            </div>
+          </motion.div>
+          <SummaryCard editingProfile={editingProfile} profile={profile} />
+
+          {/* Events form for organisations only */}
+          {profile.account_type === "organisation" && <EventsSection />}
+
+          {/* Chunks Section */}
+          <ChunksSection editingProfile={editingProfile} />
+        </div>
+      </ChunkProvider>
     </div>
   );
 }

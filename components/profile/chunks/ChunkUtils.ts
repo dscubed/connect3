@@ -27,6 +27,67 @@ export const userCategoriesList = [
 
 export type UserCategories = (typeof userCategoriesList)[number];
 
+// Category Descriptions
+
+export interface CategoryDescription {
+  name: AllCategories;
+  description: string;
+}
+
+export const userCategoryDescriptions: CategoryDescription[] = [
+  {
+    name: "Education",
+    description:
+      "Details about formal education, degrees, institutions, start/graduation dates.",
+  },
+  {
+    name: "Experience",
+    description:
+      "Professional/Club work experience, job titles, companies, responsibilities, dates.",
+  },
+  {
+    name: "Languages",
+    description: "Languages known along with proficiency levels.",
+  },
+  {
+    name: "Skills",
+    description: "Technical and soft skills.",
+  },
+  {
+    name: "Projects",
+    description:
+      "Significant projects undertaken, descriptions, technologies used, outcomes. Link to project (if available).",
+  },
+  {
+    name: "Certifications",
+    description:
+      "Professional certifications/licenses, issuing organizations, dates.",
+  },
+  {
+    name: "Courses",
+    description:
+      "Relevant courses completed, institutions, dates/undertaken at, course codes.",
+  },
+  {
+    name: "Honors",
+    description:
+      "Awards, honors, recognitions received, issuing bodies, dates.",
+  },
+  {
+    name: "Hobbies",
+    description: "Personal interests and hobbies that showcase personality.",
+  },
+  {
+    name: "Volunteering",
+    description:
+      "Volunteer work, organizations, roles, responsibilities, dates.",
+  },
+];
+
+export const userCategoryDescriptionText = userCategoryDescriptions
+  .map((cat) => `- ${cat.name}: ${cat.description}`)
+  .join("\n");
+
 export const organisationCategoriesList = [
   "Recruitment",
   "What we do",

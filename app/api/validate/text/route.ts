@@ -14,8 +14,6 @@ const ValidationSchema = z.object({
   safe: z.boolean(),
   relevant: z.boolean(),
   belongsToUser: z.boolean(),
-  detectedNames: z.array(z.string()),
-  templateResume: z.boolean(),
   reason: z.string(),
 });
 
@@ -77,7 +75,6 @@ export async function POST(req: NextRequest) {
     - "Safe": whether the text avoids harmful, illegal, NSFW, or disallowed content.
     - "Relevant": whether the text contains information that could help describe a personal or professional profile
       (e.g. work experience, education, skills, interests, biography, portfolio description).
-    - "detectedNames": an array of all human person names you find in the text.
     - "belongsToUser": whether the text appears to be primarily about this user ("${fullName}"), and not another person.
     - "templateResume": true if the text appears to be a resume or CV template with mostly placeholder/filler content 
       (for example, lorem ipsum, generic nonsense sentences, or obviously fake placeholder paragraphs) rather than a real, specific resume.
@@ -89,18 +86,11 @@ export async function POST(req: NextRequest) {
     - If you are uncertain who the text is about, set "belongsToUser": false.
     - Do NOT guess that a different full name refers to the same user.
 
-    Rules for "templateResume":
-    - Set "templateResume": true if a large portion of the text is placeholder content (e.g. "lorem ipsum", obviously generic Latin text, dummy descriptions, or nonsense).
-    - Set "templateResume": true if the resume has realistic structure (name, sections, headings) but the body content is clearly not a real person's experience.
-    - Otherwise, set "templateResume": false.
-
     Respond ONLY as a single JSON object matching this schema:
     {
       "safe": boolean,
       "relevant": boolean,
       "belongsToUser": boolean,
-      "detectedNames": string[],
-      "templateResume": boolean,
       "reason": string
     }
 
@@ -121,7 +111,7 @@ export async function POST(req: NextRequest) {
     // Log the validation result for monitoring
     console.log(
       `Validation result for user ${user.id}: safe=${result?.safe}, relevant=${result?.relevant}, 
-        belongsToUser=${result?.belongsToUser}, templateResume=${result?.templateResume}`
+        belongsToUser=${result?.belongsToUser}`
     );
 
     return NextResponse.json(result);

@@ -144,3 +144,11 @@
 .rotate-y-180 {
   transform: rotateY(180deg);
 }
+
+
+
+#auth-background {
+    background-color: hsla(256, 85%, 78%, 1);
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 500 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"), radial-gradient(circle at 46.71505146814667% 45.36673934371383%, hsla(256, 84%, 78%, 0.1) 36.25241449144171%, transparent 62.08365242569557%), radial-gradient(circle at 9.454006088124377% 4.738133041946976%, hsla(0, 0%, 100%, 0.7) 6.25%, transparent 37.939000800804195%), radial-gradient(circle at 25.771288706739526% 104.16449546813965%, hsla(272, 68%, 81%, 1) 8.378432167900934%, transparent 38.1654970380995%), radial-gradient(circle at 122.38508609648498% 77.88628472222223%, hsla(0, 0%, 100%, 1) 18.221255337750488%, transparent 52.514828364054544%), radial-gradient(circle at 8.102800546448087% 7.914496527777778%, hsla(211, 81%, 87%, 1) 8.378432167900934%, transparent 44.4033666540076%);
+    background-blend-mode: overlay, normal, normal, normal, normal, normal;
+}
