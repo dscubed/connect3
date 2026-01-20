@@ -17,16 +17,15 @@ const categorySchema = z.object({
   subcategory: z.string(),
 });
 
-const pricingSchema = z.object({
-  min: z.number().int().nonnegative(),
-  max: z.number().int().nonnegative(),
-}).refine(
-  (data: any) => data.max >= data.min,
-  {
+const pricingSchema = z
+  .object({
+    min: z.number().int().nonnegative(),
+    max: z.number().int().nonnegative(),
+  })
+  .refine((data: { min: number; max: number }) => data.max >= data.min, {
     message: "Max must be greater than min",
     path: ["max"],
-  }
-);
+  });
 
 const eventSchema = z.object({
   id: z.string(),
@@ -39,7 +38,10 @@ const eventSchema = z.object({
   publishedAt: z.string().datetime(),
   capacity: z.number().int().positive(),
   thumbnail: z.string().url().optional(),
-  currency: z.string().length(3).transform(s => s.toUpperCase()),
+  currency: z
+    .string()
+    .length(3)
+    .transform((s) => s.toUpperCase()),
   category: categorySchema,
   isOnline: z.boolean(),
   location: locationSchema,
