@@ -94,7 +94,9 @@ export async function POST(req: NextRequest) {
       payload: data,
     });
 
-    console.log(`[runSearchRoute] emit_result`, { messageId, type, res });
+    if (type !== "response") {
+      console.log(`[runSearchRoute] emit_result`, { messageId, type, res });
+    }
 
     // If send failed, surface it
     if (res !== "ok") {

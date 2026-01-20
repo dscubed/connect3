@@ -12,12 +12,12 @@ export const runSearch = async (
   chatmessageId: string,
   openai: OpenAI,
   supabase: SupabaseClient,
-  emit?: (event: string, data: unknown) => void
+  emit?: (event: string, data: unknown) => void,
 ): Promise<SearchResponse> => {
   // Fetch chatmessage and related data
   const { query, tldr, prevMessages, userUniversity } = await getContext(
     chatmessageId,
-    supabase
+    supabase,
   );
 
   // Plan Search
@@ -28,25 +28,24 @@ export const runSearch = async (
 
   // Route to general chatbot if no search required
   if (!searchPlan.requiresSearch) {
-  if (emit) emit("progress", "Routed to General Chat...");
+    if (emit) emit("progress", "Routed to General Chat...");
 
+    const lastTurn =
+      Array.isArray(prevMessages) && prevMessages.length >= 2
+        ? prevMessages.slice(-2)
+        : [];
 
-  const lastTurn =
-    Array.isArray(prevMessages) && prevMessages.length >= 2
-      ? prevMessages.slice(-2)
-      : [];
+    const generalResp = await runGeneral({
+      openai,
+      query,
+      tldr,
+      prevMessages: lastTurn,
+      userUniversity,
+      emit,
+    });
 
-  const generalResp = await runGeneral({
-    openai,
-    query,
-    tldr,
-    prevMessages: lastTurn,
-    userUniversity,
-    emit,
-  });
-  
-  return generalResp;
-}
+    return generalResp;
+  }
 
   // Filter searches if required
   let filters: EntityFilters = {
@@ -55,21 +54,23 @@ export const runSearch = async (
     events: null,
   };
   if (searchPlan.filterSearch) {
+    if (emit) emit("progress", "Filtering Results...");
+
     filters = await filterSearch(
       query,
       searchPlan.searches,
       prevMessages,
-      openai
+      openai,
     );
   }
-  if (emit) emit("progress", "Applied Filters...");
 
+  if (emit) emit("progress", "Executing Search...");
   // Perform Search
   const { results, fileMap } = await executeSearchPlan(
     searchPlan,
     filters,
     supabase,
-    openai
+    openai,
   );
   if (emit) emit("progress", "Completed Search...");
 
@@ -79,7 +80,7 @@ export const runSearch = async (
     searchPlan.context,
     openai,
     fileMap,
-    emit
+    emit,
   );
 
   return response;

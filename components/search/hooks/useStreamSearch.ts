@@ -4,44 +4,27 @@ import { useCallback, useRef } from "react";
 import { ChatMessage, SearchProgress } from "../types";
 import { useAuthStore } from "@/stores/authStore";
 import { RealtimeChannel } from "@supabase/supabase-js";
-
-// 🔴 MODULE LOAD PROOF
-console.log("[useSearchStream] MODULE LOADED");
+import type { EntityResult } from "@/lib/search/types";
 
 // Type for setMessages prop
 type MessageUpdater = React.Dispatch<React.SetStateAction<ChatMessage[]>>;
 
 export function useSearchStream(setMessages: MessageUpdater) {
-  // 🔴 HOOK INVOCATION PROOF
-  console.log("[useSearchStream] hook invoked");
-
   const supabase = useAuthStore((s) => s.getSupabaseClient());
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const currentMessageIdRef = useRef<string | null>(null);
 
   const updateMessage = useCallback(
     (messageId: string, update: Partial<ChatMessage>) => {
-      console.log("[useSearchStream] updateMessage", { messageId, update });
-
-      setMessages((prev) => {
-        const target = prev.find((m) => m.id === messageId);
-        console.log("[useSearchStream] target before update", target);
-        const next = prev.map((msg) =>
-          msg.id === messageId ? { ...msg, ...update } : msg,
-        );
-        console.log("[useSearchStream] messages after update", next);
-        return next;
-      });
+      setMessages((prev) =>
+        prev.map((msg) => (msg.id === messageId ? { ...msg, ...update } : msg)),
+      );
     },
     [setMessages],
   );
 
   const updateProgress = useCallback(
     (messageId: string, progressUpdate: SearchProgress) => {
-      console.log("[useSearchStream] updateProgress", {
-        messageId,
-        progressUpdate,
-      });
-
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === messageId ? { ...msg, progress: progressUpdate } : msg,
@@ -52,98 +35,90 @@ export function useSearchStream(setMessages: MessageUpdater) {
   );
 
   const connectStream = useCallback(
-    async (messageId: string) => {
-      // 🔴 CONNECT STREAM ENTRY
-      console.log("[useSearchStream] connectStream CALLED", {
-        messageId,
-        ts: Date.now(),
-      });
+    async (messageId: string): Promise<boolean> => {
+      console.log("[stream] connect", messageId);
 
       if (!supabase) {
-        console.error("[useSearchStream] supabase client is NULL");
-        return;
+        console.error("[stream] no supabase client");
+        return false;
       }
 
+      // Remove old channel first
       if (channelRef.current) {
-        console.log("demonstrating removeChannel", channelRef.current.topic);
-        await supabase.removeChannel(channelRef.current);
+        console.log("[stream] removing old channel");
+        supabase.removeChannel(channelRef.current);
         channelRef.current = null;
       }
 
+      currentMessageIdRef.current = messageId;
       const channelName = `message:${messageId}`;
-      console.log("[useSearchStream] creating channel", channelName);
 
       const channel = supabase.channel(channelName);
       channelRef.current = channel;
 
-      channel.on("broadcast", { event: "status" }, (payload) => {
-        console.log("[useSearchStream] status event", payload);
-        const raw = (payload as any)?.payload;
-        const progressUpdate =
-          typeof raw === "string" ? { message: raw } : (raw as SearchProgress);
-        updateProgress(messageId, progressUpdate);
-      });
-
-      channel.on("broadcast", { event: "progress" }, (payload) => {
-        console.log("[useSearchStream] progress event", payload);
-        const raw = (payload as any)?.payload;
-        const progressUpdate =
-          typeof raw === "string" ? { message: raw } : (raw as SearchProgress);
-        updateProgress(messageId, progressUpdate);
-      });
-
-      channel.on("broadcast", { event: "done" }, ({ payload }) => {
-        const data = payload as any;
-
-        // server emits { success: true, result: SearchResponse }
-        const result: any = data?.result ?? data?.response;
-
-        // The content is normalized by CompletedResponse component
-        // which handles both new markdown format and legacy format
-        const content =
-          result && typeof result === "object"
-            ? result
-            : { markdown: "", entities: [] };
-
-        updateMessage(messageId, {
-          status: "completed",
-          content,
-          progress: { step: "completed", message: "Done" } as any,
-        });
-      });
-
-      channel.on("broadcast", { event: "error" }, (payload) => {
-        console.log("[useSearchStream] ERROR EVENT RECEIVED", payload);
-
-        updateMessage(messageId, {
-          status: "failed",
-          content: (payload.payload as any)?.message ?? "Unknown error",
-        });
-      });
-
-      await new Promise<void>((resolve) => {
-        const timeout = setTimeout(() => {
-          console.warn("[useSearchStream] subscribe timeout, continuing");
-          resolve();
-        }, 8000);
-
-        channel.subscribe((status, err) => {
-          console.log("[useSearchStream] channel subscribe status", {
-            channelName,
-            status,
-            err,
-          });
-
-          if (err) {
-            clearTimeout(timeout);
-            console.warn("[useSearchStream] subscribe error, continuing", err);
-            resolve();
-            return;
+      // Set up event handlers
+      channel
+        .on("broadcast", { event: "status" }, ({ payload }) => {
+          console.log("[stream] status", payload);
+          const p = payload as SearchProgress;
+          updateProgress(messageId, p);
+        })
+        .on("broadcast", { event: "progress" }, ({ payload }) => {
+          console.log("[stream] progress", payload);
+          const p = payload as SearchProgress;
+          updateProgress(messageId, p);
+        })
+        .on("broadcast", { event: "response" }, ({ payload }) => {
+          console.log("[stream] response", payload);
+          const data = payload as {
+            partial?: { markdown?: string; entities?: EntityResult[] };
+          };
+          if (data?.partial) {
+            updateMessage(messageId, {
+              status: "processing",
+              content: {
+                markdown: data.partial.markdown ?? "",
+                entities: data.partial.entities ?? [],
+              },
+            });
           }
+        })
+        .on("broadcast", { event: "done" }, ({ payload }) => {
+          console.log("[stream] done", payload);
+          const data = payload as { result?: ChatMessage["content"] };
+          updateMessage(messageId, {
+            status: "completed",
+            content: data?.result ?? { markdown: "", entities: [] },
+            progress: { step: "completed", message: "Done" },
+          });
+        })
+        .on("broadcast", { event: "error" }, ({ payload }) => {
+          console.log("[stream] error", payload);
+          const data = payload as { message?: string };
+          updateMessage(messageId, {
+            status: "failed",
+            content: { markdown: data?.message ?? "Error", entities: [] },
+          });
+        });
 
+      // Subscribe and wait
+      return new Promise<boolean>((resolve) => {
+        const timeout = setTimeout(() => {
+          console.warn("[stream] subscribe timeout - continuing anyway");
+          resolve(true); // Continue anyway, server might still work
+        }, 10000);
+
+        channel.subscribe((status) => {
+          console.log("[stream] status:", status);
           if (status === "SUBSCRIBED") {
             clearTimeout(timeout);
-            resolve();
+            console.log("[stream] subscribed OK");
+            resolve(true);
+          }
+          if (status === "CHANNEL_ERROR" || status === "CLOSED") {
+            clearTimeout(timeout);
+            console.warn("[stream] failed:", status);
+            resolve(false);
           }
         });
       });
@@ -152,13 +127,20 @@ export function useSearchStream(setMessages: MessageUpdater) {
   );
 
   const closeStream = useCallback(() => {
-    console.log("[useSearchStream] closeStream called");
-
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
       channelRef.current = null;
     }
+    currentMessageIdRef.current = null;
   }, [supabase]);
 
-  return { connectStream, closeStream };
+  const isConnected = useCallback(() => {
+    return channelRef.current !== null;
+  }, []);
+
+  const getCurrentMessageId = useCallback(() => {
+    return currentMessageIdRef.current;
+  }, []);
+
+  return { connectStream, closeStream, isConnected, getCurrentMessageId };
 }
