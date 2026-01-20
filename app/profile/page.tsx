@@ -10,8 +10,10 @@ import { toast } from "sonner";
 export default function ProfilePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
-  const { user, profile, updateProfile, loading, makeAuthenticatedRequest } = useAuthStore();
-  const [showEventOnboardingModal, setShowEventOnboardingModal] = useState(false);
+  const { user, profile, updateProfile, loading, makeAuthenticatedRequest } =
+    useAuthStore();
+  const [showEventOnboardingModal, setShowEventOnboardingModal] =
+    useState(false);
 
   useEffect(() => {
     if (loading) return;
@@ -20,39 +22,47 @@ export default function ProfilePage() {
     if (!profile.humanitix_event_integration_setup) {
       setShowEventOnboardingModal(true);
     }
-  }, [loading, profile]) 
+  }, [loading, profile]);
 
   const onEventModalClose = () => {
     setShowEventOnboardingModal(false);
-  }
+  };
 
   const onEventModalSubmit = async (apiKey: string) => {
     if (!profile) return;
 
     try {
-      const response = await makeAuthenticatedRequest('/api/onboarding/humanitix/createSecret', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await makeAuthenticatedRequest(
+        "/api/onboarding/humanitix/createSecret",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            key: profile.id,
+            value: apiKey,
+          }),
         },
-        body: JSON.stringify({
-          key: profile.id,
-          value: apiKey,
-        }),
-      });
+      );
 
       if (response.ok) {
         const responseData = await response.json();
         let message = "API key added successfully";
         if (responseData.success) {
           // On success set the humanitix flag to true so we don't get the modal again
-          await updateProfile({ ...profile, humanitix_event_integration_setup: true });
+          await updateProfile({
+            ...profile,
+            humanitix_event_integration_setup: true,
+          });
         } else {
           message = "Failed to add API key: " + responseData.error;
         }
         toast(message);
       } else {
-        const errorData = await response.json().catch(() => ({ error: "Unknown error occurred" }));
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: "Unknown error occurred" }));
         toast("Failed to add API key: " + errorData.error || "Request failed");
       }
     } catch (error: unknown) {
@@ -64,7 +74,7 @@ export default function ProfilePage() {
     }
 
     setShowEventOnboardingModal(false);
-  }
+  };
 
   if (loading) {
     return (
@@ -90,7 +100,11 @@ export default function ProfilePage() {
       <div className="flex relative z-10">
         <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
         <main className="flex-1 pt-16 md:pt-0 relative">
-          <SetupEventsModal isOpen={showEventOnboardingModal} onClose={onEventModalClose} onSubmit={onEventModalSubmit} />
+          <SetupEventsModal
+            isOpen={showEventOnboardingModal}
+            onClose={onEventModalClose}
+            onSubmit={onEventModalSubmit}
+          />
           <ProfilePageContent
             editingProfile={editingProfile}
             setEditingProfile={setEditingProfile}

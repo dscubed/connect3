@@ -19,7 +19,7 @@ export default function EventFormHeader() {
   };
 
   const handleFormSubmit = async (
-    eventData: Omit<HostedEvent, "id" | "push">
+    eventData: Omit<HostedEvent, "id" | "push">,
   ) => {
     const eventId = crypto.randomUUID();
 
@@ -32,7 +32,7 @@ export default function EventFormHeader() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(eventData),
-      }
+      },
     );
 
     if (dbResponse.ok) {
@@ -52,7 +52,7 @@ export default function EventFormHeader() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(eventData),
-      }
+      },
     );
 
     if (vectorStoreResponse.ok) {
@@ -73,7 +73,7 @@ export default function EventFormHeader() {
     >
       {addingEvent ? (
         <div className="flex flex-col gap-2 w-full">
-          {/* event form */}
+          event form
           <AddEventForm
             onSubmit={handleFormSubmit}
             onCancel={handleFormCancel}

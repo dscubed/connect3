@@ -8,7 +8,7 @@ import OpenAI from "openai";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SECRET_KEY!
+  process.env.SUPABASE_SECRET_KEY!,
 );
 
 const openai = new OpenAI({
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest, { params }: RouteParameters) {
       console.error("Error fetching creator");
       return NextResponse.json(
         { error: "Failed to fetch creator details" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest, { params }: RouteParameters) {
       .select(
         `
         profiles ( first_name, university )
-      `
+      `,
       )
       .eq("event_id", eventId);
 
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest, { params }: RouteParameters) {
           error:
             "Failed to fetch collaborators. This could be because we switched to the clubs table. Edit route.ts under /api/vector-store/events",
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -93,14 +93,14 @@ export async function POST(request: NextRequest, { params }: RouteParameters) {
           .map((profile) => profile.university)
           .filter((uni): uni is string => typeof uni === "string"),
         ...(creator.university ? [creator.university] : []),
-      ])
+      ]),
     );
 
     // Get vector store ID from environment variables
     const vectorStoreId = process.env.OPENAI_EVENTS_VECTOR_STORE_ID;
     if (!vectorStoreId) {
       throw new Error(
-        "Events Vector Store ID not configured in environment variables"
+        "Events Vector Store ID not configured in environment variables",
       );
     }
 
@@ -152,14 +152,14 @@ export async function POST(request: NextRequest, { params }: RouteParameters) {
       vectorStoreId,
       {
         file_id: file.id,
-      }
+      },
     );
 
     if (vectorStoreFile.status === "failed") {
       throw new Error(
         `Failed to add file to vector store: ${
           vectorStoreFile.last_error?.message || "Unknown error"
-        }`
+        }`,
       );
     }
 
@@ -195,7 +195,7 @@ export async function POST(request: NextRequest, { params }: RouteParameters) {
       console.error("Error updating event with OpenAI file ID:", updateError);
       return NextResponse.json(
         { error: "Failed to update event with OpenAI file ID" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -211,7 +211,7 @@ export async function POST(request: NextRequest, { params }: RouteParameters) {
         error:
           error instanceof Error ? error.message : "Unknown error occurred",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -224,7 +224,7 @@ Organisors: ${eventFile.organisers.creator}${
       : ""
   }
 Time: ${new Date(eventFile.time.start).toLocaleString()} - ${new Date(
-    eventFile.time.end
+    eventFile.time.end,
   ).toLocaleString()}
 Location: ${eventFile.location.location_type}${
     eventFile.location.city.length > 0

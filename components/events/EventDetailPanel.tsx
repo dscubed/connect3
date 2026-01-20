@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import Image from "next/image";
 import {
   Calendar,
   ChevronLeft,
@@ -9,11 +8,10 @@ import {
   Link as LinkIcon,
   Users,
   Globe,
-  Hash,
 } from "lucide-react";
 import { type Event } from "@/lib/schemas/events/event";
 import useSWR from "swr";
-import parse from 'html-react-parser'; 
+import parse from "html-react-parser";
 
 interface EventDetailPanelProps {
   event: Event;
@@ -25,14 +23,13 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
     data: creator,
     error: creatorError,
     isLoading: isLoadingCreator,
-  } = useSWR(
-    `/api/users/${event.creatorProfileId}`,
-    (url) => fetch(url).then((res) => res.json())
+  } = useSWR(`/api/users/${event.creatorProfileId}`, (url) =>
+    fetch(url).then((res) => res.json()),
   );
 
   let organiserString = "";
   console.log(event.pricing);
-  if (!isLoadingCreator) { 
+  if (!isLoadingCreator) {
     console.log(creator);
     organiserString = creator ? creator.full_name : "Unknown";
   }
@@ -58,12 +55,12 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
       )}
 
       {/* Header background image */}
-      <div 
+      <div
         className="relative rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6 h-64 sm:h-72 lg:h-80 overflow-hidden"
         style={{
-          backgroundImage: event.thumbnail ? `url(${event.thumbnail})` : 'none',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          backgroundImage: event.thumbnail ? `url(${event.thumbnail})` : "none",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
         }}
       >
         {/* Dark overlay for text readability shown only when there is a thumbnail */}
@@ -88,7 +85,7 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
                   </motion.div>
                 )}
               </span>
-              
+
               {/* Event dates */}
               <p className="text-white/80 text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
                 <Calendar className="size-4" />
@@ -115,12 +112,18 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
               {/* Currency */}
               <p className="text-white/80 text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
                 <DollarSign className="size-4" />
-                {event.pricing.min === 0 && event.pricing.max === 0 ? "Free" : `${event.pricing.min} - ${event.pricing.max}`}
+                {event.pricing.min === 0 && event.pricing.max === 0
+                  ? "Free"
+                  : `${event.pricing.min} - ${event.pricing.max}`}
               </p>
 
               {/* Online/In-person */}
               <p className="text-white/80 text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
-                {event.isOnline ? <Globe className="size-4 text-white/80" /> : <MapPin className="size-4 text-white/80" />}
+                {event.isOnline ? (
+                  <Globe className="size-4 text-white/80" />
+                ) : (
+                  <MapPin className="size-4 text-white/80" />
+                )}
                 {event.isOnline ? "Online" : "In-Person"}
               </p>
             </div>
@@ -132,40 +135,45 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
       <div className="sm:rounded-2xl p-4 sm:p-6 lg:p-7 mb-4 sm:mb-6">
         <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">About</h2>
         <span className="leading-relaxed text-sm sm:text-base text-muted">
-          { parse(event.description || "No description provided.")}
+          {parse(event.description || "No description provided.")}
         </span>
       </div>
 
       <div className="flex border border-muted/20 rounded-xl sm:rounded-2xl">
         {/* Location Details */}
         <div className="rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-7 mb-4 sm:mb-6 w-1/2">
-          <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Location</h2>
-          {
-            event.isOnline ? (
-              <p>Event is Online</p>
-            ) :
+          <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">
+            Location
+          </h2>
+          {event.isOnline ? (
+            <p>Event is Online</p>
+          ) : (
             <div className="space-y-2">
-            <p className="text-sm sm:text-base text-muted flex items-center gap-2">
-              <MapPin className="size-4" />
-              <span>{event.location.venue}</span>
-            </p>
-            <p className="text-sm sm:text-base text-muted flex items-center gap-2">
-              <MapPin className="size-4" />
-              <span>{event.location.address}</span>
-            </p>
-            <p className="text-sm sm:text-base text-muted flex items-center gap-2">
-              <MapPin className="size-4" />
-              <span>{event.location.city}, {event.location.country}</span>
-            </p>
-          </div>
-          }
+              <p className="text-sm sm:text-base text-muted flex items-center gap-2">
+                <MapPin className="size-4" />
+                <span>{event.location.venue}</span>
+              </p>
+              <p className="text-sm sm:text-base text-muted flex items-center gap-2">
+                <MapPin className="size-4" />
+                <span>{event.location.address}</span>
+              </p>
+              <p className="text-sm sm:text-base text-muted flex items-center gap-2">
+                <MapPin className="size-4" />
+                <span>
+                  {event.location.city}, {event.location.country}
+                </span>
+              </p>
+            </div>
+          )}
         </div>
         {/* Event Details */}
         <div className="space-y-4 mb-6 w-1/2">
           {/* Booking Link */}
           {event.bookingUrl && (
             <div className="rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-7 mb-4 sm:mb-6">
-              <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Links</h2>
+              <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">
+                Links
+              </h2>
               <div className="space-y-2">
                 <a
                   href={event.bookingUrl}
@@ -188,5 +196,5 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
         </div>
       </div>
     </motion.div>
- );
+  );
 }
