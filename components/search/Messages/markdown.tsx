@@ -14,6 +14,15 @@ export function Markdown({ children }: { children: string }) {
           ],
         ]}
         components={{
+          h1: ({ children }) => (
+            <h1 className="text-xl font-bold mt-4 mb-2">{children}</h1>
+          ),
+          h2: ({ children }) => (
+            <h2 className="text-xl font-bold mt-3 mb-2">{children}</h2>
+          ),
+          h3: ({ children }) => (
+            <h3 className="text-xl font-semibold mt-2 mb-1">{children}</h3>
+          ),
           a: ({ children, ...props }) => (
             <a
               {...props}

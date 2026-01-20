@@ -18,6 +18,9 @@ export function ActionsButton({
   const { hasPendingEdits, saveChunks, savingChunks } = useChunkContext();
   const [pendingModalOpen, setPendingModalOpen] = useState(false);
 
+  // Get the current link state
+  const href = typeof window !== "undefined" ? window.location.href : "";
+
   const handleEditToggle = () => {
     // If finishing editing save chunks if no pending edits
     if (editingProfile) {
@@ -37,14 +40,26 @@ export function ActionsButton({
   return (
     <>
       <div className="flex items-center gap-2">
-        {user?.id === profile.id && (
+        {href != "profile" ? (
           <Button
             variant="outline"
             className="text-lg !bg-foreground font-medium !text-white border-[3px] border-white hover:scale-105 transition-all rounded-full py-5 shadow-none"
-            onClick={handleEditToggle}
+            onClick={() => {
+              window.open(`/profile/${profile.id}`, "_blank");
+            }}
           >
-            {editingProfile ? "Finish" : "Edit Profile"}
+            View Profile
           </Button>
+        ) : (
+          user?.id === profile.id && (
+            <Button
+              variant="outline"
+              className="text-lg !bg-foreground font-medium !text-white border-[3px] border-white hover:scale-105 transition-all rounded-full py-5 shadow-none"
+              onClick={handleEditToggle}
+            >
+              {editingProfile ? "Finish" : "Edit Profile"}
+            </Button>
+          )
         )}
       </div>
       <PendingChangesModal
