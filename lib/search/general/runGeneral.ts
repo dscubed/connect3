@@ -1,20 +1,17 @@
-// src/lib/search/general/runGeneral.ts
+/**
+ * Main entry point for the general chatbot pipeline.
+ *
+ * Simplified architecture - uses LLM-based routing instead of regex heuristics.
+ * Slightly more latency but much more robust and maintainable.
+ */
 import OpenAI from "openai";
 import type { ResponseInput } from "openai/resources/responses/responses.mjs";
 
-import { planGeneral } from "./planGeneral";
-import { normalizeUniversitySlug } from "./uniSlug";
-import { getUniversityVectorStores } from "./universities";
+import { routeQuery, getVectorStores } from "./router";
 import { runUniversityGeneral } from "./runUniversityGeneral";
 import { runConnect3General } from "./runConnect3General";
 import { countWebSearchCalls } from "./countWebSearches";
-import { normalisedPlannedUni } from "./normalisedPlannedUni";
-
-export type SearchResponse = {
-  summary: string;
-  results: any[];
-  followUps: string;
-};
+import type { SearchResponse } from "../types";
 
 type RunGeneralArgs = {
   openai: OpenAI;
@@ -25,88 +22,6 @@ type RunGeneralArgs = {
   emit?: (event: string, data: unknown) => void;
 };
 
-// ---------- heuristics (unchanged logic) ----------
-type UniKbIntent = "official" | "union" | "both";
-
-function detectUniKbIntent(query: string): UniKbIntent {
-  const q = query.toLowerCase();
-
-  // Strong official/admin signals
-  if (
-    /(special consideration|application|apply|deadline|policy|procedure|rules|regulation|appeal|enrol|enroll|census|withdraw|academic misconduct|plagiarism|assessment|exam|graduation|visa|fees)/.test(
-      q
-    )
-  ) {
-    return "official";
-  }
-
-  // Strong union signals
-  if (
-    /(advocacy|student union|umsu|msa|guild|club|clubs|society|societies|events|volunteer|welfare|food|free|support service|representation|campaign)/.test(
-      q
-    )
-  ) {
-    return "union";
-  }
-
-  // Ambiguous / informational
-  return "both";
-}
-
-function detectUniversityFromQuery(query: string): string | null {
-  const q = query.toLowerCase();
-  if (/\bunimelb\b|\buniversity of melbourne\b|\bmelbourne uni\b/.test(q))
-    return "University of Melbourne";
-  if (/\bmonash\b|\bmonash university\b/.test(q)) return "Monash University";
-  if (/\buwa\b|\buniversity of western australia\b/.test(q))
-    return "University of Western Australia";
-  if (/\brmit\b|\brmit university\b/.test(q)) return "RMIT University";
-  return null;
-}
-
-function looksUniRelated(query: string): boolean {
-  const q = query.toLowerCase();
-
-  const uniKeywords =
-    /(unimelb|university|campus|handbook|subject|timetable|enrol|enroll|census|wam|scholarship|degree|course|major|minor|faculty|parkville|umsu|student union|stop 1|advocacy|graduation|exam)/;
-
-  const clubsAndUniContext =
-    /(club|clubs|society|societies|organisation|organizations|orgs|events)/.test(q) &&
-    /(unimelb|monash|rmit|nus|university|campus|student union|umsu|guild|union)/.test(q);
-
-  const hasSubjectCode = /\b[a-z]{3,4}\d{4,5}\b/i.test(query);
-
-  return uniKeywords.test(q) || clubsAndUniContext || hasSubjectCode;
-}
-
-function looksConnect3Related(query: string): boolean {
-  return /(connect3|connect 3|my profile|matches|matchmaking|in-app|in app|onboarding|how do i use)/i.test(
-    query
-  );
-}
-
-function heuristicPlan(query: string, userUniversity?: string | null) {
-  if (looksUniRelated(query)) {
-    const uniFromQuery = detectUniversityFromQuery(query);
-    return {
-      uniRelated: true,
-      university: uniFromQuery ?? userUniversity ?? null,
-      reason: "heuristic: uni_related",
-    };
-  }
-
-  if (looksConnect3Related(query)) {
-    return {
-      uniRelated: false,
-      university: null,
-      reason: "heuristic: connect3_related",
-    };
-  }
-
-  return null;
-}
-
-// ---------- main ----------
 export async function runGeneral({
   openai,
   query,
@@ -115,79 +30,105 @@ export async function runGeneral({
   userUniversity,
   emit,
 }: RunGeneralArgs): Promise<SearchResponse> {
-  const traceId = `general_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+  // Step 1: Route the query using LLM classification
+  const routing = await routeQuery(
+    openai,
+    query,
+    prevMessages,
+    userUniversity,
+    emit,
+    tldr,
+  );
 
-  emit?.("status", { step: "general_plan", message: "Planning response..." });
+  console.log("[runGeneral] routing", routing);
 
-  const heuristic = heuristicPlan(query, userUniversity);
-  const plan =
-    heuristic ??
-    (await planGeneral(openai, query, prevMessages, emit, traceId));
+  // Step 2: Execute based on route
+  switch (routing.route) {
+    // -------- Connect3 app help --------
+    case "connect3": {
+      emit?.("status", {
+        step: "general_connect3",
+        message: "Answering as Connect3 assistant...",
+      });
+      const text = await runConnect3General(
+        openai,
+        query,
+        prevMessages,
+        emit,
+        undefined,
+        tldr,
+      );
+      return { markdown: text, entities: [] };
+    }
 
-  console.log("[runGeneral] plan", { traceId, plan, fromHeuristic: !!heuristic });
+    // -------- University-specific query --------
+    case "university": {
+      const vectorStores = getVectorStores(routing.university);
 
-  // -------- non-uni → Connect3 --------
-  if (!plan.uniRelated) {
-    emit?.("status", {
-      step: "general_connect3",
-      message: "Answering as Connect3 assistant...",
-    });
-    const text = await runConnect3General(openai, query, prevMessages);
-    return {
-      summary: text,
-      results: [],
-      followUps: "",
-    };
+      if (vectorStores.official || vectorStores.union) {
+        emit?.("status", {
+          step: "general_kb",
+          message: `Searching ${routing.university} knowledge base...`,
+        });
+        return runUniversityGeneral(
+          openai,
+          query,
+          routing.university!,
+          vectorStores,
+          { emit, intent: routing.intent },
+        );
+      }
+
+      // Fall through to web if no KB configured
+      emit?.("status", {
+        step: "general_web_fallback",
+        message: "University KB not available, searching web...",
+      });
+      return webSearch(openai, query, emit);
+    }
+
+    // -------- General web search --------
+    case "web":
+    default: {
+      emit?.("status", {
+        step: "general_web",
+        message: "Searching the web...",
+      });
+      return webSearch(openai, query, emit);
+    }
   }
+}
 
-  // -------- resolve university (fallback to userUniversity) --------
-  const plannedUni = normalisedPlannedUni(plan.university);
+// ============================================================================
+// Web Search Helper
+// ============================================================================
 
-  const rawUni = plannedUni ?? (userUniversity ?? null);
-  const uniSlug = normalizeUniversitySlug(rawUni);
-  const vectorStores = getUniversityVectorStores(uniSlug);
-  const intent = detectUniKbIntent(query);
-
-
-  // -------- KB path --------
-  if (uniSlug && (vectorStores.official || vectorStores.union)) {
-    emit?.("status", {
-      step: "general_kb",
-      message: "Checking university knowledge base...",
-    });
-    return runUniversityGeneral(openai, query, uniSlug, vectorStores, {
-      traceId,
-      emit,
-      intent,
-    });
-  }
-
-  // -------- web fallback --------
-  emit?.("status", {
-    step: "general_web_fallback",
-    message: "Knowledge base unavailable, using web search...",
-  });
+async function webSearch(
+  openai: OpenAI,
+  query: string,
+  emit?: (event: string, data: unknown) => void,
+): Promise<SearchResponse> {
   const resp = await openai.responses.create({
     model: "gpt-4o-mini",
     input: [
       {
         role: "system",
-        content:
-          "You are a university help assistant. The university knowledge base is unavailable. Use web search and prefer official university or government sources.",
+        content: `You are a helpful assistant. Use web search to find accurate, up-to-date information. 
+Prefer official sources (university websites, government sites) when relevant.
+Format your response in clear markdown.`,
       },
       { role: "user", content: query },
     ],
-    tools: [{ type: "web_search_preview" as any }],
+    tools: [{ type: "web_search_preview" }],
   });
 
   emit?.(
     "progress",
-    `WEB SEARCH usage: calls=${countWebSearchCalls(resp)} tokens=${resp.usage?.total_tokens}`
+    `WEB SEARCH: calls=${countWebSearchCalls(resp)} tokens=${resp.usage?.total_tokens}`,
   );
 
   return {
-    summary: (resp.output_text ?? "").trim(),
-    results: [],
-    followUps: "",
+    markdown: (resp.output_text ?? "").trim(),
+    entities: [],
   };
 }

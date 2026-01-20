@@ -2,51 +2,32 @@
 import OpenAI from "openai";
 import { countWebSearchCalls } from "./countWebSearches";
 import type { SearchResponse } from "../types";
-import type { UniStores } from "./universities";
+import type { KBIntent } from "./router";
+
+type VectorStores = {
+  official?: string;
+  union?: string;
+};
 
 type RunUniversityGeneralOpts = {
   traceId?: string;
   emit?: (event: string, data: unknown) => void;
-  intent?: "official" | "union" | "both";
+  intent?: KBIntent;
 };
-
-// ---------- heuristics (no extra LLM node) ----------
-function intentFromQuery(q: string): "official" | "union" | "both" {
-  const s = q.toLowerCase();
-
-  // official-first topics
-  const official =
-    /(special consideration|spec(ial)? consid|extension|defer|withdraw|enrol|enroll|re-enrol|fees|census|handbook|policy|policies|procedure|procedures|appeal|complaint|misconduct|plagiarism|academic integrity|graduation|visa|co(e)?|prereq|timetable|assessment policy|result release|transcript|stop\s*1|student admin|application|apply|admissions)/i;
-
-  // union-first topics
-  const union =
-    /(advocacy|student union|guild|umsu|msa\b|rusu\b|welfare|wellbeing|food|free food|legal|tenancy|housing|accommodation help|clubs?|societ(y|ies)|events?|volunteer|volunteering|representation|student reps|safer community|peer support|counselling support|financial aid advice)/i;
-
-  const o = official.test(s);
-  const u = union.test(s);
-
-  if (o && !u) return "official";
-  if (u && !o) return "union";
-  if (o && u) return "both";
-  return "both";
-}
 
 export async function runUniversityGeneral(
   openai: OpenAI,
   query: string,
   uniSlug: string,
-  vectorStores: UniStores,
-  opts?: RunUniversityGeneralOpts
+  vectorStores: VectorStores,
+  opts?: RunUniversityGeneralOpts,
 ): Promise<SearchResponse> {
-  const traceId = opts?.traceId ?? "uni_no_trace";
   const emit = opts?.emit;
+  const intent = opts?.intent ?? "both";
 
-  // Decide store intent without an LLM node
-  const heuristicIntent = intentFromQuery(query);
-  const intent = opts?.intent ?? heuristicIntent;
-
-  // Choose store order
-  const storesToQuery: { id: string; source: "Official" | "Student Union" }[] = [];
+  // Choose store order based on intent
+  const storesToQuery: { id: string; source: "Official" | "Student Union" }[] =
+    [];
 
   const officialId = vectorStores.official;
   const unionId = vectorStores.union;
@@ -93,15 +74,18 @@ Rules:
         },
         { role: "user", content: query },
       ],
-      tools: [{ type: "web_search_preview" as any }],
+      tools: [{ type: "web_search_preview" }],
     });
 
     emit?.(
       "progress",
-      `WEB SEARCH usage: calls=${countWebSearchCalls(webResp)} tokens=${webResp.usage?.total_tokens}`
+      `WEB SEARCH usage: calls=${countWebSearchCalls(webResp)} tokens=${webResp.usage?.total_tokens}`,
     );
 
-    return { summary: (webResp.output_text ?? "").trim(), results: [], followUps: "" };
+    return {
+      markdown: (webResp.output_text ?? "").trim(),
+      entities: [],
+    };
   }
 
   // Status message
@@ -120,11 +104,11 @@ Rules:
    * can only target one store. The model will choose to call one or both.
    */
   const storeTooling = storesToQuery.map((s) => ({
-    type: "file_search",
+    type: "file_search" as const,
     // IMPORTANT: single store per tool call; the model can call multiple tools
     vector_store_ids: [s.id],
     max_num_results: 6,
-  })) as any[];
+  }));
 
   const system = `
 You are a university help assistant for ${uniSlug}.
@@ -165,7 +149,7 @@ ${storesToQuery[1] ? `- Secondary: ${storesToQuery[1].source}` : ""}
 
   // (Optional) log token usage
   console.log("[runUniversityGeneral] one_call", {
-    traceId,
+    uniSlug,
     intent,
     primary: storesToQuery[0].source,
     secondary: storesToQuery[1]?.source,
@@ -180,18 +164,24 @@ ${storesToQuery[1] ? `- Secondary: ${storesToQuery[1].source}` : ""}
       if (o?.type !== "message") continue;
       const content = Array.isArray(o?.content) ? o.content : [];
       for (const c of content) {
-        const anns = Array.isArray((c as any)?.annotations)
-          ? (c as any).annotations
-          : [];
-        if (anns.some((a: any) => a?.type === "file_citation")) return true;
+        if ("annotations" in c && Array.isArray(c.annotations)) {
+          if (c.annotations.some((a) => a?.type === "file_citation"))
+            return true;
+        }
       }
     }
     return false;
   })();
 
   if (usedKB) {
-    emit?.("status", { step: "uni_kb_answer", message: "Answered from university KB." });
-    return { summary: (answerResp.output_text ?? "").trim(), results: [], followUps: "" };
+    emit?.("status", {
+      step: "uni_kb_answer",
+      message: "Answered from university KB.",
+    });
+    return {
+      markdown: (answerResp.output_text ?? "").trim(),
+      entities: [],
+    };
   }
 
   emit?.("status", {
@@ -222,13 +212,16 @@ Rules:
       },
       { role: "user", content: query },
     ],
-    tools: [{ type: "web_search_preview" as any }],
+    tools: [{ type: "web_search_preview" }],
   });
 
   emit?.(
     "progress",
-    `WEB SEARCH usage: calls=${countWebSearchCalls(webResp)} tokens=${webResp.usage?.total_tokens}`
+    `WEB SEARCH usage: calls=${countWebSearchCalls(webResp)} tokens=${webResp.usage?.total_tokens}`,
   );
 
-  return { summary: (webResp.output_text ?? "").trim(), results: [], followUps: "" };
+  return {
+    markdown: (webResp.output_text ?? "").trim(),
+    entities: [],
+  };
 }

@@ -1,69 +1,73 @@
 import { motion } from "framer-motion";
 import { SearchResponse } from "@/lib/search/types";
-import { ResultSection } from "./QueryResult";
 import { QuickLinks } from "@/components/search/Messages/quickLinks";
 import { Markdown } from "@/components/search/Messages/markdown";
 import { extractLinksFromMarkdown } from "@/lib/search/general/extractLinks";
 import type { ExtractedLink } from "@/lib/search/general/extractLinks";
+import {
+  splitMarkdownIntoSegments,
+  normalizeToMarkdownResponse,
+} from "@/lib/search/markdownParser";
+import MatchResults from "../MatchResult/MatchResults";
 
 export function CompletedResponse({
   content,
 }: {
-  content: Partial<SearchResponse>;
+  content: Partial<SearchResponse> | unknown;
 }) {
-  // Prefer structured links if present (no need for the LLM to print them in the summary)
+  // Normalize content to the new markdown format (handles legacy format too)
+  const normalized = normalizeToMarkdownResponse(content);
+
+  // Extract links from markdown
   const structuredLinks: ExtractedLink[] =
-    (content.quickLinks ?? []).map((l) => ({
+    (normalized.quickLinks ?? []).map((l) => ({
       url: l.url,
       label: l.label,
-      source: "summary", // maps into your ExtractedLink union; UI doesn’t care
+      source: "summary",
     })) ?? [];
 
-  // Fallback: extract from markdown
-  const extractedLinks: ExtractedLink[] = [
-    ...(content.summary ? extractLinksFromMarkdown(content.summary, "summary") : []),
-    ...(content.followUps ? extractLinksFromMarkdown(content.followUps, "followUps") : []),
-    ...((content.results || []).flatMap((r) =>
-      r?.text ? extractLinksFromMarkdown(r.text, "result") : []
-    )),
-  ];
+  const extractedLinks: ExtractedLink[] = normalized.markdown
+    ? extractLinksFromMarkdown(normalized.markdown, "summary")
+    : [];
 
   const links = structuredLinks.length ? structuredLinks : extractedLinks;
 
+  // Split markdown into text segments and entity markers
+  const segments = splitMarkdownIntoSegments(normalized.markdown);
+
   return (
     <motion.div
-      className="space-y-6 leading-relaxed !mt-0"
+      className="space-y-4 leading-relaxed !mt-0"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
     >
       <QuickLinks links={links} />
 
-      {content.summary && (
-        <motion.div
-          className="prose prose-neutral max-w-none prose-p:leading-relaxed prose-li:my-1"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 0.95, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <Markdown>{content.summary}</Markdown>
-        </motion.div>
-      )}
+      {segments.map((segment, index) => {
+        if (segment.type === "text") {
+          return (
+            <motion.div
+              key={`text-${index}`}
+              className="prose prose-neutral max-w-none prose-p:leading-relaxed prose-li:my-1"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 0.95, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 * Math.min(index, 5) }}
+            >
+              <Markdown>{segment.content}</Markdown>
+            </motion.div>
+          );
+        }
 
-      {(content.results || []).map((result, userIndex) => {
-        return <ResultSection key={userIndex} result={result} />;
+        // Entity marker - render as a card
+        return (
+          <MatchResults
+            key={`entity-${segment.entity.type}-${segment.entity.id}`}
+            match={segment.entity}
+            userIndex={index}
+          />
+        );
       })}
-
-      {content.followUps && (
-        <motion.div
-          className="prose prose-neutral max-w-none prose-p:leading-relaxed"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 0.95, y: 0 }}
-          transition={{ duration: 0.5, delay: 1.2 }}
-        >
-          <Markdown>{content.followUps}</Markdown>
-        </motion.div>
-      )}
     </motion.div>
   );
 }

@@ -47,7 +47,7 @@ export interface FileMap {
   [fileId: string]: EntityResult;
 }
 
-// Response Node
+// Response Node - Legacy JSON format (deprecated)
 export interface LLMResultSection {
   header: string | undefined;
   text: string;
@@ -66,10 +66,14 @@ export interface ResultSection {
   matches: EntityResult[];
 }
 
+// Unified Markdown Response Format
+// Entity markers use @@@type:id@@@ inline in markdown
 export interface SearchResponse {
-  summary: string;
-  results: ResultSection[];
-  followUps: string;
+  /** The full markdown response including inline @@@type:id@@@ entity markers */
+  markdown: string;
+  /** Extracted entity references from the markdown */
+  entities: EntityResult[];
+  /** Optional quick links extracted from the response */
   quickLinks?: { url: string; label: string; source: "kb" | "web" }[];
 }
 

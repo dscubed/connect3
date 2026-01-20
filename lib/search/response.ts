@@ -1,63 +1,63 @@
 import OpenAI from "openai";
-import {
-  EntityResult,
-  FileMap,
-  FileResult,
-  ResultSection,
-  SearchResponse,
-} from "./types";
-import { z } from "zod";
-import { zodTextFormat } from "openai/helpers/zod.mjs";
-import { partialParseResponse } from "./streamParser";
-
-const LLMSearchResultSchema = z.object({
-  summary: z.string(),
-  results: z.array(
-    z.object({
-      header: z.string(),
-      text: z.string(),
-      fileIds: z.array(z.string()),
-    })
-  ),
-  followUps: z.string(),
-});
+import { FileMap, FileResult, SearchResponse } from "./types";
+import { parseMarkdownEntities } from "./markdownParser";
 
 export const generateResponse = async (
   searchResults: FileResult[],
   context: string,
   openai: OpenAI,
   fileMap: FileMap,
-  emit?: (event: string, data: unknown) => void
+  emit?: (event: string, data: unknown) => void,
 ): Promise<SearchResponse> => {
+  // Build a reverse map: fileId -> entity marker string
+  const fileIdToMarker: Record<string, string> = {};
+  for (const [fileId, entity] of Object.entries(fileMap)) {
+    if (entity) {
+      fileIdToMarker[fileId] = `@@@${entity.type}:${entity.id}@@@`;
+    }
+  }
+
+  // Format results with fileId labels
   const results = searchResults
-    .map((res) => `${res.fileId}:\n${res.text}`)
+    .map((res) => `[${res.fileId}]:\n${res.text}`)
     .join("\n\n");
-  const systemPrompt = `You are an expert search result summarizer. Given a user query and a set of search results, you will generate a concise summary and suggest follow-up questions.
 
-        Your task is to analyze the search results and return a JSON object in the following format:
-        {
-            "summary": "<concise summary of the search results>",
-            "results": [
-                {
-                    "header": "<header for result>",
-                    "text": "<detailed text for result>",
-                    "fileIds": [<list of file IDs that contributed to this result>]
-                },
-                ...
-            ],
-            "followUps": "<suggested follow-up questions>"
-        }
-        Each result section should have no more than 3 matches.
+  const systemPrompt = `You are an expert search result summarizer. Given a user query and search results, generate a helpful markdown response.
 
-        Text should be short and concise (max 2 sentences per result) use bullet points if necessary.
-        summary and followUps should be no more than 2 sentences each.
+## Output Format
+Write your response in **markdown** format. When referencing specific search results, include the entity marker inline using this format:
+@@@type:id@@@
 
-        Search responses were designed to capture as many relevant documents as possible.
-        You do not need to use all search results only pick results that allow you to best generate a response to the user's query.
-        Only pick the search results which fit in with what the user is looking for.
+For example, if a search result has fileId "user_abc123", you would write:
+"Check out this person who matches your interests: @@@user:abc123@@@"
 
-        If there are no matches you can identify any partial matches and indicate that in the summary.
-        If there are no matches thats fine just indicate that in the summary.`;
+## File ID to Entity Mapping
+${Object.entries(fileIdToMarker)
+  .map(([fileId, marker]) => `- ${fileId} → ${marker}`)
+  .join("\n")}
+
+## Guidelines
+- Write a concise summary (2-3 sentences max)
+- Group related results under markdown headers (##) if helpful
+- Place entity markers (@@@type:id@@@) inline where they're contextually relevant
+- Each entity marker should appear on its own line for proper card rendering
+- Max 3-5 entity matches total - only pick the most relevant ones
+- End with 1-2 follow-up question suggestions if appropriate
+- If no good matches, explain that briefly
+
+## Example Output
+Here's what I found based on your interests:
+
+## Recommended Connections
+These people share your interest in AI and machine learning:
+
+@@@user:abc-123@@@
+@@@user:def-456@@@
+
+## Relevant Clubs
+@@@organisation:org-789@@@
+
+Would you like me to find more specific matches?`;
 
   const stream = await openai.responses.create({
     model: "gpt-4o-mini",
@@ -66,50 +66,25 @@ export const generateResponse = async (
       { role: "system", content: `Search Context: ${context}` },
       { role: "user", content: `Search Results:\n${results}` },
     ],
-    text: {
-      format: zodTextFormat(LLMSearchResultSchema, "search_response"),
-    },
     stream: true,
   });
 
   // Accumulate streamed text
-  let textContent = "";
+  let markdown = "";
   for await (const event of stream) {
     if (event.type === "response.output_text.delta" && "delta" in event) {
-      textContent += event.delta;
-      const partial = partialParseResponse(textContent, fileMap);
+      markdown += event.delta;
+      // Emit partial markdown for streaming UI updates
+      const partial = parseMarkdownEntities(markdown);
       if (emit) emit("response", { partial });
     }
   }
 
-  // Parse JSON and validate with zod
-  let parsed;
-  try {
-    parsed = JSON.parse(textContent);
-  } catch {
-    throw new Error(`Failed to parse JSON response: ${textContent}`);
-  }
-
-  const validated = LLMSearchResultSchema.safeParse(parsed);
-  if (!validated.success) {
-    throw new Error(`Invalid response schema: ${validated.error.message}`);
-  }
-
-  // Convert to SearchResponse format
-  const outputResults: ResultSection[] = [];
-  for (const result of validated.data.results) {
-    outputResults.push({
-      header: result.header ?? undefined,
-      text: result.text,
-      matches: result.fileIds
-        .map((id) => fileMap[id])
-        .filter(Boolean) as EntityResult[],
-    });
-  }
+  // Parse final response
+  const { entities } = parseMarkdownEntities(markdown);
 
   return {
-    summary: validated.data.summary,
-    results: outputResults,
-    followUps: validated.data.followUps,
+    markdown: markdown.trim(),
+    entities,
   };
 };

@@ -26,13 +26,13 @@ export function useSearchStream(setMessages: MessageUpdater) {
         const target = prev.find((m) => m.id === messageId);
         console.log("[useSearchStream] target before update", target);
         const next = prev.map((msg) =>
-          msg.id === messageId ? { ...msg, ...update } : msg
+          msg.id === messageId ? { ...msg, ...update } : msg,
         );
         console.log("[useSearchStream] messages after update", next);
         return next;
       });
     },
-    [setMessages]
+    [setMessages],
   );
 
   const updateProgress = useCallback(
@@ -44,13 +44,11 @@ export function useSearchStream(setMessages: MessageUpdater) {
 
       setMessages((prev) =>
         prev.map((msg) =>
-          msg.id === messageId
-            ? { ...msg, progress: progressUpdate }
-            : msg
-        )
+          msg.id === messageId ? { ...msg, progress: progressUpdate } : msg,
+        ),
       );
     },
-    [setMessages]
+    [setMessages],
   );
 
   const connectStream = useCallback(
@@ -96,21 +94,23 @@ export function useSearchStream(setMessages: MessageUpdater) {
 
       channel.on("broadcast", { event: "done" }, ({ payload }) => {
         const data = payload as any;
-      
-        // server emits { success: true, result: SearchResponse } OR { success: true, response: SearchResponse }
+
+        // server emits { success: true, result: SearchResponse }
         const result: any = data?.result ?? data?.response;
-      
-        const structured =
+
+        // The content is normalized by CompletedResponse component
+        // which handles both new markdown format and legacy format
+        const content =
           result && typeof result === "object"
             ? result
-            : { summary: "", results: [], followUps: "" };
-      
+            : { markdown: "", entities: [] };
+
         updateMessage(messageId, {
           status: "completed",
-          content: structured,
+          content,
           progress: { step: "completed", message: "Done" } as any,
         });
-      });      
+      });
 
       channel.on("broadcast", { event: "error" }, (payload) => {
         console.log("[useSearchStream] ERROR EVENT RECEIVED", payload);
@@ -148,7 +148,7 @@ export function useSearchStream(setMessages: MessageUpdater) {
         });
       });
     },
-    [supabase, updateMessage, updateProgress]
+    [supabase, updateMessage, updateProgress],
   );
 
   const closeStream = useCallback(() => {

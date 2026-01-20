@@ -1,9 +1,6 @@
-export function countWebSearchCalls(resp: any): number {
-    const outputs = resp?.output ?? [];
-    return outputs.filter(
-      (o: any) =>
-        o?.type === "web_search_call" ||
-        (o?.type === "tool_call" && o?.tool_name === "web_search_preview")
-    ).length;
-  }
-  
+import type { Response } from "openai/resources/responses/responses.mjs";
+
+export function countWebSearchCalls(resp: Response): number {
+  const outputs = resp?.output ?? [];
+  return outputs.filter((o) => o?.type === "web_search_call").length;
+}

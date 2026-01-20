@@ -3,7 +3,7 @@ import { ResponseInput } from "openai/resources/responses/responses.mjs";
 
 export const getContext = async (
   chatmessageId: string,
-  supabase: SupabaseClient
+  supabase: SupabaseClient,
 ) => {
   // Fetch message data
   const { data: messageData, error: messageError } = await supabase
@@ -93,8 +93,14 @@ const contentToString = (content: any): string => {
     const unwrapped: any = (content as any)?.result ?? content;
     if (typeof unwrapped === "string") return unwrapped.trim();
     if (unwrapped && typeof unwrapped === "object") {
-      if (typeof unwrapped.summary === "string") return unwrapped.summary.trim();
-      if (typeof unwrapped.content === "string") return unwrapped.content.trim();
+      // New markdown format
+      if (typeof unwrapped.markdown === "string")
+        return unwrapped.markdown.trim();
+      // Legacy format
+      if (typeof unwrapped.summary === "string")
+        return unwrapped.summary.trim();
+      if (typeof unwrapped.content === "string")
+        return unwrapped.content.trim();
     }
   }
 

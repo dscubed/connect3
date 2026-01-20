@@ -7,7 +7,8 @@ export async function runConnect3General(
   query: string,
   prevMessages: ResponseInput,
   emit?: (event: string, data: unknown) => void,
-  traceId?: string
+  traceId?: string,
+  tldr?: string,
 ): Promise<string> {
   const tid = traceId ?? mkTraceId("connect3General");
 
@@ -59,7 +60,7 @@ export async function runConnect3General(
     - Use plain language. Avoid unnecessary jargon.
     - Ask at most one clarifying question when needed.
     
-    Now respond to the user's message.` 
+    Now respond to the user's message.`;
 
   try {
     const resp = await openai.responses.create({
@@ -67,6 +68,7 @@ export async function runConnect3General(
       input: [
         { role: "system", content: systemPrompt },
         ...prevMessages,
+        { role: "system", content: `User Info: ${tldr ?? "Not Provided"}` },
         { role: "user", content: query },
       ],
     });
@@ -78,7 +80,7 @@ export async function runConnect3General(
       outputTextLen: (resp.output_text ?? "").length,
       extractedLen: text.length,
       extractedPreview: preview(text, 140),
-      outputItems: Array.isArray((resp as any).output) ? (resp as any).output.length : null,
+      outputItems: resp.output?.length ?? null,
     });
 
     // Very useful: flag empty output immediately
@@ -89,11 +91,12 @@ export async function runConnect3General(
     }
 
     return text;
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const error = err as Error;
     dbg(emit, tid, "error", {
-      message: err?.message ?? String(err),
-      name: err?.name,
-      stack: err?.stack ? preview(err.stack, 240) : undefined,
+      message: error?.message ?? String(err),
+      name: error?.name,
+      stack: error?.stack ? preview(error.stack, 240) : undefined,
     });
     throw err;
   }
