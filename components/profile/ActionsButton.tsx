@@ -20,6 +20,7 @@ export function ActionsButton({
 
   // Get the current link state
   const href = typeof window !== "undefined" ? window.location.href : "";
+  console.log("HREF", href);
 
   const handleEditToggle = () => {
     // If finishing editing save chunks if no pending edits
@@ -40,7 +41,7 @@ export function ActionsButton({
   return (
     <>
       <div className="flex items-center gap-2">
-        {href != "profile" ? (
+        {!href.includes("profile") ? (
           <Button
             variant="outline"
             className="text-lg !bg-foreground font-medium !text-white border-[3px] border-white hover:scale-105 transition-all rounded-full py-5 shadow-none"
