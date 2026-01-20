@@ -14,7 +14,7 @@ export const filterSearch = async (
   query: string,
   entities: EntitySearch,
   prevMessages: ResponseInput,
-  openai: OpenAI
+  openai: OpenAI,
 ): Promise<EntityFilters> => {
   // Determine which entity types to filter based on received plan
   const entitiesIncluded = [];
@@ -24,7 +24,7 @@ export const filterSearch = async (
     }
   }
   const entityContext = `Only consider the following entity types for inclusion/exclusion: ${entitiesIncluded.join(
-    ", "
+    ", ",
   )}`;
 
   // System prompt for filtering logic
@@ -58,7 +58,6 @@ include should only be true or false, not null or other values.
 return an empty list for entityIds if there are no relevant entities to include or exclude.
 NEVER RETURN NULL FOR INCLUDE OR ENTITYIDS.`;
 
-  //  TODO: Implement the LLM call and check if works as intended
   const response = await openai.responses.parse({
     model: "gpt-4o-mini",
     input: [

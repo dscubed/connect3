@@ -7,15 +7,50 @@ import UserAvatar from "../MatchResult/UserAvatar";
 import { useAuthStore } from "@/stores/authStore";
 import { Item } from "@/components/ui/item";
 import { FilledLogo } from "@/components/logo/FilledLogo";
+import { Button } from "@/components/ui/button";
+import { RotateCcw } from "lucide-react";
 
 interface MessageThreadProps {
   message: ChatMessage;
   index: number;
   onUserClick?: (user: UserProfile) => void;
+  onRetry?: (messageId: string) => void;
 }
 
-export function MessageThread({ message, index }: MessageThreadProps) {
+export function MessageThread({ message, index, onRetry }: MessageThreadProps) {
   const { profile } = useAuthStore();
+
+  const renderContent = () => {
+    // Failed state
+    if (message.status === "failed") {
+      return (
+        <div className="flex flex-col gap-2">
+          <p className="text-red-500 text-sm">
+            Search failed. Please try again.
+          </p>
+          {onRetry && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onRetry(message.id)}
+              className="w-fit"
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Retry
+            </Button>
+          )}
+        </div>
+      );
+    }
+
+    // Completed with content
+    if (message.content) {
+      return <CompletedResponse content={message.content} />;
+    }
+
+    // Loading/processing state
+    return <SearchProgressIndicator progress={message.progress} />;
+  };
 
   return (
     <div className="space-y-8">
@@ -47,13 +82,7 @@ export function MessageThread({ message, index }: MessageThreadProps) {
       >
         <FilledLogo width={32} height={32} className="flex-shrink-0" />
 
-        {/* Loading State */}
-        {message.content ? (
-          // Completed Results
-          <CompletedResponse content={message.content} />
-        ) : (
-          <SearchProgressIndicator progress={message.progress} />
-        )}
+        {renderContent()}
       </motion.div>
     </div>
   );

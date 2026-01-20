@@ -6,9 +6,14 @@ interface MessageListProps {
   messages: ChatMessage[];
   onUserClick?: (user: UserProfile) => void;
   isLoading?: boolean;
+  onRetry?: (messageId: string) => void;
 }
 
-export function MessageList({ messages, onUserClick }: MessageListProps) {
+export function MessageList({
+  messages,
+  onUserClick,
+  onRetry,
+}: MessageListProps) {
   if (messages.length === 0) {
     return null;
   }
@@ -21,6 +26,7 @@ export function MessageList({ messages, onUserClick }: MessageListProps) {
           message={message}
           index={index}
           onUserClick={onUserClick}
+          onRetry={onRetry}
         />
       ))}
     </div>

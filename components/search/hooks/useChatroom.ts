@@ -189,6 +189,41 @@ export function useChatroom(chatroomId: string | null) {
     [chatroomId, user, getSupabaseClient, triggerSearch, inFlight],
   );
 
+  // Retry a failed message
+  const retryMessage = useCallback(
+    async (messageId: string) => {
+      if (inFlight) {
+        console.log("[useChatroom] already in flight, can't retry");
+        return;
+      }
+
+      // Reset message status to pending
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === messageId
+            ? {
+                ...m,
+                status: "pending" as const,
+                content: null,
+                progress: undefined,
+              }
+            : m,
+        ),
+      );
+
+      // Also update in database
+      const supabase = getSupabaseClient();
+      await supabase
+        .from("chatmessages")
+        .update({ status: "pending", content: null })
+        .eq("id", messageId);
+
+      // Trigger the search again
+      await triggerSearch(messageId);
+    },
+    [inFlight, getSupabaseClient, triggerSearch],
+  );
+
   // Load Chatroom Messages
   useEffect(() => {
     if (!chatroomId || !user) {
@@ -251,5 +286,5 @@ export function useChatroom(chatroomId: string | null) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatroomId, user]); // intentionally minimal
 
-  return { messages, isLoading, addNewMessage, inFlight };
+  return { messages, isLoading, addNewMessage, retryMessage, inFlight };
 }

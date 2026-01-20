@@ -6,7 +6,7 @@ import { uploadProfileToVectorStore } from "@/lib/vectorStores/profile/upload";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SECRET_KEY!
+  process.env.SUPABASE_SECRET_KEY!,
 );
 
 export const config = {
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     if (!userId || !user) {
       return NextResponse.json(
         { error: "userId, or authentication required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       console.error("Error updating Supabase profile:", error);
       return NextResponse.json(
         { error: "Failed to update profile with OpenAI file ID" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     console.error("❌ Error in uploadProfile route:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -17,11 +17,10 @@ export function SummaryCard({
   profile?: Profile;
 }) {
   const [isEditing, setIsEditing] = useState(false);
-  const [profileState, setProfileState] = useState<Profile | null>(null);
   const [newTldr, setNewTldr] = useState(profile?.tldr || "");
-
+  const { user } = useAuthStore();
   const saveTldr = async (updatedTldr: string) => {
-    if (profileState === null) {
+    if (profile && profile.id === user?.id) {
       useAuthStore.getState().updateProfile({ tldr: updatedTldr });
       uploadProfileToVectorStore();
     } else {
@@ -31,9 +30,9 @@ export function SummaryCard({
 
   useEffect(() => {
     if (profile) {
-      setProfileState(profile);
+      setNewTldr(profile.tldr || "");
     } else {
-      setProfileState(useAuthStore.getState().profile);
+      setNewTldr("");
     }
   }, [profile]);
 
