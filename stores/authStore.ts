@@ -11,6 +11,7 @@ export interface Profile {
   created_at: string;
   updated_at: string;
   onboarding_completed: boolean;
+  humanitix_event_integration_setup: boolean; // Later should be moved to orgs table
   name_provided: boolean;
   location?: string;
   tldr?: string;
@@ -31,14 +32,14 @@ interface AuthState {
   updateProfile: (fields: Partial<Profile>) => Promise<void>;
   makeAuthenticatedRequest: (
     url: string,
-    options?: RequestInit
+    options?: RequestInit,
   ) => Promise<Response>;
   getSupabaseClient: () => ReturnType<typeof createClient>;
 }
 
 async function fetchProfile(
   userId: string,
-  set: (state: Partial<AuthState>) => void
+  set: (state: Partial<AuthState>) => void,
 ) {
   const supabase = createClient();
   const { data: profile, error } = await supabase
