@@ -45,17 +45,13 @@ export function EventListCard({
               : "border-white bg-muted"
           }`}
         >
-          {!isLoadingCreator ? (
-            <Image
-              src={creator.avatar_url}
-              alt={`${event.name} logo`}
-              width={128}
-              height={128}
-              className="w-full h-full object-cover rounded-md"
-            />
-          ) : (
-            <Calendar className="w-8 h-8 sm:w-12 sm:h-12 text-white/80" />
-          )}
+          <Image
+            src={creator.avatar_url}
+            alt={`${event.name} logo`}
+            width={128}
+            height={128}
+            className="w-full h-full object-cover rounded-md"
+          />
         </div>
 
         {/* Content */}
