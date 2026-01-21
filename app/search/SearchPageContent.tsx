@@ -32,7 +32,7 @@ export default function SearchPageContent() {
 
   const searchParams = useSearchParams();
   const chatroomId = mounted ? searchParams?.get("chatroom") || null : null;
-  const { messages, addNewMessage, inFlight, retryMessage } =
+  const { messages, addNewMessage, inFlight, retryMessage, editMessage } =
     useChatroom(chatroomId);
   const supabase = getSupabaseClient();
 
@@ -152,6 +152,7 @@ export default function SearchPageContent() {
                   messages={messages}
                   onUserClick={handleMessageUserClick}
                   onRetry={retryMessage}
+                  onEdit={editMessage}
                 />
               </div>
             )}

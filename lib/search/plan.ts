@@ -20,7 +20,7 @@ export const planSearch = async (
   openai: OpenAI,
   query: string,
   tldr: string,
-  prevMessages: ResponseInput
+  prevMessages: ResponseInput,
 ): Promise<SearchPlan> => {
   const systemPrompt = `You are an expert search planner. Given a user query, you will break down the query into relevant searches across multiple vector stores.
 
@@ -82,6 +82,9 @@ General university questions (DO NOT require search):
 - "What are the academic misconduct rules?"
 - "How do I enroll or withdraw?"
 - "What services does the student union offer?"
+
+- "When does semester 2 start?" (asking for term dates)
+- "How do I join clubs on campus?" (asking for advice on joining clubs)
 
 Important distinction:
 - If the user is asking ABOUT the Connect3 app, its features, privacy, or how it works → requiresSearch = false.

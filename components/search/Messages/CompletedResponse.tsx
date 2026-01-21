@@ -9,11 +9,18 @@ import {
   normalizeToMarkdownResponse,
 } from "@/lib/search/markdownParser";
 import MatchResults from "../MatchResult/MatchResults";
+import { Button } from "@/components/ui/button";
+import { Copy, RotateCw } from "lucide-react";
+import { toast } from "sonner";
 
 export function CompletedResponse({
   content,
+  id,
+  onRetry,
 }: {
   content: Partial<SearchResponse>;
+  id: string;
+  onRetry: (messageId: string) => void;
 }) {
   // Normalize content to the new markdown format (handles legacy format too)
   const normalized = normalizeToMarkdownResponse(content);
@@ -44,6 +51,7 @@ export function CompletedResponse({
     >
       <QuickLinks links={links} />
 
+      {/* Content */}
       {segments.map((segment, index) => {
         if (segment.type === "text") {
           return (
@@ -68,6 +76,30 @@ export function CompletedResponse({
           />
         );
       })}
+
+      {/* Search Actions */}
+      <div className="flex gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="bg-transparent hover:bg-muted/10 hover:text-muted !p-1 h-fit"
+          onClick={() => onRetry(id)}
+        >
+          <RotateCw className="h-4 w-4" />
+        </Button>
+        {/* Copy Content to Clipboard */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="bg-transparent hover:bg-muted/10 hover:text-muted !p-1 h-fit"
+          onClick={() => {
+            navigator.clipboard.writeText(normalized.markdown || "");
+            toast.success("Response copied to clipboard");
+          }}
+        >
+          <Copy className="h-4 w-4" />
+        </Button>
+      </div>
     </motion.div>
   );
 }
