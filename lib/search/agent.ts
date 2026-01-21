@@ -52,7 +52,6 @@ export const runSearch = async (
     emit,
   );
   if (emit) emit("progress", progress);
-
   console.log("Search Plan:", searchPlan);
 
   // Route to general chatbot if no search required

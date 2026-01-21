@@ -9,7 +9,7 @@ export const config = {
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SECRET_KEY!
+  process.env.SUPABASE_SECRET_KEY!,
 );
 
 const openai = new OpenAI({
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     if (!body || typeof body !== "object" || Object.keys(body).length === 0) {
       return NextResponse.json(
         { error: "Invalid request body" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     const summaries = (chunks ?? [])
       .map((c, i) => `Chunk ${i + 1}: ${c.summary_text}`)
       .join("\n");
-      const prompt = `
+    const prompt = `
       You are refining a student's profile summary ("TLDR") using their profile chunks.
       
       - Output only 2 sentences.
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
     console.error("Error generating TLDR:", error);
     return NextResponse.json(
       { error: "Failed to generate TLDR" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

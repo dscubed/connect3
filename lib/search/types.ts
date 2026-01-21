@@ -5,7 +5,7 @@ export type EntityType = "user" | "organisation" | "events";
 // Planner Node
 
 export type EntitySearch = {
-  [type in EntityType]: string;
+  [type in EntityType]: string | null;
 };
 
 export interface SearchPlan {
