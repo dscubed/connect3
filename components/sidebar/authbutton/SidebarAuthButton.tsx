@@ -6,9 +6,9 @@ import { LoggedInAuthButton } from "./LoggedInAuthButton";
 import { LoggedOutAuthButton } from "./LoggedOutAuthButton";
 
 export function SidebarAuthButton() {
-  const { user, loading, profile } = useAuthStore.getState();
+  const { user, loading, profile } = useAuthStore();
 
-  // console.log("[SidebarAuthButton] render", { user, loading, profile });
+  console.log("[SidebarAuthButton] render", { user, loading, profile });
 
   if (loading && !user) {
     return <div className="w-10 h-10 rounded-full bg-black/10 animate-pulse" />;
