@@ -21,14 +21,14 @@ export function SearchProgressIndicator({
           )}
           <div className="flex items-center space-x-2">
             {action.status === "complete" ? (
-              <CheckCircle2 className="w-5 h-5 bg-white" />
+              <CheckCircle2 className="w-5 h-5 bg-white text-muted" />
             ) : (
-              <Loader className="w-5 h-5 animate-spin text-muted bg-white" />
+              <Loader className="w-5 h-5 animate-spin bg-white" />
             )}
             <span
               className={cn(
                 "font-medium",
-                action.status === "start" && "text-muted animate-pulse",
+                action.status === "complete" ? "text-muted" : "animate-pulse",
               )}
             >
               {action.message}
