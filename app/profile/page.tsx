@@ -30,7 +30,7 @@ export default function ProfilePage() {
     if (!profile) return;
 
     try {
-      const response = await makeAuthenticatedRequest('/api/onboarding/humanitix/createSecret', {
+      const secretCreationResponse = await makeAuthenticatedRequest('/api/onboarding/humanitix/createSecret', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -41,19 +41,39 @@ export default function ProfilePage() {
         }),
       });
 
-      if (response.ok) {
-        const responseData = await response.json();
+      if (secretCreationResponse.ok) {
+        const responseData = await secretCreationResponse.json();
         let message = "API key added successfully";
         if (responseData.success) {
           // On success set the humanitix flag to true so we don't get the modal again
-          await updateProfile({ ...profile, humanitix_event_integration_setup: true });
+          await updateProfile({ ...profile, humanitix_event_integration_setup: true });  
         } else {
+
           message = "Failed to add API key: " + responseData.error;
         }
         toast(message);
       } else {
-        const errorData = await response.json().catch(() => ({ error: "Unknown error occurred" }));
+        const errorData = await secretCreationResponse.json().catch(() => ({ error: "Unknown error occurred" }));
         toast("Failed to add API key: " + errorData.error || "Request failed");
+      }
+
+      // optimstic ui update close modal while onboarding happens in the backend
+      onEventModalClose();
+
+      const response = await makeAuthenticatedRequest(
+        "https://nsjrzxbtxsqmsdgevszv.supabase.co/functions/v1/load-org-events-on-onboarding-success", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          organisationId: profile.id,
+          organisationName: `${profile.first_name} ${profile.last_name}`
+        }),
+      });
+
+      if (!response.ok) {
+        toast("Failed to init cron state");
       }
     } catch (error: unknown) {
       if (error instanceof Error) {

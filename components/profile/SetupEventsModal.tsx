@@ -7,13 +7,16 @@ interface SetupEventsModalProps {
 }
 
 export default function SetupEventsModal({ isOpen, onClose, onSubmit }: SetupEventsModalProps) {
+  const [pending, setPending] = useState(false);
   const [apiKey, setApiKey] = useState('');
 
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
+    setPending(true);
     e.preventDefault();
     onSubmit(apiKey);
+    setPending(false);
   };
 
   return (
@@ -37,6 +40,7 @@ export default function SetupEventsModal({ isOpen, onClose, onSubmit }: SetupEve
                 type="password"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
+                disabled={pending}
                 placeholder="Enter your API key"
                 className="w-full text-sm px-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
@@ -46,15 +50,17 @@ export default function SetupEventsModal({ isOpen, onClose, onSubmit }: SetupEve
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 type="submit"
-                className="flex-1 bg-foreground text-white py-2 px-4 rounded-full hover:bg-foreground/70 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                disabled={pending}
+                className={`flex-1 bg-foreground text-white py-2 px-4 rounded-full ${!pending && "hover:bg-foreground/70 focus:outline-none focus:ring-2 focus:ring-offset-2"} `}
               >
                 Submit
               </button>
               
               <button
                 type="button"
+                disabled={pending}
                 onClick={onClose}
-                className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                className={`flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-full ${!pending && "hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2"} `}
               >
                 Cancel
               </button>
