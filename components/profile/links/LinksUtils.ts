@@ -14,9 +14,12 @@ import { SiXiaohongshu } from "react-icons/si";
 import { SiX } from "react-icons/si";
 import { MdGroups } from "react-icons/md";
 import { IconType } from "react-icons/lib";
+import { toast } from "sonner";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 export type LinkType =
-  | "linkedin"
+  | "linkedin-user"
+  | "linkedin-company"
   | "github"
   | "instagram"
   | "facebook"
@@ -54,12 +57,20 @@ interface LinkPattern {
 }
 
 export const LinkTypes: { [key in LinkType]: LinkDetails } = {
-  linkedin: {
+  "linkedin-user": {
     icon: FaLinkedin,
     label: "LinkedIn",
     pattern: {
       regex: [/^(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/([^/?#]+)/i],
       prefix: "https://www.linkedin.com/in/",
+    },
+  },
+  "linkedin-company": {
+    icon: FaLinkedin,
+    label: "LinkedIn",
+    pattern: {
+      regex: [/^(?:https?:\/\/)?(?:www\.)?linkedin\.com\/company\/([^/?#]+)/i],
+      prefix: "https://www.linkedin.com/company/",
     },
   },
   github: {
@@ -139,7 +150,7 @@ export const LinkTypes: { [key in LinkType]: LinkDetails } = {
 };
 
 export const UrlToLinkDetails = (
-  url: string
+  url: string,
 ): { type: LinkType; details: string } | null => {
   for (const [type, details] of Object.entries(LinkTypes)) {
     const pattern = details.pattern;
@@ -153,4 +164,69 @@ export const UrlToLinkDetails = (
     }
   }
   return null;
+};
+
+// Supabase Link Utils
+
+export const deleteLinksFromSupabase = async (
+  ids: string[],
+  supabase: SupabaseClient,
+) => {
+  console.log("Deleting links with IDs:", ids);
+
+  // check if ids exist
+  const { data, error: checkError } = await supabase
+    .from("profile_links")
+    .select("id")
+    .in("id", ids);
+  if (checkError) {
+    console.error("Error checking links before deletion:", checkError);
+    toast.error(`Error deleting links: ${checkError.message}`);
+    return;
+  }
+  if (data.length === 0) {
+    console.log("No links found to delete.");
+    return;
+  }
+  const { error } = await supabase.from("profile_links").delete().in("id", ids);
+
+  if (error) {
+    console.error("Error deleting links:", error);
+    toast.error(`Error deleting links: ${error.message}`);
+  }
+};
+
+export const addLinksToSupabase = async (
+  newLinks: LinkItem[],
+  supabase: SupabaseClient,
+  profileId: string,
+) => {
+  const { error } = await supabase.from("profile_links").insert(
+    newLinks.map((link) => ({
+      id: link.id,
+      type: link.type,
+      details: link.details,
+      profile_id: profileId,
+    })),
+  );
+  if (error) {
+    console.error("Error adding links:", error);
+    toast.error(`Error adding links: ${error.message}`);
+  }
+};
+
+export const updateLinksInSupabase = async (
+  updatedLinks: LinkItem[],
+  supabase: SupabaseClient,
+) => {
+  for (const link of updatedLinks) {
+    const { error } = await supabase
+      .from("profile_links")
+      .update({ details: link.details })
+      .eq("id", link.id);
+    if (error) {
+      console.error("Error updating link:", error);
+      toast.error(`Error updating link: ${error.message}`);
+    }
+  }
 };

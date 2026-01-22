@@ -39,7 +39,7 @@ export function LinksSection({ editingProfile, profile }: LinksSectionProps) {
   return (
     <>
       {!loading && (
-        <div className="flex items-center gap-4 animate-fade-in h-fit">
+        <div className="flex items-center gap-4 animate-fade-in h-fit max-w-full overflow-scroll">
           {linkData.length > 0 ? (
             <LinksDisplay links={linkData} />
           ) : (

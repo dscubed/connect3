@@ -88,7 +88,7 @@ function ProfilePageContentInner({
                   editingProfile={editingProfile}
                 />
               </div>
-              <div className="flex flex-row justify-between">
+              <div className="flex flex-col">
                 <UserDetails
                   profile={profile}
                   editingProfile={editingProfile}

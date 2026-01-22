@@ -13,8 +13,12 @@ interface LinkTypeInputProps {
   links: LinkType[];
 }
 
-const ORG_EXCLUDED_LINKS: LinkType[] = ["discord"];
-const USER_EXCLUDED_LINKS: LinkType[] = ["website", "discord-server"];
+const ORG_EXCLUDED_LINKS: LinkType[] = ["discord", "linkedin-user"];
+const USER_EXCLUDED_LINKS: LinkType[] = [
+  "website",
+  "discord-server",
+  "linkedin-company",
+];
 
 export function LinkTypeInput({
   addingState,
@@ -27,22 +31,22 @@ export function LinkTypeInput({
 
   // Filter based on already added link types
   let filteredOptions = Object.entries(LinkTypes).filter(
-    ([key]) => !links.includes(key as LinkType)
+    ([key]) => !links.includes(key as LinkType),
   );
 
   // Filter options based on input
   filteredOptions = filteredOptions.filter(([, details]) =>
-    details.label.toLowerCase().includes(addingState.typeInput.toLowerCase())
+    details.label.toLowerCase().includes(addingState.typeInput.toLowerCase()),
   );
 
   // filter based on profile type
   if (profile?.account_type === "organisation") {
     filteredOptions = filteredOptions.filter(
-      ([key]) => !ORG_EXCLUDED_LINKS.includes(key as LinkType)
+      ([key]) => !ORG_EXCLUDED_LINKS.includes(key as LinkType),
     );
   } else {
     filteredOptions = filteredOptions.filter(
-      ([key]) => !USER_EXCLUDED_LINKS.includes(key as LinkType)
+      ([key]) => !USER_EXCLUDED_LINKS.includes(key as LinkType),
     );
   }
 
@@ -52,7 +56,7 @@ export function LinkTypeInput({
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setHighlightedIndex((prev) =>
-        prev < filteredOptions.length - 1 ? prev + 1 : prev
+        prev < filteredOptions.length - 1 ? prev + 1 : prev,
       );
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
@@ -92,7 +96,7 @@ export function LinkTypeInput({
                 ? "pl-8"
                 : ""
             }`,
-            "w-32"
+            "w-32",
           )}
           value={addingState.typeInput}
           onChange={(e) => {
