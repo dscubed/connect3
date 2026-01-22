@@ -4,23 +4,37 @@ import { Button } from "@/components/ui/button";
 import { AiEnhanceDialog } from "@/components/profile/edit-modals/AiEnhanceDialog";
 import { CardContent } from "@/components/ui/card";
 import { SectionCard, SectionCardHeader } from "./SectionCard";
-import { useAuthStore } from "@/stores/authStore";
+import { Profile, useAuthStore } from "@/stores/authStore";
 import { uploadProfileToVectorStore } from "@/lib/vectorStores/profile/client";
 import { PencilLine } from "lucide-react";
+import { toast } from "sonner";
 
 export function SummaryCard({
   editingProfile = false,
+  profile,
 }: {
   editingProfile?: boolean;
+  profile?: Profile;
 }) {
   const [isEditing, setIsEditing] = useState(false);
-  const { profile, updateProfile } = useAuthStore();
   const [newTldr, setNewTldr] = useState(profile?.tldr || "");
-
+  const { user } = useAuthStore();
   const saveTldr = async (updatedTldr: string) => {
-    updateProfile({ tldr: updatedTldr });
-    uploadProfileToVectorStore();
+    if (profile && profile.id === user?.id) {
+      useAuthStore.getState().updateProfile({ tldr: updatedTldr });
+      uploadProfileToVectorStore();
+    } else {
+      toast.error("Cannot update TLDR for other users' profiles.");
+    }
   };
+
+  useEffect(() => {
+    if (profile) {
+      setNewTldr(profile.tldr || "");
+    } else {
+      setNewTldr("");
+    }
+  }, [profile]);
 
   useEffect(() => {
     if (isEditing) {

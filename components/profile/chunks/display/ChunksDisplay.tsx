@@ -36,12 +36,8 @@ export function ChunksDisplay() {
             items={categoryIds}
             strategy={verticalListSortingStrategy}
           >
-            {orderedCategoryChunks.map(({ category, chunks }) => (
-              <CategoryItem
-                key={category}
-                category={category}
-                chunks={chunks}
-              />
+            {orderedCategoryChunks.map(({ category, chunks }, index) => (
+              <CategoryItem key={index} category={category} chunks={chunks} />
             ))}
           </SortableContext>
         </DndContext>

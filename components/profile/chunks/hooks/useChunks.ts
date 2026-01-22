@@ -47,34 +47,51 @@ export function useChunks({
 
   useEffect(() => {
     /**
-     * This effect cleans up the categoryOrder state by removing categories
-     * that no longer have any associated chunks.
+     * This effect syncs categoryOrder with chunks:
+     * - Removes categories that no longer have any chunks
+     * - Adds new categories found in chunks
      */
+    if (!profile) return;
+
     const usedCategories = new Set(chunks.map((chunk) => chunk.category));
-    setCategoryOrder((prev) =>
-      prev.filter((cat) => usedCategories.has(cat.category))
-    );
-  }, [chunks, setCategoryOrder]);
+
+    setCategoryOrder((prev) => {
+      // Remove categories without chunks
+      const filtered = prev.filter((cat) => usedCategories.has(cat.category));
+
+      // Find categories in chunks that aren't in categoryOrder yet
+      const existingCategories = new Set(filtered.map((cat) => cat.category));
+      const newCategories = [...usedCategories].filter(
+        (cat) => !existingCategories.has(cat)
+      );
+
+      // If nothing changed, return prev to avoid unnecessary re-render
+      if (newCategories.length === 0 && filtered.length === prev.length) {
+        return prev;
+      }
+
+      // Add new categories
+      const additions = newCategories.map((category, idx) => ({
+        profile_id: profile.id,
+        category,
+        order: filtered.length + idx,
+      }));
+
+      return [...filtered, ...additions];
+    });
+  }, [chunks, setCategoryOrder, profile]);
 
   const addChunk = (category: AllCategories, text: string) => {
     /**
      * Adds a new chunk to the specified category with the provided text.
-     * If the category does not exist in the categoryOrder, it is added.
+     * Category will be auto-added by the effect if it doesn't exist.
      *
      * @param category - The category to which the new chunk will be added.
      * @param text - The text content of the new chunk.
      */
     if (!profile) return;
 
-    // Check if category exists if not add it
-    if (!categoryOrder.find((cat) => cat.category === category)) {
-      setCategoryOrder((prev) => [
-        ...prev,
-        { profile_id: profile.id, category, order: prev.length },
-      ]);
-    }
-
-    // Add new chunk and set its order within the category to the end
+    // Just add the chunk - the effect will handle categoryOrder
     setChunks((prev) => {
       const categoryChunks = prev.filter(
         (chunk) => chunk.category === category

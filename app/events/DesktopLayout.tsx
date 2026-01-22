@@ -4,10 +4,11 @@ import { EventDetailPanel } from "@/components/events/EventDetailPanel";
 import EventsHeader from "@/components/events/HeaderSection";
 import EventFilters from "@/components/events/EventFilters";
 import { EventListCard } from "@/components/events/EventListCard";
-import { EventCategory, HostedEvent } from "@/types/events/event";
+import { EventCategory } from "@/types/events/event";
 import { useEffect, useRef, useState } from "react";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import { filterEvents } from "@/lib/events/eventUtils";
+import { type Event } from "@/lib/schemas/events/event";
 import { toast } from "sonner";
 import useInfiniteScroll from "@/hooks/useInfiniteScroll";
 
@@ -18,8 +19,8 @@ export default function DesktopLayout() {
     error,
     isLoading,
     isValidating,
-  } = useInfiniteScroll<HostedEvent>(eventListRef, "/api/events");
-  const [selectedEvent, setSelectedEvent] = useState<HostedEvent | null>(null);
+  } = useInfiniteScroll<Event>(eventListRef, "/api/events");
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [search, setSearch] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<
     EventCategory | "All"
@@ -35,7 +36,7 @@ export default function DesktopLayout() {
     }
   }, [isLoading, events, loaded]);
 
-  const handleEventSelect = (event: HostedEvent) => {
+  const handleEventSelect = (event: Event) => {
     setSelectedEvent(event);
   };
 
@@ -62,7 +63,7 @@ export default function DesktopLayout() {
   return (
     <div className="flex flex-1 overflow-hidden">
       {/* Left Panel - Event List */}
-      <div className="w-80 xl:w-96 border-r border-white/10 backdrop-blur-sm overflow-hidden flex flex-col">
+      <div className="w-80 xl:w-[34rem]  border-r border-white/10 backdrop-blur-sm overflow-hidden flex flex-col">
         <EventsHeader eventCount={events.length} isLoading={isValidating} />
         <EventFilters
           search={search}

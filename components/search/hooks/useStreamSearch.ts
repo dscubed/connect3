@@ -1,83 +1,127 @@
 "use client";
+
 import { useCallback, useRef } from "react";
-import { ChatMessage, SearchProgress } from "../types";
+import { ChatMessage, ProgressAction } from "../utils";
 import { useAuthStore } from "@/stores/authStore";
 import { RealtimeChannel } from "@supabase/supabase-js";
+import type { EntityResult } from "@/lib/search/types";
 
 // Type for setMessages prop
 type MessageUpdater = React.Dispatch<React.SetStateAction<ChatMessage[]>>;
 
-const supabase = useAuthStore.getState().getSupabaseClient();
-
 export function useSearchStream(setMessages: MessageUpdater) {
+  const supabase = useAuthStore((s) => s.getSupabaseClient());
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const currentMessageIdRef = useRef<string | null>(null);
 
   const updateMessage = useCallback(
     (messageId: string, update: Partial<ChatMessage>) => {
-      console.log("Updating message:", messageId, update);
-      setMessages((prev) => {
-        const updatedMessage = prev.map((msg) =>
-          msg.id === messageId ? { ...msg, ...update } : msg
-        );
-        console.log("Updated Messages:", updatedMessage);
-        return updatedMessage;
-      });
+      setMessages((prev) =>
+        prev.map((msg) => (msg.id === messageId ? { ...msg, ...update } : msg)),
+      );
     },
-    [setMessages]
+    [setMessages],
   );
 
   const updateProgress = useCallback(
-    (messageId: string, progressUpdate: SearchProgress) => {
-      console.log("Updating progress for message:", messageId, progressUpdate);
+    (messageId: string, progressUpdate: ProgressAction[]) => {
       setMessages((prev) =>
-        // Find matching message and update its progress
-        prev.map((msg) => {
-          if (msg.id !== messageId) return msg;
-          return {
-            ...msg,
-            progress: progressUpdate,
-          };
-        })
+        prev.map((msg) =>
+          msg.id === messageId ? { ...msg, progress: progressUpdate } : msg,
+        ),
+      );
+      console.log(
+        `[progress] updated for message:, ${messageId}, ${progressUpdate}`,
       );
     },
-    [setMessages]
+    [setMessages],
   );
 
-  // Connect to stream with authenticated POST request
   const connectStream = useCallback(
-    async (messageId: string) => {
+    async (messageId: string): Promise<boolean> => {
+      console.log("[stream] connect", messageId);
+
+      if (!supabase) {
+        console.error("[stream] no supabase client");
+        return false;
+      }
+
+      // Remove old channel first
       if (channelRef.current) {
-        await supabase.removeChannel(channelRef.current);
+        console.log("[stream] removing old channel");
+        supabase.removeChannel(channelRef.current);
         channelRef.current = null;
       }
 
-      // Create supabase channel
-      const channel = supabase.channel(`message:${messageId}`);
+      currentMessageIdRef.current = messageId;
+      const channelName = `message:${messageId}`;
+
+      const channel = supabase.channel(channelName);
       channelRef.current = channel;
-      console.log("Channel:", channel.state);
 
-      // console.log any received events for debugging TODO: remove later
-      channel.on("broadcast", { event: "*" }, (payload) => {
-        console.log("Received event:", payload);
-      });
+      // Set up event handlers
+      channel
+        .on("broadcast", { event: "status" }, ({ payload }) => {
+          console.log("[stream] status", payload);
+        })
+        .on("broadcast", { event: "progress" }, ({ payload }) => {
+          console.log("[stream] progress", payload);
+          const p = payload as ProgressAction[];
+          updateProgress(messageId, p);
+        })
+        .on("broadcast", { event: "response" }, ({ payload }) => {
+          console.log("[stream] response", payload);
+          const data = payload as {
+            partial?: { markdown?: string; entities?: EntityResult[] };
+          };
+          if (data?.partial) {
+            updateMessage(messageId, {
+              status: "processing",
+              content: {
+                markdown: data.partial.markdown ?? "",
+              },
+            });
+          }
+        })
+        .on("broadcast", { event: "done" }, ({ payload }) => {
+          console.log("[stream] done", payload);
+          const data = payload as { result?: ChatMessage["content"] };
+          updateMessage(messageId, {
+            status: "completed",
+            content: data?.result ?? { markdown: "" },
+          });
+        })
+        .on("broadcast", { event: "error" }, ({ payload }) => {
+          console.log("[stream] error", payload);
+          updateMessage(messageId, {
+            status: "failed",
+            content: null,
+          });
+        });
 
-      channel.on("broadcast", { event: "progress" }, (payload) => {
-        console.log("Progress payload:", payload);
-        console.log("Payload data:", payload.payload);
-        updateProgress(messageId, payload.payload as SearchProgress);
-      });
-      channel.on("broadcast", { event: "response" }, (payload) => {
-        console.log("Response payload:", payload);
-        updateMessage(messageId, { content: payload.payload.partial });
-      });
+      // Subscribe and wait
+      return new Promise<boolean>((resolve) => {
+        const timeout = setTimeout(() => {
+          console.warn("[stream] subscribe timeout - continuing anyway");
+          resolve(true); // Continue anyway, server might still work
+        }, 10000);
 
-      channel.subscribe((status) => {
-        if (status === "SUBSCRIBED") {
-          console.log("Channel subscribed");
-        }
+        channel.subscribe((status) => {
+          console.log("[stream] status:", status);
+          if (status === "SUBSCRIBED") {
+            clearTimeout(timeout);
+            console.log("[stream] subscribed OK");
+            resolve(true);
+          }
+          if (status === "CHANNEL_ERROR" || status === "CLOSED") {
+            clearTimeout(timeout);
+            console.warn("[stream] failed:", status);
+            resolve(false);
+          }
+        });
       });
     },
-    [updateProgress, updateMessage]
+    [supabase, updateMessage, updateProgress],
   );
 
   const closeStream = useCallback(() => {
@@ -85,7 +129,16 @@ export function useSearchStream(setMessages: MessageUpdater) {
       supabase.removeChannel(channelRef.current);
       channelRef.current = null;
     }
+    currentMessageIdRef.current = null;
+  }, [supabase]);
+
+  const isConnected = useCallback(() => {
+    return channelRef.current !== null;
   }, []);
 
-  return { connectStream, closeStream };
+  const getCurrentMessageId = useCallback(() => {
+    return currentMessageIdRef.current;
+  }, []);
+
+  return { connectStream, closeStream, isConnected, getCurrentMessageId };
 }

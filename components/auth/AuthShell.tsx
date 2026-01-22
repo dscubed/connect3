@@ -17,7 +17,7 @@ export function AuthShell({ children, className }: AuthShellProps) {
         "min-h-svh w-full",
         "bg-gradient-to-br from-[#c2b7ff] via-[#f0e5ff] to-[#ffbfd4]",
         "p-4 sm:p-6 md:p-10",
-        className
+        className,
       )}
     >
       <div className="mx-auto flex min-h-svh w-full max-w-[1400px] items-center justify-center">

@@ -1,45 +1,105 @@
 import { motion } from "framer-motion";
 import { SearchResponse } from "@/lib/search/types";
-import { ResultSection } from "./QueryResult";
+import { QuickLinks } from "@/components/search/Messages/quickLinks";
+import { Markdown } from "@/components/search/Messages/markdown";
+import { extractLinksFromMarkdown } from "@/lib/search/general/extractLinks";
+import type { ExtractedLink } from "@/lib/search/general/extractLinks";
+import {
+  splitMarkdownIntoSegments,
+  normalizeToMarkdownResponse,
+} from "@/lib/search/markdownParser";
+import MatchResults from "../MatchResult/MatchResults";
+import { Button } from "@/components/ui/button";
+import { Copy, RotateCw } from "lucide-react";
+import { toast } from "sonner";
 
 export function CompletedResponse({
   content,
+  id,
+  onRetry,
 }: {
   content: Partial<SearchResponse>;
+  id: string;
+  onRetry: (messageId: string) => void;
 }) {
+  // Normalize content to the new markdown format (handles legacy format too)
+  const normalized = normalizeToMarkdownResponse(content);
+
+  // Extract links from markdown
+  const structuredLinks: ExtractedLink[] =
+    (normalized.quickLinks ?? []).map((l) => ({
+      url: l.url,
+      label: l.label,
+      source: "summary",
+    })) ?? [];
+
+  const extractedLinks: ExtractedLink[] = normalized.markdown
+    ? extractLinksFromMarkdown(normalized.markdown, "summary")
+    : [];
+
+  const links = structuredLinks.length ? structuredLinks : extractedLinks;
+
+  // Split markdown into text segments and entity markers
+  const segments = splitMarkdownIntoSegments(normalized.markdown);
+
   return (
     <motion.div
-      className="space-y-6 leading-relaxed !mt-0"
+      className="space-y-4 leading-relaxed !mt-0"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
     >
-      {/* Result */}
-      {content.summary && (
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 0.8, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          {content.summary}
-        </motion.p>
-      )}
+      <QuickLinks links={links} />
 
-      {/* Results */}
-      {(content.results || []).map((result, userIndex) => {
-        return <ResultSection key={userIndex} result={result} />;
+      {/* Content */}
+      {segments.map((segment, index) => {
+        if (segment.type === "text") {
+          return (
+            <motion.div
+              key={`text-${index}`}
+              className="prose prose-neutral max-w-none prose-p:leading-relaxed prose-li:my-1"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 0.95, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 * Math.min(index, 5) }}
+            >
+              <Markdown>{segment.content}</Markdown>
+            </motion.div>
+          );
+        }
+
+        // Entity marker - render as a card
+        return (
+          <MatchResults
+            key={`entity-${segment.entity.type}-${segment.entity.id}`}
+            match={segment.entity}
+            userIndex={index}
+          />
+        );
       })}
 
-      {/* Follow-up questions */}
-      {content.followUps && (
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 0.8, y: 0 }}
-          transition={{ duration: 0.5, delay: 1.2 }}
+      {/* Search Actions */}
+      <div className="flex gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="bg-transparent hover:bg-muted/10 hover:text-muted !p-1 h-fit"
+          onClick={() => onRetry(id)}
         >
-          {content.followUps}
-        </motion.p>
-      )}
+          <RotateCw className="h-4 w-4" />
+        </Button>
+        {/* Copy Content to Clipboard */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="bg-transparent hover:bg-muted/10 hover:text-muted !p-1 h-fit"
+          onClick={() => {
+            navigator.clipboard.writeText(normalized.markdown || "");
+            toast.success("Response copied to clipboard");
+          }}
+        >
+          <Copy className="h-4 w-4" />
+        </Button>
+      </div>
     </motion.div>
   );
 }

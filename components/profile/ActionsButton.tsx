@@ -3,6 +3,7 @@ import { useChunkContext } from "./chunks/hooks/ChunkProvider";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { toast } from "sonner";
 
 export function ActionsButton({
   profile,
@@ -14,14 +15,25 @@ export function ActionsButton({
   setEditingProfile: (editing: boolean) => void;
 }) {
   const { user } = useAuthStore();
-  const { hasPendingEdits } = useChunkContext();
+  const { hasPendingEdits, saveChunks, savingChunks } = useChunkContext();
   const [pendingModalOpen, setPendingModalOpen] = useState(false);
 
+  // Get the current link state
+  const href = typeof window !== "undefined" ? window.location.href : "";
+  console.log("HREF", href);
+
   const handleEditToggle = () => {
-    // If finishing editing, reset chunk edits and exit chunk editing mode
-    if (editingProfile && hasPendingEdits()) {
-      setPendingModalOpen(true);
-      return;
+    // If finishing editing save chunks if no pending edits
+    if (editingProfile) {
+      if (hasPendingEdits()) {
+        setPendingModalOpen(true);
+        return;
+      }
+      if (savingChunks) {
+        toast.error("Profile is currently being saved. Try again later.");
+        return;
+      }
+      saveChunks();
     }
     setEditingProfile(!editingProfile);
   };
@@ -29,14 +41,26 @@ export function ActionsButton({
   return (
     <>
       <div className="flex items-center gap-2">
-        {user?.id === profile.id && (
+        {!href.includes("profile") ? (
           <Button
             variant="outline"
             className="text-lg !bg-foreground font-medium !text-white border-[3px] border-white hover:scale-105 transition-all rounded-full py-5 shadow-none"
-            onClick={handleEditToggle}
+            onClick={() => {
+              window.open(`/profile/${profile.id}`, "_blank");
+            }}
           >
-            {editingProfile ? "Finish" : "Edit Profile"}
+            View Profile
           </Button>
+        ) : (
+          user?.id === profile.id && (
+            <Button
+              variant="outline"
+              className="text-lg !bg-foreground font-medium !text-white border-[3px] border-white hover:scale-105 transition-all rounded-full py-5 shadow-none"
+              onClick={handleEditToggle}
+            >
+              {editingProfile ? "Finish" : "Edit Profile"}
+            </Button>
+          )
         )}
       </div>
       <PendingChangesModal

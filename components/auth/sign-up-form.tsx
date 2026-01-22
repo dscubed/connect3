@@ -27,7 +27,7 @@ export function SignUpForm({
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [accountType, setAccountType] = useState<"user" | "organisation">(
-    "user"
+    "user",
   );
 
   const { isSigningUp, handleEmailSignUp, handleGoogleSignUp } = useSignUp();
@@ -43,8 +43,6 @@ export function SignUpForm({
       accountType,
     });
   };
-
-  const purple = "bg-foreground hover:bg-foreground/70";
 
   return (
     <div className={cn("flex flex-col", className)} {...props}>
@@ -76,7 +74,7 @@ export function SignUpForm({
                     "flex-1 rounded-full px-4 py-2 transition",
                     accountType === "user"
                       ? "bg-white text-black shadow-sm"
-                      : "text-muted/70"
+                      : "text-muted/70",
                   )}
                 >
                   User
@@ -91,7 +89,7 @@ export function SignUpForm({
                     "flex-1 rounded-full px-4 py-2 transition",
                     accountType === "organisation"
                       ? "bg-white text-black shadow-sm"
-                      : "text-muted/70"
+                      : "text-muted/70",
                   )}
                 >
                   Organisation
@@ -209,7 +207,7 @@ export function SignUpForm({
                 type="submit"
                 className={cn(
                   "mt-1 h-12 w-full rounded-full text-sm font-semibold text-white",
-                  purple
+                  "bg-foreground hover:bg-foreground/70",
                 )}
                 disabled={isSigningUp}
               >

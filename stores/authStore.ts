@@ -5,12 +5,13 @@ import type { User, Session, Subscription } from "@supabase/supabase-js";
 export interface Profile {
   id: string;
   first_name: string;
-  last_name: string | null;
+  last_name: string;
   avatar_url: string;
   blurred_avatar_url?: string;
   created_at: string;
   updated_at: string;
   onboarding_completed: boolean;
+  humanitix_event_integration_setup: boolean; // Later should be moved to orgs table
   name_provided: boolean;
   location?: string;
   tldr?: string;
@@ -31,14 +32,14 @@ interface AuthState {
   updateProfile: (fields: Partial<Profile>) => Promise<void>;
   makeAuthenticatedRequest: (
     url: string,
-    options?: RequestInit
+    options?: RequestInit,
   ) => Promise<Response>;
   getSupabaseClient: () => ReturnType<typeof createClient>;
 }
 
 async function fetchProfile(
   userId: string,
-  set: (state: Partial<AuthState>) => void
+  set: (state: Partial<AuthState>) => void,
 ) {
   const supabase = createClient();
   const { data: profile, error } = await supabase
@@ -108,15 +109,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       updated_at: new Date().toISOString(),
     };
 
-    console.log("Updating profile with data:", updateData);
-
-    const response = await supabase
+    const { error } = await supabase
       .from("profiles")
       .update(updateData)
       .eq("id", userId);
-
-    console.log("Supabase update response:", response);
-    const { error } = response;
 
     if (!error) {
       set({ profile: { ...get().profile!, ...updateData } });
@@ -130,13 +126,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       throw new Error("Authentication required. Please log in.");
     }
 
+    // Build headers so FormData requests don't get an explicit Content-Type
+    const isFormData = options.body instanceof FormData;
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${session.access_token}`,
+      ...((options.headers as Record<string, string>) || {}),
+    };
+    if (!isFormData) {
+      headers["Content-Type"] = "application/json";
+    } else {
+      delete headers["Content-Type"];
+      delete headers["content-type"];
+    }
+
     const response = await fetch(url, {
       ...options,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session.access_token}`,
-        ...options.headers,
-      },
+      headers,
     });
 
     if (response.status === 401) {

@@ -22,10 +22,7 @@ interface AddEventFormProps {
   onCancel: () => void;
 }
 
-export default function AddEventForm({
-  onSubmit,
-  onCancel,
-}: AddEventFormProps) {
+export default function AddEventForm({ onCancel }: AddEventFormProps) {
   const { user } = useAuthStore();
   const [name, setName] = useState<string>("");
   const [start, setStart] = useState<string>("");
@@ -140,7 +137,7 @@ export default function AddEventForm({
         city: cities,
         location_type: locationType,
       };
-      await onSubmit(eventData);
+      console.log("Submitting event data:", eventData);
     } catch (error) {
       console.error("Error submitting form:", error);
     } finally {

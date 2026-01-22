@@ -13,12 +13,12 @@ export default function Page() {
 
   return (
     <>
-      <AuthShell>
-        {loading ? <LoadingIndicator /> : <SignUpForm />}
-      </AuthShell>
+      <AuthShell>{loading ? <LoadingIndicator /> : <SignUpForm />}</AuthShell>
 
       {user && !user.is_anonymous && !loading && (
-        <AlreadyAuthenticatedDialog onboardingCompleted={profile?.onboarding_completed} />
+        <AlreadyAuthenticatedDialog
+          onboardingCompleted={profile?.onboarding_completed}
+        />
       )}
     </>
   );

@@ -1,9 +1,10 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { ResponseInput } from "openai/resources/responses/responses.mjs";
+import type { SearchResponse } from "./types";
 
 export const getContext = async (
   chatmessageId: string,
-  supabase: SupabaseClient
+  supabase: SupabaseClient,
 ) => {
   // Fetch message data
   const { data: messageData, error: messageError } = await supabase
@@ -20,7 +21,7 @@ export const getContext = async (
   // Fetch user TLDR
   const { data: userData, error: userError } = await supabase
     .from("profiles")
-    .select("tldr")
+    .select("tldr, university")
     .eq("id", user_id)
     .single();
 
@@ -28,6 +29,8 @@ export const getContext = async (
   if (!userError && userData) {
     tldr = userData.tldr ?? "";
   }
+
+  const userUniversity = userData?.university ?? null;
 
   // Fetch previous messages (excluding current)
   const CHAT_CONTEXT_LIMIT = 3;
@@ -48,23 +51,16 @@ export const getContext = async (
   const prevMessages: ResponseInput = [];
   for (let i = 0; i < (historyData?.length ?? 0); i++) {
     const msg = historyData![i];
-    const content =
-      typeof msg.content === "string" ? JSON.parse(msg.content) : msg.content;
+    const content = msg.content as SearchResponse | null;
 
     prevMessages.push({ role: "user", content: msg.query });
-    prevMessages.push({ role: "assistant", content: contentToString(content) });
+    prevMessages.push({ role: "assistant", content: content?.markdown ?? "" });
   }
 
   return {
     query,
     tldr,
     prevMessages,
+    userUniversity,
   };
-};
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const contentToString = (content: any): string => {
-  // TODO: Update when finished with pipeline
-  console.log("contentToString content:", content);
-  return "";
 };

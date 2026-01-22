@@ -32,7 +32,8 @@ export default function SearchPageContent() {
 
   const searchParams = useSearchParams();
   const chatroomId = mounted ? searchParams?.get("chatroom") || null : null;
-  const { messages, addNewMessage, inFlight } = useChatroom(chatroomId);
+  const { messages, addNewMessage, inFlight, retryMessage, editMessage } =
+    useChatroom(chatroomId);
   const supabase = getSupabaseClient();
 
   // Handler for message thread users
@@ -59,7 +60,7 @@ export default function SearchPageContent() {
       if (!selectedUser?.id) return;
       // Set loading state
       setSelectedUser((prev) =>
-        prev ? { ...prev, chunkLoading: true } : prev
+        prev ? { ...prev, chunkLoading: true } : prev,
       );
 
       try {
@@ -90,7 +91,7 @@ export default function SearchPageContent() {
         if (categoryOrderError || !categoryOrderData) {
           console.error(
             "Error fetching user category order:",
-            categoryOrderError
+            categoryOrderError,
           );
           throw categoryOrderError;
         }
@@ -104,12 +105,12 @@ export default function SearchPageContent() {
                 categoryOrder: categoryOrderData,
                 chunkLoading: false,
               }
-            : prev
+            : prev,
         );
       } catch (err) {
         console.error("Error fetching user chunks:", err);
         setSelectedUser((prev) =>
-          prev ? { ...prev, chunks: [], chunkLoading: false } : prev
+          prev ? { ...prev, chunks: [], chunkLoading: false } : prev,
         );
       }
     };
@@ -150,6 +151,8 @@ export default function SearchPageContent() {
                 <MessageList
                   messages={messages}
                   onUserClick={handleMessageUserClick}
+                  onRetry={retryMessage}
+                  onEdit={editMessage}
                 />
               </div>
             )}

@@ -20,13 +20,13 @@ export default function ProfileEventListCard({
     >
       <div className="p-3 sm:p-5 flex items-start gap-3 sm:gap-4">
         <div className="w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center">
-          {event.thumbnailUrl ? (
+          {event.thumbnail ? (
             <Image
-              src={event.thumbnailUrl || "/placeholder.png"}
+              src={event.thumbnail || "/placeholder.png"}
               alt={`${event.name} logo`}
               width={48}
               height={48}
-              className="object-contain max-h-8 sm:max-h-12 rounded-md grayscale"
+              className="w-full h-full object-cover max-h-8 sm:max-h-12 rounded-md"
             />
           ) : (
             <Calendar className="w-8 h-8 sm:w-12 sm:h-12 text-white/80" />

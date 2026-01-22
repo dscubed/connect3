@@ -11,8 +11,8 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "connect3",
-  description: "connect3 - AI-powered knowledge assistant",
+  title: "Connect3",
+  description: "Connect3 - AI-powered knowledge assistant",
 };
 
 export const viewport: Viewport = {

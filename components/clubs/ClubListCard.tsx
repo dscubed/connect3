@@ -1,16 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { Building2 } from "lucide-react";
-import { ClubData } from "./ClubsData";
 import { FastAverageColor } from "fast-average-color";
+import { Club } from "@/types/clubs/club";
 
 export function ClubListCard({
   club,
   isSelected,
   onClick,
 }: {
-  club: ClubData;
+  club: Club;
   isSelected: boolean;
   onClick: () => void;
 }) {
@@ -18,30 +17,23 @@ export function ClubListCard({
   const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
-    if (club.logoUrl && imgRef.current) {
+    if (club.avatar_url && imgRef.current) {
       const fac = new FastAverageColor();
       fac
         .getColorAsync(imgRef.current)
         .then((color) => {
           // Lighten the color by blending with white (e.g., 70% white)
           const lighten = (c: number) => Math.round(c + (255 - c) * 0.7);
-          const [r, g, b, a = 255] = color.value; // alpha defaults to 255 if not present
+          const [r, g, b = 255] = color.value; // alpha defaults to 255 if not present
           const lr = lighten(r),
             lg = lighten(g),
             lb = lighten(b);
 
-          console.log(club.name, "logo average color:", { lr, lg, lb, a });
-
-          // If the color is very light (close to white)
-          if (lr > 240 && lg > 240 && lb > 240) {
-            setBgColor("rgba(113, 113, 123, 0.5)");
-          } else {
-            setBgColor(`rgb(${lr}, ${lg}, ${lb})`);
-          }
+          setBgColor(`rgb(${lr}, ${lg}, ${lb})`);
         })
         .catch(() => setBgColor(undefined));
     }
-  }, [club.logoUrl, club.name]);
+  }, [club.avatar_url, club.first_name]);
 
   return (
     <motion.div
@@ -61,27 +53,23 @@ export function ClubListCard({
       >
         {/* Logo */}
         <div
-          className={`rounded-lg sm:rounded-xl p-2 sm:p-3 flex-shrink-0 border ${
+          className={`rounded-lg sm:rounded-xl flex-shrink-0 border overflow-hidden ${
             isSelected ? "border-white" : "border-white"
           }`}
           style={{
-            background: club.logoUrl && bgColor ? bgColor : undefined,
+            background: club.avatar_url && bgColor ? bgColor : undefined,
           }}
         >
-          <div className="w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center">
-            {club.logoUrl ? (
-              <Image
-                ref={imgRef}
-                src={club.logoUrl || "/placeholder.png"}
-                alt={`${club.name} logo`}
-                width={48}
-                height={48}
-                className="object-contain max-h-8 sm:max-h-12 drop-shadow-md"
-                crossOrigin="anonymous"
-              />
-            ) : (
-              <Building2 className="w-8 h-8 sm:w-12 sm:h-12" />
-            )}
+          <div className="w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center">
+            <Image
+              ref={imgRef}
+              src={club.avatar_url || "/placeholder.png"}
+              alt={`${club.first_name} logo`}
+              width={48}
+              height={48}
+              className="w-full h-full object-cover drop-shadow-md"
+              crossOrigin="anonymous"
+            />
           </div>
         </div>
 
@@ -94,7 +82,7 @@ export function ClubListCard({
                 : "text-secondary-foreground"
             }`}
           >
-            {club.name}
+            {club.first_name}
           </h3>
           <p
             className={`text-opacity-50 text-xs sm:text-sm line-clamp-2 leading-relaxed ${
@@ -103,7 +91,7 @@ export function ClubListCard({
                 : "text-secondary-foreground/50"
             }`}
           >
-            {club.location}
+            {club.university ?? "No university"}
           </p>
         </div>
       </div>
