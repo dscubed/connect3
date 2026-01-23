@@ -6,7 +6,7 @@ import type { SearchResponse } from "../types";
 import type { KBIntent } from "./router";
 
 const KB_YEAR = 2026;
-const MAX_RESULTS = 5;
+const MAX_RESULTS = 8;
 const MAX_HIT_EXCERPTS = 4;
 const MAX_CHUNK_CHARS = 1200;
 const MIN_RESULT_SCORE = 0.3;
