@@ -1,14 +1,5 @@
 import { SearchResponse } from "@/lib/search/types";
 
-export interface UserProfile {
-  id: string;
-  name: string;
-  status?: string;
-  location?: string;
-  tldr?: string;
-  avatar_url?: string;
-}
-
 export interface ChatMessage {
   id: string;
   query: string;
