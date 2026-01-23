@@ -48,7 +48,6 @@ export default function ProfilePage() {
           // On success set the humanitix flag to true so we don't get the modal again
           await updateProfile({ ...profile, humanitix_event_integration_setup: true });  
         } else {
-
           message = "Failed to add API key: " + responseData.error;
         }
         toast(message);
@@ -61,12 +60,14 @@ export default function ProfilePage() {
       onEventModalClose();
 
       const response = await makeAuthenticatedRequest(
-        "https://nsjrzxbtxsqmsdgevszv.supabase.co/functions/v1/load-org-events-on-onboarding-success", {
+        "https://nsjrzxbtxsqmsdgevszv.supabase.co/functions/v1/perform-event-task", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          action: "populate",
+          source: "direct",
           organisationId: profile.id,
           organisationName: `${profile.first_name} ${profile.last_name}`
         }),
