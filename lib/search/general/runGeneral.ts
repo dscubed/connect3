@@ -7,12 +7,13 @@
 import OpenAI from "openai";
 import type { ResponseInput } from "openai/resources/responses/responses.mjs";
 
-import { routeQuery, getVectorStores } from "./router";
+import { routeQuery } from "./router";
 import { runUniversityGeneral } from "./runUniversityGeneral";
 import { runConnect3General } from "./runConnect3General";
 import { countWebSearchCalls } from "./countWebSearches";
 import type { SearchResponse } from "../types";
 import { ProgressAction } from "@/components/search/utils";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 type RunGeneralArgs = {
   openai: OpenAI;
@@ -20,6 +21,7 @@ type RunGeneralArgs = {
   tldr: string;
   prevMessages: ResponseInput;
   userUniversity?: string | null;
+  supabase: SupabaseClient;
   emit?: (event: string, data: unknown) => void;
   progress: ProgressAction[];
   updateProgress: (
@@ -35,6 +37,7 @@ export async function runGeneral({
   tldr,
   prevMessages,
   userUniversity,
+  supabase,
   emit,
   progress,
   updateProgress,
@@ -86,9 +89,9 @@ export async function runGeneral({
 
     // -------- University-specific query --------
     case "university": {
-      const vectorStores = getVectorStores(routing.university);
+      const centralVectorStoreId = process.env.OPENAI_UNI_VECTOR_STORE_ID;
 
-      if (vectorStores.official || vectorStores.union) {
+      if (centralVectorStoreId) {
         progress = updateProgress(
           progress,
           {
@@ -101,9 +104,9 @@ export async function runGeneral({
 
         return runUniversityGeneral(
           openai,
+          supabase,
           query,
           routing.university!,
-          vectorStores,
           { emit, intent: routing.intent },
         );
       }
