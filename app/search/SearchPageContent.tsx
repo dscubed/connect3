@@ -1,123 +1,36 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import Sidebar from "@/components/sidebar/Sidebar";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import { MessageList } from "@/components/search/Messages/MessageList";
-import { UserProfile } from "@/components/search/UserProfile/UserProfile";
-import { useAuthStore } from "@/stores/authStore";
-import {
-  CategoryOrderData,
-  ChunkData,
-} from "@/components/profile/chunks/ChunkUtils";
+import { ProfileSheet } from "@/components/search/ProfileSheet";
 import { useChatroom } from "@/components/search/hooks/useChatroom";
 import { ChatRoomSearchBar } from "@/components/search/ChatroomSearchBar";
+import { EntityResult } from "@/lib/search/types";
 
 export default function SearchPageContent() {
   const [mounted, setMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<{
-    id: string;
-    name: string;
-    status?: string;
-    location?: string;
-    tldr?: string;
-    avatar?: string;
-    chunks?: ChunkData[];
-    chunkLoading?: boolean;
-  } | null>(null);
-  const [profileOpen, setProfileOpen] = useState(false);
-
-  const { getSupabaseClient } = useAuthStore();
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [profileSheetOpen, setProfileSheetOpen] = useState(false);
 
   const searchParams = useSearchParams();
   const chatroomId = mounted ? searchParams?.get("chatroom") || null : null;
   const { messages, addNewMessage, inFlight, retryMessage, editMessage } =
     useChatroom(chatroomId);
-  const supabase = getSupabaseClient();
 
-  // Handler for message thread users
-  const handleMessageUserClick = (user: {
-    id: string;
-    name: string;
-    status?: string;
-    location?: string;
-    tldr?: string;
-    avatar?: string;
-  }) => {
-    setSelectedUser({ ...user, chunkLoading: true, chunks: [] });
-    setProfileOpen(true);
-  };
+  const handleProfileClick = useCallback((entity: EntityResult) => {
+    // Skipping events for now
+    if (entity.type === "events") return;
+    setSelectedProfileId(entity.id);
+    setProfileSheetOpen(true);
+  }, []);
 
   // Ensure component is mounted (for Next.js SSR)
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  // Fetch chunks when selectedUser changes
-  useEffect(() => {
-    const fetchChunks = async () => {
-      if (!selectedUser?.id) return;
-      // Set loading state
-      setSelectedUser((prev) =>
-        prev ? { ...prev, chunkLoading: true } : prev,
-      );
-
-      try {
-        // Fetch chunks
-        const { data: chunkData, error: chunkError } = (await supabase
-          .from("profile_chunks")
-          .select("id, text, category, order")
-          .eq("profile_id", selectedUser.id)
-          .order("order", { ascending: true })) as {
-          data: ChunkData[] | null;
-          error: Error | null;
-        };
-        if (chunkError || !chunkData) {
-          console.error("Error fetching user chunks:", chunkError);
-          throw chunkError;
-        }
-
-        // Fetch category order
-        const { data: categoryOrderData, error: categoryOrderError } =
-          (await supabase
-            .from("profile_chunk_categories")
-            .select("category, order")
-            .eq("profile_id", selectedUser.id)
-            .order("order", { ascending: true })) as {
-            data: CategoryOrderData[] | null;
-            error: Error | null;
-          };
-        if (categoryOrderError || !categoryOrderData) {
-          console.error(
-            "Error fetching user category order:",
-            categoryOrderError,
-          );
-          throw categoryOrderError;
-        }
-
-        // Update selected user with fetched chunks and category order
-        setSelectedUser((prev) =>
-          prev
-            ? {
-                ...prev,
-                chunks: chunkData,
-                categoryOrder: categoryOrderData,
-                chunkLoading: false,
-              }
-            : prev,
-        );
-      } catch (err) {
-        console.error("Error fetching user chunks:", err);
-        setSelectedUser((prev) =>
-          prev ? { ...prev, chunks: [], chunkLoading: false } : prev,
-        );
-      }
-    };
-    if (selectedUser?.chunkLoading) {
-      fetchChunks();
-    }
-  }, [selectedUser?.id, selectedUser?.chunkLoading, supabase]);
 
   if (!mounted) {
     return (
@@ -150,9 +63,9 @@ export default function SearchPageContent() {
               <div className="w-full">
                 <MessageList
                   messages={messages}
-                  onUserClick={handleMessageUserClick}
                   onRetry={retryMessage}
                   onEdit={editMessage}
+                  onProfileClick={handleProfileClick}
                 />
               </div>
             )}
@@ -171,11 +84,11 @@ export default function SearchPageContent() {
         </main>
       </div>
 
-      {/* UserProfile modal for viewing detailed user profiles */}
-      <UserProfile
-        user={selectedUser}
-        isOpen={profileOpen}
-        onClose={() => setProfileOpen(false)}
+      {/* ProfileSheet for viewing detailed user profiles */}
+      <ProfileSheet
+        profileId={selectedProfileId}
+        isOpen={profileSheetOpen}
+        onClose={() => setProfileSheetOpen(false)}
       />
     </div>
   );

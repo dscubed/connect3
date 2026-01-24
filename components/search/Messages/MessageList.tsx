@@ -1,20 +1,21 @@
 "use client";
 import { MessageThread } from "./MessageThread";
-import { ChatMessage, UserProfile } from "../utils";
+import { ChatMessage } from "../utils";
+import { EntityResult } from "@/lib/search/types";
 
 interface MessageListProps {
   messages: ChatMessage[];
-  onUserClick?: (user: UserProfile) => void;
   isLoading?: boolean;
   onRetry: (messageId: string) => void;
   onEdit: (messageId: string, newQuery: string) => void;
+  onProfileClick?: (entity: EntityResult) => void;
 }
 
 export function MessageList({
   messages,
-  onUserClick,
   onRetry,
   onEdit,
+  onProfileClick,
 }: MessageListProps) {
   if (messages.length === 0) {
     return null;
@@ -27,9 +28,9 @@ export function MessageList({
           key={message.id}
           message={message}
           index={index}
-          onUserClick={onUserClick}
           onRetry={onRetry}
           onEdit={onEdit}
+          onProfileClick={onProfileClick}
         />
       ))}
     </div>
