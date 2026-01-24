@@ -23,9 +23,9 @@ interface ProfileModalProps {
 export function ProfileModal({ isOpen, setIsOpen }: ProfileModalProps) {
   const { profile, updateProfile } = useAuthStore.getState();
   const [firstName, setFirstName] = useState(profile?.first_name || "");
-  const [lastName, setLastName] = useState(profile?.last_name || "");
+  const [lastName, setLastName] = useState(profile?.last_name || null);
   const [university, setUniversity] = useState<University | null>(
-    (profile?.university as University) || null
+    (profile?.university as University) || null,
   );
 
   if (!profile) {
@@ -50,6 +50,12 @@ export function ProfileModal({ isOpen, setIsOpen }: ProfileModalProps) {
         return;
       }
     }
+
+    console.log("Updating profile:", {
+      first_name: firstName,
+      last_name: lastName,
+      university: university,
+    });
 
     updateProfile({
       first_name: firstName,

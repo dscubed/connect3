@@ -33,18 +33,18 @@ export async function uploadProfileToVectorStore({
   }
 
   console.log(
-    `Uploading profile for user ${userId} to vector store ${vectorStoreId}`
+    `Uploading profile for user ${userId} to vector store ${vectorStoreId}`,
   );
   // If user already has a file remove it from vector store
   if (userDetails.openai_file_id) {
     console.log(
-      `User ${userId} has existing OpenAI file ID ${userDetails.openai_file_id}, removing from vector store`
+      `User ${userId} has existing OpenAI file ID ${userDetails.openai_file_id}, removing from vector store`,
     );
     await removeProfileFromVectorStore(
       userDetails.openai_file_id,
       vectorStoreId,
       supabase,
-      userId
+      userId,
     );
   }
 
@@ -57,7 +57,7 @@ export async function uploadProfileToVectorStore({
     `${userDetails.account_type}_${Date.now()}.txt`,
     {
       type: "text/plain",
-    }
+    },
   );
 
   const file = await openai.files.create({
@@ -70,7 +70,7 @@ export async function uploadProfileToVectorStore({
     vectorStoreId,
     {
       file_id: file.id,
-    }
+    },
   );
   console.log("Uploaded file with text", text.slice(0, 100));
 
@@ -78,7 +78,7 @@ export async function uploadProfileToVectorStore({
     throw new Error(
       `Failed to add file to vector store: ${
         vectorStoreFile.last_error?.message || "Unknown error"
-      }`
+      }`,
     );
   }
 
@@ -103,20 +103,19 @@ async function removeProfileFromVectorStore(
   openaiFileId: string,
   vectorStoreId: string,
   supabase: SupabaseClient,
-  userId: string
+  userId: string,
 ) {
   // Remove from vector store
   const { deleted: vsFileDeleted } = await openai.vectorStores.files.delete(
     openaiFileId,
     {
       vector_store_id: vectorStoreId,
-    }
+    },
   );
 
   // Remove from OpenAI files
-  const { deleted: openaiFileDeleted } = await openai.files.delete(
-    openaiFileId
-  );
+  const { deleted: openaiFileDeleted } =
+    await openai.files.delete(openaiFileId);
 
   const deleted = vsFileDeleted && openaiFileDeleted;
 
@@ -134,7 +133,7 @@ async function removeProfileFromVectorStore(
   if (error) {
     console.error(
       "Error removing OpenAI file ID from Supabase profile:",
-      error
+      error,
     );
     throw new Error("Failed to remove OpenAI file ID from profile");
   }

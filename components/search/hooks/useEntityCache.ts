@@ -8,7 +8,7 @@ const entityAvatarMap = new Map<string, Partial<Profile> | undefined>();
 export function useEntityCache(entityId: string, entityType: EntityType) {
   const { getSupabaseClient } = useAuthStore();
   const [profile, setProfile] = useState<Partial<Profile> | undefined>(
-    entityAvatarMap.get(`${entityType}:${entityId}`)
+    entityAvatarMap.get(`${entityType}:${entityId}`),
   );
 
   // Fetch and cache avatar
@@ -25,9 +25,7 @@ export function useEntityCache(entityId: string, entityType: EntityType) {
         const supabase = getSupabaseClient();
         const { data, error } = await supabase
           .from("profiles")
-          .select(
-            "avatar_url, tldr, status, location, first_name, last_name, account_type"
-          )
+          .select("avatar_url, tldr, first_name, last_name, account_type")
           .eq("id", entityId)
           .single();
         if (!error && data?.avatar_url) {

@@ -11,6 +11,8 @@ interface MatchResultsProps {
 }
 
 export default function MatchResults({ match, userIndex }: MatchResultsProps) {
+  console.log("Rendering ProfileMatchCard for", match);
+
   const profile = useEntityCache(match.id, match.type) || null;
 
   let name = null;

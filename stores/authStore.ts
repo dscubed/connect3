@@ -5,7 +5,7 @@ import type { User, Session, Subscription } from "@supabase/supabase-js";
 export interface Profile {
   id: string;
   first_name: string;
-  last_name: string;
+  last_name: string | null;
   avatar_url: string;
   blurred_avatar_url?: string;
   created_at: string;
