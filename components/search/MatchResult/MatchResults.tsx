@@ -8,9 +8,10 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 interface MatchResultsProps {
   match: EntityResult;
   userIndex: number;
+  onProfileClick?: (entity: EntityResult) => void;
 }
 
-export default function MatchResults({ match, userIndex }: MatchResultsProps) {
+export default function MatchResults({ match, userIndex, onProfileClick }: MatchResultsProps) {
   const profile = useEntityCache(match.id, match.type) || null;
 
   let name = null;
@@ -35,6 +36,7 @@ export default function MatchResults({ match, userIndex }: MatchResultsProps) {
         avatarUrl={profile?.avatar_url || ""}
         tldr={profile?.tldr}
         entity={match}
+        onClick={onProfileClick}
       />
     </motion.div>
   );
@@ -44,15 +46,23 @@ function ProfileMatchCard({
   name,
   avatarUrl,
   tldr,
-}: // entity, for later implementation trigger profile popup view
-{
+  entity,
+  onClick,
+}: {
   name: string;
   tldr?: string;
   avatarUrl?: string;
   entity: EntityResult;
+  onClick?: (entity: EntityResult) => void;
 }) {
   return (
-    <Card className="w-56 md:w-60 lg:w-80 max-h-40">
+    <Card
+      className="w-56 md:w-60 lg:w-80 max-h-40 cursor-pointer hover:shadow-md transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      onClick={() => onClick?.(entity)}
+      onKeyDown={(e) => e.key === "Enter" && onClick?.(entity)}
+      role="button"
+      tabIndex={0}
+    >
       <CardHeader className="flex flex-row gap-2 justify-center items-center p-4">
         <UserAvatar avatarUrl={avatarUrl || ""} fullName={name}></UserAvatar>
         <span className="font-medium text-base lg:text-lg flex-1 !m-0 truncate text-secondary-foreground">

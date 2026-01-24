@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { SearchResponse } from "@/lib/search/types";
+import { EntityResult, SearchResponse } from "@/lib/search/types";
 import { QuickLinks } from "@/components/search/Messages/quickLinks";
 import { Markdown } from "@/components/search/Messages/markdown";
 import { extractLinksFromMarkdown } from "@/lib/search/general/extractLinks";
@@ -17,10 +17,12 @@ export function CompletedResponse({
   content,
   id,
   onRetry,
+  onProfileClick,
 }: {
   content: Partial<SearchResponse>;
   id: string;
   onRetry: (messageId: string) => void;
+  onProfileClick?: (entity: EntityResult) => void;
 }) {
   // Normalize content to the new markdown format (handles legacy format too)
   const normalized = normalizeToMarkdownResponse(content);
@@ -73,6 +75,7 @@ export function CompletedResponse({
             key={`entity-${segment.entity.type}-${segment.entity.id}`}
             match={segment.entity}
             userIndex={index}
+            onProfileClick={onProfileClick}
           />
         );
       })}

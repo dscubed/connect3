@@ -1,7 +1,8 @@
 import { EntityResult, EntityType, SearchResponse } from "./types";
 
-// Regex to match entity markers: @@@type:id@@@
-const ENTITY_MARKER_REGEX = /@@@(user|organisation|events):([a-f0-9-]+)@@@/gi;
+// Regex to match entity markers: @@@type:id@@@ or [@@@type:id@@@]
+// The AI sometimes wraps markers in square brackets, so this handles both cases
+const ENTITY_MARKER_REGEX = /\[?@@@(user|organisation|events):([a-f0-9-]+)@@@\]?/gi;
 
 /**
  * Split markdown into segments: text and entity markers.
