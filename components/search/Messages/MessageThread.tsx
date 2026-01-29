@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { CompletedResponse } from "./CompletedResponse";
 import { ChatMessage } from "../utils";
 import { SearchProgressIndicator } from "./SearchProgressIndicator";
+import { ThinkingProgress } from "./ThinkingProgress";
 import UserAvatar from "../MatchResult/UserAvatar";
 import { useAuthStore } from "@/stores/authStore";
 import { Item } from "@/components/ui/item";
@@ -66,7 +67,14 @@ export function MessageThread({
     }
 
     // Loading/processing state
-    return <SearchProgressIndicator progress={message.progress} />;
+    return (
+      <div className="flex flex-col space-y-4">
+        {message.thinking && message.thinking.length > 0 && (
+          <ThinkingProgress steps={message.thinking} />
+        )}
+        <SearchProgressIndicator progress={message.progress} />
+      </div>
+    );
   };
 
   return (

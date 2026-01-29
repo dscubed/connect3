@@ -1,6 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
-import { planSearch } from "./plan";
+import { runThinkingPlan as planSearch } from "./thinkingPlan";
 import { filterSearch } from "./filter";
 import { executeSearchPlan } from "./search";
 import { EntityFilters, SearchResponse } from "./types";
@@ -45,7 +45,7 @@ export const runSearch = async (
     { step: "plan", status: "start", message: "Planning Search" },
     emit,
   );
-  const searchPlan = await planSearch(openai, query, tldr, prevMessages);
+  const searchPlan = await planSearch(openai, query, tldr, prevMessages, emit);
   progress = updateProgress(
     progress,
     { step: "plan", status: "complete", message: "Planned Search" },

@@ -49,8 +49,10 @@ export const getContext = async (
 
   // Build messages array (reverse for chronological order)
   const prevMessages: ResponseInput = [];
-  for (let i = 0; i < (historyData?.length ?? 0); i++) {
-    const msg = historyData![i];
+  const reversedHistory = (historyData || []).reverse();
+  
+  for (let i = 0; i < reversedHistory.length; i++) {
+    const msg = reversedHistory[i];
     const content = msg.content as SearchResponse | null;
 
     prevMessages.push({ role: "user", content: msg.query });

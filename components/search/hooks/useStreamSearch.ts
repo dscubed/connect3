@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef } from "react";
-import { ChatMessage, ProgressAction } from "../utils";
+import { ChatMessage, ProgressAction, ThinkingStep } from "../utils";
 import { useAuthStore } from "@/stores/authStore";
 import { RealtimeChannel } from "@supabase/supabase-js";
 import type { EntityResult } from "@/lib/search/types";
@@ -63,6 +63,17 @@ export function useSearchStream(setMessages: MessageUpdater) {
       channel
         .on("broadcast", { event: "status" }, ({ payload }) => {
           console.log("[stream] status", payload);
+        })
+        .on("broadcast", { event: "thinking" }, ({ payload }) => {
+          console.log("[stream] thinking", payload);
+          const step = payload as ThinkingStep;
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === messageId
+                ? { ...msg, thinking: [...(msg.thinking || []), step] }
+                : msg,
+            ),
+          );
         })
         .on("broadcast", { event: "progress" }, ({ payload }) => {
           console.log("[stream] progress", payload);

@@ -1,5 +1,13 @@
 import { SearchResponse } from "@/lib/search/types";
 
+export interface ThinkingStep {
+  thought: string;
+  thoughtNumber: number;
+  totalThoughts: number;
+  isRevision?: boolean;
+  nextThoughtNeeded: boolean;
+}
+
 export interface ChatMessage {
   id: string;
   query: string;
@@ -9,6 +17,7 @@ export interface ChatMessage {
   user_id: string;
   status: "pending" | "processing" | "completed" | "failed";
   progress?: ProgressAction[];
+  thinking?: ThinkingStep[];
 }
 
 // Streamable progress types for all search actions
