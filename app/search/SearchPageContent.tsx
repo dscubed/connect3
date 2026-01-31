@@ -1,19 +1,33 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import Sidebar from "@/components/sidebar/Sidebar";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import { MessageList } from "@/components/search/Messages/MessageList";
-import { ProfileSheet } from "@/components/search/ProfileSheet";
-import { useChatroom } from "@/components/search/hooks/useChatroom";
 import { ChatRoomSearchBar } from "@/components/search/ChatroomSearchBar";
+import { useChatroom } from "@/components/search/hooks/useChatroom";
 import { EntityResult } from "@/lib/search/types";
+
+// Dynamic imports for modal components - reduces initial bundle
+const ProfileSheet = dynamic(
+  () => import("@/components/search/ProfileSheet").then((mod) => mod.ProfileSheet),
+  { ssr: false }
+);
+const EventSheet = dynamic(
+  () => import("@/components/search/EventSheet").then((mod) => mod.EventSheet),
+  { ssr: false }
+);
+
+type SheetState = {
+  type: "profile" | "event" | null;
+  id: string | null;
+};
 
 export default function SearchPageContent() {
   const [mounted, setMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
-  const [profileSheetOpen, setProfileSheetOpen] = useState(false);
+  const [sheet, setSheet] = useState<SheetState>({ type: null, id: null });
 
   const searchParams = useSearchParams();
   const chatroomId = mounted ? searchParams?.get("chatroom") || null : null;
@@ -21,10 +35,14 @@ export default function SearchPageContent() {
     useChatroom(chatroomId);
 
   const handleProfileClick = useCallback((entity: EntityResult) => {
-    // Skipping events for now
-    if (entity.type === "events") return;
-    setSelectedProfileId(entity.id);
-    setProfileSheetOpen(true);
+    setSheet({
+      type: entity.type === "events" ? "event" : "profile",
+      id: entity.id,
+    });
+  }, []);
+
+  const closeSheet = useCallback(() => {
+    setSheet({ type: null, id: null });
   }, []);
 
   // Ensure component is mounted (for Next.js SSR)
@@ -84,11 +102,15 @@ export default function SearchPageContent() {
         </main>
       </div>
 
-      {/* ProfileSheet for viewing detailed user profiles */}
       <ProfileSheet
-        profileId={selectedProfileId}
-        isOpen={profileSheetOpen}
-        onClose={() => setProfileSheetOpen(false)}
+        profileId={sheet.type === "profile" ? sheet.id : null}
+        isOpen={sheet.type === "profile"}
+        onClose={closeSheet}
+      />
+      <EventSheet
+        eventId={sheet.type === "event" ? sheet.id : null}
+        isOpen={sheet.type === "event"}
+        onClose={closeSheet}
       />
     </div>
   );

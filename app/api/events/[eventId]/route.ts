@@ -2,11 +2,50 @@ import { authenticateRequest } from "@/lib/api/auth-middleware";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { createEventBodySchema } from "@/lib/schemas/api/events";
+import { type Event } from "@/lib/schemas/events/event";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SECRET_KEY!
 );
+
+/**
+ * Transform database event record to match our event schema
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function transformDbEventToEventSchema(dbEvent: any): Event {
+  return {
+    id: dbEvent.id,
+    name: dbEvent.name,
+    creatorProfileId: dbEvent.creator_profile_id,
+    description: dbEvent.description,
+    bookingUrl: dbEvent.booking_url,
+    start: dbEvent.start,
+    end: dbEvent.end,
+    publishedAt: dbEvent.created_at || new Date().toISOString(),
+    isOnline: dbEvent.location_type === "online",
+    capacity: dbEvent.capacity || 50,
+    currency: dbEvent.currency || "USD",
+    thumbnail: dbEvent.thumbnail,
+    category: {
+      type: dbEvent.event_categories?.type || "other",
+      category: dbEvent.event_categories?.category || "general",
+      subcategory: dbEvent.event_categories?.subcategory || "none",
+    },
+    location: {
+      venue: dbEvent.event_locations?.venue || "TBA",
+      address: dbEvent.event_locations?.address || "TBA",
+      latitude: dbEvent.event_locations?.latitude || 0,
+      longitude: dbEvent.event_locations?.longitude || 0,
+      city: dbEvent.event_locations?.city || "TBA",
+      country: dbEvent.event_locations?.country || "TBA",
+    },
+    pricing: {
+      min: dbEvent.event_pricings?.min || 0,
+      max: dbEvent.event_pricings?.max || 0,
+    },
+  };
+}
 
 interface RouteParameters {
     params: Promise<{ eventId: string }>;
@@ -14,16 +53,35 @@ interface RouteParameters {
 
 /**
  * Retrieve a single event by it's id
- * @param request 
- * @param param1 
- * @returns 
+ * @param request
+ * @param param1
+ * @returns
  */
 export async function GET(request: NextRequest, { params }: RouteParameters) {
     const { eventId } = await params;
     try {
-        const { data: event, error } = await supabase
+        const { data: dbEvent, error } = await supabase
             .from("events")
-            .select("*")
+            .select(`
+                *,
+                event_pricings (
+                    min,
+                    max
+                ),
+                event_categories (
+                    type,
+                    category,
+                    subcategory
+                ),
+                event_locations (
+                    venue,
+                    address,
+                    latitude,
+                    longitude,
+                    city,
+                    country
+                )
+            `)
             .eq("id", eventId)
             .single();
 
@@ -31,7 +89,8 @@ export async function GET(request: NextRequest, { params }: RouteParameters) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        return NextResponse.json({ event: event });
+        const event = transformDbEventToEventSchema(dbEvent);
+        return NextResponse.json({ event });
     } catch (error) {
         return NextResponse.json({ error: error }, { status: 500 });
     }
