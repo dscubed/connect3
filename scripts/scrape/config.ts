@@ -18,26 +18,49 @@ export type SiteConfig = {
       siteId: "umsu",
       kbSlug: "unimelb_su",
       baseUrl: "https://umsu.unimelb.edu.au",
-  
-      // “Soft sitemap” seeds (you provided these)
+
+      // Broader seeds to help discovery
       seeds: [
+        "https://umsu.unimelb.edu.au/",
+
+        // Keep your original seeds
         "https://umsu.unimelb.edu.au/support/",
         "https://umsu.unimelb.edu.au/buddy-up/",
-        "https://umsu.unimelb.edu.au/buddy-up/clubs/",
         "https://umsu.unimelb.edu.au/express-yourself/",
         "https://umsu.unimelb.edu.au/about/",
+
+        // New: major sections on the public site
+        "https://umsu.unimelb.edu.au/things-to-do/",
+        "https://umsu.unimelb.edu.au/things-to-do/events/",
+        "https://umsu.unimelb.edu.au/make-a-difference/",
+        "https://umsu.unimelb.edu.au/international/",
+        "https://umsu.unimelb.edu.au/oweek/",
+
+        // New: public sitemap as an efficient discovery hub
+        "https://umsu.unimelb.edu.au/sitemap/",
       ],
-  
-      // Restrict crawl strictly to these sections (and their children)
+
+      // Allow crawling across additional public sections
       allowPrefixes: [
+        // Keep original scope
         "https://umsu.unimelb.edu.au/support/",
         "https://umsu.unimelb.edu.au/buddy-up/",
         "https://umsu.unimelb.edu.au/express-yourself/",
         "https://umsu.unimelb.edu.au/about/",
+
+        // Expanded scope
+        "https://umsu.unimelb.edu.au/things-to-do/",
+        "https://umsu.unimelb.edu.au/make-a-difference/",
+        "https://umsu.unimelb.edu.au/international/",
+        "https://umsu.unimelb.edu.au/oweek/",
+
+        // Optional: allow the sitemap page itself (but not necessarily "everything")
+        "https://umsu.unimelb.edu.au/sitemap/",
       ],
-  
-      // Robots.txt disallows + additional practical exclusions
+
+      // Keep your practical exclusions + add a couple more
       denySubstrings: [
+        // existing
         "/photos/",
         "/advertclick/",
         "/login/",
@@ -55,11 +78,24 @@ export type SiteConfig = {
         "tel:",
         "javascript:",
         "#",
+
+        // extra: common non-content/static noise (adjust to your crawler logic)
+        ".css",
+        ".js",
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".gif",
+        ".webp",
+        ".svg",
+        "/ords/",            // if any oracle/ords surfaces show up
+        "/api/",             // if you see api endpoints being discovered
       ],
-  
-      maxPages: 650,  // bump if you want more coverage
-      delayMs: 900,   // polite
+
+      maxPages: 8000,     // increased because you widened scope
+      delayMs: 650,       // keep polite (or increase to 800–1000 if you hit rate limits)
     },
+    /* 
     // ---------------------------
     // 1) Unimelb main site
     // robots disallows: /home-new/, /design/, /staffdev/, /_assets/, /templates*, etc.

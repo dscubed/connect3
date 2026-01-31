@@ -238,6 +238,7 @@ const SU_SITE_CODES = new Set<string>([
   "rusu", // RMIT University Student Union
   "umsu", // UoM Student Union
   "uwa_guild",  // UWA Student Guild
+  "umsu",
   // add: "umsu", "rusu", "uwa_guild", etc.
 ]);
 

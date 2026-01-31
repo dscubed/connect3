@@ -12,7 +12,8 @@
     "rechunk": "tsx scripts/kb/rechunk-from-pages.ts",
     "build:vs-files": "tsx scripts/kb/build-vs-files-from-pages.ts",
     "sync:central-vs-files": "tsx scripts/kb/sync-central-vector-store-vs-files.ts",
-    "kb:validate": "tsx scripts/kb/validate-central-kb-search.ts"
+    "kb:validate": "tsx scripts/kb/validate-central-kb-search.ts",
+    "wipe:umsu": "tsx scripts/kb/wipe-umsu-from-central.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
