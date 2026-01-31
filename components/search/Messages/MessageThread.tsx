@@ -1,7 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import { CompletedResponse } from "./CompletedResponse";
-import { UserProfile, ChatMessage } from "../utils";
+import { ChatMessage } from "../utils";
 import { SearchProgressIndicator } from "./SearchProgressIndicator";
 import UserAvatar from "../MatchResult/UserAvatar";
 import { useAuthStore } from "@/stores/authStore";
@@ -11,13 +11,14 @@ import { Button } from "@/components/ui/button";
 import { Ban, Pencil, RotateCcw, Send } from "lucide-react";
 import { useState } from "react";
 import { Textarea } from "@/components/ui/TextArea";
+import { EntityResult } from "@/lib/search/types";
 
 interface MessageThreadProps {
   message: ChatMessage;
   index: number;
-  onUserClick?: (user: UserProfile) => void;
   onRetry: (messageId: string) => void;
   onEdit: (messageId: string, newQuery: string) => void;
+  onProfileClick?: (entity: EntityResult) => void;
 }
 
 export function MessageThread({
@@ -25,6 +26,7 @@ export function MessageThread({
   index,
   onRetry,
   onEdit,
+  onProfileClick,
 }: MessageThreadProps) {
   const { profile } = useAuthStore();
 
@@ -58,6 +60,7 @@ export function MessageThread({
           content={message.content}
           onRetry={onRetry}
           id={message.id}
+          onProfileClick={onProfileClick}
         />
       );
     }

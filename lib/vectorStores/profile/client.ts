@@ -18,7 +18,7 @@ export async function uploadProfileToVectorStore() {
       {
         method: "POST",
         body: JSON.stringify({ userId: user.id }),
-      }
+      },
     );
     if (!response.ok) {
       const errorData = await response.json();
