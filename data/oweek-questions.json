@@ -1,0 +1,69 @@
+{
+  "questions": [
+    {
+      "title": "Food",
+      "choices": [
+        "Apple",
+        "Banana",
+        "Cherry",
+        "Pizza",
+        "Sushi",
+        "Pasta",
+        "Burger",
+        "Salad"
+      ]
+    },
+    {
+      "title": "Animal",
+      "choices": [
+        "Dog",
+        "Cat",
+        "Bird",
+        "Fish",
+        "Rabbit",
+        "Hamster",
+        "Turtle",
+        "Snake"
+      ]
+    },
+    {
+      "title": "Plant",
+      "choices": [
+        "Tree",
+        "Flower",
+        "Cactus",
+        "Fern",
+        "Rose",
+        "Sunflower",
+        "Bamboo",
+        "Orchid"
+      ]
+    },
+    {
+      "title": "Mineral",
+      "choices": [
+        "Rock",
+        "Diamond",
+        "Gold",
+        "Silver",
+        "Copper",
+        "Quartz",
+        "Ruby",
+        "Emerald"
+      ]
+    },
+    {
+      "title": "Other",
+      "choices": [
+        "Music",
+        "Sports",
+        "Art",
+        "Reading",
+        "Gaming",
+        "Hiking",
+        "Cooking",
+        "Travel"
+      ]
+    }
+  ]
+}
