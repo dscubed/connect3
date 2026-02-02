@@ -24,8 +24,8 @@ function transformDbEventToEventSchema(dbEvent: any): Event {
     end: dbEvent.end,
     publishedAt: dbEvent.created_at || new Date().toISOString(),
     isOnline: dbEvent.location_type === "online",
-    capacity: dbEvent.capacity || 50, // default capacity
-    currency: dbEvent.currency || "USD", // default currency
+    capacity: dbEvent.capacity,
+    currency: dbEvent.currency,
     thumbnail: dbEvent.thumbnail,
     category: {
       type: dbEvent.event_categories?.type || "other",

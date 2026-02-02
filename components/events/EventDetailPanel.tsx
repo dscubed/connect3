@@ -68,9 +68,9 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
           />
          :
            <div
-            className="flex justify-center items-center relative rounded-xl sm:rounded-2xl overflow-hidden flex-shrink-0 w-full sm:w-80 aspect-square bg-foreground/80 opacity-30" 
+            className="flex justify-center items-center relative rounded-xl sm:rounded-2xl w-full sm:w-80 aspect-square bg-background " 
             >
-              <p className="text-secondary-foreground">Image not Found</p>
+              <p className="text-foreground">Image not Found</p>
          </div> 
         }
         
@@ -112,10 +112,15 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
             </p>
 
             {/* Event capacity */}
-            <p className="text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center text-muted">
-              <Users className="size-4 text-foreground/80" />
-              Capacity: {event.capacity}
-            </p>
+            {
+              event.capacity && (
+                <p className="text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center text-muted">
+                  <Users className="size-4 text-foreground/80" />
+                  Capacity: {event.capacity}
+                </p>
+              ) 
+            }
+            
 
             {/* Currency */}
             <p className="text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
