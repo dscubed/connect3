@@ -54,92 +54,104 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
         </button>
       )}
 
-      {/* Header background image */}
-      <div
-        className="relative rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6 h-64 sm:h-72 lg:h-80 overflow-hidden"
-        style={{
-          backgroundImage: event.thumbnail ? `url(${event.thumbnail})` : "none",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        {/* Dark overlay for text readability shown only when there is a thumbnail */}
-        <div className="absolute bg-gradient-to-b inset-0 bg-linear-to-b  from-black/70 via-black/50 to-transparent"></div>
+      {/* Header with image and event details */}
+      <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
+        {/* Image container with square aspect ratio */}
+        {event.thumbnail ? 
+          <div
+            className="relative rounded-xl sm:rounded-2xl overflow-hidden flex-shrink-0 w-full sm:w-64 aspect-square"
+            style={{
+              backgroundImage: event.thumbnail ? `url(${event.thumbnail})` : "none",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
+         :
+           <div
+            className="flex justify-center items-center relative rounded-xl sm:rounded-2xl w-full sm:w-80 aspect-square bg-background " 
+            >
+              <p className="text-foreground">Image not Found</p>
+         </div> 
+        }
+        
 
-        {/* actual content  */}
-        <div className="relative z-10 flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
-          <div className="flex-1 text-left min-w-0">
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 sm:mb-3 leading-tight text-white">
-              {event.name}
-            </h1>
-            <div className="flex flex-col gap-1">
-              {/* organiser information */}
-              <span className="text-white/90 text-sm md:text-md">
-                {isLoadingCreator ? (
-                  <p>Fetching organisers...</p>
-                ) : creatorError ? (
-                  <p>Hosted By: Unknown</p>
-                ) : (
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                    Hosted By: {organiserString || "Unknown"}
-                  </motion.div>
-                )}
-              </span>
+        {/* Event details */}
+        <div className="flex-1 text-left min-w-0 flex flex-col justify-center">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 sm:mb-3 leading-tight text-secondary-foreground">
+            {event.name}
+          </h1>
+          <div className="flex flex-col gap-1 text-muted">
+            {/* organiser information */}
+            <span className="text-sm md:text-md">
+              {isLoadingCreator ? (
+                <p>Fetching organisers...</p>
+              ) : creatorError ? (
+                <p>Hosted By: Unknown</p>
+              ) : (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  Hosted By: {organiserString || "Unknown"}
+                </motion.div>
+              )}
+            </span>
 
-              {/* Event dates */}
-              <p className="text-white/80 text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
-                <Calendar className="size-4" />
-                {new Date(event.start).toLocaleDateString()} -{" "}
-                {new Date(event.end).toLocaleDateString()}
-              </p>
-              <p className="text-white/80 text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
-                <Clock className="size-4" />
-                {new Date(event.start).toLocaleTimeString([], {
-                  timeStyle: "short",
-                })}{" "}
-                -{" "}
-                {new Date(event.end).toLocaleTimeString([], {
-                  timeStyle: "short",
-                })}
-              </p>
+            {/* Event dates */}
+            <p className="text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center text-muted">
+              <Calendar className="size-4 text-foreground/80" />
+              {new Date(event.start).toLocaleDateString()} -{" "}
+              {new Date(event.end).toLocaleDateString()}
+            </p>
+            <p className="text-muted text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
+              <Clock className="size-4 text-foreground/80" />
+              {new Date(event.start).toLocaleTimeString([], {
+                timeStyle: "short",
+              })}{" "}
+              -{" "}
+              {new Date(event.end).toLocaleTimeString([], {
+                timeStyle: "short",
+              })}
+            </p>
 
-              {/* Event capacity */}
-              <p className="text-white/80 text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
-                <Users className="size-4" />
-                Capacity: {event.capacity}
-              </p>
+            {/* Event capacity */}
+            {
+              event.capacity && (
+                <p className="text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center text-muted">
+                  <Users className="size-4 text-foreground/80" />
+                  Capacity: {event.capacity}
+                </p>
+              ) 
+            }
+            
 
-              {/* Currency */}
-              <p className="text-white/80 text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
-                <DollarSign className="size-4" />
-                {event.pricing.min === 0 && event.pricing.max === 0
-                  ? "Free"
-                  : `${event.pricing.min} - ${event.pricing.max}`}
-              </p>
+            {/* Currency */}
+            <p className="text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
+              <DollarSign className="size-4 text-foreground/80" />
+              {event.pricing.min === 0 && event.pricing.max === 0
+                ? "Free"
+                : `${event.pricing.min} - ${event.pricing.max}`}
+            </p>
 
-              {/* Online/In-person */}
-              <p className="text-white/80 text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
-                {event.isOnline ? (
-                  <Globe className="size-4 text-white/80" />
-                ) : (
-                  <MapPin className="size-4 text-white/80" />
-                )}
-                {event.isOnline ? "Online" : "In-Person"}
-              </p>
-            </div>
+            {/* Online/In-person */}
+            <p className="text-xs sm:text-sm line-clamp-2 leading-relaxed flex gap-1 items-center">
+              {event.isOnline ? (
+                <Globe className="size-4 text-foreground/80" />
+              ) : (
+                <MapPin className="size-4 text-foreground/80" />
+              )}
+              {event.isOnline ? "Online" : "In-Person"}
+            </p>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="sm:rounded-2xl p-4 sm:p-6 lg:p-7 mb-4 sm:mb-6">
-        <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">About</h2>
+        <h2 className="text-lg mb-3 sm:mb-4 font-bold rounded-2xl">About</h2>
         <span className="leading-relaxed text-sm sm:text-base text-muted">
           {parse(event.description || "No description provided.")}
         </span>
       </div>
 
-      <div className="flex border border-muted/20 rounded-xl sm:rounded-2xl">
+      <div className="flex border border-foreground/20 rounded-xl sm:rounded-2xl">
         {/* Location Details */}
         <div className="rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-7 mb-4 sm:mb-6 w-1/2">
           <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">
