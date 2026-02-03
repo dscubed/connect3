@@ -74,49 +74,43 @@ export default function ClubsPage() {
     setShowDetails(false);
   };
 
-  if (error) {
-    toast.error("Could not get clubs");
-  }
-
-  // Helper component for loading/empty states in the list
-  const ClubListContent = () => {
-    if (isLoading) {
-      return (
-        <div className="flex flex-col items-center justify-center py-12 gap-3">
-          <CubeLoader size={32} />
-          <p className="text-muted text-sm">Loading clubs...</p>
-        </div>
-      );
+  // Handle error with useEffect to avoid calling toast during render
+  useEffect(() => {
+    if (error) {
+      toast.error("Could not get clubs");
     }
+  }, [error]);
 
-    if (clubs.length === 0) {
-      return (
-        <div className="p-4 text-sm text-muted">
-          {debouncedSearch
-            ? `No clubs found for "${debouncedSearch}"`
-            : "No clubs found."}
+  // To fix flickering, render club lists as inline JSX instead of using a helper component
+  // Reducing rerenders causing flickering
+  const clubListContent = isLoading ? (
+    <div className="flex flex-col items-center justify-center py-12 gap-3">
+      <CubeLoader size={32} />
+      <p className="text-muted text-sm">Loading clubs...</p>
+    </div>
+  ) : clubs.length === 0 ? (
+    <div className="p-4 text-sm text-muted">
+      {debouncedSearch
+        ? `No clubs found for "${debouncedSearch}"`
+        : "No clubs found."}
+    </div>
+  ) : (
+    <>
+      {clubs.map((club) => (
+        <ClubListCard
+          key={club.id}
+          club={club}
+          isSelected={selectedClub?.id === club.id}
+          onClick={() => handleClubSelect(club)}
+        />
+      ))}
+      {isValidating && (
+        <div className="flex justify-center py-4">
+          <CubeLoader size={24} />
         </div>
-      );
-    }
-
-    return (
-      <>
-        {clubs.map((club) => (
-          <ClubListCard
-            key={club.id}
-            club={club}
-            isSelected={selectedClub?.id === club.id}
-            onClick={() => handleClubSelect(club)}
-          />
-        ))}
-        {isValidating && (
-          <div className="flex justify-center py-4">
-            <CubeLoader size={24} />
-          </div>
-        )}
-      </>
-    );
-  };
+      )}
+    </>
+  );
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -135,7 +129,7 @@ export default function ClubsPage() {
               className="flex-1 overflow-y-auto p-5 space-y-3 scrollbar-hide"
               ref={clubListRef}
             >
-              <ClubListContent />
+              {clubListContent}
             </div>
           </div>
 
@@ -177,7 +171,7 @@ export default function ClubsPage() {
                   className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 scrollbar-hide"
                   ref={clubListRef}
                 >
-                  <ClubListContent />
+                  {clubListContent}
                 </div>
               </motion.div>
             ) : (

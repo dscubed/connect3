@@ -15,7 +15,7 @@ export function QuickLinks({ links }: { links: ExtractedLink[] }) {
             href={l.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium hover:bg-muted transition focus:outline-none focus:ring-2 focus:ring-offset-2"
+            className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium hover:bg-muted/20 transition focus:outline-none focus:ring-2 focus:ring-offset-2"
             title={l.url}
           >
             {l.label}
