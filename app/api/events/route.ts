@@ -23,7 +23,7 @@ function transformDbEventToEventSchema(dbEvent: any): Event {
     start: dbEvent.start,
     end: dbEvent.end,
     publishedAt: dbEvent.created_at || new Date().toISOString(),
-    isOnline: dbEvent.location_type === "online",
+    isOnline: dbEvent.is_online,
     capacity: dbEvent.capacity,
     currency: dbEvent.currency,
     thumbnail: dbEvent.thumbnail,

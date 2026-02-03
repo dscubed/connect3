@@ -27,6 +27,8 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
     fetch(url).then((res) => res.json()),
   );
 
+  console.log("EVENT ", event)
+
   let organiserString = "";
   console.log(event.pricing);
   if (!isLoadingCreator) {
