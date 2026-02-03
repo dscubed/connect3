@@ -9,8 +9,8 @@ async function getOrderedChunks(profileId: string, supabase: SupabaseClient) {
   const { data: chunksData, error: chunksError } = await supabase
     .from("profile_chunks")
     .select("text, category, order")
-    .eq("profile_id", profileId)
-    //.order("created_at", { ascending: true });
+    .eq("profile_id", profileId);
+  //.order("created_at", { ascending: true });
   if (chunksError || !chunksData) {
     throw new Error(`Error fetching profile chunks: ${chunksError.message}`);
   }
@@ -21,26 +21,18 @@ async function getOrderedChunks(profileId: string, supabase: SupabaseClient) {
     .eq("profile_id", profileId);
   if (categoryOrderError || !categoryOrderData) {
     throw new Error(
-      `Error fetching category order: ${categoryOrderError.message}`
+      `Error fetching category order: ${categoryOrderError.message}`,
     );
   }
 
-  /*const orderedChunks = categoryOrderData.map(({ category }) => ({
-    category,
-    chunks: chunksData
-      .filter((chunk) => chunk.category === category)
-      .sort((a, b) => a.order - b.order),
-  }));*/
-
   const orderedChunks = categoryOrderData
-  .sort((a, b) => a.order - b.order)
-  .map(({ category }) => ({
-    category,
-    chunks: chunksData
-      .filter((chunk) => chunk.category === category)
-      .sort((a, b) => a.order - b.order),
-  }));
-
+    .sort((a, b) => a.order - b.order)
+    .map(({ category }) => ({
+      category,
+      chunks: chunksData
+        .filter((chunk) => chunk.category === category)
+        .sort((a, b) => a.order - b.order),
+    }));
 
   return {
     orderedChunks,
@@ -85,9 +77,14 @@ export async function getFileText(profileId: string, supabase: SupabaseClient) {
 
   const tldr = profileData.tldr || "";
 
-  const name = `${profileData.first_name ?? ""} ${profileData.last_name ?? ""}`.trim() || "Unknown";
+  const name =
+    `${profileData.first_name ?? ""} ${profileData.last_name ?? ""}`.trim() ||
+    "Unknown";
   const profileText = `
-  ${name} (${profileData.account_type})
+  ENTITY_ID: ${profileId}
+  ENTITY_TYPE: ${profileData.account_type}
+  ---
+  ${name}
   University: ${
     universities[profileData.university as University]?.name || "Not specified"
   }

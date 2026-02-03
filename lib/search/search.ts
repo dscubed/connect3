@@ -12,6 +12,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { zodTextFormat } from "openai/helpers/zod.mjs";
 import { getFileText } from "../users/getFileText";
+import { getEventText } from "./agents/events-agent";
 
 const FileSearchResponseSchema = z.object({
   fileIds: z.array(z.string()),
@@ -95,75 +96,6 @@ const searchSingleEntity = async (
   );
 
   return { results: fileResults, fileMap };
-};
-
-export const getEventText = async (
-  eventId: string,
-  supabase: SupabaseClient,
-): Promise<string> => {
-  const { data: eventData, error: eventError } = await supabase
-    .from("events")
-    .select(
-      `
-      *,
-      event_pricings!inner (
-        min,
-        max
-      ),
-      event_locations!inner (
-        venue,
-        address,
-        latitude,
-        longitude,
-        city,
-        country
-      ),
-      event_categories!inner (
-        type,
-        category,
-        subcategory
-      )
-    `,
-    )
-    .eq("id", eventId)
-    .single();
-
-  if (eventError || !eventData) {
-    throw new Error(`Error fetching event data: ${eventError?.message}`);
-  }
-
-  const { data: creatorData, error: creatorError } = await supabase
-    .from("profiles")
-    .select("first_name, university")
-    .eq("id", eventData.creator_profile_id)
-    .single();
-
-  if (creatorError || !creatorData) {
-    throw new Error(`Error fetching creator data: ${creatorError?.message}`);
-  }
-  const creatorName = `${creatorData.first_name || ""}`.trim() || "Unknown";
-
-  const pricing = eventData.event_pricings?.[0]; // Assuming one pricing record per event
-  const location = eventData.event_locations?.[0]; // Assuming one location record per event
-  const category = eventData.event_categories?.[0]; // Assuming one category record per event
-
-  const text = `
-    ${eventData.name || "Untitled Event"} 
-    Type: ${category ? [category.type, category.category, category.subcategory].filter(Boolean).join(", ") : "No type"}
-    Location: ${eventData.is_online ? "Online" : `${location?.venue || "Venue not specified"}, ${location?.address || ""}`}
-    City: ${location?.city || "City not specified"}
-    Country: ${location?.country || "Country not specified"}
-    Pricing: ${pricing?.min && pricing?.max && (pricing.min !== 0 || pricing.max !== 0) ? `Minimum: $${pricing.min}, Maximum: $${pricing.max}` : "Free"}
-    Creator: ${creatorName}
-    Start: ${new Date(eventData.start).toLocaleString()}
-    End: ${new Date(eventData.end).toLocaleString()}${eventData.booking_link && "\n" + eventData.booking_link + "\n"}
-    ${eventData.university && "\nUniversity: " + eventData.university}
-    ${
-      eventData.description?.length > 0
-        ? eventData.description
-        : "No description provided."
-    }`;
-  return text;
 };
 
 /**
