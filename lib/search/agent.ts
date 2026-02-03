@@ -67,6 +67,7 @@ export const runSearch = async (
       tldr,
       prevMessages: lastTurn,
       userUniversity,
+      supabase,
       emit,
       progress,
       updateProgress,

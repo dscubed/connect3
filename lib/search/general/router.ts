@@ -21,27 +21,19 @@ import type { ResponseInput } from "openai/resources/responses/responses.mjs";
 // Types
 // ============================================================================
 
-/** Supported universities with their vector store IDs */
+/** Supported universities for routing */
 export const SUPPORTED_UNIVERSITIES = {
   unimelb: {
     name: "University of Melbourne",
-    official: process.env.OPENAI_VS_UNIMELB_OFFICIAL,
-    union: process.env.OPENAI_VS_UNIMELB_SU,
   },
   monash: {
     name: "Monash University",
-    official: process.env.OPENAI_VS_MONASH_OFFICIAL,
-    union: process.env.OPENAI_VS_MONASH_SU,
   },
   rmit: {
     name: "RMIT University",
-    official: process.env.OPENAI_VS_RMIT_OFFICIAL,
-    union: process.env.OPENAI_VS_RMIT_SU,
   },
   uwa: {
     name: "University of Western Australia",
-    official: process.env.OPENAI_VS_UWA_OFFICIAL,
-    union: process.env.OPENAI_VS_UWA_SU,
   },
 } as const;
 
@@ -195,16 +187,4 @@ export async function routeQuery(
     console.error("[router] Error:", err);
     return { route: "web", university: null, intent: "both", reason: "error" };
   }
-}
-
-/**
- * Get vector store IDs for a university.
- */
-export function getVectorStores(slug: UniversitySlug | null): {
-  official?: string;
-  union?: string;
-} {
-  if (!slug || !SUPPORTED_UNIVERSITIES[slug]) return {};
-  const uni = SUPPORTED_UNIVERSITIES[slug];
-  return { official: uni.official, union: uni.union };
 }
