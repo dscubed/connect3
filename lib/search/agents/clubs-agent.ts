@@ -6,20 +6,11 @@
  */
 import { Agent, run, fileSearchTool } from "@openai/agents";
 import OpenAI from "openai";
-import type { AgentSearchResponse, SearchResult } from "./types";
-
-// Type for file search results with attributes
-interface FileSearchResultWithAttributes {
-  file_id: string;
-  filename: string;
-  score: number;
-  text: string;
-  attributes?: {
-    id?: string;
-    name?: string;
-    type?: string;
-  };
-}
+import type { AgentSearchResponse } from "./types";
+import {
+  extractRelevantFileIds,
+  extractSearchResults,
+} from "./utils/subagent-utils";
 
 export class ClubsAgent {
   private agent: Agent;
@@ -34,9 +25,10 @@ export class ClubsAgent {
       model: "gpt-4o-mini",
       instructions: `You search club and organization profiles in the Connect3 vector store.
 
-Your ONLY job:
-1. Use the file_search tool to find relevant club/organization profiles
-2. Be selective - only return strong matches
+Your job:
+1. Use the file_search tool to find clubs/organizations
+2. Review the results and select ONLY the most relevant ones
+3. Respond with a list of the RELEVANT file IDs
 
 Club profiles contain:
 - Name, description, focus areas
@@ -47,7 +39,16 @@ Club profiles contain:
 
 If the query is too vague (e.g., "show me clubs"), indicate that more information is needed.
 
-When searching, focus on the most relevant aspects of the query.`,
+When evaluating relevance, consider:
+- How well the club's focus areas match the query
+- How their activities/events align with what's being searched
+- How directly they relate to the search criteria
+
+AFTER searching, respond with ONLY a JSON array of the relevant file IDs (format: file-XXXX...):
+["file-abc123...", "file-def456..."]
+
+Be selective! Only include clubs that are truly relevant to the query.
+If no clubs are relevant, respond with: []`,
       tools: [
         fileSearchTool([this.vectorStoreId], {
           maxNumResults: 10,
@@ -66,61 +67,29 @@ User Context: ${userContext}
 
 Search for clubs/organizations matching: ${query}
 
-Use file_search to find relevant club profiles.`;
+Use file_search to find relevant club profiles.
+After reviewing results, respond with ONLY a JSON array of relevant file IDs (e.g. ["file-abc...", "file-def..."]).`;
 
     const result = await run(this.agent, searchPrompt);
 
-    // Extract results directly from file_search response - no Supabase lookup needed!
-    const searchResults = this.extractSearchResults(result);
+    // Extract the relevant file IDs from the agent's response
+    const relevantFileIds = extractRelevantFileIds(
+      result.finalOutput,
+      "ClubsAgent",
+    );
+    console.log(
+      `[ClubsAgent] Agent selected ${relevantFileIds.size} relevant file IDs`,
+    );
+
+    // Extract results and filter to only relevant ones
+    const searchResults = extractSearchResults(
+      result.newItems,
+      relevantFileIds,
+      "organisation",
+    );
 
     console.log(`[ClubsAgent] Found ${searchResults.length} results`);
 
     return { results: searchResults };
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private extractSearchResults(agentResult: any): SearchResult[] {
-    const results: SearchResult[] = [];
-    const seenIds = new Set<string>();
-
-    // Check newItems for file_search_call with results
-    const newItems = agentResult.newItems || [];
-    for (const item of newItems) {
-      if ("rawItem" in item && item.rawItem) {
-        const raw = item.rawItem;
-
-        // Look for hosted_tool_call with file_search_call
-        if (
-          typeof raw === "object" &&
-          raw !== null &&
-          raw.type === "hosted_tool_call" &&
-          raw.name === "file_search_call" &&
-          raw.providerData?.results
-        ) {
-          const fileResults = raw.providerData
-            .results as FileSearchResultWithAttributes[];
-
-          for (const fileResult of fileResults) {
-            // Use attributes.id as the entity ID
-            const entityId = fileResult.attributes?.id;
-            if (!entityId || seenIds.has(entityId)) continue;
-            seenIds.add(entityId);
-
-            // Build content with entity metadata at top
-            const content = `ENTITY_ID: ${entityId}
-ENTITY_TYPE: organisation
----
-${fileResult.text}`;
-
-            results.push({
-              fileId: fileResult.file_id,
-              content,
-            });
-          }
-        }
-      }
-    }
-
-    return results;
   }
 }

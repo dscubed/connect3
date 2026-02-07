@@ -6,6 +6,9 @@ export type AgentRoute = "students" | "clubs" | "events" | "general";
 
 export type EntityType = "user" | "organisation" | "events";
 
+// Content type includes entity types plus "general" for KB/web content
+export type ContentType = EntityType | "general";
+
 export interface SearchResult {
   fileId: string;
   content: string; // File content with ENTITY_ID embedded

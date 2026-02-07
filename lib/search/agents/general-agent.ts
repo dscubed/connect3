@@ -1,13 +1,18 @@
 /**
  * General Agent (Sub-agent)
  *
- * Searches university knowledge base (scraped university info).
- * NO entity markers needed - returns informational content.
+ * Searches university knowledge base (scraped university info) and web.
+ * Returns raw search results to orchestrator for consistent response generation.
  */
 import { Agent, run, fileSearchTool, webSearchTool } from "@openai/agents";
 import OpenAI from "openai";
 import type { AgentSearchResponse } from "./types";
 import { SUPPORTED_UNIVERSITIES, type UniversitySlug } from "../general/router";
+import {
+  extractRelevantFileIds,
+  extractGeneralSearchResults,
+  extractWebSearchResults,
+} from "./utils/subagent-utils";
 
 export class GeneralAgent {
   private openai: OpenAI;
@@ -19,13 +24,12 @@ export class GeneralAgent {
   }
 
   /**
-   * Detect university from query or user context using LLM classification
+   * Detect university from query or user context using Responses API
    */
   private async detectUniversity(
     query: string,
     userContext: string,
   ): Promise<UniversitySlug | null> {
-    // First check user's university context as a hint
     const userUniHint = this.userUniversity
       ? `User's university: ${this.userUniversity}`
       : "";
@@ -50,16 +54,15 @@ Rules:
 Respond with ONLY the code: unimelb, monash, rmit, uwa, or none`;
 
     try {
-      const completion = await this.openai.chat.completions.create({
+      // Use Responses API instead of completions
+      const response = await this.openai.responses.create({
         model: "gpt-4o-mini",
-        messages: [{ role: "user", content: classificationPrompt }],
-        max_tokens: 10,
+        input: classificationPrompt,
+        max_output_tokens: 10,
         temperature: 0,
       });
 
-      const result = completion.choices[0]?.message?.content
-        ?.trim()
-        .toLowerCase();
+      const result = response.output_text?.trim().toLowerCase();
 
       if (result && result !== "none") {
         const validSlugs: UniversitySlug[] = [
@@ -121,21 +124,25 @@ Respond with ONLY the code: unimelb, monash, rmit, uwa, or none`;
     const agent = new Agent({
       name: "University KB Specialist",
       model: "gpt-4o-mini",
-      instructions: `You search the university knowledge base to answer questions.
+      instructions: `You search the university knowledge base to find relevant information.
 
 Your job:
 1. Use file_search to find relevant information
-2. Look for official university information
-3. Student union/guild information
+2. Review the results and select ONLY the most relevant ones
+3. Respond with a list of the RELEVANT file IDs
 
-Topics you can help with:
+Topics in the knowledge base:
 - Census dates, academic calendar
 - Enrollment, course selection
 - Special consideration, academic policies
 - Campus services, facilities
 - Student support services
 
-Provide factual answers based on what you find.`,
+AFTER searching, respond with ONLY a JSON array of the relevant file IDs (format: file-XXXX...):
+["file-abc123...", "file-def456..."]
+
+Be selective! Only include documents that are truly relevant to the query.
+If no documents are relevant, respond with: []`,
       tools: [
         fileSearchTool(vectorStoreIds, {
           maxNumResults: 10,
@@ -149,20 +156,30 @@ User Context: ${userContext}
 
 Question: ${query}
 
-Search the knowledge base to find relevant information.`;
+Search the knowledge base to find relevant information.
+After reviewing results, respond with ONLY a JSON array of relevant file IDs (e.g. ["file-abc...", "file-def..."]).`;
 
     const result = await run(agent, searchPrompt);
 
-    // For general queries, we return the agent's response as content
-    // No entity markers needed
-    return {
-      results: [
-        {
-          fileId: "kb_result",
-          content: result.finalOutput ?? "No information found.",
-        },
-      ],
-    };
+    // Extract the relevant file IDs from the agent's response
+    const relevantFileIds = extractRelevantFileIds(
+      result.finalOutput,
+      "GeneralAgent",
+    );
+    console.log(
+      `[GeneralAgent] Agent selected ${relevantFileIds.size} relevant file IDs`,
+    );
+
+    // Extract results and filter to only relevant ones
+    const searchResults = extractGeneralSearchResults(
+      result.newItems,
+      relevantFileIds,
+      "kb",
+    );
+
+    console.log(`[GeneralAgent] Found ${searchResults.length} KB results`);
+
+    return { results: searchResults };
   }
 
   private async searchWeb(
@@ -172,14 +189,13 @@ Search the knowledge base to find relevant information.`;
     const agent = new Agent({
       name: "Web Search Specialist",
       model: "gpt-4o-mini",
-      instructions: `You search the web to answer general questions.
+      instructions: `You search the web to find relevant information.
 
 Your job:
 1. Use web_search to find relevant information
-2. Provide accurate, helpful answers
-3. Cite sources when possible
+2. Return the search results
 
-Be concise and factual.`,
+Be thorough in your search to find helpful information.`,
       tools: [webSearchTool()],
     });
 
@@ -192,13 +208,22 @@ Search the web to find relevant information.`;
 
     const result = await run(agent, searchPrompt);
 
-    return {
-      results: [
-        {
-          fileId: "web_result",
-          content: result.finalOutput ?? "No information found.",
-        },
-      ],
-    };
+    // Extract web search results
+    const searchResults = extractWebSearchResults(result.newItems);
+
+    // If no structured results, fall back to final output
+    if (searchResults.length === 0 && result.finalOutput) {
+      searchResults.push({
+        fileId: `web_${Date.now()}`,
+        content: `CONTENT_TYPE: general
+SOURCE: web
+---
+${result.finalOutput}`,
+      });
+    }
+
+    console.log(`[GeneralAgent] Found ${searchResults.length} web results`);
+
+    return { results: searchResults };
   }
 }

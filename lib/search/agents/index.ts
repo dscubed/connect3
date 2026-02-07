@@ -161,17 +161,8 @@ export class Connect3AgentSystem {
         `[Connect3AgentSystem] Found ${allResults.results.length} total results`,
       );
 
-      // Step 4: For general-only queries, return the content directly
-      if (routing.agents.length === 1 && routing.agents[0] === "general") {
-        const generalContent = allResults.results[0]?.content ?? "";
-        if (emit) emit("response", { partial: { markdown: generalContent } });
-        return {
-          type: "response",
-          markdown: generalContent,
-        };
-      }
-
-      // Step 5: Orchestrator generates conversational response with STREAMING
+      // Step 4: Orchestrator generates conversational response with STREAMING
+      // All agents (including general) now go through the response agent for consistent formatting
       let fullMarkdown = "";
 
       const response = await this.orchestrator.generateResponse(
