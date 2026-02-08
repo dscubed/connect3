@@ -2,12 +2,14 @@
  * Main search entry point
  *
  * Uses the new OpenAI Agents SDK-based system for routing and search.
+ * Clarification is handled as part of the response generation.
  */
 import { SupabaseClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 import { SearchResponse } from "./types";
 import { getContext } from "./context";
-import { Connect3AgentSystem, ConversationMessage } from "./agents";
+import { ConversationMessage } from "./agents";
+import { Connect3AgentSystem } from "@/lib/search/agents/index-handoff";
 
 export const runSearch = async (
   chatmessageId: string,
@@ -41,16 +43,9 @@ export const runSearch = async (
   // Run the agent system
   const result = await agentSystem.run(query, tldr, conversationHistory, emit);
 
-  console.log("[runSearch] Agent system response type:", result.type);
+  console.log("[runSearch] Agent system completed");
 
-  // Handle clarification requests
-  if (result.type === "clarification") {
-    return {
-      markdown: result.question ?? "Could you please clarify your question?",
-    };
-  }
-
-  // Return the response
+  // Return the response (clarification is now part of the response markdown)
   return {
     markdown: result.markdown ?? "",
   };
