@@ -47,7 +47,7 @@ export function EventListCard({
         >
           <Image
             src={creator.avatar_url}
-            alt={`${event.name} logo`}
+            alt=""
             width={128}
             height={128}
             className="w-full h-full object-cover rounded-md"

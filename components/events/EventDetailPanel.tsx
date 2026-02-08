@@ -165,16 +165,16 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
             <div className="space-y-2">
               <p className="text-sm sm:text-base text-muted flex items-center gap-2">
                 <MapPin className="size-4" />
-                <span>{event.location.venue}</span>
+                <span>Venue: {event.location.venue}</span>
               </p>
               <p className="text-sm sm:text-base text-muted flex items-center gap-2">
                 <MapPin className="size-4" />
-                <span>{event.location.address}</span>
+                <span>Address: {event.location.address}</span>
               </p>
               <p className="text-sm sm:text-base text-muted flex items-center gap-2">
                 <MapPin className="size-4" />
                 <span>
-                  {event.location.city}, {event.location.country}
+                  Location: {event.location.city}, {event.location.country}
                 </span>
               </p>
             </div>

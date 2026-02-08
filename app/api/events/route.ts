@@ -27,11 +27,7 @@ function transformDbEventToEventSchema(dbEvent: any): Event {
     capacity: dbEvent.capacity,
     currency: dbEvent.currency,
     thumbnail: dbEvent.thumbnail,
-    category: {
-      type: dbEvent.event_categories?.type || "other",
-      category: dbEvent.event_categories?.category || "general",
-      subcategory: dbEvent.event_categories?.subcategory || "none",
-    },
+    category: dbEvent.category,
     location: {
       venue: dbEvent.event_locations?.venue || "TBA",
       address: dbEvent.event_locations?.address || "TBA",
@@ -65,11 +61,6 @@ export async function GET(request: NextRequest) {
         event_pricings!inner (
           min,
           max
-        ),
-        event_categories!inner (
-          type,
-          category,
-          subcategory
         ),
         event_locations!inner (
           venue,
@@ -109,100 +100,3 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: error }, { status: 500 });
   }
 }
-
-/**
- * Create new event
- * @param request
- */
-// export async function POST(request: NextRequest) {
-//   return new NextResponse("WILL BE REMOVED");
-// const body = await request.json();
-// const {
-//   id,
-//   name,
-//   start,
-//   end,
-//   description,
-//   type,
-//   thumbnailUrl,
-//   creator_profile_id,
-//   collaborators,
-//   booking_link,
-//   pricing,
-//   city,
-//   location_type,
-//   location_id,
-//   category_id,
-// } = createEventBodySchema.parse(body);
-
-// try {
-//   const { data: event, error: eventError } = await supabase
-//     .from("events")
-//     .insert({
-//       id,
-//       name,
-//       start,
-//       end,
-//       description,
-//       type,
-//       thumbnail_url: thumbnailUrl,
-//       creator_profile_id,
-//       booking_link,
-//       pricing,
-//       city,
-//       location_type,
-//       location_id,
-//       category_id,
-//     })
-//     .select(`
-//       *,
-//       event_categories!inner (
-//         type,
-//         category,
-//         subcategory
-//       ),
-//       event_locations!inner (
-//         venue,
-//         address,
-//         latitude,
-//         longitude,
-//         city,
-//         country
-//       )
-//     `)
-//     .single();
-
-//   if (eventError) {
-//     return NextResponse.json({ error: eventError.message }, { status: 500 });
-//   }
-
-//   // insert collaborators if provided
-//   if (collaborators && collaborators.length > 0) {
-//     const collaboratorInserts = collaborators.map((collaboratorId) => ({
-//       event_id: id,
-//       profile_id: collaboratorId,
-//     }));
-
-//     const { error: collabError } = await supabase
-//       .from("event_collaborators")
-//       .insert(collaboratorInserts);
-
-//     if (collabError) {
-//       // rollback changes and remove the event
-//       console.error("Error inserting collaborators:", collabError);
-//       await supabase.from("events").delete().eq("id", id);
-//       return NextResponse.json(
-//         { error: "Failed to add collaborators" },
-//         { status: 500 }
-//       );
-//     }
-//   }
-
-//   // Transform the created event to match our event schema
-//   const typedEvent: Event = transformDbEventToEventSchema(event);
-
-//   return NextResponse.json({ event: typedEvent }, { status: 201 });
-// } catch (error) {
-//   return NextResponse.json({ error: error }, { status: 500 });
-// }
-// }
