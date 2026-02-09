@@ -14,6 +14,7 @@ const supabase = createClient(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function transformDbEventToEventSchema(dbEvent: any): Event {
   // Map the database fields to the schema fields
+  const fallbackCategory = dbEvent.category || "general";
   return {
     id: dbEvent.id,
     name: dbEvent.name,
@@ -23,13 +24,16 @@ function transformDbEventToEventSchema(dbEvent: any): Event {
     start: dbEvent.start,
     end: dbEvent.end,
     publishedAt: dbEvent.created_at || new Date().toISOString(),
-    isOnline: dbEvent.location_type === "online",
+    isOnline:
+      typeof dbEvent.is_online === "boolean"
+        ? dbEvent.is_online
+        : dbEvent.location_type === "online",
     capacity: dbEvent.capacity,
     currency: dbEvent.currency,
     thumbnail: dbEvent.thumbnail,
     category: {
-      type: dbEvent.event_categories?.type || "other",
-      category: dbEvent.event_categories?.category || "general",
+      type: dbEvent.event_categories?.type || fallbackCategory,
+      category: dbEvent.event_categories?.category || fallbackCategory,
       subcategory: dbEvent.event_categories?.subcategory || "none",
     },
     location: {
@@ -41,8 +45,8 @@ function transformDbEventToEventSchema(dbEvent: any): Event {
       country: dbEvent.event_locations?.country || "TBA",
     },
     pricing: {
-      min: dbEvent.event_pricings.min,
-      max: dbEvent.event_pricings.max,
+      min: dbEvent.event_pricings?.min ?? 0,
+      max: dbEvent.event_pricings?.max ?? 0,
     },
   };
 }
@@ -62,16 +66,16 @@ export async function GET(request: NextRequest) {
       .select(
         `
         *,
-        event_pricings!inner (
+        event_pricings (
           min,
           max
         ),
-        event_categories!inner (
+        event_categories (
           type,
           category,
           subcategory
         ),
-        event_locations!inner (
+        event_locations (
           venue,
           address,
           latitude,

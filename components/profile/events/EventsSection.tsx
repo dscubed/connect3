@@ -4,10 +4,13 @@ import { useRef } from "react";
 import { HostedEvent } from "@/types/events/event";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import ProfileEventListCard from "./ProfileEventListCard";
-import { useAuthStore } from "@/stores/authStore";
+import { useProfileContext } from "@/components/profile/ProfileProvider";
+import EventFormHeader from "./EventFormHeader";
 
 export default function EventsSection() {
-  const { user } = useAuthStore();
+  const { profile, isOwnProfile } = useProfileContext();
+  const canManageEvents =
+    isOwnProfile && profile.account_type === "organisation";
 
   const eventDisplayRef = useRef<HTMLDivElement | null>(null);
   const {
@@ -16,9 +19,8 @@ export default function EventsSection() {
     isValidating,
   } = useInfiniteScroll<HostedEvent>(
     eventDisplayRef,
-    user ? `/api/users/${user.id}/events` : null,
+    profile?.id ? `/api/users/${profile.id}/events` : null,
   );
-  if (!user) return;
   if (isLoading) {
     return (
       <div>
@@ -36,6 +38,7 @@ export default function EventsSection() {
       transition={{ duration: 0.6, delay: 0.4 }}
     >
       <div className="space-y-6">
+        {canManageEvents && <EventFormHeader />}
         <div className="h-96">
           <div
             className="flex flex-col overflow-y-auto p-5 space-y-3 scrollbar-hide h-5/6"

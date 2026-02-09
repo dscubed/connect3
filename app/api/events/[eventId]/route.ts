@@ -14,6 +14,7 @@ const supabase = createClient(
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function transformDbEventToEventSchema(dbEvent: any): Event {
+    const fallbackCategory = dbEvent.category || "general";
   return {
     id: dbEvent.id,
     name: dbEvent.name,
@@ -23,13 +24,16 @@ function transformDbEventToEventSchema(dbEvent: any): Event {
     start: dbEvent.start,
     end: dbEvent.end,
     publishedAt: dbEvent.created_at || new Date().toISOString(),
-    isOnline: dbEvent.location_type === "online",
+    isOnline:
+      typeof dbEvent.is_online === "boolean"
+        ? dbEvent.is_online
+        : dbEvent.location_type === "online",
     capacity: dbEvent.capacity || 50,
     currency: dbEvent.currency || "USD",
     thumbnail: dbEvent.thumbnail,
     category: {
-      type: dbEvent.event_categories?.type || "other",
-      category: dbEvent.event_categories?.category || "general",
+      type: dbEvent.event_categories?.type || fallbackCategory,
+      category: dbEvent.event_categories?.category || fallbackCategory,
       subcategory: dbEvent.event_categories?.subcategory || "none",
     },
     location: {
@@ -41,8 +45,8 @@ function transformDbEventToEventSchema(dbEvent: any): Event {
       country: dbEvent.event_locations?.country || "TBA",
     },
     pricing: {
-      min: dbEvent.event_pricings?.min || 0,
-      max: dbEvent.event_pricings?.max || 0,
+      min: dbEvent.event_pricings?.min ?? 0,
+      max: dbEvent.event_pricings?.max ?? 0,
     },
   };
 }
@@ -122,10 +126,14 @@ export async function POST(request: NextRequest, { params }: RouteParameters) {
         creator_profile_id,
         collaborators,
         booking_link,
-        pricing,
-        city,
-        location_type
+        location_type,
+        thumbnailUrl,
     } = validatedBody;
+
+    const bookingUrl = booking_link?.[0] ?? null;
+    const category = type?.[0] ?? null;
+    const isOnline = location_type === "virtual";
+    const publishedAt = new Date().toISOString();
 
     console.log("Inserting document");
     try {
@@ -138,12 +146,12 @@ export async function POST(request: NextRequest, { params }: RouteParameters) {
                 start,
                 end,
                 description,
-                type,
                 creator_profile_id,
-                booking_link,
-                pricing,
-                city,
-                location_type,
+                booking_url: bookingUrl,
+                category,
+                is_online: isOnline,
+                published_at: publishedAt,
+                thumbnail: thumbnailUrl ?? null,
             })
             .select()
             .single();

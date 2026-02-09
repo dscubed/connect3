@@ -42,3 +42,5 @@ export const createEventBodySchema = z.object({
   location_type: eventLocationTypeSchema,
   university: z.array(z.string()).optional(),
 });
+
+export type CreateEventBody = z.infer<typeof createEventBodySchema>;
