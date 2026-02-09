@@ -2,48 +2,20 @@
  * Shared types for the Connect3 Agent System
  */
 
-export type AgentRoute = "students" | "clubs" | "events" | "general";
-
-export type EntityType = "user" | "organisation" | "events";
-
-// Content type includes entity types plus "general" for KB/web content
-export type ContentType = EntityType | "general";
-
-export interface SearchResult {
-  fileId: string;
-  content: string; // File content with ENTITY_ID embedded
-}
-
-export interface AgentSearchResponse {
-  results: SearchResult[];
-}
-
-export interface OrchestratorResponse {
-  markdown: string; // Final response with entity markers
-}
-
-export interface RouteDecision {
-  agents: AgentRoute[]; // Can route to multiple agents for parallel search
-  needsClarification: boolean;
-  clarificationQuestion: string; // Empty string when not needed
-}
-
+/** Message in conversation history */
 export interface ConversationMessage {
   role: "user" | "assistant";
   content: string;
 }
 
+/** Response from the agent system */
 export interface AgentSystemResponse {
   type: "response" | "clarification";
   markdown?: string;
   question?: string;
 }
 
-export interface FileMapEntry {
-  id: string;
-  type: EntityType;
-}
-
-export interface FileMap {
-  [fileId: string]: FileMapEntry;
+/** Response shape from the agent's run method */
+export interface OrchestratorResponse {
+  markdown: string;
 }

@@ -8,8 +8,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 import { SearchResponse } from "./types";
 import { getContext } from "./context";
-import { ConversationMessage } from "./agents";
-import { Connect3AgentSystem } from "@/lib/search/agents/index-handoff";
+import { Connect3AgentSystem, ConversationMessage } from "./agents";
 
 export const runSearch = async (
   chatmessageId: string,
@@ -18,10 +17,8 @@ export const runSearch = async (
   emit?: (event: string, data: unknown) => void,
 ): Promise<SearchResponse> => {
   // Fetch chatmessage and related data
-  const { query, tldr, prevMessages, userUniversity } = await getContext(
-    chatmessageId,
-    supabase,
-  );
+  const { query, tldr, prevMessages, userUniversity, userId } =
+    await getContext(chatmessageId, supabase);
 
   console.log("[runSearch] Starting agent system with query:", query);
 
@@ -37,11 +34,18 @@ export const runSearch = async (
     }
   }
 
-  // Create agent system with user university context
-  const agentSystem = new Connect3AgentSystem(openai, userUniversity);
+  // Create agent system
+  const agentSystem = new Connect3AgentSystem(openai, supabase);
 
   // Run the agent system
-  const result = await agentSystem.run(query, tldr, conversationHistory, emit);
+  const result = await agentSystem.run(
+    query,
+    tldr,
+    conversationHistory,
+    userUniversity,
+    userId,
+    emit,
+  );
 
   console.log("[runSearch] Agent system completed");
 

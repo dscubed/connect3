@@ -1,22 +1,22 @@
 /**
- * Connect3 Agent System (Handoff-Based)
+ * Connect3 Agent System
  *
- * Main entry point for the agent-based search system.
- * Uses the handoff pattern for sequential sub-agent execution.
+ * Single agent with tools — one LLM call.
  */
 import OpenAI from "openai";
+import { SupabaseClient } from "@supabase/supabase-js";
 import { withTrace } from "@openai/agents";
-import { HandoffOrchestrator } from "./handoff-orchestrator";
+import { Connect3Agent } from "./connect3-agent";
 import type { AgentSystemResponse, ConversationMessage } from "./types";
 import { ProgressAction } from "@/components/search/utils";
 
 export class Connect3AgentSystem {
-  private orchestrator: HandoffOrchestrator;
   private openai: OpenAI;
+  private supabase: SupabaseClient;
 
-  constructor(openai: OpenAI, userUniversity?: string | null) {
+  constructor(openai: OpenAI, supabase: SupabaseClient) {
     this.openai = openai;
-    this.orchestrator = new HandoffOrchestrator(openai, userUniversity);
+    this.supabase = supabase;
   }
 
   private updateProgress(
@@ -39,6 +39,8 @@ export class Connect3AgentSystem {
     query: string,
     userContext: string,
     conversationHistory: ConversationMessage[],
+    userUniversity: string | null,
+    userId: string,
     emit?: (event: string, data: unknown) => void,
   ): Promise<AgentSystemResponse> {
     return withTrace("Connect3 Search", async (trace) => {
@@ -51,19 +53,24 @@ export class Connect3AgentSystem {
       // Start progress
       progress = this.updateProgress(
         progress,
-        { step: "routing", status: "start", message: "Analyzing query..." },
+        { step: "search", status: "start", message: "Searching..." },
         emit,
       );
 
-      // Run the orchestrator (handles routing, search, and response generation)
+      const agent = new Connect3Agent(
+        this.openai,
+        this.supabase,
+        userUniversity,
+        userId,
+      );
+
       let fullMarkdown = "";
 
-      const response = await this.orchestrator.run(
+      const response = await agent.run(
         query,
         userContext,
         conversationHistory,
-        // Stream callback
-        (chunk) => {
+        (chunk: string) => {
           fullMarkdown += chunk;
           if (emit) emit("response", { partial: { markdown: fullMarkdown } });
         },
@@ -72,7 +79,7 @@ export class Connect3AgentSystem {
       // Update progress
       this.updateProgress(
         progress,
-        { step: "routing", status: "complete", message: "Complete" },
+        { step: "search", status: "complete", message: "Complete" },
         emit,
       );
 
