@@ -5,11 +5,10 @@
  *
  * Architecture:
  * - Orchestrator routes queries to sub-agents via handoffs
- * - Sub-agents ONLY perform search (no response generation)
- * - onHandoff callbacks just track, don't run agents manually
- * - Handoffs naturally run sub-agents
- * - After run completes, extract file_search results from ALL run items
- * - Use separate response agent for final synthesis
+ * - Sub-agents search AND generate responses directly (no separate response step)
+ * - Entity markers (@@@type:id@@@) are already at the top of each file in the vector store
+ * - Sub-agents just need to include them in their response
+ * - General agent uses web search and has NO entity markers
  */
 import {
   Agent,
@@ -18,22 +17,45 @@ import {
   tool,
   fileSearchTool,
   webSearchTool,
-  RunResult,
 } from "@openai/agents";
 import { RECOMMENDED_PROMPT_PREFIX } from "@openai/agents-core/extensions";
 import OpenAI from "openai";
 import { z } from "zod";
-import type {
-  ConversationMessage,
-  OrchestratorResponse,
-  SearchResult,
-  EntityType,
-} from "./types";
-import { HostedToolCallRawItem } from "./utils/subagent-utils";
+import type { ConversationMessage, OrchestratorResponse } from "./types";
 
 // Minimal schema for handoffs (required when using onHandoff)
-// All properties must be required for OpenAI function schemas
 const HandoffInputSchema = z.object({});
+
+// Shared response instructions for entity agents (students, clubs, events)
+const ENTITY_RESPONSE_INSTRUCTIONS = `
+RESPONSE FORMAT:
+- Be concise: 2-4 sentences per entity
+- Pick the 1-3 most relevant matches
+- Each file in file_search results starts with a marker on the first line: @@@type:uuid@@@
+- After describing each entity, place its marker on a NEW LINE immediately after
+- NEVER announce or label the marker (wrong: "Here is the marker:", right: just put it on its own line)
+- ONLY use markers found in the actual file_search results. NEVER invent or fabricate markers.
+- If a file has no @@@ marker, do NOT create one
+
+CORRECT example output format:
+Michael is a Computing student with skills in React and TypeScript.
+@@@user:6789c9fd-3fb4-4037-8383-0345dfc1d789@@@
+
+DSCubed is a data science community with over 500 members.
+@@@organisation:0f1a9639-7d9a-4584-a470-03ff95a9f8f4@@@
+
+WRONG (never do these):
+- "Here is the marker: @@@user:...@@@"
+- "Relevant markers: @@@..."
+- @@@event_some_filename.txt@@@ (this is a filename, not a marker)
+- Making up UUIDs that don't exist in results
+
+CONVERSATION STYLE:
+- Be friendly and conversational
+- After showing results, ask a follow-up question to keep the conversation going
+  (e.g. "Would you like to know more about their projects?" or "Want me to find similar clubs?")
+- If search results are poor or irrelevant, ask a clarifying question instead of showing bad results
+  (e.g. "I couldn't find an exact match. Could you tell me more about what you're looking for?")`;
 
 export class HandoffOrchestrator {
   private openai: OpenAI;
@@ -41,13 +63,12 @@ export class HandoffOrchestrator {
 
   // Agents
   private orchestratorAgent!: Agent;
-  private responseAgent!: Agent;
   private studentsAgent!: Agent;
   private clubsAgent!: Agent;
   private eventsAgent!: Agent;
   private generalAgent!: Agent;
 
-  // Track which agents were called (for result extraction)
+  // Track which agents were called
   private calledAgents: Set<string> = new Set();
 
   constructor(openai: OpenAI, userUniversity?: string | null) {
@@ -59,7 +80,6 @@ export class HandoffOrchestrator {
   private initializeAgents(): void {
     this.createSubAgents();
     this.createOrchestrator();
-    this.createResponseAgent();
   }
 
   private createSubAgents(): void {
@@ -67,17 +87,13 @@ export class HandoffOrchestrator {
     const clubsVectorStoreId = process.env.OPENAI_ORG_VECTOR_STORE_ID!;
     const eventsVectorStoreId = process.env.OPENAI_EVENTS_VECTOR_STORE_ID!;
 
-    // Sub-agents ONLY search - they handoff back to orchestrator when done
-    // Their instructions tell them to just search and return file IDs
-
     this.studentsAgent = new Agent({
-      name: "Students_Search",
+      name: "Students_Agent",
       model: "gpt-4o-mini",
-      instructions: `You are a student profile search agent. 
-1. Use file_search to find relevant students
-2. After search completes, respond with ONLY relevant file IDs as JSON: ["file-xxx", "file-yyy"]
-3. If no results, respond with: []
-DO NOT generate prose or explanations.`,
+      instructions: `You search for and describe student profiles on Connect3.
+1. Use file_search to find relevant students matching the query.
+2. Generate a helpful response describing the best matches.
+${ENTITY_RESPONSE_INSTRUCTIONS}`,
       tools: [
         fileSearchTool([studentsVectorStoreId], {
           maxNumResults: 10,
@@ -87,13 +103,12 @@ DO NOT generate prose or explanations.`,
     });
 
     this.clubsAgent = new Agent({
-      name: "Clubs_Search",
+      name: "Clubs_Agent",
       model: "gpt-4o-mini",
-      instructions: `You are a club/organization search agent.
-1. Use file_search to find relevant clubs
-2. After search completes, respond with ONLY relevant file IDs as JSON: ["file-xxx", "file-yyy"]
-3. If no results, respond with: []
-DO NOT generate prose or explanations.`,
+      instructions: `You search for and describe clubs/organizations on Connect3.
+1. Use file_search to find relevant clubs matching the query.
+2. Generate a helpful response describing the best matches.
+${ENTITY_RESPONSE_INSTRUCTIONS}`,
       tools: [
         fileSearchTool([clubsVectorStoreId], {
           maxNumResults: 10,
@@ -103,13 +118,21 @@ DO NOT generate prose or explanations.`,
     });
 
     this.eventsAgent = new Agent({
-      name: "Events_Search",
+      name: "Events_Agent",
       model: "gpt-4o-mini",
-      instructions: `You are an event search agent.
-1. Use file_search to find relevant events
-2. After search completes, respond with ONLY relevant file IDs as JSON: ["file-xxx", "file-yyy"]
-3. If no results, respond with: []
-DO NOT generate prose or explanations.`,
+      instructions: `You search for and describe events on Connect3.
+1. Use file_search to find relevant events matching the query.
+2. Generate a helpful response describing the best matches.
+
+RESPONSE FORMAT:
+- Be concise: 2-4 sentences per event
+- Pick the 1-3 most relevant matches
+- Events may or may not have @@@events:uuid@@@ markers at the top of the file
+- If a marker exists, include it on a new line after describing that event
+- If NO marker exists in the file, do NOT create or invent one
+- NEVER use filenames as markers
+- If no relevant results found, ask a clarifying question instead of showing bad results
+- Be friendly and conversational. After showing results, ask a follow-up question.`,
       tools: [
         fileSearchTool([eventsVectorStoreId], {
           maxNumResults: 10,
@@ -118,22 +141,22 @@ DO NOT generate prose or explanations.`,
       ],
     });
 
-    // General agent - uses web search
     this.generalAgent = new Agent({
-      name: "General_Search",
+      name: "General_Agent",
       model: "gpt-4o-mini",
-      instructions: `You are a university knowledge search agent.
+      instructions: `You search for general university information using web search.
 1. Use web_search to find relevant information about universities, policies, dates, etc.
-2. After searching, provide a brief summary of what you found
-3. Focus on factual information like dates, policies, requirements
+2. Generate a helpful, concise response summarizing what you found.
+3. Focus on factual information like dates, policies, requirements.
+4. Be friendly and conversational. After answering, ask if they need more details.
+5. If results are poor, ask a clarifying question instead of guessing.
 
-Be helpful and find the most relevant information for the user's question.`,
+IMPORTANT: Do NOT include any @@@ markers in your response. You deal with general info only.`,
       tools: [webSearchTool()],
     });
   }
 
   private createOrchestrator(): void {
-    // Tool to plan which agents to call
     const planTool = tool({
       name: "plan_search",
       description: "Decide which search agents to call for this query",
@@ -146,8 +169,6 @@ Be helpful and find the most relevant information for the user's question.`,
       },
     });
 
-    // Create handoffs - onHandoff just tracks, doesn't run manually
-    // Handoffs automatically inherit conversation context
     const studentsHandoff = handoff(this.studentsAgent, {
       toolNameOverride: "search_students",
       toolDescriptionOverride:
@@ -192,20 +213,25 @@ Be helpful and find the most relevant information for the user's question.`,
       },
     });
 
-    // Orchestrator with handoffs to sub-agents
-    // Sub-agents need to handoff BACK to orchestrator
     this.orchestratorAgent = Agent.create({
       name: "Connect3_Orchestrator",
       model: "gpt-4o-mini",
       tools: [planTool],
       handoffs: [studentsHandoff, clubsHandoff, eventsHandoff, generalHandoff],
       instructions: `${RECOMMENDED_PROMPT_PREFIX}
-You are the Connect3 search orchestrator.
+You are the Connect3 search orchestrator. You help users find people, clubs, events, and info.
 
-WORKFLOW:
+STEP 1 - EVALUATE THE QUERY:
+Before searching, decide if the query is clear enough to search.
+- If the query is VAGUE or UNCLEAR (e.g. "help me", "I need something", "find stuff"):
+  → Do NOT search. Instead, respond with a friendly clarifying question to understand what the user needs.
+  → Ask about: what they're looking for (people, clubs, events?), specific interests, skills, etc.
+- If the query is CLEAR enough to search → proceed to Step 2.
+
+STEP 2 - SEARCH:
 1. Use plan_search to decide which agents to call
-2. Hand off to EACH required agent with the query and userContext
-3. After all handoffs, say "SEARCH_COMPLETE"
+2. Hand off to EACH required agent
+3. The sub-agent will search and generate a response directly
 
 ROUTING:
 - students: Find PEOPLE - anyone by name, role, skills (e.g. "IT director", "president", "John")
@@ -217,165 +243,16 @@ EXAMPLES:
 - "who is the IT director at DSCubed" → students (looking for a PERSON with a role)
 - "what is DSCubed" → clubs (looking for info about the ORG)
 - "DSCubed events" → events
+- "I want to get involved" → clarify: "What are you interested in? Are you looking for clubs to join, events to attend, or people to connect with?"
 
 IMPORTANT:
 - Execute handoffs SEQUENTIALLY (one at a time)
-- After ALL handoffs done, respond with ONLY: SEARCH_COMPLETE
-
-DO NOT generate user-facing responses. Just orchestrate searches.`,
-    });
-  }
-
-  private createResponseAgent(): void {
-    this.responseAgent = new Agent({
-      name: "Connect3_Response_Generator",
-      model: "gpt-4o-mini",
-      instructions: `You generate conversational responses for Connect3 search results.
-
-ABSOLUTE RULES FOR MARKERS:
-
-1. ONLY copy markers that ALREADY EXIST in the Search Results section below
-2. Markers have format: @@@type:id@@@ (three @ signs on each side)
-3. If Search Results has ZERO @@@ markers, your response has ZERO @@@ markers
-4. NEVER invent, create, or generate new markers
-
-HOW TO HANDLE RESULTS:
-- If a result starts with @@@ → it's an entity. Copy that exact marker after describing it.
-- If a result has NO @@@ → it's general info. Just summarize it. NO markers.
-
-BE CONCISE: 2-4 sentences per result. Pick the most relevant matches.`,
+- Be conversational and friendly when asking clarifying questions.`,
     });
   }
 
   /**
-   * Extract all file search results from run items
-   */
-  private extractResultsFromRun(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    runResult: RunResult<any, any>,
-  ): SearchResult[] {
-    const results: SearchResult[] = [];
-    const seenFileIds = new Set<string>();
-
-    // Helper to determine entity type from agent name
-    const getEntityType = (agentName: string): EntityType | "general" => {
-      if (agentName.includes("Students")) return "user";
-      if (agentName.includes("Clubs")) return "organisation";
-      if (agentName.includes("Events")) return "events";
-      return "general";
-    };
-
-    // Track current agent context
-    let currentAgent = "Orchestrator";
-
-    // Debug: log all item types we receive
-    console.log(
-      "[Orchestrator] Run items received:",
-      runResult.newItems.map((i) => ({
-        type: i.type,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        rawType: (i as any).rawItem?.type,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        rawName: (i as any).rawItem?.name,
-      })),
-    );
-
-    // Process all items including nested ones from handoffs
-    for (const item of runResult.newItems) {
-      // Track agent transitions via handoff items
-      if (item.type === "handoff_call_item" && "rawItem" in item) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const rawItem = item.rawItem as any;
-        if (rawItem?.name) {
-          const handoffName = rawItem.name as string;
-          if (handoffName.includes("students")) currentAgent = "Students";
-          if (handoffName.includes("clubs")) currentAgent = "Clubs";
-          if (handoffName.includes("events")) currentAgent = "Events";
-          if (handoffName.includes("general")) currentAgent = "General";
-        }
-      }
-
-      // Extract file search results
-      if ("rawItem" in item && item.rawItem) {
-        const raw = item.rawItem as HostedToolCallRawItem;
-
-        if (
-          raw.type === "hosted_tool_call" &&
-          raw.name === "file_search_call" &&
-          raw.providerData?.results
-        ) {
-          const entityType = getEntityType(currentAgent);
-          const fileResults = raw.providerData.results;
-
-          for (const fileResult of fileResults) {
-            const fileId = fileResult.file_id;
-            if (!fileId || seenFileIds.has(fileId)) continue;
-            seenFileIds.add(fileId);
-
-            const entityId = fileResult.attributes?.id;
-
-            // Build content based on type
-            let content: string;
-            if (entityType === "general") {
-              // General KB content - no entity markers
-              content = fileResult.text;
-            } else {
-              // Entity content - include marker at top for easy copying
-              content = `@@@${entityType}:${entityId || fileId}@@@
-${fileResult.text}`;
-            }
-
-            results.push({ fileId, content });
-          }
-        }
-
-        // Also handle web search results - check multiple possible names/formats
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const rawAny = item.rawItem as any;
-
-        // Web search can have different names
-        const isWebSearch =
-          rawAny.type === "hosted_tool_call" &&
-          (rawAny.name === "web_search_preview" ||
-            rawAny.name === "web_search" ||
-            rawAny.name?.includes("web"));
-
-        if (isWebSearch && rawAny.output) {
-          console.log("[Orchestrator] Found web search result:", rawAny.name);
-          results.push({
-            fileId: `web_${Date.now()}`,
-            // Web search - no entity markers, just content
-            content: rawAny.output,
-          });
-        }
-      }
-
-      // Also capture message outputs from general agent (the agent's response text)
-      if (item.type === "message_output_item" && currentAgent === "General") {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const rawItem = item.rawItem as any;
-        const content = rawItem?.content;
-        if (Array.isArray(content)) {
-          for (const part of content) {
-            if (part.type === "output_text" && part.text) {
-              console.log("[Orchestrator] Found general agent text output");
-              results.push({
-                fileId: `general_${Date.now()}`,
-                // General content - no entity markers, just content
-                content: part.text,
-              });
-            }
-          }
-        }
-      }
-    }
-
-    console.log(`[Orchestrator] Extracted ${results.length} results from run`);
-    return results;
-  }
-
-  /**
-   * Main entry point
+   * Main entry point - single phase: orchestrator hands off, sub-agent responds
    */
   async run(
     query: string,
@@ -383,69 +260,43 @@ ${fileResult.text}`;
     conversationHistory: ConversationMessage[],
     onChunk?: (chunk: string) => void,
   ): Promise<OrchestratorResponse> {
-    // Reset state
     this.calledAgents.clear();
 
-    const historyText = conversationHistory
-      .map((m) => `${m.role}: ${m.content}`)
-      .join("\n");
+    // Build proper message input for the agent (AgentInputItem format)
+    const messages: Array<
+      | { role: "user"; content: string }
+      | {
+          role: "assistant";
+          status: "completed";
+          content: { type: "output_text"; text: string }[];
+        }
+    > = [];
 
-    // Phase 1: Run orchestrator to trigger handoffs
-    const searchPrompt = `User Context: ${userContext}
+    // Add conversation history as proper role-based messages
+    for (const msg of conversationHistory) {
+      if (msg.role === "user") {
+        messages.push({ role: "user", content: msg.content });
+      } else {
+        messages.push({
+          role: "assistant",
+          status: "completed",
+          content: [{ type: "output_text", text: msg.content }],
+        });
+      }
+    }
 
-Conversation History:
-${historyText}
+    // Add current query with user context
+    const currentMessage = `User Context: ${userContext}
 
 User Query: ${query}
 
 Use plan_search to decide which agents to call, then hand off to each one.`;
+    messages.push({ role: "user", content: currentMessage });
 
-    console.log("[Orchestrator] Phase 1 - Starting search:", query);
-
-    const searchResult = await run(this.orchestratorAgent, searchPrompt);
-
-    console.log("[Orchestrator] Search phase complete. Called agents:", [
-      ...this.calledAgents,
-    ]);
-
-    // Phase 2: Extract results from the run
-    const collectedResults = this.extractResultsFromRun(searchResult);
-
-    console.log(
-      `[Orchestrator] Phase 2 - Collected ${collectedResults.length} results`,
-    );
-
-    // Phase 3: Generate response
-    const resultsText =
-      collectedResults.length > 0
-        ? collectedResults.map((r) => r.content).join("\n\n---\n\n")
-        : "No results found.";
-
-    // Check if any results contain entity markers
-    const hasEntityMarkers = resultsText.includes("@@@");
-
-    const markerInstruction = hasEntityMarkers
-      ? "Some results contain entity markers (@@@type:id@@@). Copy those EXACT markers after describing each entity."
-      : "These results are general information. Do NOT add any @@@ markers to your response.";
-
-    const responsePrompt = `User Context: ${userContext}
-
-Conversation History:
-${historyText}
-
-User Query: ${query}
-
-Search Results:
-${resultsText}
-
-IMPORTANT: ${markerInstruction}
-
-Generate a helpful, concise response based on the search results above.`;
-
-    console.log("[Orchestrator] Phase 3 - Generating response");
+    console.log("[Orchestrator] Starting search:", query);
 
     if (onChunk) {
-      const result = await run(this.responseAgent, responsePrompt, {
+      const result = await run(this.orchestratorAgent, messages, {
         stream: true,
       });
       let fullOutput = "";
@@ -455,10 +306,19 @@ Generate a helpful, concise response based on the search results above.`;
         onChunk(chunk);
       }
 
+      console.log("[Orchestrator] Complete. Called agents:", [
+        ...this.calledAgents,
+      ]);
+
       return { markdown: fullOutput };
     }
 
-    const result = await run(this.responseAgent, responsePrompt);
+    const result = await run(this.orchestratorAgent, messages);
+
+    console.log("[Orchestrator] Complete. Called agents:", [
+      ...this.calledAgents,
+    ]);
+
     return {
       markdown: result.finalOutput ?? "I couldn't generate a response.",
     };

@@ -81,9 +81,7 @@ export async function getFileText(profileId: string, supabase: SupabaseClient) {
     `${profileData.first_name ?? ""} ${profileData.last_name ?? ""}`.trim() ||
     "Unknown";
   const profileText = `
-  ENTITY_ID: ${profileId}
-  ENTITY_TYPE: ${profileData.account_type}
-  ---
+  @@@${profileData.account_type}:${profileId}@@@
   ${name}
   University: ${
     universities[profileData.university as University]?.name || "Not specified"
