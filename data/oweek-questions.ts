@@ -1,4 +1,4 @@
-import { Question } from "@/components/oweek/QuestionPage";
+import { Question } from "@/components/quiz/QuestionPage";
 
 const formalQuestionsPart1: Question[] = [
   {
