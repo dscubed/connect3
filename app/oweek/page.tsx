@@ -1,58 +1,46 @@
 'use client';
 
-import EmailEntry from '@/components/oweek/EmailEntry';
+import { Fredoka } from 'next/font/google';
 import QuestionPage from '@/components/oweek/QuestionPage';
-import { useState, useRef, useEffect } from 'react';
-import questionsData from '@/data/oweek-questions.json';
+import { getQuestions } from '@/data/oweek-questions';
+import Image from 'next/image';
+import WhiteLogo from '@/public/white-logo.png';
+import { useMemo } from 'react';
+
+const fredoka = Fredoka({ subsets: ['latin'] });
 
 export default function Page() {
-  const questionEnd = useRef<HTMLDivElement>(null);
-  const [currentIndex, setCurrentIndex] = useState<number>(-1);
-  const questions = questionsData.questions;
+  const questions = useMemo(() => getQuestions(7), []);
 
-  const handleQuestionChange = () => {
-    setCurrentIndex((prevIndex) => prevIndex + 1);
+  const handleFinish = (answers: Record<number, string[] | string>) => {
+    // TODO: Submit form data
+    console.log('Form submitted!', answers);
   };
-
-  const handleSubmit = () => {
-    // TODO: Submit form data to API
-    console.log('Form submitted!');
-    // You can navigate to a success page or show a confirmation
-  };
-
-  const handleEmailEntry = () => {
-    setCurrentIndex(0);
-  };
-
-  useEffect(() => {
-    if (questionEnd.current) {
-      questionEnd.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [currentIndex]);
 
   return (
-    <div>
-      {currentIndex === -1 && <EmailEntry onNext={handleEmailEntry} />}
-      {currentIndex >= 0 &&
-        questions.slice(0, currentIndex + 1).map((question, index) => {
-          const isCurrentQuestion = index === currentIndex;
-          const actualQuestionIndex = questions.findIndex(
-            (q) => q.title === question.title
-          );
-          const isLastQuestion = actualQuestionIndex === questions.length - 1;
+    <main className={`min-h-screen w-screen flex flex-col justify-between gap-4 bg-gradient-to-bl from-[#dfcbff] to-[#5817c1] noise ${fredoka.className}`}>
+      <div className="sticky top-0 grid grid-cols-[auto_1fr_auto] items-center gap-4 p-4 h-max w-full bg-transparent backdrop-blur-md z-50">
+        <Image src={WhiteLogo} alt="White Logo" className="w-8" />
+    
+        <h1 className="text-white/90 font-medium mx-auto leading-tight">
+          O Week Special - Find out your student personality!
+        </h1>
+      </div>
 
-          return (
-            <QuestionPage
-              key={question.title}
-              title={question.title}
-              choices={question.choices}
-              onNext={isLastQuestion ? handleSubmit : handleQuestionChange}
-              isActive={isCurrentQuestion}
-              isLastQuestion={isLastQuestion}
-            />
-          );
-        })}
-      <div ref={questionEnd} />
-    </div>
+      <div className="px-4">
+        <div className="w-full max-w-lg mx-auto">
+          <QuestionPage
+            questions={questions}
+            onFinish={handleFinish}
+          />
+        </div>
+      </div>
+
+      <div className="sticky bottom-0 p-4">
+        <button className="bg-white text-[#8C4AF7] px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-white/90 transition-colors">
+          Share Quiz
+        </button>
+      </div>
+    </main>
   );
 }
