@@ -5,10 +5,41 @@ import QuestionPage from '@/components/quiz/QuestionPage';
 import { getQuestions } from '@/data/oweek-questions';
 import Image from 'next/image';
 import WhiteLogo from '@/public/white-logo.png';
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GlobeIcon } from 'lucide-react';
 
 const fredoka = Fredoka({ subsets: ['latin'] });
+
+const STORAGE_KEY = 'quiz-progress';
+
+function loadProgress() {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveProgress(data: Record<string, unknown>) {
+  try {
+    const existing = loadProgress() ?? {};
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...existing, ...data }));
+  } catch {
+    // ignore storage errors
+  }
+}
+
+function matchCharacter(
+  _answers: Record<number, string[] | string>
+): { character: string; reason: string } {
+  // TODO: implement actual matching logic
+  return {
+    character: 'yellow',
+    reason: 'You are a bright and cheerful person!',
+  };
+}
 
 function QRCode({ width }: { width: number }) {
   return (
@@ -24,15 +55,56 @@ function QRCode({ width }: { width: number }) {
 }
 
 export default function Page() {
-  const questions = useMemo(() => getQuestions(7), []);
+  const questions = useMemo(() => getQuestions(1), []);
   const [showQR, setShowQR] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [buttonWidth, setButtonWidth] = useState(0);
 
-  const handleFinish = (answers: Record<number, string[] | string>) => {
-    // TODO: Submit form data
-    console.log('Form submitted!', answers);
+  const [hydrated, setHydrated] = useState(false);
+  const [completed, setCompleted] = useState(false);
+  const [result, setResult] = useState<{ character: string; reason: string } | null>(null);
+  const [initialAnswers, setInitialAnswers] = useState<Record<number, string[] | string> | undefined>();
+  const [initialIndex, setInitialIndex] = useState<number | undefined>();
+
+  useEffect(() => {
+    const saved = loadProgress();
+    if (saved?.status === 'completed') {
+      setCompleted(true);
+      setResult({ character: saved.character, reason: saved.reason });
+    } else if (saved) {
+      setInitialAnswers(saved.answers);
+      setInitialIndex(saved.currentIndex);
+    }
+    setHydrated(true);
+  }, []);
+
+  const handleStep = (currentIndex: number, answer: string[] | string) => {
+    saveProgress({ currentIndex: currentIndex + 1, answers: { ...loadProgress()?.answers, [currentIndex]: answer } });
   };
+
+  const handleFinish = (answers: Record<number, string[] | string>) => {
+    const { character, reason } = matchCharacter(answers);
+    saveProgress({ status: 'completed', answers, character, reason });
+    setResult({ character, reason });
+    setCompleted(true);
+  };
+
+  const tapCountRef = useRef(0);
+  const tapTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const handleTitleTap = useCallback(() => {
+    tapCountRef.current += 1;
+    clearTimeout(tapTimerRef.current);
+    if (tapCountRef.current >= 3) {
+      tapCountRef.current = 0;
+      localStorage.removeItem(STORAGE_KEY);
+      window.location.reload();
+      return;
+    }
+    tapTimerRef.current = setTimeout(() => {
+      tapCountRef.current = 0;
+    }, 600);
+  }, []);
 
   const toggleQR = () => {
     if (!showQR && buttonRef.current) {
@@ -46,17 +118,28 @@ export default function Page() {
       <div className="sticky top-0 grid grid-cols-[auto_1fr_auto] items-center gap-4 p-4 h-max w-full bg-transparent backdrop-blur-md z-50">
         <Image src={WhiteLogo} alt="White Logo" className="w-8" />
     
-        <h1 className="text-white/90 font-medium mx-auto leading-tight">
+        <h1
+          onClick={handleTitleTap}
+          className="text-white/90 font-medium mx-auto leading-tight select-none cursor-default"
+        >
           O Week Special - Find out your student personality!
         </h1>
       </div>
 
       <div className="px-4">
         <div className="w-full max-w-lg mx-auto">
-          <QuestionPage
-            questions={questions}
-            onFinish={handleFinish}
-          />
+          {!hydrated ? null : completed && result ? (
+            <div></div>
+          ) : (
+            <QuestionPage
+              key={hydrated ? 'loaded' : 'init'}
+              questions={questions}
+              initialAnswers={initialAnswers}
+              initialIndex={initialIndex}
+              onNext={handleStep}
+              onFinish={handleFinish}
+            />
+          )}
         </div>
       </div>
 

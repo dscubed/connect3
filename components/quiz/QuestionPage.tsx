@@ -17,6 +17,8 @@ interface QuestionPageProps {
   onFinish?: (answers: Record<number, string[] | string>) => void;
   onNext?: (currentIndex: number, answer: string[] | string) => void;
   onBack?: (currentIndex: number) => void;
+  initialAnswers?: Record<number, string[] | string>;
+  initialIndex?: number;
 }
 
 interface InputProps {
@@ -130,10 +132,12 @@ export default function QuestionPage({
   onFinish,
   onNext,
   onBack,
+  initialAnswers,
+  initialIndex,
 }: QuestionPageProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(initialIndex ?? 0);
   const [direction, setDirection] = useState(0);
-  const [answers, setAnswers] = useState<Record<number, string[] | string>>({});
+  const [answers, setAnswers] = useState<Record<number, string[] | string>>(initialAnswers ?? {});
 
   const currentQuestion = questions[currentIndex];
   // Ensure we fail safely if question is undefined (e.g. empty array)
