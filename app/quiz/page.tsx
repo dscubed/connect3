@@ -159,7 +159,7 @@ export default function Page() {
           <button
             ref={buttonRef}
             onClick={toggleQR}
-            className="bg-white text-[#8C4AF7] px-2 pr-4 py-2 rounded-full font-medium flex items-center gap-2 hover:bg-white/90 transition-colors"
+            className="bg-white text-[#8C4AF7] px-2 pr-4 py-2 rounded-full font-medium flex items-center gap-2 hover:bg-white/90 transition-colors shadow-lg"
           >
             <GlobeIcon size={24} />
             Share Quiz
