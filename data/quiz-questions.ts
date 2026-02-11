@@ -7,7 +7,7 @@ const formalQuestionsPart1: Question[] = [
   },
   {
     title: "What are your hobbies?",
-    type: "multiple",
+    type: "multi-dropdown",
     choices: [
       "🏋️ Gym",
       "🏃 Running",

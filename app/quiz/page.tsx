@@ -2,7 +2,7 @@
 
 import { Fredoka } from 'next/font/google';
 import QuestionPage from '@/components/quiz/QuestionPage';
-import { getQuestions } from '@/data/oweek-questions';
+import { getQuestions } from '@/data/quiz-questions';
 import Image from 'next/image';
 import WhiteLogo from '@/public/white-logo.png';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
