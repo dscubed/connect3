@@ -11,19 +11,37 @@ import { z } from "zod";
 import { getFileText } from "@/lib/users/getFileText";
 import type { ConversationMessage, OrchestratorResponse } from "./types";
 
+/** Streaming callbacks for the agent run */
+export interface StreamCallbacks {
+  onTextDelta: (delta: string) => void;
+  onReasoning: (text: string) => void;
+  onReasoningDelta: (
+    delta: string,
+    meta?: { type?: string; itemId?: string; summaryIndex?: number },
+  ) => void;
+  onToolCall: (toolName: string, callId: string, args?: string) => void;
+  onToolOutput: (toolName: string, callId: string) => void;
+}
+
 // Helper: search a vector store and return JSON
 async function searchVectorStore(
   openai: OpenAI,
   vectorStoreId: string,
-  query: string,
+  query: string | string[],
   label: string,
 ): Promise<string> {
-  console.log(`[${label}] Searching for:`, query);
+  console.log(
+    `[${label}] Searching for:`,
+    Array.isArray(query) ? query.join(", ") : query,
+  );
   try {
     const results = await openai.vectorStores.search(vectorStoreId, {
       query,
-      max_num_results: 10,
+      max_num_results: 8,
       rewrite_query: true,
+      ranking_options: {
+        score_threshold: 0.1,
+      },
     });
     if (results.data.length === 0) {
       console.log(`[${label}] Found 0 results`);
@@ -32,17 +50,22 @@ async function searchVectorStore(
         message: "No matching results found.",
       });
     }
-    const items = results.data.map((r) => {
-      const text = r.content.map((c) => c.text).join("\n");
-      const markerMatch = text.match(/@@@(\w+):([a-f0-9-]+)@@@/);
-      return {
-        marker: markerMatch ? markerMatch[0] : null,
-        type: markerMatch ? markerMatch[1] : null,
-        entityId: markerMatch ? markerMatch[2] : null,
-        score: Math.round(r.score * 1000) / 1000,
-        content: text,
-      };
-    });
+    const items = results.data
+      .map((r) => {
+        const text = r.content.map((c) => c.text).join("\n");
+        if (!r.attributes) return null;
+
+        const id = r.attributes.id as string;
+        const type = r.attributes.type as string;
+        return {
+          marker: `${type}:${id}`,
+          type: type,
+          entityId: id,
+          score: Math.round(r.score * 1000) / 1000,
+          content: text,
+        };
+      })
+      .filter((i) => i !== null);
     console.log(`[${label}] Found ${results.data.length} results`);
     return JSON.stringify({ results: items });
   } catch (err) {
@@ -123,7 +146,11 @@ export class Connect3Agent {
       description:
         "Search for students and people by skills, interests, name, or background.",
       parameters: z.object({
-        query: z.string().describe("The search query for people/students"),
+        query: z
+          .union([z.string(), z.array(z.string()).min(1).max(5)])
+          .describe(
+            "The search query for people/students. You may pass a single query string, or a list of query strings to batch search.",
+          ),
       }),
       execute: async ({ query }) =>
         searchVectorStore(openai, studentsVectorStoreId, query, "search_users"),
@@ -133,7 +160,11 @@ export class Connect3Agent {
       name: "search_clubs",
       description: "Search for clubs, societies, and student organizations.",
       parameters: z.object({
-        query: z.string().describe("The search query for clubs/organizations"),
+        query: z
+          .union([z.string(), z.array(z.string()).min(1).max(5)])
+          .describe(
+            "The search query for clubs/organizations. You may pass a single query string, or a list of query strings to batch search.",
+          ),
       }),
       execute: async ({ query }) =>
         searchVectorStore(openai, clubsVectorStoreId, query, "search_clubs"),
@@ -144,7 +175,11 @@ export class Connect3Agent {
       description:
         "Search for events, hackathons, workshops, career fairs, socials, and activities.",
       parameters: z.object({
-        query: z.string().describe("The search query for events"),
+        query: z
+          .union([z.string(), z.array(z.string()).min(1).max(5)])
+          .describe(
+            "The search query for events. You may pass a single query string, or a list of query strings to batch search.",
+          ),
       }),
       execute: async ({ query }) =>
         searchVectorStore(openai, eventsVectorStoreId, query, "search_events"),
@@ -153,6 +188,13 @@ export class Connect3Agent {
     this.agent = new Agent({
       name: "Connect3_Agent",
       model: "gpt-5-mini",
+      modelSettings: {
+        reasoning: {
+          effort: "medium",
+          summary: "concise",
+        },
+        parallelToolCalls: true,
+      },
       tools: [
         searchUsers,
         searchClubs,
@@ -185,6 +227,7 @@ TOOL ROUTING:
 - Events -> search_events
 - Multiple categories -> call ALL relevant tools in parallel.
 - Retry with different queries if first results are poor.
+- For a SINGLE category with multiple query phrasings, you MAY pass a list of query strings to the tool (query can be an array) to batch search.
 - Use get_my_profile to understand the current user for personalized results.
 - General uni info -> web_search
 
@@ -216,7 +259,7 @@ FORMAT:
     query: string,
     userContext: string,
     conversationHistory: ConversationMessage[],
-    onChunk?: (chunk: string) => void,
+    callbacks?: StreamCallbacks,
   ): Promise<OrchestratorResponse> {
     const messages: Array<
       | { role: "user"; content: string }
@@ -247,20 +290,83 @@ FORMAT:
     console.log("[Connect3Agent] Running with query:", query);
     console.log("[Connect3Agent] Message count:", messages.length);
 
-    if (onChunk) {
+    if (callbacks) {
       const result = await run(this.agent, messages, { stream: true });
       let fullOutput = "";
 
-      for await (const chunk of result.toTextStream()) {
-        fullOutput += chunk;
-        onChunk(chunk);
-      }
+      for await (const event of result) {
+        if (event.type === "raw_model_stream_event") {
+          const data = event.data;
 
-      for (const item of result.newItems) {
-        const raw = item.rawItem as Record<string, unknown>;
-        console.log(
-          `[Connect3Agent] Item: type=${item.type}, rawType=${raw.type}, rawName=${raw.name}`,
-        );
+          // Some reasoning streams (like reasoning_summary_text) come through as raw model events.
+          if (data.type === "model") {
+            const evt = data.event as
+              | {
+                  type?: string;
+                  delta?: string;
+                  item_id?: string;
+                  summary_index?: number;
+                }
+              | undefined;
+
+            const evtType = typeof evt?.type === "string" ? evt.type : "";
+            const delta = typeof evt?.delta === "string" ? evt.delta : "";
+
+            if (evtType === "response.reasoning_summary_text.delta" && delta) {
+              callbacks.onReasoningDelta(delta, {
+                type: evtType,
+                itemId:
+                  typeof evt?.item_id === "string" ? evt.item_id : undefined,
+                summaryIndex:
+                  typeof evt?.summary_index === "number"
+                    ? evt.summary_index
+                    : undefined,
+              });
+            }
+          }
+
+          // Text delta — stream to user
+          if (data.type === "output_text_delta") {
+            fullOutput += data.delta;
+            callbacks.onTextDelta(data.delta);
+          }
+        } else if (event.type === "run_item_stream_event") {
+          if (event.name === "reasoning_item_created") {
+            // Extract reasoning text from the item
+            const rawItem = event.item.rawItem as {
+              type: string;
+              content?: Array<{ type: string; text: string }>;
+            };
+            if (rawItem.content) {
+              for (const part of rawItem.content) {
+                if (part.text) {
+                  callbacks.onReasoning(part.text);
+                }
+              }
+            }
+          } else if (event.name === "tool_called") {
+            const rawItem = event.item.rawItem as {
+              name?: string;
+              type?: string;
+              callId?: string;
+              arguments?: string;
+            };
+            const toolName = rawItem.name ?? rawItem.type ?? "unknown";
+            const callId = rawItem.callId ?? "";
+            console.log(`[Connect3Agent] Tool called: ${toolName} (${callId})`);
+            callbacks.onToolCall(toolName, callId, rawItem.arguments);
+          } else if (event.name === "tool_output") {
+            const rawItem = event.item.rawItem as {
+              name?: string;
+              type?: string;
+              callId?: string;
+            };
+            const toolName = rawItem.name ?? rawItem.type ?? "unknown";
+            const callId = rawItem.callId ?? "";
+            console.log(`[Connect3Agent] Tool output: ${toolName} (${callId})`);
+            callbacks.onToolOutput(toolName, callId);
+          }
+        }
       }
 
       console.log(

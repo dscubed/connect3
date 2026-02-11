@@ -33,7 +33,7 @@ export const getContext = async (
   const userUniversity = userData?.university ?? null;
 
   // Fetch previous messages (excluding current)
-  const CHAT_CONTEXT_LIMIT = 5;
+  const CHAT_CONTEXT_LIMIT = 3;
   const { data: historyData, error: historyError } = await supabase
     .from("chatmessages")
     .select("query, content")

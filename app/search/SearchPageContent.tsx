@@ -11,12 +11,13 @@ import { EntityResult } from "@/lib/search/types";
 
 // Dynamic imports for modal components - reduces initial bundle
 const ProfileSheet = dynamic(
-  () => import("@/components/search/ProfileSheet").then((mod) => mod.ProfileSheet),
-  { ssr: false }
+  () =>
+    import("@/components/search/ProfileSheet").then((mod) => mod.ProfileSheet),
+  { ssr: false },
 );
 const EventSheet = dynamic(
   () => import("@/components/search/EventSheet").then((mod) => mod.EventSheet),
-  { ssr: false }
+  { ssr: false },
 );
 
 type SheetState = {
