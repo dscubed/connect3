@@ -98,6 +98,8 @@ function TextInput({ value, onChange }: InputProps) {
   return (
     <div className="w-full mb-4">
       <input
+        autoComplete="off"
+        data-bwignore
         value={textValue}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Type your answer here..."
@@ -181,14 +183,14 @@ function DropdownInput({ choices = [], value, onChange, single = false }: InputP
         {selectedValues.map((val) => (
           <span
             key={val}
-            className="bg-white text-[#8C4AF7] px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1 shadow-sm"
+            className="bg-white text-[#8C4AF7] pl-3 pr-2 py-1 rounded-full font-medium flex items-center gap-1 shadow-sm"
           >
             {val}
             <button
               onClick={(e) => removeChoice(e, val)}
               className="hover:bg-black/10 rounded-full p-0.5 transition-colors"
             >
-              <X className="h-3 w-3" />
+              <X className="h-4 w-4" />
             </button>
           </span>
         ))}
