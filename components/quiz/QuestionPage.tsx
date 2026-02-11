@@ -207,7 +207,7 @@ function DropdownInput({ choices = [], value, onChange, single = false }: InputP
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full left-0 w-full mt-2 rounded-lg bg-[#2A1748] border border-white/20 overflow-hidden z-50 shadow-xl max-h-60 overflow-y-auto"
+            className="absolute top-full left-0 w-full mt-2 rounded-lg bg-[#2A1748] overflow-hidden z-50 shadow-xl max-h-60 overflow-y-auto"
           >
             {choices.map((choice) => {
               const isSelected = selectedValues.includes(choice);
