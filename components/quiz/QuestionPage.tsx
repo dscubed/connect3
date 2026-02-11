@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Check, ChevronsUpDown, X } from 'lucide-react';
 
-export type QuestionType = 'single' | 'multiple' | 'text' | 'textarea' | 'studentemail';
+export type QuestionType = 'single' | 'multiple' | 'text' | 'textarea' | 'studentemail' | 'single-dropdown' | 'multi-dropdown';
 
 export interface Question {
   title: string;
@@ -117,6 +118,119 @@ function TextareaInput({ value, onChange }: InputProps) {
         placeholder="Type your answer here..."
         className="w-full h-48 rounded-lg bg-white/20 text-white placeholder:text-white/60 p-4 text-lg focus:outline-none focus:ring-2 focus:ring-white resize-none"
       />
+    </div>
+  );
+}
+
+function DropdownInput({ choices = [], value, onChange, single = false }: InputProps & { single?: boolean }) {
+  const [open, setOpen] = useState(false);
+  const selectedValues = Array.isArray(value) ? value : [];
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const toggleChoice = (choice: string) => {
+    if (single) {
+      if (selectedValues.includes(choice)) {
+        // Optional: Allow deselect by clicking again? 
+        // For standard dropdowns, usually clicking selected item keeps it selected or does nothing.
+        // But since we can remove via tag, let's just close.
+        setOpen(false);
+      } else {
+        onChange([choice]);
+        setOpen(false);
+      }
+    } else {
+      if (selectedValues.includes(choice)) {
+        onChange(selectedValues.filter((c) => c !== choice));
+      } else {
+        onChange([...selectedValues, choice]);
+      }
+    }
+  };
+
+  const removeChoice = (e: React.MouseEvent, choice: string) => {
+    e.stopPropagation();
+    onChange(selectedValues.filter((c) => c !== choice));
+  };
+
+  return (
+    <div className="w-full mb-4 relative" ref={containerRef}>
+      <div
+        onClick={() => setOpen(!open)}
+        className={cn(
+          "w-full min-h-[60px] rounded-lg bg-white/20 text-white p-3 flex flex-wrap gap-2 items-center cursor-pointer transition-all duration-200 border border-transparent",
+          open ? "ring-2 ring-white bg-white/30" : "hover:bg-white/30"
+        )}
+      >
+        {selectedValues.length === 0 && (
+          <span className="text-white/60 px-1">Select options...</span>
+        )}
+        
+        {selectedValues.map((val) => (
+          <span
+            key={val}
+            className="bg-white text-[#8C4AF7] px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1 shadow-sm"
+          >
+            {val}
+            <button
+              onClick={(e) => removeChoice(e, val)}
+              className="hover:bg-black/10 rounded-full p-0.5 transition-colors"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </span>
+        ))}
+        
+        <div className="ml-auto pl-2">
+          <ChevronsUpDown className="h-5 w-5 text-white/50" />
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {open && (
+           <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.15 }}
+            className="absolute top-full left-0 w-full mt-2 rounded-lg bg-[#2A1748] border border-white/20 overflow-hidden z-50 shadow-xl max-h-60 overflow-y-auto"
+          >
+            {choices.map((choice) => {
+              const isSelected = selectedValues.includes(choice);
+              return (
+                <div
+                  key={choice}
+                  onClick={() => toggleChoice(choice)}
+                  className={cn(
+                    "p-3 cursor-pointer flex items-center justify-between text-white transition-colors border-b border-white/5 last:border-0",
+                    isSelected ? "bg-white/20" : "hover:bg-white/10"
+                  )}
+                >
+                  <span className="font-medium">{choice}</span>
+                  {isSelected && <Check className="h-4 w-4" />}
+                </div>
+              );
+            })}
+            {choices.length === 0 && (
+              <div className="p-4 text-center text-white/50">
+                No options available
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -257,6 +371,14 @@ export default function QuestionPage({
               value={currentAnswer}
               onChange={handleAnswerChange}
               choices={[]} // Unused for keys
+            />
+          )}
+          {(currentType === 'multi-dropdown' || currentType === 'single-dropdown') && (
+            <DropdownInput 
+              choices={currentQuestion.choices} 
+              value={currentAnswer} 
+              onChange={handleAnswerChange}
+              single={currentType === 'single-dropdown'}
             />
           )}
         </motion.div>
