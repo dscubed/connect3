@@ -46,7 +46,7 @@ export function EventListCard({
           }`}
         >
           <Image
-            src={creator.avatar_url}
+            src={event.thumbnail!}
             alt=""
             width={128}
             height={128}
