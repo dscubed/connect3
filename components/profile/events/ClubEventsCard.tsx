@@ -8,6 +8,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Trash2 } from "lucide-react";
 import { useProfileContext } from "@/components/profile/ProfileProvider";
 import { useAuthStore } from "@/stores/authStore";
 import EventFormSheet from "@/components/profile/events/EventFormSheet";
@@ -267,6 +268,26 @@ export default function ClubEventsCard({
     mutate(`/api/events/${editingEventId}`);
   };
 
+  const handleDeleteEvent = async (eventId: string) => {
+    const response = await makeAuthenticatedRequest(
+      `/api/events/${eventId}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    if (!response.ok) {
+      toast.error("Failed to delete event");
+      return;
+    }
+
+    toast.success("Event deleted");
+    if (editingEventId === eventId) {
+      setEditingEventId(null);
+    }
+    mutate(`/api/users/${profileId}/events?limit=24`);
+  };
+
   if (isLoading) {
     return (
       <div className="py-4 text-sm text-slate-400">Loading events...</div>
@@ -296,9 +317,8 @@ export default function ClubEventsCard({
       <div className={showAll ? "max-h-[420px] overflow-y-auto pr-2" : ""}>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {displayEvents.map((event) => (
-            <button
+            <div
               key={event.id}
-              type="button"
               onClick={() => {
                 if (isOwnProfile) {
                   setEditingEventId(event.id);
@@ -307,6 +327,19 @@ export default function ClubEventsCard({
                   setViewingEventId(event.id);
                 }
               }}
+              onKeyDown={(eventKey) => {
+                if (eventKey.key === "Enter" || eventKey.key === " ") {
+                  eventKey.preventDefault();
+                  if (isOwnProfile) {
+                    setEditingEventId(event.id);
+                    setViewingEventId(null);
+                  } else {
+                    setViewingEventId(event.id);
+                  }
+                }
+              }}
+              role="button"
+              tabIndex={0}
               className="flex items-start gap-4 text-left"
             >
               <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
@@ -345,7 +378,26 @@ export default function ClubEventsCard({
                   ))}
                 </div>
               </div>
-            </button>
+              {isOwnProfile ? (
+                <span className="ml-auto">
+                  <button
+                    type="button"
+                    onClick={(eventClick) => {
+                      eventClick.stopPropagation();
+                      const confirmed = window.confirm(
+                        "Delete this event? This cannot be undone."
+                      );
+                      if (!confirmed) return;
+                      handleDeleteEvent(event.id);
+                    }}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full text-rose-500 hover:bg-rose-50"
+                    aria-label="Delete event"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </span>
+              ) : null}
+            </div>
           ))}
         </div>
       </div>

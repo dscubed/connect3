@@ -124,13 +124,13 @@ export default function EventFormSheet({
               >
                 <div className="h-1.5 w-12 rounded-full bg-slate-200" />
               </motion.div>
-              <div className="flex items-center justify-between px-4 pt-3">
-                <div className="flex flex-col">
-                  <span className="text-sm text-slate-500">
-                    {modeLabel ?? "Create Event"}
-                  </span>
-                  <span className="text-lg font-semibold">Event Details</span>
-                </div>
+                <div className="flex items-center justify-between px-4 pt-3">
+                  <div className="flex flex-col">
+                    <span className="text-sm text-slate-500">
+                      {modeLabel ?? "Create Event"}
+                    </span>
+                    <span className="text-lg font-semibold">Event Details</span>
+                  </div>
                 <button
                   type="button"
                   onClick={() => onOpenChange(false)}
@@ -139,7 +139,7 @@ export default function EventFormSheet({
                 >
                   <X className="h-5 w-5" />
                 </button>
-              </div>
+                </div>
               <div className="flex-1 overflow-y-auto p-4 pt-2">
                 <AddEventForm
                   key={formKey}

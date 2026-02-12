@@ -83,9 +83,8 @@ export async function uploadEventThumbnail(file: File) {
   const supabase = createClient();
   const fileName = `${crypto.randomUUID()}_${file.name}`;
   const filePath = fileName;
-  const bucket = "auto_instagram_cache";
-  // TODO: Ensure the bucket exists and has an INSERT policy for authenticated users
-  // (or update this bucket name to match the team's storage policy).
+  const bucket = "event_thumbnails";
+  // TODO: Ensure the bucket exists and has an INSERT policy for authenticated users.
 
   try {
     const { error } = await supabase.storage
