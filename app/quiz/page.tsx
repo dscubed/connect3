@@ -7,6 +7,7 @@ import Image from 'next/image';
 import WhiteLogo from '@/public/white-logo.png';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GlobeIcon } from 'lucide-react';
+import StoryViewer from '@/components/quiz/StoryViewer';
 
 const fredoka = Fredoka({ subsets: ['latin'] });
 
@@ -114,42 +115,21 @@ export default function Page() {
   };
 
   return (
-    <main className={`min-h-screen w-screen flex flex-col justify-between gap-4 bg-gradient-to-bl from-[#dfcbff] to-[#5817c1] noise ${fredoka.className}`}>
-      <div className="sticky top-0 grid grid-cols-[auto_1fr_auto] items-center gap-4 p-4 h-max w-full bg-transparent backdrop-blur-md z-50">
-        <Image src={WhiteLogo} alt="White Logo" className="w-8" />
-    
-        <h1
-          onClick={handleTitleTap}
-          className="text-white/90 font-medium mx-auto leading-tight select-none cursor-default"
-        >
-          O Week Special - Find out your student personality!
-        </h1>
-      </div>
-
-      <div className="px-4">
-        <div className="w-full max-w-lg mx-auto">
-          {!hydrated ? null : completed && result ? (
-            <div></div>
-          ) : (
-            <QuestionPage
-              key={hydrated ? 'loaded' : 'init'}
-              questions={questions}
-              initialAnswers={initialAnswers}
-              initialIndex={initialIndex}
-              onNext={handleStep}
-              onFinish={handleFinish}
-            />
-          )}
+    <main className={`min-h-svh w-screen flex flex-col bg-gradient-to-bl from-[#dfcbff] to-[#5817c1] noise ${fredoka.className}`}>
+      <div className="sticky top-0 flex justify-between items-center gap-4 p-4 h-max w-full bg-transparent backdrop-blur-md z-50">
+        <div className="flex gap-3 items-center">
+          <Image onClick={handleTitleTap} src={WhiteLogo} alt="White Logo" className="w-8" />
+          <h1 className="text-white/90 font-medium text-lg mx-auto leading-tight select-none cursor-default">
+            Personality Quiz
+          </h1>
         </div>
-      </div>
 
-      <div className="sticky bottom-0 p-4">
         <div className="relative w-max">
           <div
-            className={`absolute bottom-full left-0 mb-2 transition-all duration-300 ease-out ${
+            className={`absolute top-full left-0 mt-2 transition-all duration-300 ease-out ${
               showQR
                 ? 'opacity-100 translate-y-0'
-                : 'opacity-0 translate-y-8 pointer-events-none'
+                : 'opacity-0 -translate-y-8 pointer-events-none'
             }`}
             style={{ width: buttonWidth }}
           >
@@ -164,6 +144,24 @@ export default function Page() {
             <GlobeIcon size={24} />
             Share Quiz
           </button>
+        </div>
+      </div>
+
+      <div className="px-4 pb-4 my-auto">
+        <div className="w-full max-w-lg mx-auto">
+          {!hydrated ? null : completed && result ? (
+            <StoryViewer />
+          ) : (
+            <QuestionPage
+              key={hydrated ? 'loaded' : 'init'}
+              questions={questions}
+              initialAnswers={initialAnswers}
+              initialIndex={initialIndex}
+              onNext={handleStep}
+              onFinish={handleFinish}
+            />
+          )}
+
         </div>
       </div>
     </main>

@@ -32,7 +32,7 @@ function SingleChoiceInput({ choices = [], value, onChange }: InputProps) {
   const selectedValue = Array.isArray(value) ? value[0] : value;
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full mb-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full">
       {choices.map((choice) => {
         const isSelected = selectedValue === choice;
         return (
@@ -68,7 +68,7 @@ function MultiChoiceInput({ choices = [], value, onChange }: InputProps) {
   };
 
   return (
-    <div className="flex flex-wrap gap-3 w-full mb-4">
+    <div className="flex flex-wrap gap-3 w-full">
       {choices.map((choice) => {
         const isSelected = selectedValues.includes(choice);
         return (
@@ -96,7 +96,7 @@ function TextInput({ value, onChange }: InputProps) {
   const textValue = typeof value === 'string' ? value : '';
   
   return (
-    <div className="w-full mb-4">
+    <div className="w-full">
       <input
         autoComplete="off"
         data-bwignore
@@ -113,7 +113,7 @@ function TextareaInput({ value, onChange }: InputProps) {
   const textValue = typeof value === 'string' ? value : '';
   
   return (
-    <div className="w-full mb-4">
+    <div className="w-full">
       <textarea
         value={textValue}
         onChange={(e) => onChange(e.target.value)}
@@ -168,7 +168,7 @@ function DropdownInput({ choices = [], value, onChange, single = false }: InputP
   };
 
   return (
-    <div className="w-full mb-4 relative" ref={containerRef}>
+    <div className="w-full relative" ref={containerRef}>
       <div
         onClick={() => setOpen(!open)}
         className={cn(
@@ -387,7 +387,7 @@ export default function QuestionPage({
       </AnimatePresence>
 
       {/* Navigation Buttons */}
-      <div className="flex gap-4 w-full mt-auto">
+      <div className="flex gap-2 w-full mt-3">
         <button
           onClick={handleBackClick}
           disabled={currentIndex === 0}
