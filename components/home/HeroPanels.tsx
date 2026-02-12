@@ -30,7 +30,7 @@ export function HeroPanels() {
   return (
     <div className="w-full px-4 md:px-8">
       {/* Desktop: Grid layout */}
-      <div className="hidden md:grid md:grid-cols-3 gap-4 lg:gap-6 max-w-5xl mx-auto">
+      <div className="hidden md:flex flex-row gap-4 justify-around max-w-5xl mx-auto">
         {cards.map((card) => (
           <HeroPanel
             key={card.title}
