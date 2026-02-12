@@ -38,12 +38,18 @@ export default function StoryViewer() {
       const downloadWidth = 1000;
       const pixelRatio = downloadWidth / slideElement.clientWidth;
 
-      const dataUrl = await toPng(slideElement, {
+      const options = {
         width: slideElement.clientWidth,
         height: slideElement.clientHeight,
         pixelRatio,
         cacheBust: true,
-      });
+        includeQueryParams: true,
+      };
+
+      // Call toPng multiple times to warm up cache for Safari/iOS
+      await toPng(slideElement, options);
+      await toPng(slideElement, options);
+      const dataUrl = await toPng(slideElement, options);
 
       const link = document.createElement('a');
       link.href = dataUrl;
