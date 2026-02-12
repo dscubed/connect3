@@ -1,16 +1,17 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import Image from 'next/image';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import { Splide, SplideSlide } from '@splidejs/react-splide';
 import { ChevronLeft, ChevronRight, DownloadIcon } from 'lucide-react';
 import blueBg from '@/public/quiz/background/common/blue.png';
 import '@splidejs/react-splide/css';
-
-const CARDS = [1, 2, 3]; // Dummy cards
+import { cardData } from './cards/card-data';
 
 export default function StoryViewer() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const splideRef = useRef<any>(null);
 
   const handleNext = () => {
@@ -39,11 +40,11 @@ export default function StoryViewer() {
         }}
       >
         {/* Progress Bars */}
-        <div className="absolute top-0 left-0 right-0 z-20 flex gap-1 p-2">
-          {CARDS.map((_, idx) => (
+        <div className="absolute top-0 left-0 right-0 z-20 flex gap-1.5 p-3">
+          {cardData.map((_, idx) => (
             <div 
               key={idx} 
-              className="h-1 flex-1 bg-white/30 rounded-full overflow-hidden"
+              className="h-1 flex-1 bg-white/30 rounded-full overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.2)]"
             >
               <div 
                 className={`h-full bg-white transition-all duration-300 ${
@@ -75,27 +76,10 @@ export default function StoryViewer() {
           >
             <div className="splide__track w-full h-full">
               <ul className="splide__list w-full h-full">
-                {CARDS.map((card, index) => (
+                {cardData.map((card, index) => (
                   <SplideSlide key={index} className="w-full h-full">
-                    <div className="w-full h-full relative bg-black/10">
-                  {/* Background Image */}
-                  <Image
-                    src={blueBg}
-                    alt="Background"
-                    fill
-                    className="object-cover -z-10"
-                    priority={index === 0}
-                  />
-                  
-                  {/* Card Content Placeholder */}
-                  <div className="relative z-10 flex flex-col items-center justify-center w-full h-full p-8 text-white">
-                    <h2 className="text-3xl font-bold mb-4">Card {index + 1}</h2>
-                    <p className="text-center opacity-80">
-                       Content goes here. Swipe or use arrows to navigate.
-                    </p>
-                  </div>
-                </div>
-              </SplideSlide>
+                    {card}
+                  </SplideSlide>
                 ))}
               </ul>
             </div>
@@ -113,7 +97,7 @@ export default function StoryViewer() {
           </button>
         )}
         
-        {currentIndex < CARDS.length - 1 && (
+        {currentIndex < cardData.length - 1 && (
           <button
             onClick={(e) => { e.stopPropagation(); handleNext(); }}
             className="absolute right-2 top-1/2 -translate-y-1/2 z-30 p-1 bg-black/20 hover:bg-black/40 text-white rounded-full backdrop-blur-sm transition-all"
