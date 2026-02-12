@@ -89,6 +89,7 @@ export const userCategoryDescriptionText = userCategoryDescriptions
   .join("\n");
 
 export const organisationCategoriesList = [
+  "Events",
   "Recruitment",
   "What we do",
   "Projects",

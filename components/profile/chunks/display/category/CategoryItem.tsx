@@ -12,6 +12,9 @@ import { Button } from "@/components/ui/button";
 import { PencilLine } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
+import { useProfileContext } from "@/components/profile/ProfileProvider";
+import ClubEventsCard from "@/components/profile/events/ClubEventsCard";
+import EventFormHeader from "@/components/profile/events/EventFormHeader";
 
 interface CategoryItemProps {
   category: AllCategories;
@@ -30,6 +33,10 @@ export function CategoryItem({ category, chunks }: CategoryItemProps) {
     cancelDivFocus,
     focusedDiv,
   } = useChunkContext();
+  const { profile, isOwnProfile } = useProfileContext();
+  const isEventsCategory = category === "Events";
+  const canManageEvents =
+    isOwnProfile && profile.account_type === "organisation";
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (
@@ -59,40 +66,56 @@ export function CategoryItem({ category, chunks }: CategoryItemProps) {
             title={category}
             {...(isEditing ? { ...attributes, ...listeners } : {})}
           >
-            {!isEditingCategory(category) && isEditing && (
-              <Button
-                variant="ghost"
-                className="!bg-transparent !text-muted rounded-full border border-muted/50 !p-1.5 h-fit"
-                onClick={() => editCategory(category)}
-              >
-                <PencilLine className="!size-4" />
-              </Button>
+            {isEventsCategory ? (
+              canManageEvents ? (
+                <EventFormHeader variant="compact" />
+              ) : null
+            ) : (
+              !isEditingCategory(category) &&
+              isEditing && (
+                <Button
+                  variant="ghost"
+                  className="!bg-transparent !text-muted rounded-full border border-muted/50 !p-1.5 h-fit"
+                  onClick={() => editCategory(category)}
+                >
+                  <PencilLine className="!size-4" />
+                </Button>
+              )
             )}
           </SectionCardHeader>
           <CardContent className="w-full">
-            {/* Category Chunks */}
-            <CategoryChunks chunks={chunks} category={category} />
-            {isEditingCategory(category) && (
-              <div className="w-full flex flex-row justify-end mt-2 gap-2">
-                <Button
-                  variant="ghost"
-                  onClick={() => saveEdits(category)}
-                  className={cn(
-                    "!bg-transparent text-muted hover:text-card-foreground"
-                  )}
-                >
-                  Save
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => cancelEdits(category)}
-                  className={cn(
-                    "!bg-transparent text-muted hover:text-card-foreground"
-                  )}
-                >
-                  Cancel
-                </Button>
-              </div>
+            {isEventsCategory ? (
+              <ClubEventsCard
+                profileId={profile.id}
+                clubName={profile.first_name || "Club"}
+              />
+            ) : (
+              <>
+                {/* Category Chunks */}
+                <CategoryChunks chunks={chunks} category={category} />
+                {isEditingCategory(category) && (
+                  <div className="w-full flex flex-row justify-end mt-2 gap-2">
+                    <Button
+                      variant="ghost"
+                      onClick={() => saveEdits(category)}
+                      className={cn(
+                        "!bg-transparent text-muted hover:text-card-foreground"
+                      )}
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => cancelEdits(category)}
+                      className={cn(
+                        "!bg-transparent text-muted hover:text-card-foreground"
+                      )}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </CardContent>
         </SectionCard>

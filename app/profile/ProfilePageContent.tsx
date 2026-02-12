@@ -3,7 +3,6 @@ import CoverImage from "@/components/profile/CoverImage";
 import ProfilePicture from "@/components/profile/ProfilePicture";
 import UserDetails from "@/components/profile/UserDetails";
 import ChunksSection from "@/components/profile/ChunksSection";
-import EventsSection from "@/components/profile/events/EventsSection";
 import { ChunkProvider } from "@/components/profile/chunks/hooks/ChunkProvider";
 import { LinksSection } from "@/components/profile/LinksSection";
 import { ActionsButton } from "@/components/profile/ActionsButton";
@@ -101,9 +100,6 @@ function ProfilePageContentInner({
             </div>
           </motion.div>
           <SummaryCard editingProfile={editingProfile} profile={profile} />
-
-          {/* Events form for organisations only */}
-          {profile.account_type === "organisation" && <EventsSection />}
 
           {/* Chunks Section */}
           <ChunksSection editingProfile={editingProfile} />

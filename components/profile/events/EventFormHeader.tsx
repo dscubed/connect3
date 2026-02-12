@@ -6,7 +6,11 @@ import { useAuthStore } from "@/stores/authStore";
 import type { CreateEventBody } from "@/lib/schemas/api/events";
 import { toast } from "sonner";
 
-export default function EventFormHeader() {
+export default function EventFormHeader({
+  variant = "default",
+}: {
+  variant?: "default" | "compact";
+}) {
   const { makeAuthenticatedRequest } = useAuthStore();
   const [addingEvent, setAddingEvent] = useState<boolean>(false);
   const [sheetHeight, setSheetHeight] = useState<number | null>(null);
@@ -113,24 +117,35 @@ export default function EventFormHeader() {
 
   return (
     <>
-      <motion.div
-        className="w-full py-2 transition-all rounded-lg group hover:bg-white/5"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0 }}
-      >
+      {variant === "compact" ? (
         <button
-          className="w-full flex items-center justify-between group"
+          type="button"
           onClick={handleAddButtonClick}
+          className="inline-flex items-center gap-2 rounded-full border border-muted/40 px-3 py-1 text-sm font-medium text-muted transition-colors hover:text-card-foreground"
         >
-          <div className="flex items-center gap-4">
-            <h3 className="text-xl font-semibold">Add Event</h3>
-            <span className="text-sm px-3 py-1 rounded-full">
-              <Plus className="h-5 w-5 text-muted/70 group-hover:text-muted transition-colors" />
-            </span>
-          </div>
+          Add Event
+          <Plus className="h-4 w-4" />
         </button>
-      </motion.div>
+      ) : (
+        <motion.div
+          className="w-full py-2 transition-all rounded-lg group hover:bg-white/5"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0 }}
+        >
+          <button
+            className="w-full flex items-center justify-between group"
+            onClick={handleAddButtonClick}
+          >
+            <div className="flex items-center gap-4">
+              <h3 className="text-xl font-semibold">Add Event</h3>
+              <span className="text-sm px-3 py-1 rounded-full">
+                <Plus className="h-5 w-5 text-muted/70 group-hover:text-muted transition-colors" />
+              </span>
+            </div>
+          </button>
+        </motion.div>
+      )}
 
       <AnimatePresence>
         {addingEvent && (

@@ -53,7 +53,12 @@ export function useChunks({
      */
     if (!profile) return;
 
-    const usedCategories = new Set(chunks.map((chunk) => chunk.category));
+    const staticCategories: AllCategories[] =
+      profile?.account_type === "organisation" ? ["Events"] : [];
+    const usedCategories = new Set([
+      ...chunks.map((chunk) => chunk.category),
+      ...staticCategories,
+    ]);
 
     setCategoryOrder((prev) => {
       // Remove categories without chunks
