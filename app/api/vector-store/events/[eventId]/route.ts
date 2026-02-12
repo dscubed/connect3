@@ -122,7 +122,7 @@ const uploadEventToVectorStore = async ({
     pricing: filePricing,
     description: description || "",
     type: type || [],
-    thumbnail_url: event.thumbnailUrl,
+    thumbnail_url: event.thumbnailUrl ?? undefined,
     booking_links: event.booking_link,
     attributes: {
       university: university || [],
@@ -169,7 +169,7 @@ const uploadEventToVectorStore = async ({
     vector_store_id: vectorStoreId,
     attributes: {
       id: eventId,
-      event_name: name,
+      event_name: name ?? "Event",
       creator_name: creator?.full_name || "Unknown",
       collaborators: collaboratorNames.join(", "),
       type: (type || []).join(", "),

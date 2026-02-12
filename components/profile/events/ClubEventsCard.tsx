@@ -103,7 +103,7 @@ export default function ClubEventsCard({
     fetcher
   );
 
-  const events: RawEvent[] = data?.items ?? [];
+  const events = useMemo<RawEvent[]>(() => data?.items ?? [], [data?.items]);
   const sortedEvents = useMemo(() => sortEvents(events), [events]);
   const displayEvents = showAll ? sortedEvents : sortedEvents.slice(0, 4);
   const selectedEventId = editingEventId ?? viewingEventId;

@@ -24,10 +24,10 @@ async function blurImageFile(file: File): Promise<File> {
 export async function uploadAvatar(file: File, userId?: string) {
   const supabase = createClient();
   // Generate random UUID filename
-  const fileExt = file.name.split(".").pop();
+  const fileExt = file.name.split(".").pop() || "png";
   const fileName = `${crypto.randomUUID()}.${fileExt}`;
 
-  const filePath = `${userId}/${fileName}`;
+  const filePath = userId ? `${userId}/${fileName}` : fileName;
 
   // Blur the image
   const blurredFile = await blurImageFile(file);
@@ -81,7 +81,6 @@ export async function uploadAvatar(file: File, userId?: string) {
 
 export async function uploadEventThumbnail(file: File) {
   const supabase = createClient();
-  const fileExt = file.name.split(".").pop();
   const fileName = `${crypto.randomUUID()}_${file.name}`;
   const filePath = fileName;
   const bucket = "auto_instagram_cache";

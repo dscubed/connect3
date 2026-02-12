@@ -14,7 +14,6 @@ const supabase = createClient(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function transformDbEventToEventSchema(dbEvent: any): Event {
   // Map the database fields to the schema fields
-  const fallbackCategory = dbEvent.category || "general";
   return {
     id: dbEvent.id,
     name: dbEvent.name,

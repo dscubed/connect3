@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -107,9 +108,7 @@ export default function AddEventForm({
   const [endTime, setEndTime] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [type, setType] = useState<EventCategory[]>([]);
-  const [collaborators, setCollaborators] = useState<
-    { id: string; name: string }[]
-  >([]);
+  const [collaborators] = useState<{ id: string; name: string }[]>([]);
   const [bookingLinks, setBookingLinks] = useState<string[]>([""]);
   const [pricingMin, setPricingMin] = useState<string>("");
   const [pricingMax, setPricingMax] = useState<string>("");
@@ -455,10 +454,13 @@ export default function AddEventForm({
             <label className="group relative flex aspect-[4/5] w-full cursor-pointer items-center justify-center rounded-2xl border-2 border-slate-200 shadow-sm">
               <div className="absolute inset-0 overflow-hidden rounded-2xl bg-black">
                 {thumbnailPreview ? (
-                  <img
+                  <Image
                     src={thumbnailPreview}
                     alt="Event poster preview"
-                    className="h-full w-full object-cover"
+                    fill
+                    sizes="(max-width: 1024px) 320px, 320px"
+                    className="object-cover"
+                    unoptimized
                   />
                 ) : (
                   <span className="sr-only">Add photo</span>

@@ -105,6 +105,7 @@ const CATEGORY_PLACEHOLDERS: Record<AllCategories, string> = {
     "Describe your personal hobbies and interests, sports, movies, music...",
   Volunteering:
     "Describe your volunteering experiences, organizations, roles...",
+  Events: "Showcase upcoming events and activities for this profile...",
   Recruitment:
     "Describe your recruitment status, availability, open roles, recruitment period...",
   "What we do":
