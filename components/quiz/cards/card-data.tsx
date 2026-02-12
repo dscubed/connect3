@@ -47,4 +47,12 @@ export const cardData: React.ReactElement[] = [
       </p>
     </BaseCard>
   ),
+  (
+    <BaseCard key={2} backgroundImage="/quiz/background/common/orange.png">
+      <h2 className="text-3xl font-bold mb-4">Card</h2>
+      <p className="text-center opacity-80">
+        Content goes here. Swipe or use arrows to navigate.
+      </p>
+    </BaseCard>
+  ),
 ]

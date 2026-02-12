@@ -5,6 +5,7 @@ import { useState, useRef } from 'react';
 // @ts-ignore
 import { Splide, SplideSlide } from '@splidejs/react-splide';
 import { ChevronLeft, ChevronRight, DownloadIcon } from 'lucide-react';
+import { toPng } from 'html-to-image';
 import blueBg from '@/public/quiz/background/common/blue.png';
 import '@splidejs/react-splide/css';
 import { cardData } from './cards/card-data';
@@ -13,6 +14,7 @@ export default function StoryViewer() {
   const [currentIndex, setCurrentIndex] = useState(0);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const splideRef = useRef<any>(null);
+  const slideContainerRef = useRef<HTMLDivElement>(null);
 
   const handleNext = () => {
     if (splideRef.current) {
@@ -26,12 +28,41 @@ export default function StoryViewer() {
     }
   };
 
+  const handleDownloadSlide = async () => {
+    try {
+      await document.fonts.ready;
+
+      const slideElement = slideContainerRef.current?.querySelector('.splide__slide.is-active') as HTMLElement;
+      if (!slideElement) return;
+
+      const downloadWidth = 1000;
+      const pixelRatio = downloadWidth / slideElement.clientWidth;
+
+      const dataUrl = await toPng(slideElement, {
+        width: slideElement.clientWidth,
+        height: slideElement.clientHeight,
+        pixelRatio,
+        cacheBust: true,
+      });
+
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `slide-${currentIndex + 1}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Download failed:', error);
+    }
+  };
+
+  const isDownloadDisabled = currentIndex === 0 || currentIndex === cardData.length - 1;
   const aspectRatio = blueBg.width / blueBg.height;
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center">
-      {/* Container */}
       <div 
+        ref={slideContainerRef}
         className="relative w-full mx-auto overflow-hidden rounded-2xl shadow-md bg-black/50"
         style={{ 
           aspectRatio: `${blueBg.width} / ${blueBg.height}`,
@@ -39,7 +70,6 @@ export default function StoryViewer() {
           width: '100%'
         }}
       >
-        {/* Progress Bars */}
         <div className="absolute top-0 left-0 right-0 z-20 flex gap-1.5 p-3">
           {cardData.map((_, idx) => (
             <div 
@@ -55,7 +85,6 @@ export default function StoryViewer() {
           ))}
         </div>
 
-        {/* Content Area with Swipe */}
         <div className="absolute inset-0 z-10">
           <Splide
             ref={splideRef}
@@ -86,7 +115,6 @@ export default function StoryViewer() {
           </Splide>
         </div>
 
-        {/* Navigation Buttons (Desktop/Overlay) */}
         {currentIndex > 0 && (
           <button
             onClick={(e) => { e.stopPropagation(); handlePrev(); }}
@@ -109,14 +137,16 @@ export default function StoryViewer() {
       </div>
 
       <div className="mt-4">
-         <button
-            // ref={buttonRef}
-            // onClick={toggleQR}
-            className="bg-white text-[#8C4AF7] px-3 pr-4 py-2 rounded-full font-medium flex items-center gap-2 hover:bg-white/90 transition-colors shadow-lg"
-          >
-            <DownloadIcon size={24} />
-            Save Slide
-          </button>
+        <button
+          onClick={handleDownloadSlide}
+          disabled={isDownloadDisabled}
+          className={`bg-white text-[#8C4AF7] px-3 pr-4 py-2 rounded-full font-medium flex items-center gap-2 hover:bg-white/90 transition-colors shadow-lg ${
+            isDownloadDisabled ? 'opacity-0 pointer-events-none' : ''
+          }`}
+        >
+          <DownloadIcon size={24} />
+          Save Slide
+        </button>
       </div>
     </div>
   );
