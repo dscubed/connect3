@@ -288,6 +288,14 @@ export function useChatroom(chatroomId: string | null) {
 
         setMessages(loaded);
 
+        // Check if any message is pending/processing and set inFlight accordingly
+        const hasPending = loaded.some(
+          (m) => m.status === "pending" || m.status === "processing",
+        );
+        if (hasPending) {
+          setInFlight(true);
+        }
+
         // If first message is pending, trigger it
         const firstMsg = loaded[0];
         if (firstMsg?.status === "pending") {

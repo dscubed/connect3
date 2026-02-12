@@ -66,7 +66,9 @@ export function MessageThread({
     }
 
     // Loading/processing state
-    return <SearchProgressIndicator progress={message.progress} />;
+    return (
+      <SearchProgressIndicator progressEntries={message.progressEntries} />
+    );
   };
 
   return (
