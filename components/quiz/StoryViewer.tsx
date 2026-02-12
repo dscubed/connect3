@@ -6,7 +6,7 @@ import { useState, useRef } from 'react';
 import { Splide, SplideSlide } from '@splidejs/react-splide';
 import { ChevronLeft, ChevronRight, DownloadIcon } from 'lucide-react';
 import { toPng } from 'html-to-image';
-import blueBg from '@/public/quiz/background/common/blue.png';
+import blueBg from '@/public/quiz/common-background/blue.png';
 import '@splidejs/react-splide/css';
 import { cardData } from './cards/card-data';
 
