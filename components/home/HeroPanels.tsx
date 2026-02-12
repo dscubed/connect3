@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 import { HeroPanel } from "./HeroPanel";
-import { clubsPanelSVG, usersPanelSVG } from "./PanelSVGs";
+import { clubsPanelSVG, eventsPanelSVGs, usersPanelSVG } from "./PanelSVGs";
 
 export function HeroPanels() {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -21,7 +21,7 @@ export function HeroPanels() {
     },
     {
       title: "Events",
-      svg: usersPanelSVG,
+      svg: eventsPanelSVGs,
       flipText:
         "Connect3 enables you to explore and participate in events happening around you.",
     },
