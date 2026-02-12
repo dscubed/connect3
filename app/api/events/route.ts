@@ -24,18 +24,11 @@ function transformDbEventToEventSchema(dbEvent: any): Event {
     start: dbEvent.start,
     end: dbEvent.end,
     publishedAt: dbEvent.created_at || new Date().toISOString(),
-    isOnline:
-      typeof dbEvent.is_online === "boolean"
-        ? dbEvent.is_online
-        : dbEvent.location_type === "online",
+    isOnline: dbEvent.is_online,
     capacity: dbEvent.capacity,
     currency: dbEvent.currency,
     thumbnail: dbEvent.thumbnail,
-    category: {
-      type: dbEvent.event_categories?.type || fallbackCategory,
-      category: dbEvent.event_categories?.category || fallbackCategory,
-      subcategory: dbEvent.event_categories?.subcategory || "none",
-    },
+    category: dbEvent.category,
     location: {
       venue: dbEvent.event_locations?.venue || "TBA",
       address: dbEvent.event_locations?.address || "TBA",
@@ -69,11 +62,6 @@ export async function GET(request: NextRequest) {
         event_pricings (
           min,
           max
-        ),
-        event_categories (
-          type,
-          category,
-          subcategory
         ),
         event_locations (
           venue,
