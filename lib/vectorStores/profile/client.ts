@@ -22,11 +22,14 @@ export async function uploadProfileToVectorStore() {
     );
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to upload profile");
+      throw new Error(errorData.error || "Failed to enqueue profile upload");
     }
-    toast.success("Profile uploaded to vector store", { id: toastId });
+    // 202 Accepted — job is queued, worker will process it
+    toast.success("Profile upload queued — it will be processed shortly", {
+      id: toastId,
+    });
   } catch (e) {
-    console.error("Error uploading profile to vector store:", e);
+    console.error("Error enqueuing profile upload:", e);
     toast.error("Failed to upload profile to vector store", { id: toastId });
   }
 }
