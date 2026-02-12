@@ -126,8 +126,28 @@ function TextareaInput({ value, onChange }: InputProps) {
 
 function DropdownInput({ choices = [], value, onChange, single = false }: InputProps & { single?: boolean }) {
   const [open, setOpen] = useState(false);
+  const [menuMaxHeight, setMenuMaxHeight] = useState<number>(300);
   const selectedValues = Array.isArray(value) ? value : [];
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const updateHeight = () => {
+      if (open && containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom - 16;
+        setMenuMaxHeight(Math.max(100, spaceBelow));
+      }
+    };
+
+    if (open) {
+      updateHeight();
+      window.addEventListener('resize', updateHeight);
+    }
+
+    return () => {
+      window.removeEventListener('resize', updateHeight);
+    };
+  }, [open]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -207,7 +227,8 @@ function DropdownInput({ choices = [], value, onChange, single = false }: InputP
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full left-0 w-full mt-2 rounded-lg bg-[#2A1748] overflow-hidden z-50 shadow-xl max-h-60 overflow-y-auto"
+            style={{ maxHeight: menuMaxHeight }}
+            className="absolute top-full left-0 w-full mt-2 rounded-lg bg-[#2A1748] overflow-hidden z-50 shadow-xl overflow-y-auto"
           >
             {choices.map((choice) => {
               const isSelected = selectedValues.includes(choice);
