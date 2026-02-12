@@ -79,6 +79,43 @@ export async function uploadAvatar(file: File, userId?: string) {
   }
 }
 
+export async function uploadEventThumbnail(file: File) {
+  const supabase = createClient();
+  const fileExt = file.name.split(".").pop();
+  const fileName = `${crypto.randomUUID()}_${file.name}`;
+  const filePath = fileName;
+  const bucket = "auto_instagram_cache";
+  // TODO: Ensure the bucket exists and has an INSERT policy for authenticated users
+  // (or update this bucket name to match the team's storage policy).
+
+  try {
+    const { error } = await supabase.storage
+      .from(bucket)
+      .upload(filePath, file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (error) throw error;
+
+    const { data: publicUrlData } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(filePath);
+
+    return {
+      success: true,
+      url: publicUrlData.publicUrl,
+      path: filePath,
+    };
+  } catch (error) {
+    console.error("Error uploading event thumbnail:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Upload failed",
+    };
+  }
+}
+
 function getStoragePathFromUrl(url: string | null): string | null {
   if (!url) return null;
   // Find everything after the first "/avatars/"

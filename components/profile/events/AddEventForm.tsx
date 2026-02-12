@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/TextArea";
 import { AiEnhanceDialog } from "@/components/profile/edit-modals/AiEnhanceDialog";
 import {
@@ -18,7 +17,6 @@ import {
   Globe,
   ImagePlus,
   Layers,
-  MapPin,
   PencilLine,
   Plus,
   Tag,
@@ -36,14 +34,17 @@ import {
   EventCategory,
   EventPricing,
   EventLocationType,
-  EventCity,
 } from "@/types/events/event";
 import { useAuthStore } from "@/stores/authStore";
 import type { CreateEventBody } from "@/lib/schemas/api/events";
+import { uploadEventThumbnail } from "@/lib/supabase/storage";
+import { toast } from "sonner";
 
 interface AddEventFormProps {
   onSubmit: (event: Omit<CreateEventBody, "id">) => Promise<void> | void;
   onCancel: () => void;
+  initialValues?: Partial<Omit<CreateEventBody, "id">>;
+  submitLabel?: string;
 }
 
 const SECTION_CARD =
@@ -92,7 +93,12 @@ function EventThemeIconPlaceholder({ theme }: { theme: ThemePreset }) {
   );
 }
 
-export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) {
+export default function AddEventForm({
+  onSubmit,
+  onCancel,
+  initialValues,
+  submitLabel = "Add Event",
+}: AddEventFormProps) {
   const { user } = useAuthStore();
   const [name, setName] = useState<string>("");
   const [start, setStart] = useState<string>("");
@@ -105,8 +111,13 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
     { id: string; name: string }[]
   >([]);
   const [bookingLinks, setBookingLinks] = useState<string[]>([""]);
-  const [pricing, setPricing] = useState<EventPricing>("free");
-  const [cities, setCities] = useState<EventCity[]>([]);
+  const [pricingMin, setPricingMin] = useState<string>("");
+  const [pricingMax, setPricingMax] = useState<string>("");
+  const [pricingCurrency, setPricingCurrency] = useState<string>("AUD");
+  const [locationVenue, setLocationVenue] = useState<string>("");
+  const [locationAddress, setLocationAddress] = useState<string>("");
+  const [locationCity, setLocationCity] = useState<string>("");
+  const [locationCountry, setLocationCountry] = useState<string>("");
   const [locationType, setLocationType] =
     useState<EventLocationType>("physical");
   const [tagFilters, setTagFilters] = useState({
@@ -115,6 +126,7 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
   });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [accentColor, setAccentColor] = useState<string>("#6F63FF");
   const [tagsTouched, setTagsTouched] = useState<boolean>(false);
   const [tagsManuallyChosen, setTagsManuallyChosen] = useState<boolean>(false);
@@ -122,7 +134,7 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
     undefined
   );
   const [timezone, setTimezone] = useState(
-    TIMEZONE_OPTIONS.find((option) => option.offset === "GMT+11:00") ??
+    TIMEZONE_OPTIONS.find((option) => option.city === "Melbourne") ??
       TIMEZONE_OPTIONS[0]
   );
   const previewUrlRef = useRef<string | null>(null);
@@ -181,6 +193,60 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
     };
   }, [tagsTouched]);
 
+  useEffect(() => {
+    if (!initialValues) {
+      return;
+    }
+
+    const toDateInputValue = (value?: Date | string | null) => {
+      if (!value) return "";
+      const date = value instanceof Date ? value : new Date(value);
+      if (Number.isNaN(date.getTime())) return "";
+      return date.toISOString().slice(0, 10);
+    };
+
+    const toTimeInputValue = (value?: Date | string | null) => {
+      if (!value) return "";
+      const date = value instanceof Date ? value : new Date(value);
+      if (Number.isNaN(date.getTime())) return "";
+      return date.toISOString().slice(11, 16);
+    };
+
+    setName(initialValues.name ?? "");
+    setDescription(initialValues.description ?? "");
+    setStart(toDateInputValue(initialValues.start));
+    setEnd(toDateInputValue(initialValues.end));
+    setStartTime(toTimeInputValue(initialValues.start));
+    setEndTime(toTimeInputValue(initialValues.end));
+    setType(initialValues.type ?? []);
+    setBookingLinks(
+      initialValues.booking_link && initialValues.booking_link.length > 0
+        ? initialValues.booking_link
+        : [""]
+    );
+    setLocationType(initialValues.location_type ?? "physical");
+    setLocationVenue(initialValues.location?.venue ?? "");
+    setLocationAddress(initialValues.location?.address ?? "");
+    setLocationCity(
+      initialValues.location?.city ?? initialValues.city?.[0] ?? ""
+    );
+    setLocationCountry(initialValues.location?.country ?? "");
+    setPricingMin(
+      initialValues.pricing_min != null
+        ? String(initialValues.pricing_min)
+        : ""
+    );
+    setPricingMax(
+      initialValues.pricing_max != null
+        ? String(initialValues.pricing_max)
+        : ""
+    );
+    setPricingCurrency(initialValues.currency ?? "");
+    if (initialValues.thumbnailUrl) {
+      setThumbnailPreview(initialValues.thumbnailUrl);
+    }
+  }, [initialValues]);
+
   const categories: EventCategory[] = [
     "networking",
     "study",
@@ -189,20 +255,6 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
     "competition",
     "panel",
     "miscellaneous",
-  ] as const;
-
-  const eventCities: EventCity[] = [
-    "melbourne",
-    "sydney",
-    "perth",
-    "canberra",
-    "adelaide",
-    "gold-coast",
-    "newcaste",
-    "hobart",
-    "brisbane",
-    "darwin",
-    "geelong",
   ] as const;
 
   const themePresets: ThemePreset[] = [
@@ -274,14 +326,6 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
     }
   };
 
-  const handleCityChange = (city: EventCity, checked: boolean) => {
-    if (checked) {
-      setCities([...cities, city]);
-    } else {
-      setCities(cities.filter((c) => c !== city));
-    }
-  };
-
   const buildLinkUrl = (item: { type: LinkType; details: string }) => {
     const pattern = LinkTypes[item.type]?.pattern;
     if (pattern) {
@@ -293,6 +337,7 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setThumbnailFile(file);
     if (previewUrlRef.current) {
       URL.revokeObjectURL(previewUrlRef.current);
     }
@@ -303,10 +348,6 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
 
   if (!user) return null;
 
-  const formattedCities = cities.length
-    ? cities.map((city) => city.replace("-", " ")).join(", ")
-    : "No location selected";
-  const isLocationEmpty = cities.length === 0;
   const isLinksEmpty = bookingLinks.every((link) => link.trim() === "");
   const isCategoriesEmpty = type.length === 0;
   const linkItems: LinkItem[] = bookingLinks
@@ -328,6 +369,10 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
       };
     })
     .filter((item): item is LinkItem => Boolean(item));
+  const pricingMinNumber = Number(pricingMin || 0);
+  const pricingMaxNumber = Number(pricingMax || 0);
+  const pricingTag: EventPricing =
+    pricingMinNumber > 0 || pricingMaxNumber > 0 ? "paid" : "free";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -337,9 +382,34 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
       if (!user) {
         return;
       }
+      const pricingMinValue = Number(pricingMin || 0);
+      const pricingMaxValue = Number(pricingMax || 0);
+      const derivedPricing: EventPricing =
+        pricingMinValue > 0 || pricingMaxValue > 0 ? "paid" : "free";
       const bookingLinkValues = bookingLinks
         .map((link) => link.trim())
         .filter((link) => link !== "");
+      const trimmedCurrency = pricingCurrency.trim().toUpperCase();
+      const locationPayload = {
+        venue: locationVenue.trim() || null,
+        address: locationAddress.trim() || null,
+        city: locationCity.trim() || null,
+        country: locationCountry.trim() || null,
+      };
+      const cityList = locationPayload.city ? [locationPayload.city] : [];
+      const resolvedThumbnail =
+        thumbnailPreview && !thumbnailPreview.startsWith("blob:")
+          ? thumbnailPreview
+          : undefined;
+      let uploadedThumbnailUrl = resolvedThumbnail;
+      if (thumbnailFile) {
+        const uploadResult = await uploadEventThumbnail(thumbnailFile);
+        if (!uploadResult.success || !uploadResult.url) {
+          toast.error("Failed to upload event image");
+          return;
+        }
+        uploadedThumbnailUrl = uploadResult.url;
+      }
       const eventData: Omit<CreateEventBody, "id"> = {
         creator_profile_id: user.id,
         name,
@@ -349,9 +419,14 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
         type,
         collaborators: collaborators.map((c) => c.id),
         booking_link: bookingLinkValues,
-        pricing,
-        city: cities,
+        pricing: derivedPricing,
+        pricing_min: Number.isFinite(pricingMinValue) ? pricingMinValue : 0,
+        pricing_max: Number.isFinite(pricingMaxValue) ? pricingMaxValue : 0,
+        currency: trimmedCurrency.length === 3 ? trimmedCurrency : undefined,
+        city: cityList,
         location_type: locationType,
+        location: locationPayload,
+        thumbnailUrl: uploadedThumbnailUrl,
       };
       await onSubmit(eventData);
     } catch (error) {
@@ -441,7 +516,6 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
               placeholder="Event Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              required
               disabled={isSubmitting}
               className="h-auto border-0 bg-transparent px-0 !text-[38px] font-semibold leading-tight text-slate-900 placeholder:!text-[38px] placeholder:text-slate-300 shadow-none focus-visible:ring-0"
             />
@@ -469,7 +543,6 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
             <Textarea
               id="description"
               onChange={(e) => setDescription(e.target.value)}
-              required
               disabled={isSubmitting}
               value={description}
               placeholder="Add a description ..."
@@ -582,56 +655,85 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
             </div>
           </div>
 
-          <div className={`${SECTION_CARD} group min-h-[112px]`}>
+          <div className={`${SECTION_CARD}`}>
+            <div className="flex items-start justify-between gap-4">
+              <span className={SECTION_LABEL}>Pricing</span>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_120px]">
+              <Input
+                id="pricing-min"
+                type="number"
+                min={0}
+                placeholder="Min"
+                value={pricingMin}
+                onChange={(e) => setPricingMin(e.target.value)}
+                disabled={isSubmitting}
+                className="h-11 rounded-[14px] border-2 border-slate-200/70 px-4 text-base text-slate-600 shadow-none focus-visible:ring-0"
+              />
+              <Input
+                id="pricing-max"
+                type="number"
+                min={0}
+                placeholder="Max"
+                value={pricingMax}
+                onChange={(e) => setPricingMax(e.target.value)}
+                disabled={isSubmitting}
+                className="h-11 rounded-[14px] border-2 border-slate-200/70 px-4 text-base text-slate-600 shadow-none focus-visible:ring-0"
+              />
+              <Input
+                id="pricing-currency"
+                placeholder="AUD"
+                value={pricingCurrency}
+                onChange={(e) =>
+                  setPricingCurrency(e.target.value.toUpperCase())
+                }
+                maxLength={3}
+                disabled={isSubmitting}
+                className="h-11 rounded-[14px] border-2 border-slate-200/70 px-4 text-base text-slate-600 shadow-none focus-visible:ring-0"
+              />
+            </div>
+            <p className="mt-2 text-xs text-slate-400">
+              Leave min/max as 0 for free events.
+            </p>
+          </div>
+
+          <div className={`${SECTION_CARD}`}>
             <div className="flex items-start justify-between gap-4">
               <span className={SECTION_LABEL}>Location</span>
-              {!isLocationEmpty && (
-                <button
-                  type="button"
-                  className={`${ICON_BUTTON} h-8 w-8`}
-                  aria-label="Edit location"
-                >
-                  <PencilLine className="h-4 w-4" />
-                </button>
-              )}
             </div>
-            {isLocationEmpty ? (
-              <button
-                type="button"
-                className="mt-3 flex items-center gap-3 rounded-lg px-2 py-1 text-base font-normal text-slate-400 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--theme-200)]"
-              >
-                <MapPin className="h-5 w-5 text-slate-400" />
-                <span>Add a location ...</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="mt-3 flex items-center gap-3 rounded-lg px-2 py-1 text-lg text-slate-600 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--theme-200)]"
-              >
-                <MapPin className="h-5 w-5 text-slate-400" />
-                <span>{formattedCities}</span>
-              </button>
-            )}
-            <div className="mt-3 hidden flex-wrap gap-2 group-focus-within:flex">
-              {eventCities.map((city) => {
-                const isSelected = cities.includes(city);
-                return (
-                  <button
-                    key={city}
-                    type="button"
-                    onClick={() => handleCityChange(city, !isSelected)}
-                    className={`${CHIP_BASE} ${
-                      isSelected
-                        ? "border-[color:var(--theme-200)] bg-[color:var(--theme-100)] text-slate-700"
-                        : "border-slate-200/70 text-slate-400 hover:border-[color:var(--theme-200)] hover:text-slate-600"
-                    }`}
-                    disabled={isSubmitting}
-                    aria-pressed={isSelected}
-                  >
-                    {city.replace("-", " ")}
-                  </button>
-                );
-              })}
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <Input
+                id="location-venue"
+                placeholder="Venue (optional)"
+                value={locationVenue}
+                onChange={(e) => setLocationVenue(e.target.value)}
+                disabled={isSubmitting}
+                className="h-11 rounded-[14px] border-2 border-slate-200/70 px-4 text-base text-slate-600 shadow-none focus-visible:ring-0"
+              />
+              <Input
+                id="location-city"
+                placeholder="City (optional)"
+                value={locationCity}
+                onChange={(e) => setLocationCity(e.target.value)}
+                disabled={isSubmitting}
+                className="h-11 rounded-[14px] border-2 border-slate-200/70 px-4 text-base text-slate-600 shadow-none focus-visible:ring-0"
+              />
+              <Input
+                id="location-address"
+                placeholder="Address (optional)"
+                value={locationAddress}
+                onChange={(e) => setLocationAddress(e.target.value)}
+                disabled={isSubmitting}
+                className="h-11 rounded-[14px] border-2 border-slate-200/70 px-4 text-base text-slate-600 shadow-none focus-visible:ring-0 sm:col-span-2"
+              />
+              <Input
+                id="location-country"
+                placeholder="Country (optional)"
+                value={locationCountry}
+                onChange={(e) => setLocationCountry(e.target.value)}
+                disabled={isSubmitting}
+                className="h-11 rounded-[14px] border-2 border-slate-200/70 px-4 text-base text-slate-600 shadow-none focus-visible:ring-0"
+              />
             </div>
           </div>
 
@@ -817,7 +919,7 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
                 <span
                   className={`${CHIP_BASE} border-[color:var(--theme-200)] bg-[color:var(--theme-100)] text-slate-700`}
                 >
-                  {pricing === "free" ? "Free" : "Paid"}
+                  {pricingTag === "free" ? "Free" : "Paid"}
                 </span>
                 {tagFilters.membersOnly && (
                   <span
@@ -837,52 +939,6 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
             ) : null}
             {tagsTouched ? (
               <div className="mt-2 flex flex-wrap items-center gap-2">
-              <RadioGroup
-                value={pricing}
-                onValueChange={(value: EventPricing) => {
-                  setPricing(value);
-                  setTagsTouched(true);
-                  setTagsManuallyChosen(true);
-                }}
-                className="flex items-center gap-2"
-                disabled={isSubmitting}
-              >
-                <div>
-                  <RadioGroupItem
-                    value="free"
-                    id="pricing-free"
-                    className="peer sr-only"
-                  />
-                  <Label
-                    htmlFor="pricing-free"
-                    className={`${CHIP_BASE} border-slate-200/70 text-slate-400 ${
-                      tagsManuallyChosen
-                        ? "peer-data-[state=checked]:border-[color:var(--theme-200)] peer-data-[state=checked]:bg-[color:var(--theme-100)] peer-data-[state=checked]:text-slate-700"
-                        : ""
-                    }`}
-                  >
-                    Free
-                  </Label>
-                </div>
-                <div>
-                  <RadioGroupItem
-                    value="paid"
-                    id="pricing-paid"
-                    className="peer sr-only"
-                  />
-                  <Label
-                    htmlFor="pricing-paid"
-                    className={`${CHIP_BASE} border-slate-200/70 text-slate-400 ${
-                      tagsManuallyChosen
-                        ? "peer-data-[state=checked]:border-[color:var(--theme-200)] peer-data-[state=checked]:bg-[color:var(--theme-100)] peer-data-[state=checked]:text-slate-700"
-                        : ""
-                    }`}
-                  >
-                    Paid
-                  </Label>
-                </div>
-              </RadioGroup>
-              <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => {
@@ -922,7 +978,6 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
                   Early-bird
                 </button>
               </div>
-            </div>
             ) : null}
           </div>
 
@@ -932,7 +987,7 @@ export default function AddEventForm({ onSubmit, onCancel }: AddEventFormProps) 
               disabled={isSubmitting}
               className="h-11 border border-[color:var(--theme)] bg-[color:var(--theme)] px-5 text-white hover:bg-[color:var(--theme)]/90"
             >
-              {isSubmitting ? "Adding..." : "Add Event"}
+              {isSubmitting ? "Saving..." : submitLabel}
             </Button>
             <Button
               variant="outline"
