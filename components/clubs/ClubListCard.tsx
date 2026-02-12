@@ -92,7 +92,9 @@ export function ClubListCard({
                 : "text-secondary-foreground/50"
             }`}
           >
-            {club.university ? universities[(club.university as University)].name : "No university"}
+            {club.university && club.university in universities
+              ? universities[club.university as University].name
+              : club.university || "No university"}
           </p>
         </div>
       </div>
