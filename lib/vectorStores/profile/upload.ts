@@ -7,8 +7,16 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const userVectorStoreId = process.env.OPENAI_USER_VECTOR_STORE_ID;
-const orgVectorStoreId = process.env.OPENAI_ORG_VECTOR_STORE_ID;
+function getVectorStoreIds() {
+  const userVectorStoreId = process.env.OPENAI_USER_VECTOR_STORE_ID;
+  const orgVectorStoreId = process.env.OPENAI_ORG_VECTOR_STORE_ID;
+  
+  if (!userVectorStoreId || !orgVectorStoreId) {
+    throw new Error("Vector store IDs not configured");
+  }
+  
+  return { userVectorStoreId, orgVectorStoreId };
+}
 
 export async function uploadProfileToVectorStore({
   userId,
@@ -18,6 +26,7 @@ export async function uploadProfileToVectorStore({
   supabase: SupabaseClient;
 }) {
   const userDetails = await fetchUserDetails(userId);
+  const { userVectorStoreId, orgVectorStoreId } = getVectorStoreIds();
   console.log("Fetched user details:", userDetails);
 
   if (!userDetails) {
@@ -104,7 +113,7 @@ async function removeProfileFromVectorStore(
   vectorStoreId: string,
   supabase: SupabaseClient,
   userId: string,
-) {
+) {  
   // Remove from vector store
   const { deleted: vsFileDeleted } = await openai.vectorStores.files.delete(
     openaiFileId,

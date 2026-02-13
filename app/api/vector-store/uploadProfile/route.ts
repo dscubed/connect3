@@ -1,8 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
-import { fetchUserDetails } from "@/lib/users/fetchUserDetails";
-import { uploadProfileToVectorStore } from "@/lib/vectorStores/profile/upload";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -35,32 +33,31 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User ID mismatch" }, { status: 403 });
     }
 
-    // Get user information from Supabase
-    const userDetails = await fetchUserDetails(userId);
-    if (!userDetails) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+    // Dedupe: remove any existing pending jobs for this user
+    await supabase
+      .from("profile_upload_jobs")
+      .delete()
+      .eq("user_id", userId)
+      .eq("status", "pending");
 
-    // Upload to OpenAI Vector Store
-    const fileId = await uploadProfileToVectorStore({ userId, supabase });
+    // Enqueue a new upload job
+    const { error: insertError } = await supabase
+      .from("profile_upload_jobs")
+      .insert({ user_id: userId, status: "pending" });
 
-    // Update file id in supabase
-    const { error } = await supabase
-      .from("profiles")
-      .update({ openai_file_id: fileId })
-      .eq("id", userId);
-    if (error) {
-      console.error("Error updating Supabase profile:", error);
+    if (insertError) {
+      console.error("Error enqueuing profile upload job:", insertError);
       return NextResponse.json(
-        { error: "Failed to update profile with OpenAI file ID" },
+        { error: "Failed to enqueue profile upload" },
         { status: 500 },
       );
     }
 
-    return NextResponse.json({
-      message: "Profile uploaded successfully",
-      fileId,
-    });
+    // Return 202 Accepted — the worker will process this asynchronously
+    return NextResponse.json(
+      { message: "Profile upload enqueued" },
+      { status: 202 },
+    );
   } catch (error) {
     console.error("❌ Error in uploadProfile route:", error);
     return NextResponse.json(

@@ -24,10 +24,10 @@ async function blurImageFile(file: File): Promise<File> {
 export async function uploadAvatar(file: File, userId?: string) {
   const supabase = createClient();
   // Generate random UUID filename
-  const fileExt = file.name.split(".").pop();
+  const fileExt = file.name.split(".").pop() || "png";
   const fileName = `${crypto.randomUUID()}.${fileExt}`;
 
-  const filePath = `${userId}/${fileName}`;
+  const filePath = userId ? `${userId}/${fileName}` : fileName;
 
   // Blur the image
   const blurredFile = await blurImageFile(file);
@@ -72,6 +72,42 @@ export async function uploadAvatar(file: File, userId?: string) {
     };
   } catch (error) {
     console.error("Error uploading avatar:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Upload failed",
+    };
+  }
+}
+
+export async function uploadEventThumbnail(file: File) {
+  const supabase = createClient();
+  const fileName = `${crypto.randomUUID()}_${file.name}`;
+  const filePath = fileName;
+  const bucket = "auto_instagram_cache";
+  // TODO: Ensure the bucket exists and has an INSERT policy for authenticated users
+  // (or update this bucket name to match the team's storage policy).
+
+  try {
+    const { error } = await supabase.storage
+      .from(bucket)
+      .upload(filePath, file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (error) throw error;
+
+    const { data: publicUrlData } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(filePath);
+
+    return {
+      success: true,
+      url: publicUrlData.publicUrl,
+      path: filePath,
+    };
+  } catch (error) {
+    console.error("Error uploading event thumbnail:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Upload failed",

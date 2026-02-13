@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { FastAverageColor } from "fast-average-color";
 import { Club } from "@/types/clubs/club";
+import { universities, University } from "../profile/details/univeristies";
 
 export function ClubListCard({
   club,
@@ -91,7 +92,9 @@ export function ClubListCard({
                 : "text-secondary-foreground/50"
             }`}
           >
-            {club.university ?? "No university"}
+            {club.university && club.university in universities
+              ? universities[club.university as University].name
+              : club.university || "No university"}
           </p>
         </div>
       </div>

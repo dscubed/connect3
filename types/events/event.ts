@@ -9,18 +9,7 @@ export type HostedEvent = Omit<Event, 'location' | 'category'> & {
 // Export other types as needed
 export type EventPricing = "free" | "paid";
 export type EventLocationType = "virtual" | "physical";
-export type EventCity =
-  | "melbourne"
-  | "sydney"
-  | "perth"
-  | "canberra"
-  | "adelaide"
-  | "gold-coast"
-  | "newcaste"
-  | "hobart"
-  | "brisbane"
-  | "darwin"
-  | "geelong";
+export type EventCity = string;
 
 export type EventFilePricing =
   | {

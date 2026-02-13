@@ -1,5 +1,17 @@
 import { SearchResponse } from "@/lib/search/types";
 
+export type ProgressEntry =
+  | {
+      kind: "reasoning";
+      key: string;
+      text: string;
+    }
+  | {
+      kind: "search";
+      key: string;
+      queries: string[];
+    };
+
 export interface ChatMessage {
   id: string;
   query: string;
@@ -8,26 +20,10 @@ export interface ChatMessage {
   created_at: string;
   user_id: string;
   status: "pending" | "processing" | "completed" | "failed";
-  progress?: ProgressAction[];
-}
-
-// Streamable progress types for all search actions
-export type ProgressSteps =
-  | "plan"
-  // RAG entity search
-  | "filter"
-  | "search"
-  // General search
-  | "routing"
-  | "general_kb"
-  | "websearch";
-
-export type ProgressStatus = "start" | "complete";
-
-export interface ProgressAction {
-  step: ProgressSteps;
-  message: string;
-  status: ProgressStatus;
+  /** Progress message from the agent, e.g. "Thinking" or "Searching CS clubs" */
+  progress?: string;
+  /** Streamed progress entries (reasoning blocks + search rows). */
+  progressEntries?: ProgressEntry[];
 }
 
 // Utility to format duration between two dates

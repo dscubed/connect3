@@ -19,10 +19,10 @@ export function ChatRoomSearchBar({
 }: ChatRoomSearchBarProps) {
   const [query, setQuery] = useState("");
 
-  const handleSubmit = async (query: string) => {
-    if (query.trim() === "" || inFlight) return;
-    setQuery("");
-    addNewMessage(query);
+  const handleSubmit = async (submittedQuery: string) => {
+    if (submittedQuery.trim() === "" || inFlight) return;
+    setQuery(""); // Clear immediately after submission
+    addNewMessage(submittedQuery);
   };
 
   if (!chatroomId) return null;

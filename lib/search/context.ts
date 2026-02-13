@@ -47,10 +47,12 @@ export const getContext = async (
     throw new Error("Failed to fetch chat history");
   }
 
-  // Build messages array (reverse for chronological order)
+  // Reverse to chronological order (fetched newest-first)
+  const chronologicalHistory = [...(historyData ?? [])].reverse();
+
   const prevMessages: ResponseInput = [];
-  for (let i = 0; i < (historyData?.length ?? 0); i++) {
-    const msg = historyData![i];
+  for (let i = 0; i < chronologicalHistory.length; i++) {
+    const msg = chronologicalHistory[i];
     const content = msg.content as SearchResponse | null;
 
     prevMessages.push({ role: "user", content: msg.query });
@@ -62,5 +64,6 @@ export const getContext = async (
     tldr,
     prevMessages,
     userUniversity,
+    userId: user_id as string,
   };
 };
