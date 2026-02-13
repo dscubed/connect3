@@ -125,7 +125,7 @@ export default function Page() {
   };
 
   const tapCountRef = useRef(0);
-  const tapTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const tapTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const handleTitleTap = useCallback(() => {
     tapCountRef.current += 1;
