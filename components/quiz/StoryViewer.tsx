@@ -115,7 +115,7 @@ export default function StoryViewer() {
               perMove: 1,
               perPage: 1,
             }}
-            onMove={(splide: any, newIndex: number) => {
+            onMove={(splide: unknown, newIndex: number) => {
               setCurrentIndex(newIndex);
             }}
             hasTrack={false}
