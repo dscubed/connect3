@@ -8,6 +8,36 @@ import WhiteLogo from '@/public/white-logo.png';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GlobeIcon } from 'lucide-react';
 import StoryViewer from '@/components/quiz/StoryViewer';
+import { generateMatch, MatchResult } from '@/lib/quiz/generate-match';
+
+const MATCH_RESULT_KEY = 'quiz-match-result';
+
+const LOADING_MESSAGES = [
+  "Analysing your answers...",
+  "Spotting patterns...",
+  "Reading your vibe...",
+  "Choosing your personality...",
+];
+
+function LoadingMessages() {
+  const [messageIndex, setMessageIndex] = useState(0);
+
+  useEffect(() => {
+    if (messageIndex >= LOADING_MESSAGES.length - 1) return;
+    const delay = 1500 + Math.random() * 500;
+    const timer = setTimeout(() => {
+      setMessageIndex((prev) => prev + 1);
+    }, delay);
+    return () => clearTimeout(timer);
+  }, [messageIndex]);
+
+  return (
+    <div className="flex flex-col items-center justify-center gap-4 text-white">
+      <div className="w-10 h-10 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+      <p className="text-lg font-medium">{LOADING_MESSAGES[messageIndex]}</p>
+    </div>
+  );
+}
 
 const fredoka = Fredoka({ subsets: ['latin'] });
 
@@ -32,15 +62,7 @@ function saveProgress(data: Record<string, unknown>) {
   }
 }
 
-function matchCharacter(
-  _answers: Record<number, string[] | string>
-): { character: string; reason: string } {
-  // TODO: implement actual matching logic
-  return {
-    character: 'yellow',
-    reason: 'You are a bright and cheerful person!',
-  };
-}
+
 
 function QRCode({ width }: { width: number }) {
   return (
@@ -56,14 +78,15 @@ function QRCode({ width }: { width: number }) {
 }
 
 export default function Page() {
-  const questions = useMemo(() => getQuestions(1), []);
+  const questions = useMemo(() => getQuestions(7), []);
   const [showQR, setShowQR] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [buttonWidth, setButtonWidth] = useState(0);
 
   const [hydrated, setHydrated] = useState(false);
   const [completed, setCompleted] = useState(false);
-  const [result, setResult] = useState<{ character: string; reason: string } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<MatchResult | null>(null);
   const [initialAnswers, setInitialAnswers] = useState<Record<number, string[] | string> | undefined>();
   const [initialIndex, setInitialIndex] = useState<number | undefined>();
 
@@ -71,7 +94,10 @@ export default function Page() {
     const saved = loadProgress();
     if (saved?.status === 'completed') {
       setCompleted(true);
-      setResult({ character: saved.character, reason: saved.reason });
+      try {
+        const savedResult = localStorage.getItem(MATCH_RESULT_KEY);
+        if (savedResult) setResult(JSON.parse(savedResult));
+      } catch { /* ignore */ }
     } else if (saved) {
       setInitialAnswers(saved.answers);
       setInitialIndex(saved.currentIndex);
@@ -83,11 +109,19 @@ export default function Page() {
     saveProgress({ currentIndex: currentIndex + 1, answers: { ...loadProgress()?.answers, [currentIndex]: answer } });
   };
 
-  const handleFinish = (answers: Record<number, string[] | string>) => {
-    const { character, reason } = matchCharacter(answers);
-    saveProgress({ status: 'completed', answers, character, reason });
-    setResult({ character, reason });
-    setCompleted(true);
+  const handleFinish = async (answers: Record<number, string[] | string>) => {
+    setLoading(true);
+    try {
+      const matchResult = await generateMatch(questions, answers);
+      saveProgress({ status: 'completed', answers });
+      localStorage.setItem(MATCH_RESULT_KEY, JSON.stringify(matchResult));
+      setResult(matchResult);
+      setCompleted(true);
+    } catch (error) {
+      console.error('Failed to generate match:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const tapCountRef = useRef(0);
@@ -99,6 +133,7 @@ export default function Page() {
     if (tapCountRef.current >= 3) {
       tapCountRef.current = 0;
       localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(MATCH_RESULT_KEY);
       window.location.reload();
       return;
     }
@@ -149,7 +184,9 @@ export default function Page() {
 
       <div className="px-4 pb-4 my-auto">
         <div className="w-full max-w-lg mx-auto">
-          {!hydrated ? null : completed && result ? (
+          {!hydrated ? null : loading ? (
+            <LoadingMessages />
+          ) : completed && result ? (
             <StoryViewer />
           ) : (
             <QuestionPage

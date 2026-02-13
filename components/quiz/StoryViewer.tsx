@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { Splide, SplideSlide } from '@splidejs/react-splide';
@@ -8,13 +8,25 @@ import { ChevronLeft, ChevronRight, DownloadIcon } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import blueBg from '@/public/quiz/common-background/blue.png';
 import '@splidejs/react-splide/css';
-import { cardData } from './cards/card-data';
+import { createCards } from './cards/card-data';
 
 export default function StoryViewer() {
   const [currentIndex, setCurrentIndex] = useState(0);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const splideRef = useRef<any>(null);
   const slideContainerRef = useRef<HTMLDivElement>(null);
+  const [cardData, setCardData] = useState<React.ReactNode[]>(createCards());
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('quiz-match-result');
+      if (raw) {
+        const matchResult = JSON.parse(raw);
+        console.log('Quiz Match Result:', matchResult);
+        setCardData(createCards(matchResult));
+      }
+    } catch { /* ignore */ }
+  }, []);
 
   const handleNext = () => {
     if (splideRef.current) {

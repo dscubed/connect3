@@ -1,3 +1,4 @@
+import { MatchResult } from "@/lib/quiz/generate-match";
 import BaseCard from "./BaseCard"
 import Image from "next/image";
 
@@ -20,8 +21,8 @@ function CardFooter() {
   )
 }
 
-export const cardData: React.ReactElement[] = [
-  (
+function AnalysisCard({ data }: { data?: MatchResult }) {
+  return (
     <BaseCard key={0} backgroundImage="/quiz/common-background/rainbow.png" className="text-[#222D56F3]">
       <div className="flex flex-col gap-6 justify-center items-center my-auto text-center">
         <Image src="/quiz/book.png" alt="Book Icon" width={150} height={150} className="w-38" />
@@ -30,7 +31,7 @@ export const cardData: React.ReactElement[] = [
           <h2 className="text-2xl font-medium leading-none">3 things stood out...</h2>
         </div>
         <p className="max-w-xs text-lg leading-tight">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          {data?.standout}
         </p>
         <p className="bg-[#222D56F3] text-white rounded-full px-5 py-2 font-medium text-lg">
           Swipe to reveal
@@ -38,23 +39,29 @@ export const cardData: React.ReactElement[] = [
       </div>
       <CardFooter />
     </BaseCard>
-  ),
-  (
+  );
+}
+
+function CharacterCard({ data }: { data?: MatchResult }) {
+  return (
     <BaseCard key={1} backgroundImage="/quiz/characters/blue/background.png" className="text-white">
       <div className="flex flex-col gap-6 justify-center items-center my-auto text-center">
         <Image src="/quiz/characters/blue/huddle.png" alt="Book Icon" width={150} height={150} className="w-38" />
         <div>
           <p className="text-lg font-medium leading-none my-2">You are the</p>
-          <h2 className="text-3xl font-semibold leading-none">Reliable Tank</h2>
+          <h2 className="text-3xl font-semibold leading-none">{data?.alias}</h2>
         </div>
         <p className="max-w-xs text-lg leading-tight">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          {data?.summary}
         </p>
       </div>
       <CardFooter />
     </BaseCard>
-  ),
-  (
+  );
+}
+
+function SignatureTraitCard({ data }: { data?: MatchResult }) {
+  return (
     <BaseCard key={2} backgroundImage="/quiz/common-background/blue.png" className="text-white">
       <div className="flex flex-col gap-6 justify-center items-center my-auto text-center">
         <Image src="/quiz/characters/blue/hat.png" alt="Book Icon" width={150} height={150} className="w-48" />
@@ -62,13 +69,16 @@ export const cardData: React.ReactElement[] = [
           <h2 className="text-lg font-medium leading-none">Signature Student Trait</h2>
         </div>
         <p className="px-2 font-semibold text-3xl leading-tight">
-          Writes essays at 3am fueled by purpose and caffeine
+          {data?.trait}
         </p>
       </div>
       <CardFooter />
     </BaseCard>
-  ),
-  (
+  );
+}
+
+function StrengthCard({ data }: { data?: MatchResult }) {
+  return (
     <BaseCard key={3} backgroundImage="/quiz/common-background/gray.png" className="text-white">
       <div className="flex flex-col gap-6 justify-center items-center my-auto text-center">
         <Image src="/quiz/plant.png" alt="Book Icon" width={150} height={150} className="w-38" />
@@ -76,13 +86,16 @@ export const cardData: React.ReactElement[] = [
           <h2 className="text-lg font-medium leading-none">Top Strength</h2>
         </div>
         <p className="px-2 font-semibold text-3xl leading-tight">
-          Exceptional leadership and communication skills
+          {data?.strength}
         </p>
       </div>
       <CardFooter />
     </BaseCard>
-  ),
-  (
+  );
+}
+
+function WeaknessCard({ data }: { data?: MatchResult }) {
+  return (
     <BaseCard key={4} backgroundImage="/quiz/common-background/orange.png" className="text-white">
       <div className="flex flex-col gap-6 justify-center items-center my-auto text-center">
         <Image src="/quiz/characters/blue/angry.png" alt="Book Icon" width={150} height={150} className="w-38" />
@@ -90,13 +103,16 @@ export const cardData: React.ReactElement[] = [
           <h2 className="text-lg font-medium leading-none">Peak Weakness</h2>
         </div>
         <p className="px-2 font-semibold text-3xl leading-tight">
-          Sacrifices sleep and personal wellbeing
+          {data?.weakness}
         </p>
       </div>
       <CardFooter />
     </BaseCard>
-  ),
-  (
+  );
+}
+
+function SeeMoreCard() {
+  return (
     <BaseCard key={5} backgroundImage="/quiz/common-background/graphite.png" className="text-white">
       <div className="flex flex-col gap-6 justify-center items-center my-auto text-center">
         <Image src="/quiz/eyes.png" alt="Book Icon" width={300} height={300} className="w-full max-w-sm px-4 mb-16" />
@@ -112,5 +128,16 @@ export const cardData: React.ReactElement[] = [
       </div>
       <CardFooter />
     </BaseCard>
-  ),
-]
+  )
+}
+
+export function createCards(data?: MatchResult): React.ReactNode[] {
+  return [
+    <AnalysisCard key={0} data={data} />,
+    <CharacterCard key={1} data={data} />,
+    <SignatureTraitCard key={2} data={data} />,
+    <StrengthCard key={3} data={data} />,
+    <WeaknessCard key={4} data={data} />,
+    <SeeMoreCard key={5} />
+  ];
+}
