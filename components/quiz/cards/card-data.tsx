@@ -2,6 +2,42 @@ import { MatchResult } from "@/lib/quiz/generate-match";
 import BaseCard from "./BaseCard"
 import Image from "next/image";
 
+const backgroundImageMapping = {
+  "Purple C3": "/quiz/characters/purple/background.png",
+  "Green Squiggle": "/quiz/characters/green/background.png",
+  "Yellow Dorito": "/quiz/characters/yellow/background.png",
+  "Blue Square": "/quiz/characters/blue/background.png",
+  "Round Peach": "/quiz/characters/orange/background.png",
+  "Pink Star": "/quiz/characters/pink/background.png",
+}
+
+const huddleImageMapping = {
+  "Purple C3": "/quiz/characters/purple/huddle.png",
+  "Green Squiggle": "/quiz/characters/green/huddle.png",
+  "Yellow Dorito": "/quiz/characters/yellow/huddle.png",
+  "Blue Square": "/quiz/characters/blue/huddle.png",
+  "Round Peach": "/quiz/characters/orange/huddle.png",
+  "Pink Star": "/quiz/characters/pink/huddle.png",
+}
+
+const hatImageMapping = {
+  "Purple C3": "/quiz/characters/purple/hat.png",
+  "Green Squiggle": "/quiz/characters/green/hat.png",
+  "Yellow Dorito": "/quiz/characters/yellow/hat.png",
+  "Blue Square": "/quiz/characters/blue/hat.png",
+  "Round Peach": "/quiz/characters/orange/hat.png",
+  "Pink Star": "/quiz/characters/pink/hat.png",
+}
+
+const angryImageMapping = {
+  "Purple C3": "/quiz/characters/purple/angry.png",
+  "Green Squiggle": "/quiz/characters/green/angry.png",
+  "Yellow Dorito": "/quiz/characters/yellow/angry.png",
+  "Blue Square": "/quiz/characters/blue/angry.png",
+  "Round Peach": "/quiz/characters/orange/angry.png",
+  "Pink Star": "/quiz/characters/pink/angry.png",
+}
+
 function Logo({ className }: { className?: string }) {
   return (
     <svg width="32" height="29" viewBox="0 0 32 29" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
@@ -43,10 +79,14 @@ function AnalysisCard({ data }: { data?: MatchResult }) {
 }
 
 function CharacterCard({ data }: { data?: MatchResult }) {
+  if (!data) return null;
+  const backgroundImage = backgroundImageMapping[data.name as keyof typeof backgroundImageMapping];
+  const huddleImage = huddleImageMapping[data.name as keyof typeof huddleImageMapping];
+
   return (
-    <BaseCard key={1} backgroundImage="/quiz/characters/blue/background.png" className="text-white">
+    <BaseCard key={1} backgroundImage={backgroundImage} className="text-white">
       <div className="flex flex-col gap-6 justify-center items-center my-auto text-center">
-        <Image src="/quiz/characters/blue/huddle.png" alt="Book Icon" width={150} height={150} className="w-38" />
+        <Image src={huddleImage} alt="Book Icon" width={150} height={150} className="w-38" />
         <div>
           <p className="text-lg font-medium leading-none my-2">You are the</p>
           <h2 className="text-3xl font-semibold leading-none">{data?.alias}</h2>
@@ -61,10 +101,13 @@ function CharacterCard({ data }: { data?: MatchResult }) {
 }
 
 function SignatureTraitCard({ data }: { data?: MatchResult }) {
+  if (!data) return null;
+  const hatImage = hatImageMapping[data.name as keyof typeof hatImageMapping];
+
   return (
     <BaseCard key={2} backgroundImage="/quiz/common-background/blue.png" className="text-white">
       <div className="flex flex-col gap-6 justify-center items-center my-auto text-center">
-        <Image src="/quiz/characters/blue/hat.png" alt="Book Icon" width={150} height={150} className="w-48" />
+        <Image src={hatImage} alt="Book Icon" width={150} height={150} className="w-48" />
         <div>
           <h2 className="text-lg font-medium leading-none">Signature Student Trait</h2>
         </div>
@@ -95,10 +138,13 @@ function StrengthCard({ data }: { data?: MatchResult }) {
 }
 
 function WeaknessCard({ data }: { data?: MatchResult }) {
+  if (!data) return null;
+  const angryImage = angryImageMapping[data.name as keyof typeof angryImageMapping];
+
   return (
     <BaseCard key={4} backgroundImage="/quiz/common-background/orange.png" className="text-white">
       <div className="flex flex-col gap-6 justify-center items-center my-auto text-center">
-        <Image src="/quiz/characters/blue/angry.png" alt="Book Icon" width={150} height={150} className="w-38" />
+        <Image src={angryImage} alt="Book Icon" width={150} height={150} className="w-38" />
         <div>
           <h2 className="text-lg font-medium leading-none">Peak Weakness</h2>
         </div>
