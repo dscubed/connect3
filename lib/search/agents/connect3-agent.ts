@@ -58,7 +58,7 @@ async function searchVectorStore(
         const id = r.attributes.id as string;
         const type = r.attributes.type as string;
         return {
-          marker: `${type}:${id}`,
+          marker: `@@@${type}:${id}@@@`,
           type: type,
           entityId: id,
           score: Math.round(r.score * 1000) / 1000,

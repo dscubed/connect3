@@ -12,33 +12,40 @@ const eventCategorySchema = z.enum([
 
 const eventPricingSchema = z.enum(["free", "paid"]);
 const eventLocationTypeSchema = z.enum(["virtual", "physical"]);
-const eventCitySchema = z.enum([
-  "melbourne",
-  "sydney",
-  "perth",
-  "canberra",
-  "adelaide",
-  "gold-coast",
-  "newcaste",
-  "hobart",
-  "brisbane",
-  "darwin",
-  "geelong",
-]);
+const eventCitySchema = z.string();
 
 export const createEventBodySchema = z.object({
-  id: z.string().uuid(),
-  name: z.string(),
+  id: z.string(),
+  name: z.string().optional().nullable(),
   start: z.coerce.date(),
   end: z.coerce.date(),
-  description: z.string(),
-  type: z.array(eventCategorySchema),
-  thumbnailUrl: z.string().url().optional(),
+  description: z.string().optional().nullable(),
+  type: z.array(eventCategorySchema).optional().default([]),
+  thumbnailUrl: z.string().url().optional().nullable(),
   creator_profile_id: z.string().uuid(),
   collaborators: z.array(z.string().uuid()).optional(),
-  booking_link: z.array(z.string().url()),
+  booking_link: z.array(z.string().url()).optional().default([]),
   pricing: eventPricingSchema,
-  city: z.array(eventCitySchema),
-  location_type: eventLocationTypeSchema,
+  pricing_min: z.coerce.number().nonnegative().optional().default(0),
+  pricing_max: z.coerce.number().nonnegative().optional().default(0),
+  currency: z
+    .string()
+    .length(3)
+    .optional()
+    .nullable()
+    .transform((value) => (value ? value.toUpperCase() : value)),
+  city: z.array(eventCitySchema).optional().default([]),
+  location_type: eventLocationTypeSchema.optional().default("physical"),
+  location: z
+    .object({
+      venue: z.string().optional().nullable(),
+      address: z.string().optional().nullable(),
+      city: z.string().optional().nullable(),
+      country: z.string().optional().nullable(),
+    })
+    .optional()
+    .nullable(),
   university: z.array(z.string()).optional(),
 });
+
+export type CreateEventBody = z.infer<typeof createEventBodySchema>;

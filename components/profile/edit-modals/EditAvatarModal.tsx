@@ -28,9 +28,16 @@ export default function EditAvatarModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { profile, updateProfile, getSupabaseClient } = useAuthStore();
 
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error("File size must be less than 5MB");
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        return;
+      }
       setSelectedFile(file);
       setPreviewUrl(URL.createObjectURL(file));
     }

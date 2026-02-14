@@ -37,8 +37,8 @@ function transformDbEventToEventSchema(dbEvent: any): Event {
       country: dbEvent.event_locations?.country || "TBA",
     },
     pricing: {
-      min: dbEvent.event_pricings.min,
-      max: dbEvent.event_pricings.max,
+      min: dbEvent.event_pricings?.min ?? 0,
+      max: dbEvent.event_pricings?.max ?? 0,
     },
   };
 }
@@ -58,11 +58,11 @@ export async function GET(request: NextRequest) {
       .select(
         `
         *,
-        event_pricings!inner (
+        event_pricings (
           min,
           max
         ),
-        event_locations!inner (
+        event_locations (
           venue,
           address,
           latitude,

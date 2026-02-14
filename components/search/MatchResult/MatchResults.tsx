@@ -8,6 +8,7 @@ import { useEntityCache } from "../hooks/useEntityCache";
 import { useEventCache } from "../hooks/useEventCache";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Calendar, MapPin, Globe } from "lucide-react";
+import Image from "next/image";
 
 const entityColorVariants: Record<EntityType, string> = {
   user: "bg-blue-50 border-blue-200 hover:bg-blue-100",
@@ -204,13 +205,15 @@ const EventMatchCard = memo(function EventMatchCard({
     >
       <CardHeader className="flex flex-row gap-3 items-center p-4">
         {thumbnail ? (
-          <img
-            src={thumbnail}
-            alt={name}
-            width={40}
-            height={40}
-            className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
-          />
+          <div className="relative h-10 w-10 flex-shrink-0">
+            <Image
+              src={thumbnail}
+              alt={name}
+              fill
+              sizes="40px"
+              className="rounded-lg object-cover"
+            />
+          </div>
         ) : (
           <div className="w-10 h-10 rounded-lg bg-rose-200 flex items-center justify-center flex-shrink-0">
             <Calendar className="w-5 h-5 text-rose-600" aria-hidden="true" />

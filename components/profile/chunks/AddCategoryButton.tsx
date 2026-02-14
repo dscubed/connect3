@@ -33,6 +33,7 @@ export function AddCategoryButton() {
   } else if (profile?.account_type === "organisation") {
     categoriesList = organisationCategoriesList.filter(
       (category) =>
+        category !== "Events" &&
         !orderedCategoryChunks.find((cat) => cat.category === category)
     );
   }
