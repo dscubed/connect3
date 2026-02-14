@@ -27,6 +27,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const pathName = usePathname();
   const [chatroomsOpen, setChatroomsOpen] = useState(false);
@@ -37,6 +38,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   useEffect(() => {
     const handleResize = () => setIsDesktop(window.innerWidth >= 768);
     handleResize();
+    // Delay hasMounted so the initial isDesktop correction doesn't animate
+    requestAnimationFrame(() => setHasMounted(true));
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -102,7 +105,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -200, opacity: 0 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className={`absolute top-0 left-full h-[100dvh] w-64 bg-white/95 backdrop-blur-xl border-l border-black/5 pt-12 md:pt-6 px-3 z-40 shadow-lg`}
+              className={`absolute top-0 left-full h-screen w-64 bg-white/95 backdrop-blur-xl border-l border-black/5 pt-12 md:pt-6 px-3 z-40 shadow-lg`}
             >
               <div className="flex flex-col h-full">
                 {/* Close button for chatrooms panel */}
@@ -133,8 +136,8 @@ const Sidebar: React.FC<SidebarProps> = ({
         <motion.aside
           initial={false}
           animate={{ x: isDesktop ? "0%" : sidebarOpen ? "0%" : "-100%" }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
-          className={`z-50 flex flex-col px-4 gap-2 h-[100dvh] bg-white backdrop-blur-xl shadow-xl pt-12 md:pt-6 safe-area-inset-top justify-between
+          transition={hasMounted ? { duration: 0.3, ease: "easeInOut" } : { duration: 0 }}
+          className={`z-50 flex flex-col px-4 gap-2 h-screen bg-white backdrop-blur-xl shadow-xl pt-12 md:pt-6 safe-area-inset-top justify-between
             ${isDesktop ? "w-fit relative md:shadow-none" : "w-fit"}          `}
         >
           {/* Mobile close button */}
