@@ -264,7 +264,8 @@ function DropdownInput({ choices = [], value, onChange, single = false }: InputP
 function validateStudentEmail(email: string) {
   if (typeof email !== 'string') return false;
   const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  return re.test(email.toLowerCase()) && email.indexOf('edu.au') > -1;
+  return re.test(email.toLowerCase());
+    // && email.toLowerCase().endsWith('.edu.au');
 }
 
 export default function QuestionPage({
