@@ -8,7 +8,7 @@ export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-[100svh] relative overflow-hidden">
+    <div className="min-h-[100dvh] relative overflow-hidden">
       <div className="flex relative z-10">
         <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
 
