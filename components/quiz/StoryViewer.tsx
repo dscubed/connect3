@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { Splide, SplideSlide } from '@splidejs/react-splide';
-import { ChevronLeft, ChevronRight, DownloadIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, DownloadIcon, Share2Icon } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import blueBg from '@/public/quiz/common-background/blue.png';
 import '@splidejs/react-splide/css';
@@ -16,6 +16,14 @@ export default function StoryViewer() {
   const splideRef = useRef<any>(null);
   const slideContainerRef = useRef<HTMLDivElement>(null);
   const [cardData, setCardData] = useState<React.ReactNode[]>(createCards());
+  const [canShare, setCanShare] = useState(false);
+  const [alias, setAlias] = useState('');
+
+  const slideNames = ['Analysis', 'Character', 'Signature Trait', 'Strength', 'Weakness', 'See More'];
+
+  useEffect(() => {
+    setCanShare(typeof navigator !== 'undefined' && !!navigator.share);
+  }, []);
 
   useEffect(() => {
     try {
@@ -23,6 +31,7 @@ export default function StoryViewer() {
       if (raw) {
         const matchResult = JSON.parse(raw);
         console.log('Quiz Match Result:', matchResult);
+        setAlias(matchResult.alias || '');
         setCardData(createCards(matchResult));
       }
     } catch { /* ignore */ }
@@ -63,13 +72,22 @@ export default function StoryViewer() {
       await toPng(slideElement, options);
       const dataUrl = await toPng(slideElement, options);
 
-      const link = document.createElement('a');
-      link.href = dataUrl;
-      link.download = `slide-${currentIndex + 1}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      if (canShare) {
+        const res = await fetch(dataUrl);
+        const blob = await res.blob();
+        const fileName = alias ? `${alias} - ${slideNames[currentIndex]}.png` : `slide-${currentIndex + 1}.png`;
+        const file = new File([blob], fileName, { type: 'image/png' });
+        await navigator.share({ files: [file] });
+      } else {
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = alias ? `${alias} - ${slideNames[currentIndex]}.png` : `slide-${currentIndex + 1}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
     } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') return;
       console.error('Download failed:', error);
     }
   };
@@ -162,8 +180,8 @@ export default function StoryViewer() {
             isDownloadDisabled ? 'opacity-0 pointer-events-none' : ''
           }`}
         >
-          <DownloadIcon size={24} />
-          Save Slide
+          {canShare ? <Share2Icon size={24} /> : <DownloadIcon size={24} />}
+          {canShare ? 'Share Slide' : 'Save Slide'}
         </button>
       </div>
     </div>
