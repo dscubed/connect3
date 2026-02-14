@@ -3,12 +3,14 @@ import Sidebar from "@/components/sidebar/Sidebar";
 import HeroSection from "@/components/home/HeroSection";
 import React, { useState } from "react";
 import { SearchBar } from "@/components/home/SearchBar";
+import { CharacterBackground } from "@/components/ui/CharacterBackground";
 
 export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="min-h-[100dvh] relative overflow-hidden">
+      <CharacterBackground />
       <div className="flex relative z-10">
         <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
 
@@ -19,6 +21,7 @@ export default function Home() {
             scrollbarColor: "rgba(255,255,255,0.3) transparent",
           }}
         >
+          
           <HeroSection />
           <div className="w-full pb-4">
             <SearchBar />
