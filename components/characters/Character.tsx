@@ -10,12 +10,17 @@ const Character: React.FC<CharacterProps> = ({
   className = "",
   color,
   expression,
+  grayscale = false,
 }) => {
   const src = emojiMap[expression][color];
 
   return (
     <Image
       src={src}
+      style={{
+        filter: grayscale ? 'grayscale(100%)' : 'grayscale(0%)',
+        opacity: grayscale ? 0.05 : 1.0,
+      }}
       alt={`${expression} ${color} character`}
       width={size}
       height={size}

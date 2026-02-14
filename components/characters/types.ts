@@ -9,4 +9,5 @@ export interface CharacterProps {
   className?: string;        // tailwind / custom classes
   color: CharacterColor;     // which character color
   expression: EyeExpression; // which eye expression
+  grayscale?: boolean; // Whether to convert svg to grayscale and reduce opacity. Used for background component
 }
