@@ -22,14 +22,23 @@ export async function uploadProfileToVectorStore() {
     );
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to enqueue profile upload");
+      
+      // Handle specific 409 conflict error (upload already in progress)
+      if (response.status === 409) {
+        toast.error("Profile upload already in progress. Please wait.", {
+          id: toastId,
+        });
+        return;
+      }
+      
+      throw new Error(errorData.error || "Failed to upload profile");
     }
-    // 202 Accepted — job is queued, worker will process it
-    toast.success("Profile upload queued — it will be processed shortly", {
+    
+    toast.success("Profile uploaded successfully to vector store", {
       id: toastId,
     });
   } catch (e) {
-    console.error("Error enqueuing profile upload:", e);
+    console.error("Error uploading profile:", e);
     toast.error("Failed to upload profile to vector store", { id: toastId });
   }
 }
