@@ -9,6 +9,10 @@ import OpenAI from "openai";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { getFileText } from "@/lib/users/getFileText";
+import {
+  universities as universityMap,
+  University,
+} from "@/components/profile/details/univeristies";
 import type { ConversationMessage, OrchestratorResponse } from "./types";
 
 /** Streaming callbacks for the agent run */
@@ -29,20 +33,32 @@ async function searchVectorStore(
   vectorStoreId: string,
   query: string | string[],
   label: string,
+  universityFilter?: string[],
 ): Promise<string> {
   console.log(
     `[${label}] Searching for:`,
     Array.isArray(query) ? query.join(", ") : query,
   );
   try {
-    const results = await openai.vectorStores.search(vectorStoreId, {
+    const searchParams: Record<string, unknown> = {
       query,
       max_num_results: 8,
       rewrite_query: true,
       ranking_options: {
         score_threshold: 0.1,
       },
-    });
+    };
+
+    if (universityFilter && universityFilter.length > 0) {
+      searchParams.filters = {
+        type: "in",
+        key: "university",
+        value: universityFilter,
+      };
+    }
+
+    // @ts-expect-error — `in` filter operator not yet in the JS SDK types
+    const results = await openai.vectorStores.search(vectorStoreId, searchParams);
     if (results.data.length === 0) {
       console.log(`[${label}] Found 0 results`);
       return JSON.stringify({
@@ -82,6 +98,7 @@ export class Connect3Agent {
   private supabase: SupabaseClient;
   private userUniversity: string | null;
   private userId: string;
+  private selectedUniversities: string[];
   private agent!: Agent;
 
   constructor(
@@ -89,11 +106,13 @@ export class Connect3Agent {
     supabase: SupabaseClient,
     userUniversity?: string | null,
     userId?: string,
+    selectedUniversities?: string[],
   ) {
     this.openai = openai;
     this.supabase = supabase;
     this.userUniversity = userUniversity ?? null;
     this.userId = userId ?? "";
+    this.selectedUniversities = selectedUniversities ?? [];
     this.createAgent();
   }
 
@@ -105,6 +124,7 @@ export class Connect3Agent {
     const openai = this.openai;
     const supabase = this.supabase;
     const currentUserId = this.userId;
+    const uniFilter = this.selectedUniversities;
 
     const getCurrentDate = tool({
       name: "get_current_date",
@@ -153,7 +173,7 @@ export class Connect3Agent {
           ),
       }),
       execute: async ({ query }) =>
-        searchVectorStore(openai, studentsVectorStoreId, query, "search_users"),
+        searchVectorStore(openai, studentsVectorStoreId, query, "search_users", uniFilter),
     });
 
     const searchClubs = tool({
@@ -167,7 +187,7 @@ export class Connect3Agent {
           ),
       }),
       execute: async ({ query }) =>
-        searchVectorStore(openai, clubsVectorStoreId, query, "search_clubs"),
+        searchVectorStore(openai, clubsVectorStoreId, query, "search_clubs", uniFilter),
     });
 
     const searchEvents = tool({
@@ -182,7 +202,7 @@ export class Connect3Agent {
           ),
       }),
       execute: async ({ query }) =>
-        searchVectorStore(openai, eventsVectorStoreId, query, "search_events"),
+        searchVectorStore(openai, eventsVectorStoreId, query, "search_events", uniFilter),
     });
 
     this.agent = new Agent({
@@ -282,9 +302,20 @@ FORMAT:
       }
     }
 
-    const userMessage = userContext
-      ? `[About me: ${userContext}]\n\n${query}`
-      : query;
+    const contextParts: string[] = [];
+    if (userContext) {
+      contextParts.push(`[About me: ${userContext}]`);
+    }
+    if (this.selectedUniversities.length > 0) {
+      const uniNames = this.selectedUniversities.map(
+        (key) => universityMap[key as University]?.name ?? key,
+      );
+      contextParts.push(`[University: ${uniNames.join(", ")}]`);
+    }
+    const userMessage =
+      contextParts.length > 0
+        ? `${contextParts.join("\n")}\n\n${query}`
+        : query;
     messages.push({ role: "user", content: userMessage });
 
     console.log("[Connect3Agent] Running with query:", query);

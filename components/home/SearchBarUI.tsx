@@ -11,6 +11,9 @@ interface SearchBarUIProps {
   disabled?: boolean;
   isLoading?: boolean;
   containerClassName?: string;
+  selectedUniversities?: string[];
+  onUniversityChange?: (uni: string) => void;
+  onUniversityClear?: () => void;
 }
 
 const DEFAULT_CONTAINER_CLASSNAME =
@@ -23,6 +26,9 @@ const SearchBarUIComponent: React.FC<SearchBarUIProps> = ({
   disabled = false,
   isLoading = false,
   containerClassName = DEFAULT_CONTAINER_CLASSNAME,
+  selectedUniversities = [],
+  onUniversityChange = () => {},
+  onUniversityClear = () => {},
 }) => {
   const {
     query: localQuery,
@@ -73,6 +79,9 @@ const SearchBarUIComponent: React.FC<SearchBarUIProps> = ({
             disabled || isSearching || isLoading || localQuery.trim() === ""
           }
           isLoading={isLoading}
+          selectedUniversities={selectedUniversities}
+          onUniversityChange={onUniversityChange}
+          onUniversityClear={onUniversityClear}
         />
       </div>
     </form>

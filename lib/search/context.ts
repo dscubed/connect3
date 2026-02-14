@@ -32,7 +32,18 @@ export const getContext = async (
 
   const userUniversity = userData?.university ?? null;
 
-  // Fetch previous messages (excluding current)
+  const { data: chatroomData } = await supabase
+    .from("chatrooms")
+    .select("universities")
+    .eq("id", chatroom_id)
+    .single();
+
+  const selectedUniversities =
+    typeof chatroomData?.universities === "string" &&
+    chatroomData.universities.length > 0
+      ? chatroomData.universities.split(",")
+      : [];
+
   const CHAT_CONTEXT_LIMIT = 3;
   const { data: historyData, error: historyError } = await supabase
     .from("chatmessages")
@@ -51,10 +62,8 @@ export const getContext = async (
   const chronologicalHistory = [...(historyData ?? [])].reverse();
 
   const prevMessages: ResponseInput = [];
-  for (let i = 0; i < chronologicalHistory.length; i++) {
-    const msg = chronologicalHistory[i];
+  for (const msg of chronologicalHistory) {
     const content = msg.content as SearchResponse | null;
-
     prevMessages.push({ role: "user", content: msg.query });
     prevMessages.push({ role: "assistant", content: content?.markdown ?? "" });
   }
@@ -65,5 +74,6 @@ export const getContext = async (
     prevMessages,
     userUniversity,
     userId: user_id as string,
+    selectedUniversities,
   };
 };

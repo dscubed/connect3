@@ -1,7 +1,7 @@
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
 
-export const createChatroom = async (query: string) => {
+export const createChatroom = async (query: string, universities?: string[]) => {
   const { user, getSupabaseClient } = useAuthStore.getState();
 
   if (!user) {
@@ -12,13 +12,13 @@ export const createChatroom = async (query: string) => {
   const userId = user.id;
   const supabase = getSupabaseClient();
 
-  // Create chatroom
   const title = query.length > 50 ? query.substring(0, 50) + "..." : query;
   const { data: createData, error: createError } = await supabase
     .from("chatrooms")
     .insert({
-      title: title,
+      title,
       created_by: userId,
+      universities: universities?.join(",") ?? "",
     })
     .select()
     .single();
@@ -34,7 +34,7 @@ export const createChatroom = async (query: string) => {
     .from("chatmessages")
     .insert({
       chatroom_id: createData.id,
-      query: query,
+      query,
       content: null,
       user_id: userId,
       status: "pending",

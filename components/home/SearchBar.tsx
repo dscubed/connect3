@@ -1,5 +1,5 @@
 import { SearchBarUI } from "./SearchBarUI";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuthStore } from "@/stores/authStore";
@@ -12,7 +12,20 @@ interface SearchBarProps {
 export function SearchBar({ containerClassName }: SearchBarProps) {
   const [query, setQuery] = useState("");
   const [creatingChatroom, setCreatingChatroom] = useState(false);
+  const [selectedUniversities, setSelectedUniversities] = useState<string[]>(
+    []
+  );
   const router = useRouter();
+
+  const handleUniversityChange = useCallback((uni: string) => {
+    setSelectedUniversities((prev) =>
+      prev.includes(uni) ? prev.filter((u) => u !== uni) : [...prev, uni]
+    );
+  }, []);
+
+  const handleUniversityClear = useCallback(() => {
+    setSelectedUniversities([]);
+  }, []);
 
   const handleSearch = async (searchQuery: string) => {
     if (!searchQuery.trim()) {
@@ -36,8 +49,10 @@ export function SearchBar({ containerClassName }: SearchBarProps) {
         }
       }
 
-      console.log("Creating chatroom for query:", searchQuery);
-      const createResponse = await createChatroom(searchQuery);
+      const createResponse = await createChatroom(
+        searchQuery,
+        selectedUniversities.length > 0 ? selectedUniversities : undefined,
+      );
 
       if (!createResponse) {
         setCreatingChatroom(false);
@@ -45,10 +60,9 @@ export function SearchBar({ containerClassName }: SearchBarProps) {
       }
       const { chatroomId } = createResponse;
 
-      // Navigate immediately
       router.push(`/search?chatroom=${chatroomId}`);
     } catch (error) {
-      console.error("❌ Error creating chatroom:", error);
+      console.error("Error creating chatroom:", error);
       toast.error("Failed to create chatroom. Please try again.");
       setCreatingChatroom(false);
     }
@@ -61,6 +75,9 @@ export function SearchBar({ containerClassName }: SearchBarProps) {
       disabled={creatingChatroom}
       onSubmit={handleSearch}
       containerClassName={containerClassName}
+      selectedUniversities={selectedUniversities}
+      onUniversityChange={handleUniversityChange}
+      onUniversityClear={handleUniversityClear}
     />
   );
 }
