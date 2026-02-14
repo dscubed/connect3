@@ -157,7 +157,7 @@ function WeaknessCard({ data }: { data?: MatchResult }) {
   );
 }
 
-function SeeMoreCard() {
+function SeeMoreCard({ onViewQualities }: { onViewQualities?: () => void }) {
   return (
     <BaseCard key={5} backgroundImage="/quiz/common-background/graphite.png" className="text-white">
       <div className="flex flex-col gap-6 justify-center items-center my-auto text-center">
@@ -167,7 +167,7 @@ function SeeMoreCard() {
         </div>
         <button 
           className="bg-white text-[#424242] rounded-full px-5 py-2 font-medium text-lg hover:bg-gray-200 transition-colors cursor-pointer"
-          onClick={() => window.location.href = '#'}
+          onClick={onViewQualities}
         >
           View all qualities
         </button>
@@ -177,13 +177,13 @@ function SeeMoreCard() {
   )
 }
 
-export function createCards(data?: MatchResult): React.ReactNode[] {
+export function createCards(data?: MatchResult, onViewQualities?: () => void): React.ReactNode[] {
   return [
     <AnalysisCard key={0} data={data} />,
     <CharacterCard key={1} data={data} />,
     <SignatureTraitCard key={2} data={data} />,
     <StrengthCard key={3} data={data} />,
     <WeaknessCard key={4} data={data} />,
-    <SeeMoreCard key={5} />
+    <SeeMoreCard key={5} onViewQualities={onViewQualities} />
   ];
 }

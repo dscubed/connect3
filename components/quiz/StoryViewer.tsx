@@ -9,6 +9,7 @@ import { toPng } from 'html-to-image';
 import blueBg from '@/public/quiz/common-background/blue.png';
 import '@splidejs/react-splide/css';
 import { createCards } from './cards/card-data';
+import QualitiesModal from './QualitiesModal';
 
 export default function StoryViewer() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -18,6 +19,8 @@ export default function StoryViewer() {
   const [cardData, setCardData] = useState<React.ReactNode[]>(createCards());
   const [canShare, setCanShare] = useState(false);
   const [alias, setAlias] = useState('');
+  const [personalityName, setPersonalityName] = useState('');
+  const [showQualities, setShowQualities] = useState(false);
 
   const slideNames = ['Analysis', 'Character', 'Signature Trait', 'Strength', 'Weakness', 'See More'];
 
@@ -32,7 +35,8 @@ export default function StoryViewer() {
         const matchResult = JSON.parse(raw);
         console.log('Quiz Match Result:', matchResult);
         setAlias(matchResult.alias || '');
-        setCardData(createCards(matchResult));
+        setPersonalityName(matchResult.name || '');
+        setCardData(createCards(matchResult, () => setShowQualities(true)));
       }
     } catch { /* ignore */ }
   }, []);
@@ -184,6 +188,12 @@ export default function StoryViewer() {
           {canShare ? 'Share Slide' : 'Save Slide'}
         </button>
       </div>
+
+      <QualitiesModal
+        personalityName={personalityName}
+        open={showQualities}
+        onClose={() => setShowQualities(false)}
+      />
     </div>
   );
 }
