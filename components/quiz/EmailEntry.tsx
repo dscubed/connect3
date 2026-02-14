@@ -25,7 +25,7 @@ export default function EmailEntry({ onNext }: { onNext: () => void }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50 p-6 flex items-center justify-center">
+    <div className="min-h-[100dvh] bg-gradient-to-b from-blue-50 to-purple-50 p-6 flex items-center justify-center">
       <div className="max-w-lg mx-auto w-full">
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold text-gray-900 mb-4">Welcome! 👋</h1>

@@ -53,14 +53,14 @@ export default function SearchPageContent() {
 
   if (!mounted) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-[100dvh] flex items-center justify-center">
         <CubeLoader size={48} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen w-full relative overflow-hidden">
+    <div className="min-h-[100dvh] w-full relative overflow-hidden">
       <div className="flex relative z-10 w-full">
         <Sidebar
           open={sidebarOpen}
@@ -68,7 +68,7 @@ export default function SearchPageContent() {
           chatroomId={chatroomId || undefined}
         />
 
-        <main className="flex-1 min-w-0 pt-16 md:pt-12 relative flex flex-col items-center h-screen">
+        <main className="flex-1 min-w-0 pt-16 md:pt-12 relative flex flex-col items-center h-[100dvh]">
           {/* Scrollable content area */}
           <div
             className="flex-1 overflow-y-auto px-4 pb-36 w-full"
