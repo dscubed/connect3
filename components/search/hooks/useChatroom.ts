@@ -29,8 +29,8 @@ function normalizeMessage(m: Record<string, unknown>): ChatMessage {
 export function useChatroom(chatroomId: string | null) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [inFlight, setInFlight] = useState(false); // Request-in-flight lock
-  const messagesRef = useRef<ChatMessage[]>([]); // Keep ref in sync for visibility handler
+  const [inFlight, setInFlight] = useState(false);
+  const messagesRef = useRef<ChatMessage[]>([]);
 
   const { user, getSupabaseClient, makeAuthenticatedRequest } = useAuthStore();
   const { connectStream, closeStream, isConnected, getCurrentMessageId } =
@@ -43,92 +43,56 @@ export function useChatroom(chatroomId: string | null) {
 
   // Cleanup only on real unmount (prevents killing the websocket on rerenders)
   useEffect(() => {
-    return () => {
-      console.log("[useChatroom] unmount -> closeStream()");
-      closeStream();
-    };
+    return () => closeStream();
   }, [closeStream]);
 
   // Reconnect to stream for pending/processing messages when page becomes visible
   useEffect(() => {
-    const handleVisibilityChange = async () => {
-      if (document.visibilityState === "visible") {
-        console.log(
-          "[useChatroom] page became visible, checking for reconnect...",
-        );
+    function handleVisibilityChange() {
+      if (document.visibilityState !== "visible") return;
 
-        // Find last message that needs streaming
-        const msgs = messagesRef.current;
-        const lastMsg = msgs[msgs.length - 1];
+      const msgs = messagesRef.current;
+      const lastMsg = msgs[msgs.length - 1];
+      if (
+        !lastMsg ||
+        (lastMsg.status !== "pending" && lastMsg.status !== "processing")
+      )
+        return;
 
-        if (
-          lastMsg &&
-          (lastMsg.status === "pending" || lastMsg.status === "processing")
-        ) {
-          // Check if we're already connected to this message
-          const currentId = getCurrentMessageId();
-          const connected = isConnected();
-
-          console.log("[useChatroom] visibility check", {
-            lastMsgId: lastMsg.id,
-            lastMsgStatus: lastMsg.status,
-            currentId,
-            connected,
-          });
-
-          if (!connected || currentId !== lastMsg.id) {
-            console.log(
-              "[useChatroom] reconnecting stream for message",
-              lastMsg.id,
-            );
-            await connectStream(lastMsg.id);
-          }
-        }
+      if (!isConnected() || getCurrentMessageId() !== lastMsg.id) {
+        connectStream(lastMsg.id);
       }
-    };
+    }
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
+    return () =>
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
   }, [connectStream, isConnected, getCurrentMessageId]);
 
-  // Run AI Search for a message
   const triggerSearch = useCallback(
-    async (messageId: string) => {
-      if (inFlight) {
-        console.log("[useChatroom] already in flight");
-        return;
-      }
+    async (messageId: string, universities?: string[]) => {
+      if (inFlight) return;
 
       setInFlight(true);
       try {
-        // Connect to realtime stream first
-        console.log("[useChatroom] connecting stream", messageId);
         await connectStream(messageId);
 
-        // Then trigger the search API
-        console.log("[useChatroom] calling runSearch API", messageId);
         const response = await makeAuthenticatedRequest(
           "/api/chatrooms/runSearch",
           {
             method: "POST",
-            body: JSON.stringify({ messageId }),
+            body: JSON.stringify({ messageId, universities }),
           },
         );
 
-        // Always check HTTP response as backup
-        // In case realtime missed the "done" event
+        // HTTP fallback in case realtime missed the "done" event
         if (response.ok) {
           const data = await response.json();
-          console.log("[useChatroom] HTTP response", data);
-
           if (data.success && data.response) {
             // Only update if message isn't already completed
             setMessages((prev) => {
               const msg = prev.find((m) => m.id === messageId);
               if (msg?.status !== "completed") {
-                console.log("[useChatroom] updating from HTTP fallback");
                 return prev.map((m) =>
                   m.id === messageId
                     ? {
@@ -152,36 +116,29 @@ export function useChatroom(chatroomId: string | null) {
     [connectStream, makeAuthenticatedRequest, inFlight],
   );
 
-  // Add New Message to Chatroom
   const addNewMessage = useCallback(
-    async (query: string) => {
+    async (query: string, universities?: string[]) => {
       if (!query.trim() || !chatroomId || !user || inFlight) return;
 
       try {
         const supabase = getSupabaseClient();
-
-        console.log("[useChatroom] inserting message", { chatroomId, query });
-        const addRes = await supabase
+        const { data } = await supabase
           .from("chatmessages")
           .insert({
             chatroom_id: chatroomId,
             query,
-            content: null, // populated later
+            content: null,
             user_id: user.id,
             status: "pending",
           })
           .select()
           .single();
 
-        const addData = addRes.data;
-        if (!addData) return;
+        if (!data) return;
 
-        const newMessage = normalizeMessage(addData) as ChatMessage;
-
+        const newMessage = normalizeMessage(data) as ChatMessage;
         setMessages((prev) => [...prev, newMessage]);
-
-        console.log("[useChatroom] triggerSearch ->", newMessage.id);
-        await triggerSearch(newMessage.id);
+        await triggerSearch(newMessage.id, universities);
       } catch (error) {
         console.error("[useChatroom] Send message error:", error);
       }
@@ -189,15 +146,10 @@ export function useChatroom(chatroomId: string | null) {
     [chatroomId, user, getSupabaseClient, triggerSearch, inFlight],
   );
 
-  // Retry a failed message
   const retryMessage = useCallback(
     async (messageId: string) => {
-      if (inFlight) {
-        console.log("[useChatroom] already in flight, can't retry");
-        return;
-      }
+      if (inFlight) return;
 
-      // Reset message status to pending
       setMessages((prev) =>
         prev.map((m) =>
           m.id === messageId
@@ -211,27 +163,21 @@ export function useChatroom(chatroomId: string | null) {
         ),
       );
 
-      // Also update in database
       const supabase = getSupabaseClient();
       await supabase
         .from("chatmessages")
         .update({ status: "pending", content: null })
         .eq("id", messageId);
 
-      // Trigger the search again
       await triggerSearch(messageId);
     },
     [inFlight, getSupabaseClient, triggerSearch],
   );
 
-  // Edit Message: Edit and re-run a previous message
   const editMessage = useCallback(
     async (messageId: string, newQuery: string) => {
-      if (inFlight) {
-        console.log("[useChatroom] already in flight, can't edit");
-        return;
-      }
-      // Update message query and reset status
+      if (inFlight) return;
+
       setMessages((prev) =>
         prev.map((m) =>
           m.id === messageId
@@ -245,19 +191,18 @@ export function useChatroom(chatroomId: string | null) {
             : m,
         ),
       );
-      // Also update in database
+
       const supabase = getSupabaseClient();
       await supabase
         .from("chatmessages")
         .update({ query: newQuery, status: "pending", content: null })
         .eq("id", messageId);
-      // Trigger the search again
+
       await triggerSearch(messageId);
     },
     [inFlight, getSupabaseClient, triggerSearch],
   );
 
-  // Load Chatroom Messages
   useEffect(() => {
     if (!chatroomId || !user) {
       setIsLoading(false);
@@ -268,8 +213,6 @@ export function useChatroom(chatroomId: string | null) {
       setIsLoading(true);
       try {
         const supabase = getSupabaseClient();
-
-        console.log("[useChatroom] loading messages", { chatroomId });
         const { data, error } = await supabase
           .from("chatmessages")
           .select("*")
@@ -284,35 +227,21 @@ export function useChatroom(chatroomId: string | null) {
         const loaded = ((data ?? []) as Record<string, unknown>[]).map(
           normalizeMessage,
         );
-        console.log("[useChatroom] loaded messages:", loaded.length);
-
         setMessages(loaded);
 
         // Check if any message is pending/processing and set inFlight accordingly
         const hasPending = loaded.some(
           (m) => m.status === "pending" || m.status === "processing",
         );
-        if (hasPending) {
-          setInFlight(true);
-        }
+        if (hasPending) setInFlight(true);
 
-        // If first message is pending, trigger it
         const firstMsg = loaded[0];
         if (firstMsg?.status === "pending") {
-          console.log(
-            "[useChatroom] first message pending -> triggerSearch",
-            firstMsg.id,
-          );
           triggerSearch(firstMsg.id);
         }
 
-        // If last message is processing, reconnect stream
         const lastMsg = loaded[loaded.length - 1];
         if (lastMsg?.status === "processing") {
-          console.log(
-            "[useChatroom] last message processing -> reconnect stream",
-            lastMsg.id,
-          );
           await connectStream(lastMsg.id);
         }
       } catch (e) {

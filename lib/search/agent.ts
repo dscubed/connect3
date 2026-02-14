@@ -15,14 +15,22 @@ export const runSearch = async (
   openai: OpenAI,
   supabase: SupabaseClient,
   emit?: (event: string, data: unknown) => void,
+  selectedUniversities?: string[],
 ): Promise<SearchResponse> => {
-  // Fetch chatmessage and related data
-  const { query, tldr, prevMessages, userUniversity, userId } =
-    await getContext(chatmessageId, supabase);
+  const {
+    query,
+    tldr,
+    prevMessages,
+    userUniversity,
+    userId,
+    selectedUniversities: storedUniversities,
+  } = await getContext(chatmessageId, supabase);
 
-  console.log("[runSearch] Starting agent system with query:", query);
+  const universities =
+    selectedUniversities && selectedUniversities.length > 0
+      ? selectedUniversities
+      : storedUniversities;
 
-  // Convert prevMessages to agent format
   const conversationHistory: ConversationMessage[] = [];
   for (const msg of prevMessages) {
     if ("role" in msg && "content" in msg) {
@@ -45,6 +53,7 @@ export const runSearch = async (
     userUniversity,
     userId,
     emit,
+    universities,
   );
 
   console.log("[runSearch] Agent system completed");
