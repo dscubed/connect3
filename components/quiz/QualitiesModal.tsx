@@ -69,7 +69,7 @@ export default function QualitiesModal({ personalityName, open, onClose }: Quali
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="z-10 flex flex-col bg-[#1a1a2e] text-white rounded-2xl w-full max-w-md max-h-[calc(100vh-32px)] overflow-y-auto shadow-2xl">
+      <div className="z-10 flex flex-col bg-[#1a1a2e] text-white rounded-2xl w-full max-w-md max-h-[calc(100dvh-32px)] overflow-y-auto shadow-2xl">
         <div className="flex items-center justify-between p-4 pb-3 bg-[#1a1a2e] rounded-t-2xl border-b border-white/10">
           <div className="flex items-center gap-3">
             <Image
