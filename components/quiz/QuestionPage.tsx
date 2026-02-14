@@ -287,7 +287,7 @@ export default function QuestionPage({
   const currentType = currentQuestion.type || 'single';
   
   // Get current answer or default
-  const currentAnswer = answers[currentIndex] ?? (currentType === 'text' ? '' : []);
+  const currentAnswer = answers[currentIndex] ?? ((currentType === 'text' || currentType === 'textarea' || currentType === 'studentemail') ? '' : []);
 
   // Resolve choices for dependent questions
   let effectiveChoices = currentQuestion.choices;
@@ -332,7 +332,7 @@ export default function QuestionPage({
   };
 
   // Check if current question has a valid answer
-  let isNextDisabled = currentType === 'text' 
+  let isNextDisabled = (currentType === 'text' || currentType === 'textarea' || currentType === 'studentemail')
     ? (currentAnswer as string).trim().length === 0
     : (currentAnswer as string[]).length === 0;
 
