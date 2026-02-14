@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GlobeIcon } from 'lucide-react';
 import StoryViewer from '@/components/quiz/StoryViewer';
 import { generateMatch, MatchResult } from '@/lib/quiz/generate-match';
+import { cn } from '@/lib/utils';
 
 const MATCH_RESULT_KEY = 'quiz-match-result';
 
@@ -61,8 +62,6 @@ function saveProgress(data: Record<string, unknown>) {
     // ignore storage errors
   }
 }
-
-
 
 function QRCode({ width }: { width: number }) {
   return (
@@ -150,55 +149,59 @@ export default function Page() {
   };
 
   return (
-    <main className={`min-h-svh w-screen flex flex-col bg-gradient-to-bl from-[#dfcbff] to-[#5817c1] noise ${fredoka.className}`}>
-      <div className="sticky top-0 flex justify-between items-center gap-4 p-4 h-max w-full bg-transparent backdrop-blur-md z-50">
-        <div className="flex gap-3 items-center">
-          <Image onClick={handleTitleTap} src={WhiteLogo} alt="White Logo" className="w-8" />
-          <h1 className="text-white/90 font-medium text-lg mx-auto leading-tight select-none cursor-default">
-            Personality Quiz
-          </h1>
-        </div>
-
-        <div className="relative w-max">
-          <div
-            className={`absolute top-full left-0 mt-2 transition-all duration-300 ease-out ${
-              showQR
-                ? 'opacity-100 translate-y-0'
-                : 'opacity-0 -translate-y-8 pointer-events-none'
-            }`}
-            style={{ width: buttonWidth }}
-          >
-            <QRCode width={buttonWidth} />
+    <main className={`h-dvh w-screen flex flex-col bg-gradient-to-bl from-[#dfcbff] to-[#5817c1] noise ${fredoka.className} overflow-clip`}>
+      <div className="flex flex-col overflow-auto h-full">
+        <div className="sticky top-0 flex justify-between items-center gap-4 p-4 h-max w-full bg-transparent backdrop-blur-md z-50">
+          <div className="flex gap-3 items-center">
+            <Image onClick={handleTitleTap} src={WhiteLogo} alt="White Logo" className="w-8" />
+            <h1 className="text-white/90 font-medium text-lg mx-auto leading-tight select-none cursor-default">
+              Personality Quiz
+            </h1>
           </div>
 
-          <button
-            ref={buttonRef}
-            onClick={toggleQR}
-            className="bg-white text-[#8C4AF7] px-2 pr-4 py-2 rounded-full font-medium flex items-center gap-2 hover:bg-white/90 transition-colors shadow-lg"
-          >
-            <GlobeIcon size={24} />
-            Share Quiz
-          </button>
+          <div className="relative w-max">
+            <div
+              className={`absolute top-full left-0 mt-2 transition-all duration-300 ease-out ${
+                showQR
+                  ? 'opacity-100 translate-y-0'
+                  : 'opacity-0 -translate-y-8 pointer-events-none'
+              }`}
+              style={{ width: buttonWidth }}
+            >
+              <QRCode width={buttonWidth} />
+            </div>
+
+            <button
+              ref={buttonRef}
+              onClick={toggleQR}
+              className="bg-white text-[#8C4AF7] px-2 pr-4 py-2 rounded-full font-medium flex items-center gap-2 hover:bg-white/90 transition-colors shadow-lg"
+            >
+              <GlobeIcon size={24} />
+              Share Quiz
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div className="px-4 pb-4 my-auto">
-        <div className="w-full max-w-lg mx-auto">
-          {!hydrated ? null : loading ? (
-            <LoadingMessages />
-          ) : completed && result ? (
-            <StoryViewer />
-          ) : (
-            <QuestionPage
-              key={hydrated ? 'loaded' : 'init'}
-              questions={questions}
-              initialAnswers={initialAnswers}
-              initialIndex={initialIndex}
-              onNext={handleStep}
-              onFinish={handleFinish}
-            />
-          )}
+        <div className={cn("px-4 pb-4 my-auto", {
+            "pt-8 pb-12": !(completed && result),
+        })}>
+          <div className="w-full max-w-lg mx-auto">
+            {!hydrated ? null : loading ? (
+              <LoadingMessages />
+            ) : completed && result ? (
+              <StoryViewer />
+            ) : (
+              <QuestionPage
+                key={hydrated ? 'loaded' : 'init'}
+                questions={questions}
+                initialAnswers={initialAnswers}
+                initialIndex={initialIndex}
+                onNext={handleStep}
+                onFinish={handleFinish}
+              />
+            )}
 
+          </div>
         </div>
       </div>
     </main>

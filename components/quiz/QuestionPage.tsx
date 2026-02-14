@@ -81,7 +81,7 @@ function MultiChoiceInput({ choices = [], value, onChange }: InputProps) {
             whileTap={{ scale: 0.95 }}
             onClick={() => toggleChoice(choice)}
             className={cn(
-              "px-4 py-2 rounded-full text-lg font-medium transition-all duration-200 shadow-md",
+              "px-4 py-2 rounded-full text-md font-medium transition-all duration-200 shadow-md",
               isSelected
                 ? "bg-white text-[#8C4AF7]"
                 : "bg-white/30 text-white hover:bg-white/30"
