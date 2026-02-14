@@ -10,6 +10,7 @@ import { GlobeIcon } from 'lucide-react';
 import StoryViewer from '@/components/quiz/StoryViewer';
 import { generateMatch, MatchResult } from '@/lib/quiz/generate-match';
 import { cn } from '@/lib/utils';
+import { submitQuizEmail } from '@/lib/quiz/actions';
 
 const MATCH_RESULT_KEY = 'quiz-match-result';
 
@@ -111,6 +112,14 @@ export default function Page() {
   const handleFinish = async (answers: Record<number, string[] | string>) => {
     setLoading(true);
     try {
+      const emailQuestionIndex = questions.findIndex((q) => q.type === 'studentemail');
+      if (emailQuestionIndex !== -1) {
+        const email = answers[emailQuestionIndex];
+        if (typeof email === 'string' && email) {
+          await submitQuizEmail(email).catch(() => {});
+        }
+      }
+
       const matchResult = await generateMatch(questions, answers);
       saveProgress({ status: 'completed', answers });
       localStorage.setItem(MATCH_RESULT_KEY, JSON.stringify(matchResult));
