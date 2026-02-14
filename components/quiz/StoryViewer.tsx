@@ -103,6 +103,8 @@ export default function StoryViewer() {
         style={{ 
           aspectRatio: `${blueBg.width} / ${blueBg.height}`,
           maxWidth: `min(28rem, calc((100svh - 72px - 40px - 32px) * ${aspectRatio}))`,
+          minHeight: '500px',
+          minWidth: `${500 * aspectRatio}px`,
           width: '100%'
         }}
       >
