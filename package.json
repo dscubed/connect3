@@ -55,6 +55,7 @@
     "react-textarea-autosize": "^8.5.9",
     "rehype-external-links": "^3.0.0",
     "remark-gfm": "^4.0.1",
+    "resend": "^6.9.2",
     "robots-parser": "^3.0.1",
     "sharp": "^0.34.4",
     "sonner": "^2.0.7",
