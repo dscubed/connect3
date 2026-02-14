@@ -2,6 +2,8 @@ import { toast } from "sonner";
 import { createClient } from "./client";
 import { SupabaseClient } from "@supabase/supabase-js";
 
+/**
+ * Deprecated: Use client-side resizing instead
 // Resize image to 256x256 using the resize API
 async function resizeImageFile(file: File): Promise<File> {
   const formData = new FormData();
@@ -19,6 +21,7 @@ async function resizeImageFile(file: File): Promise<File> {
     type: "image/png",
   });
 }
+**/
 
 export async function uploadAvatar(file: File, userId?: string) {
   const supabase = createClient();

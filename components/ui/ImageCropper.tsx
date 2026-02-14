@@ -44,7 +44,6 @@ export default function ImageCropper({
   shape = "rect",
   initialZoom = 1,
   fileName = "cropped-image.png",
-  outputSize = 400,
 }: ImageCropperProps) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(initialZoom);
