@@ -26,8 +26,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { messageId } = await req.json();
-  console.log(`[runSearchRoute] incoming`, { messageId, userId: user.id });
+  const { messageId, universities: selectedUniversities } = await req.json();
 
   if (!messageId) {
     return NextResponse.json(
@@ -74,37 +73,14 @@ export async function POST(req: NextRequest) {
   });
 
   const emit: SSEEmitter = async (type, data) => {
-    const dataPreview =
-      typeof data === "string"
-        ? data.slice(0, 160)
-        : JSON.stringify(data).slice(0, 240);
-
-    if (type !== "response") {
-      console.log(`[runSearchRoute] emit_attempt`, {
-        messageId,
-        type,
-        channelState: channel.state,
-        dataPreview,
-      });
-    }
-
     const res = await channel.send({
       type: "broadcast",
       event: type,
       payload: data,
     });
 
-    if (type !== "response") {
-      console.log(`[runSearchRoute] emit_result`, { messageId, type, res });
-    }
-
-    // If send failed, surface it
     if (res !== "ok") {
-      console.error(`[runSearchRoute] emit_error`, {
-        messageId,
-        type,
-        error: res,
-      });
+      console.error(`[runSearchRoute] emit failed`, { messageId, type, res });
     }
   };
 
@@ -119,12 +95,7 @@ export async function POST(req: NextRequest) {
       throw new Error("Failed to update message status");
     }
 
-    const response = await runSearch(messageId, openai, supabase, emit);
-    console.log(`[runSearchRoute] response_ready`, {
-      messageId,
-      markdownLen: response.markdown?.length ?? 0,
-      markdownPreview: response.markdown?.slice(0, 120),
-    });
+    const response = await runSearch(messageId, openai, supabase, emit, selectedUniversities);
 
     await emit("done", {
       success: true,

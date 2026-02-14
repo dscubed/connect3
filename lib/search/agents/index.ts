@@ -34,6 +34,7 @@ export class Connect3AgentSystem {
     userUniversity: string | null,
     userId: string,
     emit?: (event: string, data: unknown) => void,
+    selectedUniversities?: string[],
   ): Promise<AgentSystemResponse> {
     return withTrace("Connect3 Search", async (trace) => {
       console.log(
@@ -45,16 +46,15 @@ export class Connect3AgentSystem {
         this.supabase,
         userUniversity,
         userId,
+        selectedUniversities,
       );
 
       // Track active searches: callId -> query string
       const activeSearches = new Map<string, string>();
 
-      const emitProgress = (
-        emitter: (event: string, data: unknown) => void,
-      ) => {
+      function emitProgress(emitter: (event: string, data: unknown) => void) {
         emitter("progress", { message: "Thinking" });
-      };
+      }
 
       // Start with "Thinking"
       if (emit) emit("progress", { message: "Thinking" });
