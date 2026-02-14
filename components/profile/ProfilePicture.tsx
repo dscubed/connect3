@@ -77,17 +77,24 @@ export default function ProfilePicture({
               <Edit3 className="h-3 w-3" />
             </motion.button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" sideOffset={4}>
-            <DropdownMenuItem onClick={() => setModalOpen(true)}>
-              <Upload className="h-4 w-4 mr-2" />
-              Upload
+          <DropdownMenuContent 
+            align="end" 
+            sideOffset={4}
+            className="w-44 rounded-xl border border-black/10 bg-white shadow-lg p-1"
+          >
+            <DropdownMenuItem 
+              onClick={() => setModalOpen(true)}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors"
+            >
+              <Upload className="h-4 w-4" />
+              <span className="text-sm font-medium">Upload</span>
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={handleReset}
-              className="text-destructive focus:text-destructive"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors text-destructive focus:text-destructive"
             >
-              <RotateCcw className="h-4 w-4 mr-2" />
-              Reset
+              <RotateCcw className="h-4 w-4" />
+              <span className="text-sm font-medium">Reset</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
