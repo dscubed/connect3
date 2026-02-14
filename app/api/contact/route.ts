@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { Resend } from "resend";
+import { EmailTemplate } from "@/components/email/ContactEmailTemplate";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -98,51 +100,18 @@ export async function POST(req: NextRequest) {
     const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL;
     if (contactEmail) {
       try {
-        const { Resend } = await import("resend");
         const resend = new Resend(process.env.RESEND_API_KEY);
 
         await resend.emails.send({
           from: "Connect3 Support <onboarding@resend.dev>",
           to: contactEmail,
           subject: `Contact Form Submission from ${name}`,
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #333;">New Contact Form Submission</h2>
-              
-              <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <p style="margin: 10px 0;"><strong>From:</strong> ${name}</p>
-                <p style="margin: 10px 0;"><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
-              </div>
-              
-              <div style="margin: 20px 0;">
-                <h3 style="color: #333;">Issue Description:</h3>
-                <p style="white-space: pre-wrap; background-color: #f9f9f9; padding: 15px; border-left: 4px solid #007bff; border-radius: 4px;">
-                  ${description}
-                </p>
-              </div>
-              
-              ${
-                screenshotUrl
-                  ? `
-                <div style="margin: 20px 0;">
-                  <h3 style="color: #333;">Screenshot:</h3>
-                  <a href="${screenshotUrl}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px;">
-                    View Screenshot
-                  </a>
-                  <br/><br/>
-                  <img src="${screenshotUrl}" alt="Screenshot" style="max-width: 100%; border: 1px solid #ddd; border-radius: 4px;" />
-                </div>
-              `
-                  : ""
-              }
-              
-              <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;" />
-              
-              <p style="color: #666; font-size: 12px;">
-                This email was sent from the Connect3 contact form.
-              </p>
-            </div>
-          `,
+          html: EmailTemplate({
+            name,
+            email,
+            description,
+            screenshotUrl: screenshotUrl || undefined,
+          }),
         });
 
         console.log(`✅ Contact form email sent to ${contactEmail}`);
