@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState, useEffect, useRef, useCallback } from "react";
+import { useMemo } from "react";
 import { Character, CharacterColor, EyeExpression} from "../characters";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import {

@@ -4,8 +4,6 @@ import HeroSection from "@/components/home/HeroSection";
 import React, { useState } from "react";
 import { SearchBar } from "@/components/home/SearchBar";
 import { CharacterBackground } from "@/components/ui/CharacterBackground";
-import { useWindowSize } from "@/hooks/useWindowSize";
-
 
 export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
