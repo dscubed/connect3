@@ -8,9 +8,12 @@ import { Check, ChevronsUpDown, X } from 'lucide-react';
 export type QuestionType = 'single' | 'multiple' | 'text' | 'textarea' | 'studentemail' | 'single-dropdown' | 'multi-dropdown';
 
 export interface Question {
+  id?: string;
   title: string;
   choices?: string[];
-  type?: QuestionType; // Optional in default data so defaulting to single is useful
+  choicesMap?: Record<string, string[]>;
+  dependsOn?: string;
+  type?: QuestionType;
 }
 
 interface QuestionPageProps {
@@ -285,8 +288,27 @@ export default function QuestionPage({
   // Get current answer or default
   const currentAnswer = answers[currentIndex] ?? (currentType === 'text' ? '' : []);
 
+  // Resolve choices for dependent questions
+  let effectiveChoices = currentQuestion.choices;
+  if (currentQuestion.dependsOn && currentQuestion.choicesMap) {
+    const depIndex = questions.findIndex(q => q.id === currentQuestion.dependsOn);
+    if (depIndex !== -1) {
+      const depAnswer = answers[depIndex];
+      const depValue = Array.isArray(depAnswer) ? depAnswer[0] : depAnswer;
+      effectiveChoices = depValue ? (currentQuestion.choicesMap[depValue] ?? []) : [];
+    }
+  }
+
   const handleAnswerChange = (val: string[] | string) => {
-    setAnswers(prev => ({ ...prev, [currentIndex]: val }));
+    const newAnswers = { ...answers, [currentIndex]: val };
+    if (currentQuestion.id) {
+      questions.forEach((q, idx) => {
+        if (q.dependsOn === currentQuestion.id) {
+          delete newAnswers[idx];
+        }
+      });
+    }
+    setAnswers(newAnswers);
   };
   
   const handleNextClick = () => {
@@ -363,14 +385,14 @@ export default function QuestionPage({
           {/* Inputs */}
           {currentType === 'single' && (
             <SingleChoiceInput 
-              choices={currentQuestion.choices} 
+              choices={effectiveChoices} 
               value={currentAnswer} 
               onChange={handleAnswerChange} 
             />
           )}
           {currentType === 'multiple' && (
             <MultiChoiceInput 
-              choices={currentQuestion.choices} 
+              choices={effectiveChoices} 
               value={currentAnswer} 
               onChange={handleAnswerChange} 
             />
@@ -398,7 +420,7 @@ export default function QuestionPage({
           )}
           {(currentType === 'multi-dropdown' || currentType === 'single-dropdown') && (
             <DropdownInput 
-              choices={currentQuestion.choices} 
+              choices={effectiveChoices} 
               value={currentAnswer} 
               onChange={handleAnswerChange}
               single={currentType === 'single-dropdown'}
