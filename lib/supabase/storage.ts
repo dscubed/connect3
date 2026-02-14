@@ -67,12 +67,11 @@ export async function uploadEventThumbnail(file: File) {
   // (or update this bucket name to match the team's storage policy).
 
   try {
-    // Resize the image to 256x256
-    const resizedFile = await resizeImageFile(file);
+    // Image is already cropped by the client-side cropper
 
     const { error } = await supabase.storage
       .from(bucket)
-      .upload(filePath, resizedFile, {
+      .upload(filePath, file, {
         cacheControl: "3600",
         upsert: false,
       });

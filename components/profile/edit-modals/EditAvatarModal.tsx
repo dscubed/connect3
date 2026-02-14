@@ -132,13 +132,15 @@ export default function EditAvatarModal({
           ) : (
             // Image cropper when image is selected
             <div className="space-y-3">
-              <ImageCropper
-                imageSrc={previewUrl}
-                onCropComplete={handleCropComplete}
-                aspectRatio={1}
-                shape="round"
-                fileName={originalFile?.name || "avatar.png"}
-              />
+              <div className="w-full aspect-square max-w-md">
+                <ImageCropper
+                  imageSrc={previewUrl}
+                  onCropComplete={handleCropComplete}
+                  aspectRatio={1}
+                  shape="round"
+                  fileName={originalFile?.name || "avatar.png"}
+                />
+              </div>
               <Button
                 variant="outline"
                 onClick={handleSelectNewImage}

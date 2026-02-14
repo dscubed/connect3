@@ -19,6 +19,8 @@ interface ImageCropperProps {
   initialZoom?: number;
   /** Original file name for the cropped output */
   fileName?: string;
+  /** Output size in pixels (default: 400) */
+  outputSize?: number;
 }
 
 /**
@@ -42,6 +44,7 @@ export default function ImageCropper({
   shape = "rect",
   initialZoom = 1,
   fileName = "cropped-image.png",
+  outputSize = 400,
 }: ImageCropperProps) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(initialZoom);
@@ -65,9 +68,12 @@ export default function ImageCropper({
   );
 
   return (
-    <div className="relative w-full">
-      {/* Cropper Container */}
-      <div className="relative h-64 w-full overflow-hidden rounded-lg bg-black">
+    <div className="relative w-full h-full flex flex-col">
+      {/* Cropper Container - matches aspect ratio */}
+      <div 
+        className="relative w-full overflow-hidden rounded-lg bg-black"
+        style={{ aspectRatio: aspectRatio }}
+      >
         <Cropper
           image={imageSrc}
           crop={crop}

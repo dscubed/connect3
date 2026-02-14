@@ -47,9 +47,14 @@ export async function getCroppedImg(
     throw new Error("Failed to get canvas context");
   }
 
-  // Set canvas size to the desired output size
-  canvas.width = outputSize;
-  canvas.height = outputSize;
+  // Calculate output dimensions based on crop aspect ratio
+  const cropAspectRatio = pixelCrop.width / pixelCrop.height;
+  const outputWidth = outputSize;
+  const outputHeight = Math.round(outputSize / cropAspectRatio);
+
+  // Set canvas size to the calculated output dimensions
+  canvas.width = outputWidth;
+  canvas.height = outputHeight;
 
   // Draw the cropped region scaled to the output size
   ctx.drawImage(
@@ -60,8 +65,8 @@ export async function getCroppedImg(
     pixelCrop.height,
     0,
     0,
-    outputSize,
-    outputSize
+    outputWidth,
+    outputHeight
   );
 
   // Convert canvas to blob and then to File
