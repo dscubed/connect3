@@ -4,7 +4,6 @@ import sharp from "sharp";
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
 
 export async function POST(req: Request) {
-  // Parse the incoming file from the request
   const formData = await req.formData();
   const file = formData.get("file") as File;
 
@@ -16,23 +15,19 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "File size must be less than 5MB" }, { status: 400 });
   }
 
-  // Convert File to Buffer
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
-  // Blur the image using sharp
-  const blurredBuffer = await sharp(buffer)
+  const resizedBuffer = await sharp(buffer)
     .resize(256, 256, { fit: "cover" })
-    .blur(32)
     .png()
     .toBuffer();
 
-  // Return the blurred image as a response
-  return new NextResponse(new Uint8Array(blurredBuffer), {
+  return new NextResponse(new Uint8Array(resizedBuffer), {
     status: 200,
     headers: {
       "Content-Type": "image/png",
-      "Content-Disposition": `inline; filename="blurred.png"`,
+      "Content-Disposition": `inline; filename="resized.png"`,
     },
   });
 }
