@@ -56,12 +56,10 @@ export default function StoryViewer() {
       const slideElement = slideContainerRef.current?.querySelector('.splide__slide.is-active') as HTMLElement;
       if (!slideElement) return;
 
-      const downloadWidth = 1000;
+      const downloadWidth = 800;
       const pixelRatio = downloadWidth / slideElement.clientWidth;
 
       const options = {
-        width: slideElement.clientWidth,
-        height: slideElement.clientHeight,
         pixelRatio,
         cacheBust: true,
         includeQueryParams: true,
