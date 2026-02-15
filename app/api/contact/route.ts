@@ -82,39 +82,34 @@ export async function POST(req: NextRequest) {
       screenshotUrl = publicUrlData.publicUrl;
     }
 
-    // Store contact submission in database (optional)
-    const { error: dbError } = await supabase.from("contact_submissions").insert({
-      name,
-      email,
-      description,
-      screenshot_url: screenshotUrl,
-      created_at: new Date().toISOString(),
-    });
+    // Generate a short ticket ID for tracking
+    const timestamp = Date.now().toString(36).toUpperCase();
+    const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const ticketId = `C${timestamp}-${randomStr}`;
 
-    if (dbError) {
-      console.error("Error storing contact submission:", dbError);
-      // Don't fail the request if DB insert fails
-    }
-
-    // Send email notification via Resend
-    const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL;
-    if (contactEmail) {
+    // Send email notifications via Resend
+    const supportSendEmail = process.env.SUPPORT_EMAIL;
+    const supportReceiveEmail = process.env.SUPPORT_EMAIL;
+    
+    if (supportSendEmail && supportReceiveEmail) {
       try {
         const resend = new Resend(process.env.RESEND_API_KEY);
 
+        // Send to both user and support team
         await resend.emails.send({
-          from: "Connect3 Support <onboarding@resend.dev>",
-          to: contactEmail,
-          subject: `Contact Form Submission from ${name}`,
+          from: `Connect3 Support <${supportSendEmail}>`,
+          to: [`${name} <${email}>`, `Connect3 Support <${supportReceiveEmail}>`], // Send to both user and support
+          subject: `[${ticketId}] Support Request - ${name}`,
           html: EmailTemplate({
             name,
             email,
             description,
             screenshotUrl: screenshotUrl || undefined,
+            ticketId,
           }),
         });
 
-        console.log(`✅ Contact form email sent to ${contactEmail}`);
+        console.log(`✅ Contact form emails sent to ${email} and ${supportReceiveEmail} (Ticket: ${ticketId})`);
       } catch (emailError) {
         console.error("Failed to send email:", emailError);
         // Don't fail the request if email fails - submission is still stored in DB

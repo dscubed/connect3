@@ -3,10 +3,11 @@ type EmailData = {
   email: string;
   description: string;
   screenshotUrl?: string;
+  ticketId?: string;
 };
 
 export function EmailTemplate(data: EmailData): string {
-  const { name, email, description, screenshotUrl } = data;
+  const { name, email, description, screenshotUrl, ticketId } = data;
 
   return `
 <!DOCTYPE html>
@@ -37,6 +38,7 @@ export function EmailTemplate(data: EmailData): string {
                   Support Request
                 </h1>
               </div>
+              ${ticketId ? `<p style="margin: 8px 0 0 0; color: #ffffff; font-size: 14px; opacity: 0.9;">Ticket ID: <strong>${ticketId}</strong></p>` : ''}
             </td>
           </tr>
 
@@ -100,8 +102,17 @@ ${description}
           <!-- Footer -->
           <tr>
             <td style="padding: 30px; border-top: 1px solid #e5e7eb; background-color: #fafafa;">
-              <p style="margin: 0; color: #6b7280; font-size: 12px; text-align: center;">
-                This email was sent from the Connect3 contact form.
+              <div style="margin-bottom: 16px; padding: 16px; background-color: #f0fdf4; border-left: 4px solid #10b981; border-radius: 4px;">
+                <p style="margin: 0; color: #065f46; font-size: 14px; font-weight: 600; margin-bottom: 4px;">
+                  ✓ Your support request has been received
+                </p>
+                <p style="margin: 0; color: #047857; font-size: 13px;">
+                  A member of the Connect3 team will get back to you soon.
+                </p>
+              </div>
+              <p style="margin: 0; color: #6b7280; font-size: 12px; text-align: center; line-height: 1.5;">
+                This email was sent from the Connect3 contact form.<br>
+                <strong>If you did not submit a support request, please ignore this email.</strong>
               </p>
             </td>
           </tr>

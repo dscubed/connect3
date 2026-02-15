@@ -55,7 +55,7 @@ export default function ContactPage() {
         throw new Error(error.error || "Failed to send message");
       }
 
-      toast.success("Message sent success2xly! We'll get back to you soon.", {
+      toast.success("Message sent successfully! We'll get back to you soon.", {
         id: loadingToast,
       });
 
