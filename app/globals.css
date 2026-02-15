@@ -6,10 +6,16 @@
 /* Add blur effect to shadcn dialog overlay */
 [data-slot="dialog-overlay"] {
   backdrop-filter: blur(8px);
-  background: rgba(0,0,0,0.2);
+  background: rgba(0, 0, 0, 0.2);
 }
+
+[data-slot="dialog-content"] {
+  background: rgba(255, 255, 255);
+}
+
 [data-sonner-toast] {
-  background: rgb(var(--background)) !important; /* or any solid color you prefer */
+  background: rgb(var(--background)) !important;
+  /* or any solid color you prefer */
   color: rgb(var(--foreground)) !important;
 }
 
@@ -41,6 +47,7 @@
     --chart-5: 232 51 102;
     --radius: 0.5rem;
   }
+
   .dark {
     --background: 249 236 255;
     --foreground: 133 78 203;
@@ -73,6 +80,7 @@
   * {
     @apply border-border;
   }
+
   /* html {
     @apply dark;
   } */
@@ -83,18 +91,22 @@
 
 /* Hide scrollbar for horizontal carousel */
 .scrollbar-hide {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
 .scrollbar-hide::-webkit-scrollbar {
-  display: none;  /* Chrome, Safari, Opera */
+  display: none;
+  /* Chrome, Safari, Opera */
 }
 
 @layer utilities {
   .animate-fade-in {
     animation: fadeIn 0.3s ease;
   }
+
   .animate-fade-out {
     animation: fadeOut 0.3s ease;
   }
@@ -104,6 +116,7 @@
       opacity: 0;
       transform: translateY(12px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -115,6 +128,7 @@
       opacity: 1;
       transform: translateY(0);
     }
+
     to {
       opacity: 0;
       transform: translateY(-12px);
@@ -123,9 +137,9 @@
 }
 
 .animated-gradient {
-    background-color: hsla(0, 0%, 0%, 1);
-    background-image: radial-gradient(circle at 85% 80%, hsla(266.99999999999983, 1%, 8%, 0.7) 9%, transparent 55%), radial-gradient(circle at 60% 24%, hsla(335.9999999999997, 2%, 15%, 0.6) 5%, transparent 72%), radial-gradient(circle at 13% 82%, hsla(53.999999999999886, 0%, 0%, 0.3) 5%, transparent 52%), radial-gradient(circle at 24% 7%, hsla(299, 4%, 25%, 0.8) 13%, transparent 68%);
-    background-blend-mode: normal, normal, normal, normal;
+  background-color: hsla(0, 0%, 0%, 1);
+  background-image: radial-gradient(circle at 85% 80%, hsla(266.99999999999983, 1%, 8%, 0.7) 9%, transparent 55%), radial-gradient(circle at 60% 24%, hsla(335.9999999999997, 2%, 15%, 0.6) 5%, transparent 72%), radial-gradient(circle at 13% 82%, hsla(53.999999999999886, 0%, 0%, 0.3) 5%, transparent 52%), radial-gradient(circle at 24% 7%, hsla(299, 4%, 25%, 0.8) 13%, transparent 68%);
+  background-blend-mode: normal, normal, normal, normal;
 }
 
 /* 3D flip card utilities */
@@ -145,10 +159,22 @@
   transform: rotateY(180deg);
 }
 
+.noise {
+  position: relative;
+}
 
+.noise::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.3'/%3E%3C/svg%3E");
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 100;
+}
 
 #auth-background {
-    background-color: hsla(256, 85%, 78%, 1);
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 500 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"), radial-gradient(circle at 46.71505146814667% 45.36673934371383%, hsla(256, 84%, 78%, 0.1) 36.25241449144171%, transparent 62.08365242569557%), radial-gradient(circle at 9.454006088124377% 4.738133041946976%, hsla(0, 0%, 100%, 0.7) 6.25%, transparent 37.939000800804195%), radial-gradient(circle at 25.771288706739526% 104.16449546813965%, hsla(272, 68%, 81%, 1) 8.378432167900934%, transparent 38.1654970380995%), radial-gradient(circle at 122.38508609648498% 77.88628472222223%, hsla(0, 0%, 100%, 1) 18.221255337750488%, transparent 52.514828364054544%), radial-gradient(circle at 8.102800546448087% 7.914496527777778%, hsla(211, 81%, 87%, 1) 8.378432167900934%, transparent 44.4033666540076%);
-    background-blend-mode: overlay, normal, normal, normal, normal, normal;
+  background-color: hsla(256, 85%, 78%, 1);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 500 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"), radial-gradient(circle at 46.71505146814667% 45.36673934371383%, hsla(256, 84%, 78%, 0.1) 36.25241449144171%, transparent 62.08365242569557%), radial-gradient(circle at 9.454006088124377% 4.738133041946976%, hsla(0, 0%, 100%, 0.7) 6.25%, transparent 37.939000800804195%), radial-gradient(circle at 25.771288706739526% 104.16449546813965%, hsla(272, 68%, 81%, 1) 8.378432167900934%, transparent 38.1654970380995%), radial-gradient(circle at 122.38508609648498% 77.88628472222223%, hsla(0, 0%, 100%, 1) 18.221255337750488%, transparent 52.514828364054544%), radial-gradient(circle at 8.102800546448087% 7.914496527777778%, hsla(211, 81%, 87%, 1) 8.378432167900934%, transparent 44.4033666540076%);
+  background-blend-mode: overlay, normal, normal, normal, normal, normal;
 }

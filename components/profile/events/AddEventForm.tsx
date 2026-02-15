@@ -336,6 +336,12 @@ export default function AddEventForm({
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error("File size must be less than 5MB");
+      e.target.value = "";
+      return;
+    }
     setThumbnailFile(file);
     if (previewUrlRef.current) {
       URL.revokeObjectURL(previewUrlRef.current);

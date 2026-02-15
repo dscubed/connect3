@@ -1,9 +1,18 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { Edit3 } from "lucide-react";
+import { Edit3, Upload, RotateCcw } from "lucide-react";
 import EditAvatarModal from "./edit-modals/EditAvatarModal";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useAuthStore } from "@/stores/authStore";
+import { deleteAvatar } from "@/lib/supabase/storage";
+import { toast } from "sonner";
 
 interface ProfilePictureProps {
   avatar: string | null;
@@ -15,6 +24,29 @@ export default function ProfilePicture({
   editingProfile,
 }: ProfilePictureProps) {
   const [modalOpen, setModalOpen] = useState(false);
+  const { profile, updateProfile, getSupabaseClient } = useAuthStore();
+
+  const handleReset = async () => {
+    if (!profile?.id) return;
+
+    try {
+      const supabase = getSupabaseClient();
+      await deleteAvatar(profile.id, supabase);
+
+      const { error } = await supabase
+        .from("profiles")
+        .update({ avatar_url: null })
+        .eq("id", profile.id);
+
+      if (error) throw error;
+
+      updateProfile({ avatar_url: "" });
+      toast.success("Avatar has been reset");
+    } catch (error) {
+      console.error("Error resetting avatar:", error);
+      toast.error("Failed to reset avatar");
+    }
+  };
 
   return (
     <div className="relative w-fit">
@@ -33,19 +65,43 @@ export default function ProfilePicture({
           priority
         />
       </div>
-      {/* Edit Avatar Button */}
+      {/* Edit Avatar Dropdown */}
       {editingProfile && (
-        <motion.button
-          className="absolute bottom-2 right-2 p-2 rounded-full bg-white text-black hover:bg-white/90 transition-colors shadow-lg animate-fade-in"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setModalOpen(true)}
-        >
-          <Edit3 className="h-3 w-3" />
-        </motion.button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <motion.button
+              className="absolute bottom-2 right-2 p-2 rounded-full bg-white text-black hover:bg-white/90 transition-colors shadow-lg animate-fade-in"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <Edit3 className="h-3 w-3" />
+            </motion.button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent 
+            align="end" 
+            sideOffset={4}
+            className="w-44 rounded-xl border border-black/10 bg-white shadow-lg p-1"
+          >
+            <DropdownMenuItem 
+              onClick={() => setModalOpen(true)}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors"
+            >
+              <Upload className="h-4 w-4" />
+              <span className="text-sm font-medium">Upload</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={handleReset}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors text-destructive focus:text-destructive"
+            >
+              <RotateCcw className="h-4 w-4" />
+              <span className="text-sm font-medium">Reset</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
 
       <EditAvatarModal open={modalOpen} onOpenChange={setModalOpen} />
     </div>
   );
 }
+

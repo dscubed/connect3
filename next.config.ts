@@ -2,11 +2,23 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: [
-      "lh3.googleusercontent.com", 
-      "nsjrzxbtxsqmsdgevszv.supabase.co",
-      "images.unsplash.com", // Added for placeholder images
-      "cdn.filestackcontent.com", // humanitix event thumbnails
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "nsjrzxbtxsqmsdgevszv.supabase.co",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn.filestackcontent.com",
+      },
     ],
   },
 };

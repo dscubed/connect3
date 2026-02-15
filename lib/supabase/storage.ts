@@ -2,40 +2,37 @@ import { toast } from "sonner";
 import { createClient } from "./client";
 import { SupabaseClient } from "@supabase/supabase-js";
 
-// Replace blurImageFile with sharp version
-async function blurImageFile(file: File): Promise<File> {
-  // Send the file to your API route
+/**
+ * Deprecated: Use client-side resizing instead
+// Resize image to 256x256 using the resize API
+async function resizeImageFile(file: File): Promise<File> {
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch("/api/blur", {
+  const response = await fetch("/api/resize", {
     method: "POST",
     body: formData,
   });
 
-  if (!response.ok) throw new Error("Failed to blur image");
+  if (!response.ok) throw new Error("Failed to resize image");
 
   const blob = await response.blob();
-  return new File([blob], file.name.replace(/\.[^.]+$/, ".blurred.png"), {
+  return new File([blob], file.name.replace(/\.[^.]+$/, ".png"), {
     type: "image/png",
   });
 }
+**/
 
 export async function uploadAvatar(file: File, userId?: string) {
   const supabase = createClient();
-  // Generate random UUID filename
-  const fileExt = file.name.split(".").pop() || "png";
-  const fileName = `${crypto.randomUUID()}.${fileExt}`;
-
+  // Always use .png since the cropper outputs png
+  const fileName = `${crypto.randomUUID()}.png`;
   const filePath = userId ? `${userId}/${fileName}` : fileName;
 
-  // Blur the image
-  const blurredFile = await blurImageFile(file);
-  const blurredFileName = `blurred/${crypto.randomUUID()}.png`;
-  const blurredFilePath = `${blurredFileName}`;
+  // Image is already cropped and resized to 256x256 by the client-side cropper
 
   try {
-    // Upload original
+    // Upload resized original
     const { error: origError } = await supabase.storage
       .from("avatars")
       .upload(filePath, file, {
@@ -45,30 +42,15 @@ export async function uploadAvatar(file: File, userId?: string) {
 
     if (origError) throw origError;
 
-    // Upload blurred
-    const { error: blurError } = await supabase.storage
-      .from("avatars")
-      .upload(blurredFilePath, blurredFile, {
-        cacheControl: "3600",
-        upsert: false,
-      });
-
-    if (blurError) throw blurError;
-
     // Get public URLs
     const { data: publicUrlData } = supabase.storage
       .from("avatars")
       .getPublicUrl(filePath);
-    const { data: blurredUrlData } = supabase.storage
-      .from("avatars")
-      .getPublicUrl(blurredFilePath);
 
     return {
       success: true,
       url: publicUrlData.publicUrl,
-      blurredUrl: blurredUrlData.publicUrl,
       path: filePath,
-      blurredPath: blurredFilePath,
     };
   } catch (error) {
     console.error("Error uploading avatar:", error);
@@ -81,12 +63,14 @@ export async function uploadAvatar(file: File, userId?: string) {
 
 export async function uploadEventThumbnail(file: File) {
   const supabase = createClient();
-  const fileName = `${crypto.randomUUID()}_${file.name}`;
+  const fileName = `${crypto.randomUUID()}.png`;
   const filePath = fileName;
   const bucket = "event_thumbnails";
   // TODO: Ensure the bucket exists and has an INSERT policy for authenticated users.
 
   try {
+    // Image is already cropped by the client-side cropper
+
     const { error } = await supabase.storage
       .from(bucket)
       .upload(filePath, file, {
@@ -124,7 +108,7 @@ function getStoragePathFromUrl(url: string | null): string | null {
 export async function deleteAvatar(userId: string, supabase: SupabaseClient) {
   const result = await supabase
     .from("profiles")
-    .select("avatar_url, blurred_avatar_url")
+    .select("avatar_url")
     .eq("id", userId)
     .single();
 
@@ -134,9 +118,6 @@ export async function deleteAvatar(userId: string, supabase: SupabaseClient) {
   }
 
   const avatarPath = getStoragePathFromUrl(result.data.avatar_url);
-  const blurredAvatarPath = getStoragePathFromUrl(
-    result.data.blurred_avatar_url
-  );
 
   if (
     avatarPath ==
@@ -147,18 +128,14 @@ export async function deleteAvatar(userId: string, supabase: SupabaseClient) {
   }
 
   try {
-    console.log("Deleting avatar files:", avatarPath, blurredAvatarPath);
+    console.log("Deleting avatar files:", avatarPath);
     const { error } = await supabase.storage
       .from("avatars")
-      .remove([avatarPath || "", blurredAvatarPath || ""]);
+      .remove([avatarPath || ""]);
 
     if (error) throw error;
 
-    console.log(
-      "Deleted avatars:",
-      result.data.avatar_url,
-      result.data.blurred_avatar_url
-    );
+    console.log("Deleted avatars:", result.data.avatar_url);
 
     return { success: true };
   } catch (error) {
@@ -175,7 +152,7 @@ export async function updateAvatar(
   supabase: SupabaseClient
 ) {
   const uploadResult = await uploadAvatar(file, userId);
-  if (!uploadResult.success || !uploadResult.url || !uploadResult.blurredUrl) {
+  if (!uploadResult.success || !uploadResult.url) {
     toast.error(
       `Failed to upload new avatar: ${uploadResult.error || "Unknown error"}`
     );
@@ -192,6 +169,5 @@ export async function updateAvatar(
   return {
     success: true,
     url: uploadResult.url,
-    blurredUrl: uploadResult.blurredUrl,
   };
 }

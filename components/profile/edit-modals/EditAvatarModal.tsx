@@ -8,11 +8,11 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, Upload, X } from "lucide-react";
+import { Loader2, Upload } from "lucide-react";
 import { updateAvatar } from "@/lib/supabase/storage";
-import Image from "next/image";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
+import ImageCropper from "@/components/ui/ImageCropper";
 
 export default function EditAvatarModal({
   open,
@@ -21,75 +21,88 @@ export default function EditAvatarModal({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [originalFile, setOriginalFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [croppedFile, setCroppedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { profile, updateProfile, getSupabaseClient } = useAuthStore();
 
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setSelectedFile(file);
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error("File size must be less than 5MB");
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        return;
+      }
+      setOriginalFile(file);
       setPreviewUrl(URL.createObjectURL(file));
+      setCroppedFile(null); // Reset cropped file when new image is selected
     }
   };
 
-  const handleImageClick = () => {
-    if (selectedFile) {
-      setSelectedFile(null);
-      setPreviewUrl(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    } else {
-      fileInputRef.current?.click();
-    }
+  const handleCropComplete = (croppedFile: File) => {
+    setCroppedFile(croppedFile);
   };
 
   const handleConfirm = async () => {
-    if (!selectedFile) return;
+    if (!croppedFile) {
+      toast.error("Please wait for the image to be cropped");
+      return;
+    }
+    
     setIsUploading(true);
     if (profile && profile.id) {
       const result = await updateAvatar(
         profile.id,
-        selectedFile,
+        croppedFile,
         getSupabaseClient()
       );
       if (!result || result.success === false) {
-        toast.error(`
-          "Failed to update avatar:",
-          ${result?.error || "Unknown error"}
-        `);
+        toast.error(
+          `Failed to update avatar: ${result?.error || "Unknown error"}`
+        );
+        setIsUploading(false);
         return;
       }
       updateProfile({
         avatar_url: result.url,
-        blurred_avatar_url: result.blurredUrl,
       });
       toast.success("Avatar updated successfully!");
     }
     setIsUploading(false);
     onOpenChange(false);
-    setSelectedFile(null);
+    // Reset state
+    setOriginalFile(null);
     setPreviewUrl(null);
+    setCroppedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleCancel = () => {
-    setSelectedFile(null);
+    setOriginalFile(null);
     setPreviewUrl(null);
+    setCroppedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
     onOpenChange(false);
   };
 
-  // Always show image: preview if selected, else profile avatar, else default
-  const avatarSrc = previewUrl || profile?.avatar_url || "/default-avatar.png";
+  const handleSelectNewImage = () => {
+    fileInputRef.current?.click();
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showCloseButton={true}>
+      <DialogContent showCloseButton={true} className="max-w-md">
         <DialogHeader>
           <DialogTitle>Upload New Avatar</DialogTitle>
         </DialogHeader>
-        <div className="flex flex-col gap-4 items-center">
+        
+        <div className="flex flex-col gap-4">
           <input
             ref={fileInputRef}
             type="file"
@@ -97,37 +110,55 @@ export default function EditAvatarModal({
             className="hidden"
             onChange={handleFileChange}
           />
-          <div
-            className="cursor-pointer group relative w-32 h-32"
-            onClick={handleImageClick}
-            title={
-              selectedFile
-                ? "Click to remove selected image"
-                : "Click to upload new image"
-            }
-          >
-            <Image
-              src={avatarSrc}
-              alt="Avatar Preview"
-              width={128}
-              height={128}
-              className="rounded-full w-32 h-32 object-cover border border-white/10 group-hover:opacity-80 transition"
-            />
-            <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-              {selectedFile ? (
-                <X className="h-8 w-8 text-white bg-black/30 rounded-full p-1" />
-              ) : (
-                <Upload className="h-8 w-8 text-white bg-black/30 rounded-full p-1" />
-              )}
-            </span>
-          </div>
+
+          {!previewUrl ? (
+            // Upload prompt when no image selected
+            <div
+              className="flex flex-col items-center justify-center gap-3 p-8 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:border-slate-400 transition-colors"
+              onClick={handleSelectNewImage}
+            >
+              <div className="p-4 rounded-full bg-slate-100">
+                <Upload className="h-8 w-8 text-slate-400" />
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-medium text-slate-700">
+                  Click to upload image
+                </p>
+                <p className="text-xs text-slate-500 mt-1">
+                  PNG, JPG, WEBP up to 5MB
+                </p>
+              </div>
+            </div>
+          ) : (
+            // Image cropper when image is selected
+            <div className="space-y-3">
+              <div className="w-full aspect-square max-w-md">
+                <ImageCropper
+                  imageSrc={previewUrl}
+                  onCropComplete={handleCropComplete}
+                  aspectRatio={1}
+                  shape="round"
+                  fileName={originalFile?.name || "avatar.png"}
+                />
+              </div>
+              <Button
+                variant="outline"
+                onClick={handleSelectNewImage}
+                className="w-full"
+                disabled={isUploading}
+              >
+                Select Different Image
+              </Button>
+            </div>
+          )}
         </div>
+
         <DialogFooter>
           <Button
             className="px-4 py-2 font-medium flex items-center justify-center transition-all duration-150"
             variant="default"
             onClick={handleConfirm}
-            disabled={isUploading || !selectedFile}
+            disabled={isUploading || !croppedFile}
           >
             {isUploading ? (
               <Loader2 className="h-4 w-4 animate-spin" />

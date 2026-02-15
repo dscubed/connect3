@@ -41,7 +41,7 @@ export default function MobileLayout() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen w-full flex flex-col justify-center items-center bg-black">
+      <div className="min-h-[100dvh] w-full flex flex-col justify-center items-center bg-black">
         <CubeLoader size={32} />
         <p>Loading events...</p>
       </div>
