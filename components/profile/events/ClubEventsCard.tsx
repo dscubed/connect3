@@ -26,6 +26,7 @@ type RawEvent = {
   thumbnail?: string | null;
   created_at?: string | null;
   event_pricings?: { min?: number | null; max?: number | null } | null;
+  category?: string | null;
 };
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -61,6 +62,13 @@ const getPricingTag = (
   return isFree
     ? { label: "Free", className: "bg-emerald-100 text-emerald-700" }
     : { label: "Paid", className: "bg-pink-100 text-pink-700" };
+};
+
+const formatCategoryLabel = (category?: string | null) => {
+  if (!category) return null;
+  return category
+    .replace(/[-_]/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
 const sortEvents = (events: RawEvent[]) => {
@@ -378,15 +386,25 @@ export default function ClubEventsCard({
                   {formatEventDate(event.start)}
                 </div>
                 {(() => {
-                  const tag = getPricingTag(event.event_pricings ?? undefined);
-                  if (!tag) return null;
+                  const pricingTag = getPricingTag(
+                    event.event_pricings ?? undefined
+                  );
+                  const categoryLabel = formatCategoryLabel(event.category);
+                  if (!pricingTag && !categoryLabel) return null;
                   return (
                     <div className="mt-2 flex flex-wrap gap-2">
-                      <span
-                        className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${tag.className}`}
-                      >
-                        {tag.label}
-                      </span>
+                      {pricingTag ? (
+                        <span
+                          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${pricingTag.className}`}
+                        >
+                          {pricingTag.label}
+                        </span>
+                      ) : null}
+                      {categoryLabel ? (
+                        <span className="rounded-full bg-purple-100 px-2.5 py-1 text-[11px] font-semibold text-purple-700">
+                          {categoryLabel}
+                        </span>
+                      ) : null}
                     </div>
                   );
                 })()}
@@ -496,15 +514,29 @@ export default function ClubEventsCard({
                       </div>
                     </div>
                     {(() => {
-                      const tag = getPricingTag(detailPricing ?? undefined);
-                      if (!tag) return null;
+                      const pricingTag = getPricingTag(
+                        detailPricing ?? undefined
+                      );
+                      const categoryLabel = formatCategoryLabel(
+                        typeof detailCategory === "string"
+                          ? detailCategory
+                          : detailCategory?.category ?? detailCategory?.type ?? null
+                      );
+                      if (!pricingTag && !categoryLabel) return null;
                       return (
                         <div className="mt-4 flex flex-wrap gap-2">
-                          <span
-                            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${tag.className}`}
-                          >
-                            {tag.label}
-                          </span>
+                          {pricingTag ? (
+                            <span
+                              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${pricingTag.className}`}
+                            >
+                              {pricingTag.label}
+                            </span>
+                          ) : null}
+                          {categoryLabel ? (
+                            <span className="rounded-full bg-purple-100 px-2.5 py-1 text-[11px] font-semibold text-purple-700">
+                              {categoryLabel}
+                            </span>
+                          ) : null}
                         </div>
                       );
                     })()}
