@@ -3,6 +3,8 @@
   <h1 align="center">Next.js and Supabase Starter Kit</h1>
 </a>
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/dscubed/connect3)
+
 <p align="center">
  The fastest way to build apps with Next.js and Supabase
 </p>
