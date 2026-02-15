@@ -53,8 +53,7 @@ export function useChunks({
      */
     if (!profile) return;
 
-    const staticCategories: AllCategories[] =
-      profile?.account_type === "organisation" ? ["Events"] : [];
+    const staticCategories: AllCategories[] = profile ? ["Events"] : [];
     const usedCategories = new Set([
       ...chunks.map((chunk) => chunk.category),
       ...staticCategories,
