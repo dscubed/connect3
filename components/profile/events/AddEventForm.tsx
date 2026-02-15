@@ -78,22 +78,6 @@ const TIMEZONE_OPTIONS = [
   { offset: "GMT+10:00", city: "Hobart" },
 ];
 
-function EventThemeIconPlaceholder({ theme }: { theme: ThemePreset }) {
-  // TODO: Replace with real theme icon asset that matches selected colour.
-  return (
-    <div
-      className="flex h-14 w-14 items-center justify-center rounded-full border text-[12px] font-semibold shadow-sm"
-      style={{
-        backgroundColor: theme.tint100,
-        borderColor: theme.border,
-        color: theme.main,
-      }}
-    >
-      ICON
-    </div>
-  );
-}
-
 export default function AddEventForm({
   onSubmit,
   onCancel,
@@ -483,9 +467,6 @@ export default function AddEventForm({
                 disabled={isSubmitting}
               />
             </label>
-            <div className="absolute right-0 top-0 z-10 -translate-y-1/2 translate-x-1/2">
-              <EventThemeIconPlaceholder theme={currentTheme} />
-            </div>
           </div>
           <div className="mt-4 flex w-full max-w-[320px] items-center justify-center gap-3">
             {themePresets.map((theme) => {

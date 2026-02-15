@@ -25,15 +25,11 @@ type RawEvent = {
   is_online?: boolean | null;
   thumbnail?: string | null;
   created_at?: string | null;
+  event_pricings?: { min?: number | null; max?: number | null } | null;
 };
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-const PLACEHOLDER_TAGS = [
-  { label: "Paid", className: "bg-pink-100 text-pink-600" },
-  { label: "Members-only", className: "bg-emerald-100 text-emerald-600" },
-  { label: "+2 more", className: "bg-purple-100 text-purple-600" },
-];
 
 const formatEventDate = (start?: string | null) => {
   if (!start) return "Date TBD";
@@ -51,6 +47,15 @@ const formatEventDate = (start?: string | null) => {
     })
     .replace(" ", "");
   return `${datePart}, ${timePart}`;
+};
+
+const getPricingTag = (pricing?: { min?: number | null; max?: number | null }) => {
+  const min = Number(pricing?.min ?? 0);
+  const max = Number(pricing?.max ?? 0);
+  const isFree = min === 0 && max === 0;
+  return isFree
+    ? { label: "Free", className: "bg-emerald-100 text-emerald-700" }
+    : { label: "Paid", className: "bg-pink-100 text-pink-700" };
 };
 
 const sortEvents = (events: RawEvent[]) => {
@@ -368,14 +373,16 @@ export default function ClubEventsCard({
                   {formatEventDate(event.start)}
                 </div>
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {PLACEHOLDER_TAGS.map((tag) => (
-                    <span
-                      key={`${event.id}-${tag.label}`}
-                      className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${tag.className}`}
-                    >
-                      {tag.label}
-                    </span>
-                  ))}
+                  {(() => {
+                    const tag = getPricingTag(event.event_pricings ?? undefined);
+                    return (
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${tag.className}`}
+                      >
+                        {tag.label}
+                      </span>
+                    );
+                  })()}
                 </div>
               </div>
               {isOwnProfile ? (
@@ -483,14 +490,16 @@ export default function ClubEventsCard({
                       </div>
                     </div>
                     <div className="mt-4 flex flex-wrap gap-2">
-                      {PLACEHOLDER_TAGS.map((tag) => (
-                        <span
-                          key={`${selectedEventId}-${tag.label}-detail`}
-                          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${tag.className}`}
-                        >
-                          {tag.label}
-                        </span>
-                      ))}
+                      {(() => {
+                        const tag = getPricingTag(detailPricing ?? undefined);
+                        return (
+                          <span
+                            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${tag.className}`}
+                          >
+                            {tag.label}
+                          </span>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
