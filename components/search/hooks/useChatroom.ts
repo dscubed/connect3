@@ -30,6 +30,7 @@ export function useChatroom(chatroomId: string | null) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [inFlight, setInFlight] = useState(false);
+  const [notFound, setNotFound] = useState(false);
   const messagesRef = useRef<ChatMessage[]>([]);
 
   const { user, getSupabaseClient, makeAuthenticatedRequest } = useAuthStore();
@@ -223,8 +224,21 @@ export function useChatroom(chatroomId: string | null) {
 
     const load = async () => {
       setIsLoading(true);
+      setNotFound(false);
       try {
         const supabase = getSupabaseClient();
+
+        const { data: chatroom, error: chatroomError } = await supabase
+          .from("chatrooms")
+          .select("id")
+          .eq("id", chatroomId!)
+          .single();
+
+        if (chatroomError || !chatroom) {
+          console.warn("[useChatroom] chatroom not found or not owned by user");
+          setNotFound(true);
+          return;
+        }
 
         console.log("[useChatroom] loading messages", { chatroomId });
         const { data, error } = await supabase
@@ -291,5 +305,6 @@ export function useChatroom(chatroomId: string | null) {
     retryMessage,
     editMessage,
     inFlight,
+    notFound,
   };
 }

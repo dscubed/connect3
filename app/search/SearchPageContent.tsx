@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Sidebar from "@/components/sidebar/Sidebar";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import { MessageList } from "@/components/search/Messages/MessageList";
@@ -30,10 +30,17 @@ export default function SearchPageContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sheet, setSheet] = useState<SheetState>({ type: null, id: null });
 
+  const router = useRouter();
   const searchParams = useSearchParams();
   const chatroomId = mounted ? searchParams?.get("chatroom") || null : null;
-  const { messages, addNewMessage, inFlight, retryMessage, editMessage } =
-    useChatroom(chatroomId);
+  const {
+    messages,
+    addNewMessage,
+    inFlight,
+    retryMessage,
+    editMessage,
+    notFound: chatroomNotFound,
+  } = useChatroom(chatroomId);
 
   const handleProfileClick = useCallback((entity: EntityResult) => {
     setSheet({
@@ -50,6 +57,12 @@ export default function SearchPageContent() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (chatroomNotFound) {
+      router.replace("/404");
+    }
+  }, [chatroomNotFound, router]);
 
   if (!mounted) {
     return (
