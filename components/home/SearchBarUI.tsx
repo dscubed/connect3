@@ -43,7 +43,6 @@ const SearchBarUIComponent: React.FC<SearchBarUIProps> = ({
     e.preventDefault();
     if (disabled || isLoading) return;
     onSubmit?.(localQuery);
-    setQuery(localQuery);
   };
 
   return (
