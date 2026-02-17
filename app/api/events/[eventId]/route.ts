@@ -14,6 +14,16 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
+const EVENT_THUMBNAIL_BUCKET = "event_thumbnails";
+
+const getEventThumbnailPathFromUrl = (url: string | null) => {
+    if (!url) return null;
+    const match = url.match(
+        new RegExp(`/${EVENT_THUMBNAIL_BUCKET}/(.+)$`)
+    );
+    return match ? match[1] : null;
+};
+
 const deleteVectorStoreFile = async (fileId: string) => {
     const vectorStoreId = process.env.OPENAI_EVENTS_VECTOR_STORE_ID;
     if (!vectorStoreId) {
@@ -342,7 +352,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParameters) {
     try {
         const { data: existingEvent, error: fetchError } = await supabase
             .from("events")
-            .select("creator_profile_id, location_id, pricing_id")
+            .select("creator_profile_id, location_id, pricing_id, thumbnail")
             .eq("id", eventId)
             .single();
 
@@ -398,6 +408,17 @@ export async function PATCH(request: NextRequest, { params }: RouteParameters) {
                 { error: updateError.message },
                 { status: 500 }
             );
+        }
+
+        if (thumbnailUrl && thumbnailUrl !== existingEvent.thumbnail) {
+            const existingPath = getEventThumbnailPathFromUrl(
+                existingEvent.thumbnail ?? null
+            );
+            if (existingPath) {
+                await supabase.storage
+                    .from(EVENT_THUMBNAIL_BUCKET)
+                    .remove([existingPath]);
+            }
         }
 
         if (hasLocation) {

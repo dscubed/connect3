@@ -8,6 +8,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Trash2 } from "lucide-react";
 import { useProfileContext } from "@/components/profile/ProfileProvider";
 import { useAuthStore } from "@/stores/authStore";
 import EventFormSheet from "@/components/profile/events/EventFormSheet";
@@ -24,15 +25,12 @@ type RawEvent = {
   is_online?: boolean | null;
   thumbnail?: string | null;
   created_at?: string | null;
+  event_pricings?: { min?: number | null; max?: number | null } | null;
+  category?: string | null;
 };
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-const PLACEHOLDER_TAGS = [
-  { label: "Paid", className: "bg-pink-100 text-pink-600" },
-  { label: "Members-only", className: "bg-emerald-100 text-emerald-600" },
-  { label: "+2 more", className: "bg-purple-100 text-purple-600" },
-];
 
 const formatEventDate = (start?: string | null) => {
   if (!start) return "Date TBD";
@@ -50,6 +48,27 @@ const formatEventDate = (start?: string | null) => {
     })
     .replace(" ", "");
   return `${datePart}, ${timePart}`;
+};
+
+const getPricingTag = (
+  pricing?: { min?: number | null; max?: number | null },
+) => {
+  if (!pricing || (pricing.min == null && pricing.max == null)) {
+    return null;
+  }
+  const min = Number(pricing.min ?? 0);
+  const max = Number(pricing.max ?? 0);
+  const isFree = min === 0 && max === 0;
+  return isFree
+    ? { label: "Free", className: "bg-emerald-100 text-emerald-700" }
+    : { label: "Paid", className: "bg-pink-100 text-pink-700" };
+};
+
+const formatCategoryLabel = (category?: string | null) => {
+  if (!category) return null;
+  return category
+    .replace(/[-_]/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
 const sortEvents = (events: RawEvent[]) => {
@@ -267,6 +286,26 @@ export default function ClubEventsCard({
     mutate(`/api/events/${editingEventId}`);
   };
 
+  const handleDeleteEvent = async (eventId: string) => {
+    const response = await makeAuthenticatedRequest(
+      `/api/events/${eventId}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    if (!response.ok) {
+      toast.error("Failed to delete event");
+      return;
+    }
+
+    toast.success("Event deleted");
+    if (editingEventId === eventId) {
+      setEditingEventId(null);
+    }
+    mutate(`/api/users/${profileId}/events?limit=24`);
+  };
+
   if (isLoading) {
     return (
       <div className="py-4 text-sm text-slate-400">Loading events...</div>
@@ -296,9 +335,8 @@ export default function ClubEventsCard({
       <div className={showAll ? "max-h-[420px] overflow-y-auto pr-2" : ""}>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {displayEvents.map((event) => (
-            <button
+            <div
               key={event.id}
-              type="button"
               onClick={() => {
                 if (isOwnProfile) {
                   setEditingEventId(event.id);
@@ -307,6 +345,19 @@ export default function ClubEventsCard({
                   setViewingEventId(event.id);
                 }
               }}
+              onKeyDown={(eventKey) => {
+                if (eventKey.key === "Enter" || eventKey.key === " ") {
+                  eventKey.preventDefault();
+                  if (isOwnProfile) {
+                    setEditingEventId(event.id);
+                    setViewingEventId(null);
+                  } else {
+                    setViewingEventId(event.id);
+                  }
+                }
+              }}
+              role="button"
+              tabIndex={0}
               className="flex items-start gap-4 text-left"
             >
               <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
@@ -334,18 +385,50 @@ export default function ClubEventsCard({
                 <div className="text-xs text-slate-500">
                   {formatEventDate(event.start)}
                 </div>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {PLACEHOLDER_TAGS.map((tag) => (
-                    <span
-                      key={`${event.id}-${tag.label}`}
-                      className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${tag.className}`}
-                    >
-                      {tag.label}
-                    </span>
-                  ))}
-                </div>
+                {(() => {
+                  const pricingTag = getPricingTag(
+                    event.event_pricings ?? undefined
+                  );
+                  const categoryLabel = formatCategoryLabel(event.category);
+                  if (!pricingTag && !categoryLabel) return null;
+                  return (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {pricingTag ? (
+                        <span
+                          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${pricingTag.className}`}
+                        >
+                          {pricingTag.label}
+                        </span>
+                      ) : null}
+                      {categoryLabel ? (
+                        <span className="rounded-full bg-purple-100 px-2.5 py-1 text-[11px] font-semibold text-purple-700">
+                          {categoryLabel}
+                        </span>
+                      ) : null}
+                    </div>
+                  );
+                })()}
               </div>
-            </button>
+              {isOwnProfile ? (
+                <span className="ml-auto">
+                  <button
+                    type="button"
+                    onClick={(eventClick) => {
+                      eventClick.stopPropagation();
+                      const confirmed = window.confirm(
+                        "Delete this event? This cannot be undone."
+                      );
+                      if (!confirmed) return;
+                      handleDeleteEvent(event.id);
+                    }}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full text-rose-500 hover:bg-rose-50"
+                    aria-label="Delete event"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </span>
+              ) : null}
+            </div>
           ))}
         </div>
       </div>
@@ -430,16 +513,33 @@ export default function ClubEventsCard({
                           : locationLine || "Location coming soon"}
                       </div>
                     </div>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {PLACEHOLDER_TAGS.map((tag) => (
-                        <span
-                          key={`${selectedEventId}-${tag.label}-detail`}
-                          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${tag.className}`}
-                        >
-                          {tag.label}
-                        </span>
-                      ))}
-                    </div>
+                    {(() => {
+                      const pricingTag = getPricingTag(
+                        detailPricing ?? undefined
+                      );
+                      const categoryLabel = formatCategoryLabel(
+                        typeof detailCategory === "string"
+                          ? detailCategory
+                          : detailCategory?.category ?? detailCategory?.type ?? null
+                      );
+                      if (!pricingTag && !categoryLabel) return null;
+                      return (
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {pricingTag ? (
+                            <span
+                              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${pricingTag.className}`}
+                            >
+                              {pricingTag.label}
+                            </span>
+                          ) : null}
+                          {categoryLabel ? (
+                            <span className="rounded-full bg-purple-100 px-2.5 py-1 text-[11px] font-semibold text-purple-700">
+                              {categoryLabel}
+                            </span>
+                          ) : null}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
 
