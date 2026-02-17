@@ -11,19 +11,13 @@ const locationSchema = z.object({
   country: z.string(),
 });
 
-const categorySchema = z.object({
-  type: z.string(),
-  category: z.string(),
-  subcategory: z.string(),
-});
-
 const pricingSchema = z
   .object({
-    min: z.number().int().nonnegative(),
-    max: z.number().int().nonnegative(),
+    min: z.number().nonnegative(),
+    max: z.number().nonnegative(),
   })
   .refine((data: { min: number; max: number }) => data.max >= data.min, {
-    message: "Max must be greater than min",
+    message: "Max must be greater or equal to min",
     path: ["max"],
   });
 
@@ -42,15 +36,14 @@ const eventSchema = z.object({
     .string()
     .length(3)
     .transform((s) => s.toUpperCase()),
-  category: categorySchema,
+  category: z.string(),
   isOnline: z.boolean(),
   location: locationSchema,
   pricing: pricingSchema,
   openaiFileId: z.string().optional(), // id in vector database
 });
 
-export { eventSchema, locationSchema, categorySchema };
+export { eventSchema, locationSchema };
 export type Event = z.infer<typeof eventSchema>;
 export type Location = z.infer<typeof locationSchema>;
-export type Category = z.infer<typeof categorySchema>;
 export type Pricing = z.infer<typeof pricingSchema>;
