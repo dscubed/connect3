@@ -32,7 +32,7 @@ export function LoggedInAuthButton() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center justify-center w-8 h-8 rounded-full bg-black text-white hover:scale-105 transition-transform focus:outline-none overflow-hidden">
+        <button className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-black hover:scale-105 transition-transform focus:outline-none overflow-hidden">
           <UserAvatar
             avatarUrl={profile?.avatar_url}
             fullName={profile?.first_name || "User"}
