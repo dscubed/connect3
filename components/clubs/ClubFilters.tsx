@@ -48,7 +48,7 @@ export default function ClubFilters({
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className="justify-between rounded-2xl px-3 py-2 text-sm border-none text-foreground"
+            className="justify-between rounded-2xl px-3 py-2 text-sm border-none text-foreground shadow-none"
           >
             <Filter className="h-4 w-4" />
           </Button>
@@ -58,7 +58,7 @@ export default function ClubFilters({
             <DropdownMenuItem
               key={uni}
               onClick={() => setSelectedUniversity(uni)}
-              className={uni === selectedUniversity ? "font-bold" : ""}
+              className={uni === selectedUniversity ? "font-medium" : ""}
             >
               {uni === "All"
                 ? "All universities"
