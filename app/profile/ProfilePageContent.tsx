@@ -79,6 +79,12 @@ function ProfilePageContentInner({
               <div className="flex flex-row justify-between">
                 <ProfilePicture
                   avatar={profile.avatar_url}
+                  userId={profile.id}
+                  fullName={
+                    profile.account_type === "organisation"
+                      ? profile.first_name
+                      : `${profile.first_name} ${profile.last_name || ""}`.trim()
+                  }
                   editingProfile={editingProfile}
                 />
                 <ActionsButton

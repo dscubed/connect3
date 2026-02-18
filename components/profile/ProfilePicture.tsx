@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import Avvvatars from "avvvatars-react";
 import { Edit3, Upload, RotateCcw } from "lucide-react";
 import EditAvatarModal from "./edit-modals/EditAvatarModal";
 import { cn } from "@/lib/utils";
@@ -16,15 +17,22 @@ import { toast } from "sonner";
 
 interface ProfilePictureProps {
   avatar: string | null;
+  userId: string;
+  fullName?: string;
   editingProfile: boolean;
 }
 
 export default function ProfilePicture({
   avatar,
+  userId,
+  fullName = "User",
   editingProfile,
 }: ProfilePictureProps) {
   const [modalOpen, setModalOpen] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const { profile, updateProfile, getSupabaseClient } = useAuthStore();
+
+  const showGeneratedAvatar = !avatar || imageError;
 
   const handleReset = async () => {
     if (!profile?.id) return;
@@ -57,13 +65,26 @@ export default function ProfilePicture({
           editingProfile && "hover:scale-105 transition-all"
         )}
       >
-        <Image
-          src={avatar || "/placeholder.png"}
-          alt={`User Avatar`}
-          fill
-          className="object-cover"
-          priority
-        />
+        {avatar && !showGeneratedAvatar ? (
+          <Image
+            src={avatar}
+            alt={`User Avatar`}
+            fill
+            className="object-cover"
+            priority
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Avvvatars
+              value={userId || "anonymous"}
+              displayValue={fullName}
+              size={160}
+              radius={160}
+              border={false}
+            />
+          </div>
+        )}
       </div>
       {/* Edit Avatar Dropdown */}
       {editingProfile && (

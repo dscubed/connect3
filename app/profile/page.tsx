@@ -5,13 +5,11 @@ import { CubeLoader } from "@/components/ui/CubeLoader";
 import { ProfilePageContent } from "./ProfilePageContent";
 // import SetupEventsModal from "@/components/profile/SetupEventsModal";
 import Sidebar from "@/components/sidebar/Sidebar";
-import { toast } from "sonner";
 
 export default function ProfilePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
-  const { user, profile, updateProfile, loading, makeAuthenticatedRequest } =
-    useAuthStore();
+  const { user, profile, loading } = useAuthStore();
   // const [showEventOnboardingModal, setShowEventOnboardingModal] =
   //   useState(false);
 
