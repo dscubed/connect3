@@ -39,7 +39,7 @@ export default function CoverImage({
 
   return (
     <motion.div
-      className="relative h-32 md:h-48 w-full overflow-hidden"
+      className="relative min-h-48 h-48 w-full overflow-hidden"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}

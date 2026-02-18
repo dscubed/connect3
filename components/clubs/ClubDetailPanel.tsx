@@ -18,16 +18,16 @@ export function ClubDetailPanel({
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 20 }}
       transition={{ duration: 0.3 }}
-      className="h-full overflow-y-auto scrollbar-hide"
+      className="relative h-full overflow-y-auto scrollbar-hide"
     >
-      {/* Mobile Back Button */}
+      {/* Mobile Back Button - sits inside gradient with p-4 from edge */}
       {onBack && (
         <button
           onClick={onBack}
-          className="lg:hidden top-16 flex items-center gap-2 text-muted mb-4 p-2 -ml-2 rounded-lg transition-colors absolute z-50 backdrop-blur-sm border border-muted/50 bg-background/50"
+          className="lg:hidden absolute top-4 left-4 z-50 flex items-center justify-center w-10 h-10 rounded-full bg-white text-foreground transition-colors hover:bg-white/90"
+          aria-label="Back"
         >
           <ChevronLeft className="w-5 h-5" />
-          <span className="text-sm">Back</span>
         </button>
       )}
 
