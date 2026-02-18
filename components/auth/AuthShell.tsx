@@ -14,13 +14,13 @@ export function AuthShell({ children, className }: AuthShellProps) {
   return (
     <main
       className={cn(
-        "min-h-svh w-full",
+        "flex min-h-svh w-full",
         "bg-gradient-to-br from-[#c2b7ff] via-[#f0e5ff] to-[#ffbfd4]",
         "p-4 sm:p-6 md:p-10",
         className,
       )}
     >
-      <div className="mx-auto flex min-h-svh w-full max-w-[1400px] items-center justify-center">
+      <div className="mx-auto flex flex-1 max-w-[1400px] items-center justify-center">
         {/* Big white box */}
         <div className="w-full max-w-[1200px] overflow-hidden rounded-[28px] bg-white shadow-[0_18px_45px_rgba(0,0,0,0.08)]">
           {/* Make sure the panel has a nice height on large screens */}
