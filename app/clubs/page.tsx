@@ -113,7 +113,7 @@ export default function ClubsPage() {
   );
 
   return (
-    <div className="flex h-[100dvh] overflow-hidden">
+    <div className="flex flex-col md:flex-row h-[100dvh] overflow-hidden">
       <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
 
       {isDesktop ? (
@@ -150,7 +150,7 @@ export default function ClubsPage() {
         </div>
       ) : (
         // Mobile: Show either list or details
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
           <AnimatePresence mode="wait">
             {!showDetails ? (
               <motion.div

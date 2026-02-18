@@ -11,11 +11,11 @@ export default function Home() {
   return (
     <div className="min-h-[100dvh] relative overflow-hidden">
       <CharacterBackground />
-      <div className="flex relative z-10">
+      <div className="flex flex-col md:flex-row relative z-10 h-[100dvh]">
         <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
 
         <div
-          className="flex flex-col h-[100dvh] overflow-y-auto overflow-x-hidden px-4 md:px-6 w-full items-center justify-between "
+          className="flex flex-col flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-4 md:px-6 w-full items-center justify-between"
           style={{
             scrollbarWidth: "thin",
             scrollbarColor: "rgba(255,255,255,0.3) transparent",

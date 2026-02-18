@@ -74,14 +74,14 @@ export default function SearchPageContent() {
 
   return (
     <div className="min-h-[100dvh] w-full relative overflow-hidden">
-      <div className="flex relative z-10 w-full">
+      <div className="flex flex-col md:flex-row relative z-10 w-full h-[100dvh]">
         <Sidebar
           open={sidebarOpen}
           onOpenChange={setSidebarOpen}
           chatroomId={chatroomId || undefined}
         />
 
-        <main className="flex-1 min-w-0 pt-16 md:pt-12 relative flex flex-col items-center h-[100dvh]">
+        <main className="flex-1 min-w-0 min-h-0 md:pt-12 relative flex flex-col items-center">
           {/* Scrollable content area */}
           <div
             className="flex-1 overflow-y-auto px-4 pb-36 w-full"

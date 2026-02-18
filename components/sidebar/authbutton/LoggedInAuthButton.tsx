@@ -45,7 +45,7 @@ export function LoggedInAuthButton() {
       <DropdownMenuContent
         align="end"
         side="right"
-        className="w-44 rounded-xl border border-black/10 bg-white p-1"
+        className="z-[110] w-44 rounded-xl border border-black/10 bg-white p-1"
       >
         <AuthDropdownButton
           onClick={handleProfile}
