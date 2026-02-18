@@ -2,9 +2,8 @@
 
 import { type Event } from "@/lib/schemas/events/event";
 import Image from "next/image";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Character } from "@/components/characters";
 
 interface EventsHeroSectionProps {
   events: Event[];
@@ -19,26 +18,33 @@ export default function EventsHeroSection({
   const router = useRouter();
   const featuredEvents = events.slice(0, 8);
 
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      if (e.deltaY === 0) return;
+      e.preventDefault();
+      el.scrollLeft += e.deltaY;
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
+
   return (
-    <div className="relative rounded-3xl overflow-hidden p-6 md:p-10 min-h-[320px]"
-      style={{
-        background: "linear-gradient(135deg, #c8a2f0 0%, #b47de8 30%, #d4a8f5 60%, #c490ee 100%)",
-      }}
-    >
-      {/* Checkered pattern overlay on right side */}
-      <div
-        className="absolute top-0 right-0 bottom-0 w-[75%] opacity-30"
-        style={{
-          backgroundImage: `
-            linear-gradient(45deg, #4338ca 25%, transparent 25%),
-            linear-gradient(-45deg, #4338ca 25%, transparent 25%),
-            linear-gradient(45deg, transparent 75%, #4338ca 75%),
-            linear-gradient(-45deg, transparent 75%, #4338ca 75%)
-          `,
-          backgroundSize: "28px 28px",
-          backgroundPosition: "0 0, 0 14px, 14px -14px, 14px 0px",
-        }}
+    <div className="relative rounded-3xl overflow-hidden p-6 md:p-10 min-h-[320px]">
+      {/* Cover image background */}
+      <Image
+        src="/cover/cover-purple.png"
+        alt="Events cover"
+        fill
+        className="object-cover object-center"
+        priority
+        unoptimized
       />
+      <div className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-background/40" />
+      <div className="absolute inset-0 bg-gradient-to-r from-background/30 via-transparent to-background/30" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-transparent to-background/50" />
 
       <div className="relative z-10 flex gap-8 items-start">
         {/* Left - Title */}
@@ -57,28 +63,18 @@ export default function EventsHeroSection({
           </div>
         </div>
 
-        {/* Right - Scrolling Cards with Characters */}
+        {/* Right - Scrolling Cards */}
         <div className="flex-1 min-w-0 relative">
-          {/* Floating Characters */}
-          <div className="absolute -top-2 left-[15%] z-20">
-            <Character color="green" expression="open" size={56} />
-          </div>
-          <div className="absolute -top-3 left-[50%] z-20">
-            <Character color="green" expression="cheeky" size={52} />
-          </div>
-          <div className="absolute -top-2 right-[10%] z-20">
-            <Character color="orange" expression="wink" size={52} />
-          </div>
-
-          {/* Scrolling Cards */}
           <div
             ref={scrollRef}
-            className="flex gap-5 overflow-x-auto scrollbar-hide pt-10 pb-2"
+            className="flex gap-5 overflow-x-auto pt-4 pb-2 scrollbar-styled"
           >
             {featuredEvents.map((event) => (
               <div
                 key={event.id}
-                onClick={() => onEventClick ? onEventClick(event) : router.push(`/events/${event.id}`)}
+                onClick={() => {
+                  onEventClick ? onEventClick(event) : router.push(`/events/${event.id}`);
+                }}
                 className="flex-shrink-0 w-64 bg-white rounded-2xl overflow-hidden shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
               >
                 <div className="relative h-36 w-full bg-purple-100">

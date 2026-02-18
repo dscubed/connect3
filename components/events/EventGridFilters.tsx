@@ -1,6 +1,5 @@
 "use client";
 
-import { EventCategory } from "@/types/events/event";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -9,15 +8,54 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Search, MapPin, ChevronDown } from "lucide-react";
 
+export type DateFilter = "all" | "today" | "this-week" | "this-month" | "upcoming";
+export type SortOption = "date-asc" | "date-desc" | "name-asc" | "name-desc";
+export type TagFilter = "all" | "free" | "paid" | "online" | "in-person";
+
 interface EventGridFiltersProps {
   search: string;
   setSearch: React.Dispatch<React.SetStateAction<string>>;
   location: string;
   setLocation: React.Dispatch<React.SetStateAction<string>>;
-  selectedCategory: EventCategory | "All";
-  setSelectedCategory: React.Dispatch<
-    React.SetStateAction<EventCategory | "All">
-  >;
+  selectedCategory: string;
+  setSelectedCategory: React.Dispatch<React.SetStateAction<string>>;
+  categoryOptions: string[];
+  dateFilter: DateFilter;
+  setDateFilter: React.Dispatch<React.SetStateAction<DateFilter>>;
+  tagFilter: TagFilter;
+  setTagFilter: React.Dispatch<React.SetStateAction<TagFilter>>;
+  sortOption: SortOption;
+  setSortOption: React.Dispatch<React.SetStateAction<SortOption>>;
+}
+
+const dateLabels: Record<DateFilter, string> = {
+  all: "All Dates",
+  today: "Today",
+  "this-week": "This Week",
+  "this-month": "This Month",
+  upcoming: "Upcoming",
+};
+
+const tagLabels: Record<TagFilter, string> = {
+  all: "All Tags",
+  free: "Free",
+  paid: "Paid",
+  online: "Online",
+  "in-person": "In-Person",
+};
+
+const sortLabels: Record<SortOption, string> = {
+  "date-asc": "Date (Earliest)",
+  "date-desc": "Date (Latest)",
+  "name-asc": "Name (A-Z)",
+  "name-desc": "Name (Z-A)",
+};
+
+function formatCategory(cat: string): string {
+  return cat
+    .split(/[_\s]+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }
 
 export default function EventGridFilters({
@@ -27,17 +65,14 @@ export default function EventGridFilters({
   setLocation,
   selectedCategory,
   setSelectedCategory,
+  categoryOptions,
+  dateFilter,
+  setDateFilter,
+  tagFilter,
+  setTagFilter,
+  sortOption,
+  setSortOption,
 }: EventGridFiltersProps) {
-  const categoryOptions = [
-    "All",
-    "networking",
-    "study",
-    "fun",
-    "workshop",
-    "competition",
-    "panel",
-    "miscellaneous",
-  ] as const;
 
   return (
     <div className="flex flex-wrap items-center gap-3">
@@ -68,23 +103,73 @@ export default function EventGridFilters({
 
       {/* Filter Dropdowns */}
       <div className="flex items-center gap-2">
-        {/* All Dates dropdown (placeholder) */}
-        <button className="flex items-center gap-1.5 px-4 py-2.5 rounded-full border border-gray-200 bg-white text-sm text-gray-600 hover:bg-gray-50 transition-colors shadow-sm">
-          All Dates
-          <ChevronDown className="w-3.5 h-3.5" />
-        </button>
+        {/* Date filter */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex items-center gap-1.5 px-4 py-2.5 rounded-full border border-gray-200 bg-white text-sm text-gray-600 hover:bg-gray-50 transition-colors shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-200">
+              {dateLabels[dateFilter]}
+              <ChevronDown className="w-3.5 h-3.5" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            {(Object.keys(dateLabels) as DateFilter[]).map((key) => (
+              <DropdownMenuItem
+                key={key}
+                onClick={() => setDateFilter(key)}
+                className={key === dateFilter ? "font-bold" : ""}
+              >
+                {dateLabels[key]}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-        {/* Tags dropdown (placeholder) */}
-        <button className="flex items-center gap-1.5 px-4 py-2.5 rounded-full border border-gray-200 bg-white text-sm text-gray-600 hover:bg-gray-50 transition-colors shadow-sm">
-          Tags
-          <ChevronDown className="w-3.5 h-3.5" />
-        </button>
+        {/* Tags filter */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex items-center gap-1.5 px-4 py-2.5 rounded-full border border-gray-200 bg-white text-sm text-gray-600 hover:bg-gray-50 transition-colors shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-200">
+              {tagFilter === "all" ? "Tags" : tagLabels[tagFilter]}
+              <ChevronDown className="w-3.5 h-3.5" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            {(Object.keys(tagLabels) as TagFilter[]).map((key) => (
+              <DropdownMenuItem
+                key={key}
+                onClick={() => setTagFilter(key)}
+                className={key === tagFilter ? "font-bold" : ""}
+              >
+                {tagLabels[key]}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
+        {/* Sort dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex items-center gap-1.5 px-4 py-2.5 rounded-full border border-gray-200 bg-white text-sm text-gray-600 hover:bg-gray-50 transition-colors shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-200">
+              {sortLabels[sortOption]}
+              <ChevronDown className="w-3.5 h-3.5" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            {(Object.keys(sortLabels) as SortOption[]).map((key) => (
+              <DropdownMenuItem
+                key={key}
+                onClick={() => setSortOption(key)}
+                className={key === sortOption ? "font-bold" : ""}
+              >
+                {sortLabels[key]}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
         {/* Categories dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-1.5 px-4 py-2.5 rounded-full border border-gray-200 bg-white text-sm text-gray-600 hover:bg-gray-50 transition-colors shadow-sm">
-              {selectedCategory === "All" ? "Categories" : selectedCategory}
+            <button className="flex items-center gap-1.5 px-4 py-2.5 rounded-full border border-gray-200 bg-white text-sm text-gray-600 hover:bg-gray-50 transition-colors shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-200">
+              {selectedCategory === "All" ? "Categories" : formatCategory(selectedCategory)}
               <ChevronDown className="w-3.5 h-3.5" />
             </button>
           </DropdownMenuTrigger>
@@ -95,7 +180,7 @@ export default function EventGridFilters({
                 onClick={() => setSelectedCategory(cat)}
                 className={cat === selectedCategory ? "font-bold" : ""}
               >
-                {cat === "All" ? "All Categories" : cat}
+                {cat === "All" ? "All Categories" : formatCategory(cat)}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
