@@ -105,7 +105,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -200, opacity: 0 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className={`absolute top-0 left-full h-[100dvh] w-64 bg-white/95 backdrop-blur-xl border-l border-black/5 pt-12 md:pt-6 px-3 z-40 shadow-lg`}
+              className={`absolute top-0 left-full h-[100dvh] w-64 bg-white/95 backdrop-blur-xl border-l border-black/5 pt-6 px-3 z-40 shadow-lg`}
             >
               <div className="flex flex-col h-full">
                 {/* Chatrooms header with collapse button */}
@@ -136,7 +136,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           initial={false}
           animate={{ x: isDesktop ? "0%" : sidebarOpen ? "0%" : "-100%" }}
           transition={hasMounted ? { duration: 0.3, ease: "easeInOut" } : { duration: 0 }}
-          className={`z-50 flex flex-col px-4 gap-2 h-[100dvh] bg-white backdrop-blur-xl shadow-xl pt-12 md:pt-6 safe-area-inset-top justify-between
+          className={`z-50 flex flex-col px-3 gap-2 h-[100dvh] bg-white backdrop-blur-xl shadow-xl pt-4 pb-4 safe-area-inset-top justify-between
             ${isDesktop ? "w-fit relative md:shadow-none" : "w-fit"}          `}
         >
           {/* Mobile close button */}
@@ -155,7 +155,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           <div className="flex flex-col gap-4 items-center">
             <SidebarHeader />
 
-            <nav className="mt-2 flex flex-col gap-1.5 items-center w-full">
+            <nav className="mt-2 flex flex-col gap-3 items-center w-full">
               {sidebarLinks.map((link) => (
                 <SidebarLink
                   key={link.href}
@@ -167,7 +167,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             </nav>
           </div>
           {/* Expand button and auth at bottom */}
-          <div className="pb-6 flex flex-col items-center gap-3">
+          <div className="flex flex-col items-center gap-3">
             <button
               onClick={() => setChatroomsOpen(!chatroomsOpen)}
               className="flex items-center justify-center w-10 h-10 rounded-xl text-muted hover:text-black hover:bg-muted/15 transition-colors"
