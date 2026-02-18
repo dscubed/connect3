@@ -32,7 +32,7 @@ export function LoggedOutAuthButton() {
       <DropdownMenuContent
         align="end"
         side="right"
-        className="w-44 rounded-xl border border-muted/20 bg-white shadow-lg p-1"
+        className="w-44 rounded-xl border border-muted/20 bg-white p-1"
       >
         <AuthDropdownButton
           onClick={handleLogin}

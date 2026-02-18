@@ -146,7 +146,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 setSidebarOpen(false);
                 setChatroomsOpen(false);
               }}
-              className="absolute top-4 -right-10 flex items-center justify-center w-8 h-8 rounded-lg bg-white shadow-md transition-all z-50"
+              className="absolute top-4 -right-10 flex items-center justify-center w-8 h-8 rounded-lg bg-white transition-all z-50"
             >
               <X className="h-4 w-4 text-muted" />
             </button>
