@@ -7,10 +7,12 @@ import { NextResponse, type NextRequest } from "next/server";
 // }
 
 export function middleware(request: NextRequest) {
-  return NextResponse.redirect(
-    'https://waitlist.connect3.app/',
-    302
-  )
+  if (request.nextUrl.pathname === "/") {
+    return NextResponse.redirect(
+      'https://waitlist.connect3.app/',
+      302
+    )
+  }
 }
 
 export const config = {
