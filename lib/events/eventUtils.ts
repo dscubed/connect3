@@ -1,4 +1,4 @@
-import { EventCategory, HostedEvent } from "@/types/events/event";
+import { HostedEvent } from "@/types/events/event";
 import type { DateFilter, TagFilter, SortOption } from "@/components/events/EventGridFilters";
 
 interface WeightedEvent extends HostedEvent {

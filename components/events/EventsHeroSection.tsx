@@ -73,7 +73,11 @@ export default function EventsHeroSection({
               <div
                 key={event.id}
                 onClick={() => {
-                  onEventClick ? onEventClick(event) : router.push(`/events/${event.id}`);
+                  if (onEventClick) {
+                    onEventClick(event);
+                  } else {
+                    router.push(`/events/${event.id}`);
+                  }
                 }}
                 className="flex-shrink-0 w-64 bg-white rounded-2xl overflow-hidden shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
               >
