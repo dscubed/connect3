@@ -108,19 +108,18 @@ const Sidebar: React.FC<SidebarProps> = ({
               className={`absolute top-0 left-full h-[100dvh] w-64 bg-white/95 backdrop-blur-xl border-l border-black/5 pt-12 md:pt-6 px-3 z-40 shadow-lg`}
             >
               <div className="flex flex-col h-full">
-                {/* Close button for chatrooms panel */}
-                <div className="flex justify-end mb-4">
+                {/* Chatrooms header with collapse button */}
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-md text-black/50 px-1 tracking-wide leading-5 flex items-center">
+                    Your Chats
+                  </div>
                   <button
                     onClick={() => setChatroomsOpen(false)}
                     className="p-1.5 rounded-lg hover:bg-muted/15 transition-colors text-muted hover:text-black"
+                    aria-label="Close chatrooms"
                   >
                     <SidebarIcon className="h-5 w-5" />
                   </button>
-                </div>
-
-                {/* Chatrooms header */}
-                <div className="text-md text-black/50 px-1 mb-3 tracking-wide">
-                  Your Chats
                 </div>
 
                 {/* Chatrooms list - uncomment RecentChatrooms when ready */}
@@ -153,13 +152,10 @@ const Sidebar: React.FC<SidebarProps> = ({
             </button>
           )}
 
-          <div className="flex flex-col gap-4">
-            <SidebarHeader
-              chatroomsOpen={chatroomsOpen}
-              setChatroomsOpen={setChatroomsOpen}
-            />
+          <div className="flex flex-col gap-4 items-center">
+            <SidebarHeader />
 
-            <nav className="mt-2 flex flex-col gap-1.5">
+            <nav className="mt-2 flex flex-col gap-1.5 items-center w-full">
               {sidebarLinks.map((link) => (
                 <SidebarLink
                   key={link.href}
@@ -170,8 +166,15 @@ const Sidebar: React.FC<SidebarProps> = ({
               ))}
             </nav>
           </div>
-          {/* Auth button at bottom */}
-          <div className="pb-12">
+          {/* Expand button and auth at bottom */}
+          <div className="pb-6 flex flex-col items-center gap-3">
+            <button
+              onClick={() => setChatroomsOpen(!chatroomsOpen)}
+              className="flex items-center justify-center w-10 h-10 rounded-xl text-muted hover:text-black hover:bg-muted/15 transition-colors"
+              aria-label={chatroomsOpen ? "Close chatrooms" : "Open chatrooms"}
+            >
+              <SidebarIcon className="h-5 w-5" />
+            </button>
             <SidebarAuthButton />
           </div>
         </motion.aside>
