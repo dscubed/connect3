@@ -20,7 +20,7 @@ export function ClubListCard({
       className={`cursor-pointer rounded-xl sm:rounded-2xl border transition-all duration-300 ${
         isSelected
           ? "bg-primary border-white/20"
-          : "bg-secondary border-white/20 hover:bg-primary/80"
+          : "bg-[#f9f9f9] border-white/20 hover:bg-primary/80"
       }`}
     >
       <div
