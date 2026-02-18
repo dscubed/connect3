@@ -19,21 +19,22 @@ export default function ClubsPage() {
   const [showDetails, setShowDetails] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [search, setSearch] = useState("");
+  const [selectedUniversity, setSelectedUniversity] = useState<string>("All");
 
   // Debounce search to avoid too many API calls
   const debouncedSearch = useDebouncedValue(search, 300);
-
-  // Track previous search to detect when it actually changes
-  const prevSearchRef = useRef(debouncedSearch);
 
   const clubListRef = useRef<HTMLDivElement>(null);
   const isDesktop = useBreakpointLarge();
 
   // Memoize query params to prevent unnecessary re-fetches
-  const queryParams = useMemo(
-    () => (debouncedSearch ? { search: debouncedSearch } : undefined),
-    [debouncedSearch]
-  );
+  const queryParams = useMemo(() => {
+    const params: Record<string, string> = {};
+    if (debouncedSearch) params.search = debouncedSearch;
+    if (selectedUniversity && selectedUniversity !== "All")
+      params.university = selectedUniversity;
+    return Object.keys(params).length > 0 ? params : undefined;
+  }, [debouncedSearch, selectedUniversity]);
 
   const {
     items: clubs,
@@ -50,20 +51,15 @@ export default function ClubsPage() {
     }
   }, [isLoading, clubs, loaded]);
 
-  // Reset selection only when search query actually changes
+  // Reset selection when current selection is no longer in the filtered list
   useEffect(() => {
-    // Check if search actually changed (not just clubs loading more)
-    if (prevSearchRef.current !== debouncedSearch) {
-      prevSearchRef.current = debouncedSearch;
-
-      // Wait a tick for new data to load, then select first result
-      if (!isValidating && clubs.length > 0) {
-        setSelectedClub(clubs[0]);
-      } else if (!isValidating && clubs.length === 0) {
-        setSelectedClub(null);
-      }
+    if (isValidating) return;
+    const selectionStillValid =
+      selectedClub && clubs.some((c) => c.id === selectedClub.id);
+    if (!selectionStillValid) {
+      setSelectedClub(clubs.length > 0 ? clubs[0] : null);
     }
-  }, [debouncedSearch, clubs, isValidating]);
+  }, [clubs, isValidating, selectedClub]);
 
   const handleClubSelect = (club: Club) => {
     setSelectedClub(club);
@@ -122,7 +118,12 @@ export default function ClubsPage() {
           {/* Left Panel - Club List */}
           <div className="w-80 xl:w-96 border-r border-white/10 backdrop-blur-sm overflow-hidden flex flex-col">
             <ClubsHeader clubCount={clubs.length} isLoading={isValidating} />
-            <ClubFilters search={search} setSearch={setSearch} />
+            <ClubFilters
+              search={search}
+              setSearch={setSearch}
+              selectedUniversity={selectedUniversity}
+              setSelectedUniversity={setSelectedUniversity}
+            />
 
             {/* Club List */}
             <div
@@ -164,7 +165,12 @@ export default function ClubsPage() {
                   clubCount={clubs.length}
                   isLoading={isValidating}
                 />
-                <ClubFilters search={search} setSearch={setSearch} />
+                <ClubFilters
+                  search={search}
+                  setSearch={setSearch}
+                  selectedUniversity={selectedUniversity}
+                  setSelectedUniversity={setSelectedUniversity}
+                />
 
                 {/* Club List */}
                 <div

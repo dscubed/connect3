@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
   const cursor = searchParams.get("cursor");
   const limit = parseInt(searchParams.get("limit") || "10");
   const search = searchParams.get("search");
+  const university = searchParams.get("university");
 
   try {
     let query = supabase
@@ -23,6 +24,11 @@ export async function GET(request: NextRequest) {
       .select("id, first_name, university, created_at, avatar_url")
       .eq("account_type", "organisation")
       .order("created_at", { ascending: false });
+
+    // Filter by university if provided
+    if (university && university.trim() !== "") {
+      query = query.eq("university", university);
+    }
 
     // Add search filter if provided (case-insensitive contains)
     if (search && search.trim() !== "") {
