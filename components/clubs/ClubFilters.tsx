@@ -11,7 +11,7 @@ export default function ClubFilters({ search, setSearch }: ClubFiltersProps) {
   return (
     <div className="p-4 flex-row gap-4 flex w-full">
       {/* Search Input */}
-      <div className="relative bg-background w-full rounded-2xl shadow-md text-foreground">
+      <div className="relative bg-background w-full rounded-2xl text-foreground">
         <Input
           type="text"
           value={search}
@@ -24,7 +24,7 @@ export default function ClubFilters({ search, setSearch }: ClubFiltersProps) {
       {/* University Filter: TO BE IMPLEMENTED */}
       <Button
         variant="outline"
-        className="justify-between rounded-2xl px-3 py-2 text-sm border-none text-foreground shadow-md"
+        className="justify-between rounded-2xl px-3 py-2 text-sm border-none text-foreground"
       >
         <Filter className="h-4 w-4" />
       </Button>

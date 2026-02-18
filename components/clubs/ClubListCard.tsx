@@ -19,8 +19,8 @@ export function ClubListCard({
       onClick={onClick}
       className={`cursor-pointer rounded-xl sm:rounded-2xl border transition-all duration-300 ${
         isSelected
-          ? "bg-primary border-white/20 shadow-xl shadow-black/10"
-          : "bg-secondary border-white/20 hover:bg-primary/80 hover:shadow-lg hover:shadow-black/5"
+          ? "bg-primary border-white/20"
+          : "bg-secondary border-white/20 hover:bg-primary/80"
       }`}
     >
       <div
