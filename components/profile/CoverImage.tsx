@@ -49,20 +49,20 @@ export default function CoverImage({
         src={COVER_IMAGES[selectedColor].source}
         alt="Cover Image"
         fill
-        className="object-cover object-center"
+        className="object-cover object-center rounded-xl opacity-65"
         priority
         unoptimized
         quality={1280}
       />
 
-      <div className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent" />
+      {/* <div className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent" /> */}
 
       {/* Vignette Effect */}
-      <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-background/40" />
+      {/* <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-background/40" /> */}
 
       {/* Additional edge blur effect */}
-      <div className="absolute inset-0 bg-gradient-to-r from-background/30 via-transparent to-background/30" />
-      <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-transparent to-background/50" />
+      {/* <div className="absolute inset-0 bg-gradient-to-r from-background/30 via-transparent to-background/30" /> */}
+      {/* <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-transparent to-background/50" /> */}
 
       {/* Edit Cover Button */}
       {editingProfile && (
