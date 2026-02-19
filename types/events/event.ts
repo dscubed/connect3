@@ -1,9 +1,8 @@
-import { Event, Category, Location } from "@/lib/schemas/events/event";
+import { Event, Location } from "@/lib/schemas/events/event";
 
 // Export the HostedEvent type based on the schema
-export type HostedEvent = Omit<Event, 'location' | 'category'> & {
+export type HostedEvent = Omit<Event, 'location'> & {
   location: Location;
-  category: Category;
 };
 
 // Export other types as needed

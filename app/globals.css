@@ -102,6 +102,31 @@
   /* Chrome, Safari, Opera */
 }
 
+/* Custom styled scrollbar */
+.scrollbar-styled {
+  scrollbar-width: thin;
+  scrollbar-color: #d8b4fe transparent;
+}
+
+.scrollbar-styled::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-styled::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 999px;
+}
+
+.scrollbar-styled::-webkit-scrollbar-thumb {
+  background: #d8b4fe;
+  border-radius: 999px;
+}
+
+.scrollbar-styled::-webkit-scrollbar-thumb:hover {
+  background: #c084fc;
+}
+
 @layer utilities {
   .animate-fade-in {
     animation: fadeIn 0.3s ease;
