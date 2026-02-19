@@ -116,16 +116,18 @@ export default function MobileLayout() {
                     onClick={() => handleEventSelect(event)}
                   />
                 ))}
+
+                {deduped.length === 0 && (
+                  <div className="py-8 text-center text-sm text-gray-400">
+                    No events found.
+                  </div>
+                )}
+
                 {hasMore && <div ref={sentinelRef} className="h-1 w-full" aria-hidden />}
                 <div className="min-h-[64px] flex items-center justify-center py-4">
                   {isValidating && <CubeLoader size={32} />}
                 </div>
               </div>
-              {deduped.length === 0 && !isValidating && (
-                <div className="p-4 text-sm text-white/60">
-                  No events found.
-                </div>
-              )}
             </motion.div>
           ) : (
             <motion.div
