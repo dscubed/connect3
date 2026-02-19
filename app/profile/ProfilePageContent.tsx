@@ -81,13 +81,7 @@ function ProfilePageContentBody({
   const { loadingChunks } = useChunkContext();
 
   return (
-    <div
-      className="h-[100dvh] w-full max-w-screen-lg mx-auto overflow-y-auto p-0 pb-8 md:p-4 md:pb-8"
-      style={{
-        scrollbarWidth: "thin",
-        scrollbarColor: "rgba(255,255,255,0.3) transparent",
-      }}
-    >
+    <div className="w-full max-w-screen-lg mx-auto min-h-full p-0 pb-8 md:p-4 md:pb-8">
       <div className="relative">
         <CoverImage userId={profile.id} avatarUrl={profile.avatar_url} />
         <div className="absolute bottom-0 left-0 right-0">
