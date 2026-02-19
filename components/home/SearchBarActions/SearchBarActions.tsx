@@ -67,9 +67,9 @@ export function SearchBarActions({
           className="flex items-center justify-center rounded-full p-2 text-neutral-600 bg-neutral-200 cursor-pointer hover:bg-neutral-300 transition-all hover:scale-105"
         >
           <GraduationCap className="h-5.5 w-5.5" />
-          {selectedUniversities.length > 2 && (
-            <span className="text-xs">
-              {selectedUniversities.length} unis
+          {selectedUniversities.length > 0 && (
+            <span className="text-xs ml-1">
+              {selectedUniversities.length} selected
             </span>
           )}
         </button>
@@ -144,38 +144,6 @@ export function SearchBarActions({
           </div>
         )}
       </div>
-
-      {selectedUniversities.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5">
-          {selectedUniversities.slice(0, 3).map((key) => (
-            <span
-              key={key}
-              className="flex items-center gap-1 rounded-full border border-foreground/20 px-2 py-0.5 text-xs"
-            >
-              {universities[key as University]?.name ?? key}
-              <button
-                type="button"
-                onClick={() => onUniversityChange(key)}
-                className="hover:text-destructive"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </span>
-          ))}
-          {selectedUniversities.length > 3 && (
-            <span className="flex items-center gap-1 rounded-full border border-foreground/20 px-2 py-0.5 text-xs">
-              + {selectedUniversities.length - 3} more
-              <button
-                type="button"
-                onClick={onUniversityClear}
-                className="hover:text-destructive"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </span>
-          )}
-        </div>
-      )}
 
       <div className="flex flex-row gap-4 items-center">
         <button
