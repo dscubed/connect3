@@ -39,7 +39,7 @@ export function LinksSection({ editingProfile, profile }: LinksSectionProps) {
   return (
     <>
       {!loading && (
-        <div className="flex items-center gap-4 h-9 max-w-full overflow-scroll">
+        <div className="flex items-center gap-2 h-9 max-w-full overflow-scroll">
           {linkData.length > 0 ? (
             <LinksDisplay links={linkData} />
           ) : (
@@ -47,10 +47,7 @@ export function LinksSection({ editingProfile, profile }: LinksSectionProps) {
           )}
 
           {editingProfile && (
-            <div className="flex h-full items-center">
-              <span className="h-6 border-l border-secondary-foreground mr-2" />
-              <EditLinkButton onClick={() => setDisplayEditModal(true)} />
-            </div>
+            <EditLinkButton onClick={() => setDisplayEditModal(true)} />
           )}
         </div>
       )}

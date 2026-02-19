@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { ArrowUp, GraduationCap, Loader2, Search, X, Check } from "lucide-react";
+import { ArrowUp, GraduationCap, Loader2, Search, Check } from "lucide-react";
 import {
   universities,
   University,
@@ -26,7 +26,9 @@ export function SearchBarActions({
 }: SearchBarActionsProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [openAbove, setOpenAbove] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -43,6 +45,15 @@ export function SearchBarActions({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
+  useEffect(() => {
+    if (open && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const spaceAbove = rect.top;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      setOpenAbove(spaceAbove > spaceBelow && spaceAbove > 300);
+    }
+  }, [open]);
+
   const filtered = UNIVERSITY_ENTRIES.filter(([, info]) =>
     info.name.toLowerCase().includes(search.toLowerCase())
   );
@@ -53,18 +64,23 @@ export function SearchBarActions({
         <button
           type="button"
           onClick={() => setOpen((prev) => !prev)}
-          className="flex flex-row items-center gap-1.5 rounded-full px-2.5 py-1.5 text-background bg-foreground text-sm font-medium cursor-pointer hover:bg-foreground/90 transition-all hover:scale-105 shadow-lg"
+          className="flex items-center justify-center rounded-full p-2 text-neutral-600 bg-neutral-200 cursor-pointer hover:bg-neutral-300 transition-all hover:scale-105"
         >
-          <GraduationCap className="h-5 w-5" />
-          {selectedUniversities.length > 2 && (
-            <span className="text-xs">
-              {selectedUniversities.length} unis
+          <GraduationCap className="h-5.5 w-5.5" />
+          {selectedUniversities.length > 0 && (
+            <span className="text-xs ml-1">
+              {selectedUniversities.length} selected
             </span>
           )}
         </button>
 
         {open && (
-          <div className="absolute bottom-full left-0 mb-2 w-64 rounded-xl border bg-popover text-popover-foreground shadow-xl z-50 overflow-hidden">
+          <div
+            ref={popupRef}
+            className={`absolute left-0 w-64 rounded-xl border bg-popover text-popover-foreground shadow-xl z-50 overflow-hidden ${
+              openAbove ? "bottom-full mb-2" : "top-full mt-2"
+            }`}
+          >
             <div className="flex items-center gap-2 border-b px-3 py-2">
               <input
                 type="text"
@@ -129,48 +145,16 @@ export function SearchBarActions({
         )}
       </div>
 
-      {selectedUniversities.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5">
-          {selectedUniversities.slice(0, 3).map((key) => (
-            <span
-              key={key}
-              className="flex items-center gap-1 rounded-full border border-foreground/20 px-2 py-0.5 text-xs"
-            >
-              {universities[key as University]?.name ?? key}
-              <button
-                type="button"
-                onClick={() => onUniversityChange(key)}
-                className="hover:text-destructive"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </span>
-          ))}
-          {selectedUniversities.length > 3 && (
-            <span className="flex items-center gap-1 rounded-full border border-foreground/20 px-2 py-0.5 text-xs">
-              + {selectedUniversities.length - 3} more
-              <button
-                type="button"
-                onClick={onUniversityClear}
-                className="hover:text-destructive"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </span>
-          )}
-        </div>
-      )}
-
       <div className="flex flex-row gap-4 items-center">
         <button
           type="submit"
           disabled={searchDisabled}
-          className="flex flex-row items-center gap-2 rounded-full p-1.5 text-background bg-foreground text-sm font-medium cursor-pointer hover:bg-foreground/90 transition-all hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex flex-row items-center gap-2 rounded-full p-2 text-white text-sm font-medium cursor-pointer transition-all hover:scale-105 disabled:bg-purple-300 disabled:cursor-not-allowed bg-purple-600 hover:bg-purple-700"
         >
           {isLoading ? (
-            <Loader2 className="inline-block h-5 w-5 animate-spin" />
+            <Loader2 className="inline-block h-5.5 w-5.5 animate-spin" />
           ) : (
-            <ArrowUp className="inline-block h-5 w-5" />
+            <ArrowUp className="inline-block h-5.5 w-5.5" />
           )}
         </button>
       </div>

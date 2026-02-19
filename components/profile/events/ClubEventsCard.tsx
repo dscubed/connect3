@@ -75,10 +75,8 @@ const sortEvents = (events: RawEvent[]) => {
 
 export default function ClubEventsCard({
   profileId,
-  clubName,
 }: {
   profileId: string;
-  clubName: string;
 }) {
   const { isOwnProfile } = useProfileContext();
   const { makeAuthenticatedRequest } = useAuthStore();

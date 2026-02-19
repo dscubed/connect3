@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { Plus } from "lucide-react";
 
 export function EditLinkButton({ onClick }: { onClick: () => void }) {
   return (
-    <Button className="px-2 py-1" variant="ghost" onClick={onClick}>
-      <PlusCircle className="!size-6" />
+    <Button className="size-9 p-0 bg-muted/15 hover:bg-muted/25 hover:text-current" variant="ghost" onClick={onClick}>
+      <Plus className="!size-5" />
     </Button>
   );
 }

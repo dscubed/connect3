@@ -24,7 +24,6 @@ interface CategoryItemProps {
 export function CategoryItem({ category, chunks }: CategoryItemProps) {
   const {
     isEditing,
-    editCategory,
     isEditingCategory,
     saveEdits,
     cancelEdits,
@@ -82,7 +81,6 @@ export function CategoryItem({ category, chunks }: CategoryItemProps) {
             {isEventsCategory ? (
               <ClubEventsCard
                 profileId={profile.id}
-                clubName={profile.first_name || "Club"}
               />
             ) : (
               <>

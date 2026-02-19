@@ -1,6 +1,4 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { SectionCard, SectionCardHeader } from "./SectionCard";
-import { CardContent } from "@/components/ui/card";
 
 export function ProfilePageSkeleton() {
   return (

@@ -7,6 +7,7 @@ import { uploadProfileToVectorStore } from "@/lib/vectorStores/profile/client";
 export interface UseChunkDataExports {
   fetchChunks: () => Promise<void>;
   saveChunks: () => Promise<void>;
+  hasChunkChanges: () => boolean;
   loadingChunks: boolean;
   savingChunks: boolean;
   reset: () => void;
@@ -38,6 +39,19 @@ export function useChunkData({
   >([]);
   const [loadingChunks, setLoadingChunks] = useState<boolean>(true);
   const [savingChunks, setSavingChunks] = useState<boolean>(false);
+
+  // Refs to always provide the latest values inside async callbacks,
+  // avoiding stale closures across React render boundaries.
+  const chunksRef = useRef(chunks);
+  chunksRef.current = chunks;
+  const prevChunksRef = useRef(prevChunks);
+  prevChunksRef.current = prevChunks;
+  const categoryOrderRef = useRef(categoryOrder);
+  categoryOrderRef.current = categoryOrder;
+  const prevCategoryOrderRef = useRef(prevCategoryOrder);
+  prevCategoryOrderRef.current = prevCategoryOrder;
+  const savingChunksRef = useRef(savingChunks);
+  savingChunksRef.current = savingChunks;
 
   // Track current profileId to handle race conditions
   const currentProfileIdRef = useRef<string>(profileId);
@@ -241,35 +255,6 @@ export function useChunkData({
     return { newChunks, newCategories };
   };
 
-  const isChunksEdited = ({
-    deletedChunkIds,
-    deletedCategories,
-    editedChunks,
-    editedCategories,
-  }: {
-    deletedChunkIds: string[];
-    deletedCategories: CategoryOrderData[];
-    editedChunks: ProfileChunk[];
-    editedCategories: CategoryOrderData[];
-  }) => {
-    /**
-     * Checks if there are any unsaved changes in chunks or category order.
-     *
-     * @param deletedChunkIds - An array of deleted chunk IDs.
-     * @param deletedCategories - An array of deleted categories.
-     * @param editedChunks - An array of edited chunks.
-     * @param editedCategories - An array of edited categories.
-     * @return A boolean indicating whether there are unsaved changes.
-     */
-    return (
-      deletedChunkIds.length > 0 ||
-      deletedCategories.length > 0 ||
-      editedChunks.length > 0 ||
-      editedCategories.length > 0 ||
-      prevCategoryOrder.length !== categoryOrder.length
-    );
-  };
-
   const deleteChunksFromSupabase = async (
     deletedChunkIds: string[],
     deletedCategories: AllCategories[]
@@ -365,9 +350,27 @@ export function useChunkData({
     }
   };
 
+  const hasChunkChanges = (): boolean => {
+    const { deletedChunkIds, deletedCategories } =
+      getDeletedChunksAndCategories();
+    const { editedChunks, editedCategories } = getEditedChunksAndCategories();
+    const { newChunks, newCategories } = getNewChunksAndCategories();
+
+    return (
+      deletedChunkIds.length > 0 ||
+      deletedCategories.length > 0 ||
+      editedChunks.length > 0 ||
+      editedCategories.length > 0 ||
+      newChunks.length > 0 ||
+      newCategories.length > 0 ||
+      prevCategoryOrder.length !== categoryOrder.length
+    );
+  };
+
   const saveChunks = async () => {
     /**
      * Saves the current chunks and category order to Supabase.
+     * - Reads from refs to avoid stale closures in async context.
      * - Identifies deleted, edited, and new chunks and categories.
      * - Performs necessary deletions and upserts to synchronize with the database.
      * - Updates previous state to current state upon successful save.
@@ -375,24 +378,66 @@ export function useChunkData({
      */
     if (isVisiting) return;
 
-    if (!profile || savingChunks || user?.id !== profile.id) return;
+    const { profile, user } = useAuthStore.getState();
+    if (!profile || savingChunksRef.current || user?.id !== profile.id) return;
     setSavingChunks(true);
+    savingChunksRef.current = true;
 
-    const { deletedChunkIds, deletedCategories } =
-      getDeletedChunksAndCategories();
-    const { editedChunks, editedCategories } = getEditedChunksAndCategories();
-    const { newChunks, newCategories } = getNewChunksAndCategories();
+    // Read latest values from refs to avoid stale closures
+    const currentChunks = chunksRef.current;
+    const currentPrevChunks = prevChunksRef.current;
+    const currentCategoryOrder = categoryOrderRef.current;
+    const currentPrevCategoryOrder = prevCategoryOrderRef.current;
+
+    const deletedChunkIds = currentPrevChunks
+      .filter(
+        (prevChunk) =>
+          !currentChunks.find((chunk) => chunk.id === prevChunk.id)
+      )
+      .map((chunk) => chunk.id);
+    const deletedCategories = currentPrevCategoryOrder.filter(
+      (prevCat) =>
+        !currentCategoryOrder.find((cat) => cat.category === prevCat.category)
+    );
+
+    const editedChunks = currentChunks.filter((chunk) => {
+      const prevChunk = currentPrevChunks.find((pc) => pc.id === chunk.id);
+      if (!prevChunk) return false;
+      return (
+        prevChunk.text !== chunk.text ||
+        prevChunk.category !== chunk.category ||
+        prevChunk.order !== chunk.order
+      );
+    });
+    const editedCategories = currentCategoryOrder.filter((cat) => {
+      const prevCat = currentPrevCategoryOrder.find(
+        (pc) => pc.category === cat.category
+      );
+      if (!prevCat) return false;
+      return prevCat.order !== cat.order;
+    });
+
+    const newChunks = currentChunks.filter(
+      (chunk) => !currentPrevChunks.find((pc) => pc.id === chunk.id)
+    );
+    const newCategories = currentCategoryOrder.filter(
+      (cat) =>
+        !currentPrevCategoryOrder.find((pc) => pc.category === cat.category)
+    );
 
     // If no changes, skip saving
-    if (
-      !isChunksEdited({
-        deletedChunkIds,
-        deletedCategories,
-        editedChunks,
-        editedCategories,
-      })
-    ) {
+    const hasChanges =
+      deletedChunkIds.length > 0 ||
+      deletedCategories.length > 0 ||
+      editedChunks.length > 0 ||
+      editedCategories.length > 0 ||
+      newChunks.length > 0 ||
+      newCategories.length > 0 ||
+      currentPrevCategoryOrder.length !== currentCategoryOrder.length;
+
+    if (!hasChanges) {
       setSavingChunks(false);
+      savingChunksRef.current = false;
       return;
     }
 
@@ -412,8 +457,8 @@ export function useChunkData({
       });
 
       // Update prev states to current
-      setPrevChunks(chunks);
-      setPrevCategoryOrder(categoryOrder);
+      setPrevChunks(currentChunks);
+      setPrevCategoryOrder(currentCategoryOrder);
 
       // save profile to vector store
       await uploadProfileToVectorStore();
@@ -421,12 +466,14 @@ export function useChunkData({
       console.error("Failed to save chunks:", error);
     } finally {
       setSavingChunks(false);
+      savingChunksRef.current = false;
     }
   };
 
   return {
     fetchChunks,
     saveChunks,
+    hasChunkChanges,
     reset,
     loadingChunks,
     savingChunks,
