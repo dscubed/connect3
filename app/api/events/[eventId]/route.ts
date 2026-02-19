@@ -59,11 +59,7 @@ function transformDbEventToEventSchema(dbEvent: any): Event {
     capacity: dbEvent.capacity || 50,
     currency: dbEvent.currency || "USD",
     thumbnail: dbEvent.thumbnail,
-    category: {
-      type: dbEvent.event_categories?.type || fallbackCategory,
-      category: dbEvent.event_categories?.category || fallbackCategory,
-      subcategory: dbEvent.event_categories?.subcategory || "none",
-    },
+    category: dbEvent.event_categories?.category || fallbackCategory,
     location: {
       venue: dbEvent.event_locations?.venue || "TBA",
       address: dbEvent.event_locations?.address || "TBA",

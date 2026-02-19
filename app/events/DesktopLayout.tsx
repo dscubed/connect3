@@ -1,16 +1,18 @@
 "use client";
-import { AnimatePresence } from "framer-motion";
-import { EventDetailPanel } from "@/components/events/EventDetailPanel";
-import EventsHeader from "@/components/events/HeaderSection";
-import EventFilters from "@/components/events/EventFilters";
-import { EventListCard } from "@/components/events/EventListCard";
-import { EventCategory } from "@/types/events/event";
+import EventsHeroSection from "@/components/events/EventsHeroSection";
+import EventGridFilters, {
+  type DateFilter,
+  type TagFilter,
+} from "@/components/events/EventGridFilters";
+import { EventGridCard } from "@/components/events/EventGridCard";
 import { useEffect, useRef, useState } from "react";
 import { CubeLoader } from "@/components/ui/CubeLoader";
-import { filterEvents } from "@/lib/events/eventUtils";
+import { filterEvents, getFeaturedEvents } from "@/lib/events/eventUtils";
 import { type Event } from "@/lib/schemas/events/event";
 import { toast } from "sonner";
 import useInfiniteScroll from "@/hooks/useInfiniteScroll";
+import { EventDetailPanel } from "@/components/events/EventDetailPanel";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function DesktopLayout() {
   const eventListRef = useRef<HTMLDivElement>(null);
@@ -20,25 +22,24 @@ export default function DesktopLayout() {
     isLoading,
     isValidating,
   } = useInfiniteScroll<Event>(eventListRef, "/api/events");
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [search, setSearch] = useState<string>("");
-  const [selectedCategory, setSelectedCategory] = useState<
-    EventCategory | "All"
-  >("All");
-  const [loaded, setLoaded] = useState<boolean>(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [dateFilter, setDateFilter] = useState<DateFilter>("all");
+  const [tagFilter, setTagFilter] = useState<TagFilter>("all");
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   useEffect(() => {
-    // on initial load set the selected event to be the first in the data
-    // upon further loads do not set the selected event
-    if (!loaded && !isLoading) {
-      setSelectedEvent(events[0]);
-      setLoaded(true);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      console.log(event.key)
+      if (event.key === "Escape") {
+        setSelectedEvent(null);
+      }
     }
-  }, [isLoading, events, loaded]);
-
-  const handleEventSelect = (event: Event) => {
-    setSelectedEvent(event);
-  };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, []);
 
   if (error) {
     toast.error("Could not get events");
@@ -53,57 +54,107 @@ export default function DesktopLayout() {
     );
   }
 
-  // perform event filtering by name and category
+  const categoryOptions = [
+    "All",
+    ...Array.from(new Set(events.map((e) => e.category).filter(Boolean))).sort(),
+  ];
+
+  const featuredEvents = getFeaturedEvents(events);
+
   const filtered = filterEvents(
     events,
     search,
-    selectedCategory === "All" ? null : selectedCategory
+    selectedCategory === "All" ? null : selectedCategory,
+    dateFilter,
+    tagFilter,
   );
 
   return (
     <div className="flex flex-1 overflow-hidden">
-      {/* Left Panel - Event List */}
-      <div className="w-80 xl:w-[34rem]  border-r border-white/10 backdrop-blur-sm overflow-hidden flex flex-col">
-        <EventsHeader eventCount={events.length} isLoading={isValidating} />
-        <EventFilters
-          search={search}
-          setSearch={setSearch}
-          selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
-        />
-        <div
-          className="flex-1 overflow-y-auto p-5 space-y-3 scrollbar-hide"
-          ref={eventListRef}
-        >
-          {filtered.map((event) => (
-            <EventListCard
-              key={event.id}
-              event={event}
-              isSelected={selectedEvent ? selectedEvent.id === event.id : false}
-              onClick={() => handleEventSelect(event)}
+      <div
+        ref={eventListRef}
+        className={`overflow-y-auto scrollbar-hide transition-all duration-300 ${
+          selectedEvent ? "flex-1" : "flex-1"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-6 space-y-8 bg-white shadow-md z-30">
+          <EventsHeroSection events={featuredEvents} onEventClick={setSelectedEvent} />
+
+          <div className="space-y-5">
+            <h2 className="text-2xl font-bold text-black">All Events</h2>
+
+            <EventGridFilters
+              search={search}
+              setSearch={setSearch}
+              selectedCategory={selectedCategory}
+              setSelectedCategory={setSelectedCategory}
+              categoryOptions={categoryOptions}
+              dateFilter={dateFilter}
+              setDateFilter={setDateFilter}
+              tagFilter={tagFilter}
+              setTagFilter={setTagFilter}
             />
-          ))}
 
-          {filtered.length === 0 && (
-            <div className="p-4 text-sm text-muted">No events found.</div>
-          )}
+            <p className="text-sm text-gray-400">
+              Viewing {filtered.length} of {events.length} results
+            </p>
 
-          {isValidating && (
-            <div className="flex justify-center">
-              <CubeLoader size={32} />
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              {filtered.map((event) => (
+                <EventGridCard
+                  key={event.id}
+                  event={event}
+                  onClick={() => setSelectedEvent(event)}
+                />
+              ))}
             </div>
-          )}
+
+            {filtered.length === 0 && (
+              <div className="py-8 text-center text-sm text-gray-400">
+                No events found.
+              </div>
+            )}
+
+            {isValidating && (
+              <div className="flex justify-center py-4">
+                <CubeLoader size={32} />
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Right Panel - Event Details */}
-      <div className="flex-1 overflow-hidden">
-        <div className="h-full overflow-y-auto p-6 lg:p-8 scrollbar-hide">
-          <AnimatePresence mode="wait">
-            {selectedEvent && <EventDetailPanel event={selectedEvent} />}
-          </AnimatePresence>
-        </div>
-      </div>
+      <AnimatePresence>
+        {selectedEvent && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/20 z-40 lg:hidden"
+              onClick={() => setSelectedEvent(null)}
+            />
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl z-50 overflow-hidden border-l border-gray-200"
+            >
+              <div className="relative h-full overflow-y-auto scrollbar-hide">
+                <button
+                  onClick={() => setSelectedEvent(null)}
+                  className="absolute top-3 left-3 z-20 flex items-center gap-1 bg-white/80 backdrop-blur-sm hover:bg-white text-gray-600 hover:text-gray-900 transition-colors text-sm px-3 py-1.5 rounded-full shadow-sm"
+                >
+                  ✕ Close
+                </button>
+                <EventDetailPanel event={selectedEvent} />
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
