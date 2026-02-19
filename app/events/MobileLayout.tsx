@@ -16,7 +16,6 @@ const CATEGORY_OPTIONS = [
 
 export default function MobileLayout() {
   const eventListRef = useRef<HTMLDivElement>(null);
-  const [showDetails, setShowDetails] = useState(false);
   const [search, setSearch] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -49,11 +48,6 @@ export default function MobileLayout() {
 
   const handleEventSelect = (event: Event) => {
     setSelectedEvent(event);
-    setShowDetails(true);
-  };
-
-  const handleBackToList = () => {
-    setShowDetails(false);
   };
 
   if (error) {
@@ -69,85 +63,90 @@ export default function MobileLayout() {
 
   return (
     <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
-      <div className="flex-1 overflow-hidden">
-        <AnimatePresence mode="wait">
-          {!showDetails ? (
-            <motion.div
-              key="list"
-              ref={eventListRef}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="h-full overflow-y-auto scrollbar-hide"
-            >
-              <div className="p-4 space-y-8 bg-white">
-                <div className="space-y-5">
-                  <h2 className="text-2xl font-bold text-black">All Events</h2>
+      <div
+        ref={eventListRef}
+        className="flex-1 overflow-y-auto scrollbar-hide"
+      >
+        <div className="p-4 space-y-8 bg-white">
+          <div className="space-y-5">
+            <h2 className="text-2xl font-bold text-black">All Events</h2>
 
-                  <EventGridFilters
-                    search={search}
-                    setSearch={setSearch}
-                    selectedCategory={selectedCategory}
-                    setSelectedCategory={setSelectedCategory}
-                    categoryOptions={CATEGORY_OPTIONS}
-                    dateFilter={dateFilter}
-                    setDateFilter={setDateFilter}
-                    tagFilter={tagFilter}
-                    setTagFilter={setTagFilter}
-                  />
+            <EventGridFilters
+              search={search}
+              setSearch={setSearch}
+              selectedCategory={selectedCategory}
+              setSelectedCategory={setSelectedCategory}
+              categoryOptions={CATEGORY_OPTIONS}
+              dateFilter={dateFilter}
+              setDateFilter={setDateFilter}
+              tagFilter={tagFilter}
+              setTagFilter={setTagFilter}
+            />
 
-                  <p className="text-sm text-gray-400">
-                    Viewing {deduped.length} of {events.length} results
-                  </p>
+            <p className="text-sm text-gray-400">
+              Viewing {deduped.length} of {events.length} results
+            </p>
 
-                  <div className="space-y-6">
-                    {isLoading
-                      ? Array.from({ length: 6 }).map((_, i) => <EventGridCardSkeleton key={i} />)
-                      : deduped.map((event: Event, index) => (
-                          <EventGridCard
-                            key={`${event.id}-${index}`}
-                            event={event}
-                            onClick={() => handleEventSelect(event)}
-                          />
-                        ))}
-                  </div>
+            <div className="space-y-6">
+              {isLoading
+                ? Array.from({ length: 6 }).map((_, i) => <EventGridCardSkeleton key={i} />)
+                : deduped.map((event: Event, index) => (
+                    <EventGridCard
+                      key={`${event.id}-${index}`}
+                      event={event}
+                      onClick={() => handleEventSelect(event)}
+                    />
+                  ))}
+            </div>
 
-                  {!isLoading && deduped.length === 0 && (
-                    <div className="py-8 text-center text-sm text-gray-400">
-                      No events found.
-                    </div>
-                  )}
-
-                  {hasMore && deduped.length > 0 && <div ref={sentinelRef} className="h-1 w-full" aria-hidden />}
-
-                  {isValidating && (
-                    <div className="space-y-6">
-                      {Array.from({ length: 18 }).map((_, i) => <EventGridCardSkeleton key={`skel-${i}`} />)}
-                    </div>
-                  )}
-                </div>
+            {!isLoading && deduped.length === 0 && (
+              <div className="py-8 text-center text-sm text-gray-400">
+                No events found.
               </div>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="details"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="h-full bg-white overflow-hidden"
-            >
-              <div className="h-full overflow-y-auto scrollbar-hide">
-                {selectedEvent && (
-                  <EventDetailPanel
-                    event={selectedEvent}
-                    onBack={handleBackToList}
-                  />
-                )}
+            )}
+
+            {hasMore && deduped.length > 0 && <div ref={sentinelRef} className="h-1 w-full" aria-hidden />}
+
+            {isValidating && (
+              <div className="space-y-6">
+                {Array.from({ length: 18 }).map((_, i) => <EventGridCardSkeleton key={`skel-${i}`} />)}
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            )}
+          </div>
+        </div>
       </div>
+
+      <AnimatePresence>
+        {selectedEvent && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/20 z-40"
+              onClick={() => setSelectedEvent(null)}
+            />
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl z-50 overflow-hidden"
+            >
+              <div className="relative h-full overflow-y-auto scrollbar-hide">
+                <button
+                  onClick={() => setSelectedEvent(null)}
+                  className="absolute top-3 left-3 z-20 flex items-center justify-center w-8 h-8 bg-white hover:bg-gray-100 text-gray-600 hover:text-gray-900 transition-colors rounded-full shadow-sm"
+                >
+                  ✕
+                </button>
+                <EventDetailPanel event={selectedEvent} />
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
