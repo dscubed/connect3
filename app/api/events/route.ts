@@ -72,6 +72,7 @@ export async function GET(request: NextRequest) {
         )
       `,
       )
+      .eq("is_attendable", true)
       .order("created_at", { ascending: false });
 
     if (cursor) {

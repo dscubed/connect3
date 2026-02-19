@@ -55,6 +55,8 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
     fetch(url).then((res) => res.json()),
   );
 
+  console.log("Event  ", event)
+
   const organiserString =
     !isLoadingCreator && !creatorError && creator
       ? creator.full_name

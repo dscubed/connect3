@@ -85,20 +85,6 @@ export default function EventGridFilters({
           placeholder="Search event ..."
           className="flex-1 px-4 py-2.5 text-sm bg-transparent outline-none text-black placeholder:text-gray-400"
         />
-        <div className="w-px h-6 bg-gray-200" />
-        <div className="flex items-center gap-1.5 px-3">
-          <MapPin className="w-4 h-4 text-purple-400" />
-          <input
-            type="text"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="Search location ..."
-            className="py-2.5 text-sm bg-transparent outline-none text-black placeholder:text-gray-400 w-36"
-          />
-        </div>
-        <button className="bg-white hover:bg-gray-50 p-2.5 mr-1 rounded-full transition-colors">
-          <Search className="w-4 h-4 text-gray-500" />
-        </button>
       </div>
 
       {/* Filter Dropdowns */}
