@@ -3,14 +3,18 @@ import { ProfilePageContent } from "../ProfilePageContent";
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import Sidebar from "@/components/sidebar/Sidebar";
+import { useAuthStore } from "@/stores/authStore";
 
 export default function ProfilePage() {
   const { id } = useParams();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [editingProfile, setEditingProfile] = useState(false);
+  const { user } = useAuthStore();
 
-  // Visitors cannot edit profiles
-  const EDITING_PROFILE_VISITOR = false;
-  const SET_EDITING_PROFILE_VISITOR = () => {};
+  // Allow editing only when viewing own profile
+  const isOwnProfile = user?.id === id;
+  const effectiveEditingProfile = isOwnProfile ? editingProfile : false;
+  const effectiveSetEditingProfile = isOwnProfile ? setEditingProfile : () => {};
 
   if (!id || typeof id !== "string") {
     return (
@@ -27,8 +31,8 @@ export default function ProfilePage() {
         <main className="flex-1 min-h-0 relative overflow-y-auto">
           {/* ProfilePageContent handles fetching with race condition protection */}
           <ProfilePageContent
-            editingProfile={EDITING_PROFILE_VISITOR}
-            setEditingProfile={SET_EDITING_PROFILE_VISITOR}
+            editingProfile={effectiveEditingProfile}
+            setEditingProfile={effectiveSetEditingProfile}
             profileId={id}
           />
         </main>
