@@ -8,7 +8,7 @@ export default function SidebarHeader() {
   return (
     <Link
       href="/"
-      className="flex justify-center cursor-pointer w-fit p-1.5 rounded-xl hover:scale-105 transition-all duration-200 text-muted hover:text-black hover:bg-muted/15"
+      className="flex justify-center cursor-pointer w-fit p-1.5 rounded-lg hover:scale-105 transition-all duration-200 text-muted hover:text-black hover:bg-muted/15"
       onMouseEnter={() => setHeaderHovering(true)}
       onMouseLeave={() => setHeaderHovering(false)}
     >
