@@ -102,9 +102,8 @@ export async function GET(request: NextRequest) {
         weekEnd.setDate(weekStart.getDate() + 7);
         query = query.gte("start", weekStart.toISOString()).lt("start", weekEnd.toISOString());
       } else if (dateFilter === "this-month") {
-        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
         const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-        query = query.gte("start", monthStart.toISOString()).lt("start", monthEnd.toISOString());
+        query = query.gte("start", now.toISOString()).lt("start", monthEnd.toISOString());
       } else if (dateFilter === "upcoming") {
         query = query.gte("start", now.toISOString());
       }

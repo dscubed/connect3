@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
+import EventsHeroSection from "@/components/events/EventsHeroSection";
 import EventGridFilters, {
   type DateFilter,
   type TagFilter,
@@ -8,7 +9,15 @@ import { EventGridCard, EventGridCardSkeleton } from "@/components/events/EventG
 import { type Event } from "@/lib/schemas/events/event";
 import { EventDetailPanel } from "@/components/events/EventDetailPanel";
 import { toast } from "sonner";
+import useSWR from "swr";
 import useInfiniteScroll from "@/hooks/useInfiniteScroll";
+
+const baseUrl =
+  process.env.NODE_ENV !== "production"
+    ? "http://localhost:3000"
+    : "https://connect3.app";
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 const CATEGORY_OPTIONS = [
   "All", "competition", "fun", "miscellaneous", "networking", "panel", "study", "workshop",
@@ -46,6 +55,13 @@ export default function MobileLayout() {
     sentinelRef,
   } = useInfiniteScroll<Event>(eventListRef, "/api/events", { queryParams });
 
+  const { data: thisMonthData, isLoading: isLoadingThisMonth } = useSWR<{ items: Event[] }>(
+    `${baseUrl}/api/events?dateFilter=this-month&limit=10`,
+    fetcher,
+    { revalidateOnFocus: false },
+  );
+  const thisMonthEvents = thisMonthData?.items ?? [];
+
   const handleEventSelect = (event: Event) => {
     setSelectedEvent(event);
   };
@@ -68,6 +84,8 @@ export default function MobileLayout() {
         className="flex-1 overflow-y-auto scrollbar-hide"
       >
         <div className="p-4 space-y-8 bg-white">
+          <EventsHeroSection events={thisMonthEvents} isLoading={isLoadingThisMonth} onEventClick={setSelectedEvent} />
+
           <div className="space-y-5">
             <h2 className="text-2xl font-bold text-black">All Events</h2>
 

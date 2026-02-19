@@ -46,10 +46,10 @@ export default function EventsHeroSection({
     return () => el.removeEventListener("wheel", onWheel);
   }, []);
 
+  if (!isLoading && featuredEvents.length === 0) return null;
+
   const eventsThisWeek = isLoading
     ? Array.from({ length: 4 }).map((_, i) => <HeroCardSkeleton key={i} />)
-    : featuredEvents.length === 0
-    ? <p className="text-white/60">No events this week</p>
     : (featuredEvents.map((event) => (
       <div
         key={event.id}
@@ -127,7 +127,7 @@ export default function EventsHeroSection({
           <h2 className="text-white text-3xl md:text-4xl font-bold leading-tight">
             What&apos;s on
             <br />
-            this week
+            this month
           </h2>
           <div className="flex items-center gap-1 mt-2">
             <span className="text-white/80 text-sm">✦</span>
