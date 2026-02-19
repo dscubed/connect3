@@ -37,7 +37,7 @@ export const SectionCard = forwardRef<
       <Card
         ref={ref}
         className={cn(
-          "flex flex-col items-start justify-center w-full mb-6 shadow-none",
+          "flex flex-col items-start justify-center w-full shadow-none",
           colorVariants[variant].card,
           className
         )}

@@ -55,7 +55,7 @@ export function CategoryItem({ category, chunks }: CategoryItemProps) {
     <SortableCategory key={category} id={category}>
       {({ attributes, listeners, setNodeRef, style }) => (
         <SectionCard
-          className="mb-2 flex flex-col items-start align-start w-full"
+          className="flex flex-col items-start align-start w-full"
           style={style}
           ref={setNodeRef}
           onClick={() => focusDiv(category)}

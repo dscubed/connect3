@@ -41,16 +41,16 @@ export function AddCategoryButton() {
   if (categoriesList.length === 0) return null;
 
   return (
-    <div className="w-full flex flex-col items-start gap-2 mb-12">
+    <div className="w-full flex flex-col items-center gap-2 mb-12">
       {!profile || loading ? (
         <Spinner className="h-4 w-4" />
       ) : !showSelector ? (
         <Button
           variant={"ghost"}
           onClick={() => setShowSelector(true)}
-          className="flex w-full justify-center border border-rounded-xl !text-card-foreground !bg-transparent h-fit py-3 
-          opacity-50 hover:opacity-100 transition-opacity transition-duration-300 animate-fade-in"
+          className="rounded-full bg-gray-200 px-5 py-2 text-muted-foreground hover:bg-purple-200 hover:text-purple-900 transition-colors animate-fade-in flex items-center gap-2"
         >
+          <span>Add section</span>
           <Plus className="!size-4" />
         </Button>
       ) : (
