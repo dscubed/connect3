@@ -8,7 +8,7 @@ import React, {
   ReactNode,
 } from "react";
 import { Profile, useAuthStore } from "@/stores/authStore";
-import { CubeLoader } from "@/components/ui/CubeLoader";
+import { ProfilePageSkeleton } from "./ProfilePageSkeleton";
 
 interface ProfileContextType {
   profile: Profile;
@@ -106,14 +106,7 @@ export function ProfileProvider({
 
   // Show loading state
   if (isLoading) {
-    return (
-      <div className="min-h-[200px] flex items-center justify-center">
-        <div className="flex items-center gap-4">
-          <CubeLoader size={32} />
-          <p>Loading profile...</p>
-        </div>
-      </div>
-    );
+    return <ProfilePageSkeleton />;
   }
 
   // Show error state
