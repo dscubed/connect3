@@ -65,11 +65,17 @@ export default function useInfiniteScroll<T>(
     return `${baseUrl}${endpoint}?${params.toString()}`;
   };
 
+  const queryParamsKey = JSON.stringify(queryParams ?? {});
+
   const { data, setSize, mutate, error, isValidating, isLoading } =
     useSWRInfinite<PaginatedResponse<T>>(getKey, fetcher, {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
     });
+
+  useEffect(() => {
+    setSize(1);
+  }, [queryParamsKey, setSize]);
 
   const rawItems: T[] = !!data ? data.flatMap((d) => d.items) : [];
   const items: T[] = rawItems.filter((item, index, arr) => {

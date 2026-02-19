@@ -29,6 +29,23 @@ function getEventTags(event: Event): { label: string; color: string }[] {
   return tags;
 }
 
+export function EventGridCardSkeleton() {
+  return (
+    <div className="flex items-start gap-4 animate-pulse">
+      <div className="w-28 h-28 flex-shrink-0 rounded-xl bg-gray-200" />
+      <div className="flex-1 min-w-0 pt-1 space-y-2">
+        <div className="h-4 bg-gray-200 rounded w-3/4" />
+        <div className="h-3 bg-gray-200 rounded w-1/3" />
+        <div className="h-3 bg-gray-200 rounded w-1/2" />
+        <div className="flex gap-1.5 mt-2">
+          <div className="h-4 w-12 bg-gray-200 rounded-full" />
+          <div className="h-4 w-16 bg-gray-200 rounded-full" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface EventGridCardProps {
   event: Event;
   onClick?: () => void;

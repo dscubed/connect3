@@ -5,13 +5,29 @@ import Image from "next/image";
 import { useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
+function HeroCardSkeleton() {
+  return (
+    <div className="flex-shrink-0 w-64 bg-white rounded-2xl overflow-hidden animate-pulse">
+      <div className="h-36 w-full bg-gray-200" />
+      <div className="p-4 space-y-2">
+        <div className="h-4 bg-gray-200 rounded w-3/4" />
+        <div className="h-3 bg-gray-200 rounded w-1/3" />
+        <div className="h-3 bg-gray-200 rounded w-1/2" />
+        <div className="h-3 bg-gray-200 rounded w-1/4 mt-2" />
+      </div>
+    </div>
+  );
+}
+
 interface EventsHeroSectionProps {
   events: Event[];
+  isLoading?: boolean;
   onEventClick?: (event: Event) => void;
 }
 
 export default function EventsHeroSection({
   events,
+  isLoading,
   onEventClick,
 }: EventsHeroSectionProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -30,11 +46,11 @@ export default function EventsHeroSection({
     return () => el.removeEventListener("wheel", onWheel);
   }, []);
 
-  const eventsThisWeek = featuredEvents.length === 0
-    ?
-    <p>No events</p>
-    :
-    (featuredEvents.map((event) => (
+  const eventsThisWeek = isLoading
+    ? Array.from({ length: 4 }).map((_, i) => <HeroCardSkeleton key={i} />)
+    : featuredEvents.length === 0
+    ? <p className="text-white/60">No events this week</p>
+    : (featuredEvents.map((event) => (
       <div
         key={event.id}
         onClick={() => {
