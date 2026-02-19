@@ -6,7 +6,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { Search, MapPin, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 export type DateFilter = "all" | "today" | "this-week" | "this-month" | "upcoming";
 export type SortOption = "date-asc" | "date-desc" | "name-asc" | "name-desc";
