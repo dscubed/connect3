@@ -6,7 +6,7 @@ import EventGridFilters, {
   type SortOption,
 } from "@/components/events/EventGridFilters";
 import { EventGridCard } from "@/components/events/EventGridCard";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import { filterEvents } from "@/lib/events/eventUtils";
 import { type Event } from "@/lib/schemas/events/event";
@@ -30,6 +30,19 @@ export default function DesktopLayout() {
   const [tagFilter, setTagFilter] = useState<TagFilter>("all");
   const [sortOption, setSortOption] = useState<SortOption>("date-asc");
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      console.log(event.key)
+      if (event.key === "Escape") {
+        setSelectedEvent(null);
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, []);
 
   if (error) {
     toast.error("Could not get events");
