@@ -28,7 +28,7 @@ export function HeroPanels() {
 
   return (
     <div className="w-full px-4 md:px-8">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4 max-w-4xl mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
         {cards.map((card, i) => (
           <HeroPanel key={i} heading={card.heading} description={card.description}>
             <div className="w-full h-full [&>svg]:w-full [&>svg]:h-full">
