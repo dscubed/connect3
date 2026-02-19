@@ -62,7 +62,10 @@ export default function useInfiniteScroll<T>(
   };
 
   const { data, setSize, mutate, error, isValidating, isLoading } =
-    useSWRInfinite<PaginatedResponse<T>>(getKey, fetcher);
+    useSWRInfinite<PaginatedResponse<T>>(getKey, fetcher, {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    });
 
   const items: T[] = !!data ? data.flatMap((d) => d.items) : [];
   const handleScroll = useCallback(() => {
