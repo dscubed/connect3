@@ -87,7 +87,7 @@ export default function DesktopLayout() {
           selectedEvent ? "flex-1" : "flex-1"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-6 space-y-8 bg-white shadow-md z-30">
+        <div className="max-w-7xl mx-auto p-4 space-y-8 bg-white z-30">
           <EventsHeroSection events={featuredEvents} onEventClick={setSelectedEvent} />
 
           <div className="space-y-5">
