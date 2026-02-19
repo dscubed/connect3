@@ -14,7 +14,7 @@ export function ClubListCard({
   return (
     <div
       onClick={onClick}
-      className={`cursor-pointer rounded-xl sm:rounded-2xl border transition-all duration-300 ${
+      className={`cursor-pointer rounded-lg border transition-all duration-300 ${
         isSelected
           ? "bg-primary border-white/20"
           : "bg-[#f9f9f9] border-white/20 hover:bg-primary/80"

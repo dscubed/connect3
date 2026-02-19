@@ -31,9 +31,9 @@ export default function ClubFilters({
   setSelectedUniversity,
 }: ClubFiltersProps) {
   return (
-    <div className="p-4 flex-row gap-4 flex w-full">
+    <div className="p-4 flex-row gap-3 flex w-full">
       {/* Search Input */}
-      <div className="relative bg-background w-full rounded-2xl text-foreground">
+      <div className="relative bg-background w-full rounded-lg text-foreground">
         <Input
           type="text"
           value={search}
@@ -48,7 +48,7 @@ export default function ClubFilters({
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className="justify-between rounded-2xl px-3 py-2 text-sm border-none text-foreground shadow-none"
+            className="justify-between rounded-lg px-3 py-2 text-sm border-none text-foreground shadow-none"
           >
             <Filter className="h-4 w-4" />
           </Button>
