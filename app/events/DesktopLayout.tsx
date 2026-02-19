@@ -58,7 +58,7 @@ export default function DesktopLayout() {
   } = useInfiniteScroll<Event>(eventListRef, "/api/events", { queryParams });
 
   const { data: thisWeekData, isLoading: isLoadingThisWeek } = useSWR<{ items: Event[] }>(
-    `${baseUrl}/api/events?dateFilter=this-week&limit=10`,
+    `${baseUrl}/api/events?dateFilter=this-month&limit=10`,
     fetcher,
     { revalidateOnFocus: false },
   );
