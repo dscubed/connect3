@@ -1,17 +1,17 @@
 import { HostedEvent } from "@/types/events/event";
-import type { DateFilter, TagFilter, SortOption } from "@/components/events/EventGridFilters";
+import type { DateFilter, TagFilter } from "@/components/events/EventGridFilters";
+import { Event } from "../schemas/events/event";
 
 interface WeightedEvent extends HostedEvent {
   weight: number;
 }
 
 export const filterEvents = (
-  events: HostedEvent[],
+  events: Event[],
   search: string,
   category: string | null,
   dateFilter: DateFilter = "all",
   tagFilter: TagFilter = "all",
-  sortOption: SortOption = "date-asc",
 ) => {
   const searchLowered = search.toLowerCase().trim();
   const now = new Date();
@@ -78,18 +78,30 @@ export const filterEvents = (
       return accumulator;
     }, []);
 
-  // Sort
-  if (sortOption === "date-asc") {
-    filtered.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
-  } else if (sortOption === "date-desc") {
-    filtered.sort((a, b) => new Date(b.start).getTime() - new Date(a.start).getTime());
-  } else if (sortOption === "name-asc") {
-    filtered.sort((a, b) => a.name.localeCompare(b.name));
-  } else if (sortOption === "name-desc") {
-    filtered.sort((a, b) => b.name.localeCompare(a.name));
-  } else if (searchLowered !== "") {
-    filtered.sort((a, b) => a.weight - b.weight);
-  }
+  // Sort by most recent event first (events with start dates come first, sorted by start date descending,
+  // events without start dates come last in no particular order)
+  filtered.sort((a, b) => {
+    const aHasStartDate = !!a.start;
+    const bHasStartDate = !!b.start;
+
+    // If one has start date and the other doesn't, the one with start date comes first
+    if (aHasStartDate && !bHasStartDate) {
+      return -1;
+    }
+    if (!aHasStartDate && bHasStartDate) {
+      return 1;
+    }
+
+    // If both have start dates, sort by start date descending (most recent first)
+    if (aHasStartDate && bHasStartDate) {
+      const aDate = new Date(a.start);
+      const bDate = new Date(b.start);
+      return bDate.getTime() - aDate.getTime(); // Descending order (most recent first)
+    }
+
+    // If neither has start dates, their order doesn't matter
+    return 0;
+  });
 
   return filtered;
 };

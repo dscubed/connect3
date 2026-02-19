@@ -9,7 +9,6 @@ import {
 import { ChevronDown } from "lucide-react";
 
 export type DateFilter = "all" | "today" | "this-week" | "this-month" | "upcoming";
-export type SortOption = "date-asc" | "date-desc" | "name-asc" | "name-desc";
 export type TagFilter = "all" | "free" | "paid" | "online" | "in-person";
 
 interface EventGridFiltersProps {
@@ -22,8 +21,6 @@ interface EventGridFiltersProps {
   setDateFilter: React.Dispatch<React.SetStateAction<DateFilter>>;
   tagFilter: TagFilter;
   setTagFilter: React.Dispatch<React.SetStateAction<TagFilter>>;
-  sortOption: SortOption;
-  setSortOption: React.Dispatch<React.SetStateAction<SortOption>>;
 }
 
 const dateLabels: Record<DateFilter, string> = {
@@ -42,12 +39,6 @@ const tagLabels: Record<TagFilter, string> = {
   "in-person": "In-Person",
 };
 
-const sortLabels: Record<SortOption, string> = {
-  "date-asc": "Date (Earliest)",
-  "date-desc": "Date (Latest)",
-  "name-asc": "Name (A-Z)",
-  "name-desc": "Name (Z-A)",
-};
 
 function formatCategory(cat: string): string {
   return cat
@@ -66,8 +57,6 @@ export default function EventGridFilters({
   setDateFilter,
   tagFilter,
   setTagFilter,
-  sortOption,
-  setSortOption,
 }: EventGridFiltersProps) {
 
   return (
@@ -127,26 +116,6 @@ export default function EventGridFilters({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Sort dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-1.5 px-4 py-2.5 rounded-full border border-gray-200 bg-white text-sm text-gray-600 hover:bg-gray-50 transition-colors shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-200">
-              {sortLabels[sortOption]}
-              <ChevronDown className="w-3.5 h-3.5" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            {(Object.keys(sortLabels) as SortOption[]).map((key) => (
-              <DropdownMenuItem
-                key={key}
-                onClick={() => setSortOption(key)}
-                className={key === sortOption ? "font-bold" : ""}
-              >
-                {sortLabels[key]}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
         {/* Categories dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

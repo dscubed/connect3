@@ -3,7 +3,6 @@ import EventsHeroSection from "@/components/events/EventsHeroSection";
 import EventGridFilters, {
   type DateFilter,
   type TagFilter,
-  type SortOption,
 } from "@/components/events/EventGridFilters";
 import { EventGridCard } from "@/components/events/EventGridCard";
 import { useEffect, useRef, useState } from "react";
@@ -27,7 +26,6 @@ export default function DesktopLayout() {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [dateFilter, setDateFilter] = useState<DateFilter>("all");
   const [tagFilter, setTagFilter] = useState<TagFilter>("all");
-  const [sortOption, setSortOption] = useState<SortOption>("date-asc");
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   useEffect(() => {
@@ -67,7 +65,6 @@ export default function DesktopLayout() {
     selectedCategory === "All" ? null : selectedCategory,
     dateFilter,
     tagFilter,
-    sortOption,
   );
 
   return (
@@ -94,8 +91,6 @@ export default function DesktopLayout() {
               setDateFilter={setDateFilter}
               tagFilter={tagFilter}
               setTagFilter={setTagFilter}
-              sortOption={sortOption}
-              setSortOption={setSortOption}
             />
 
             <p className="text-sm text-gray-400">
