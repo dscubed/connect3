@@ -2,6 +2,7 @@
 import { Suspense } from "react";
 import SearchPageContent from "./SearchPageContent";
 import { CubeLoader } from "@/components/ui/CubeLoader";
+import { CharacterBackground } from "@/components/ui/CharacterBackground";
 
 function SearchPageFallback() {
   return (
@@ -13,7 +14,10 @@ function SearchPageFallback() {
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={<SearchPageFallback />}>
+    <Suspense 
+     fallback={<SearchPageFallback />}
+    > 
+      <CharacterBackground />
       <SearchPageContent />
     </Suspense>
   );

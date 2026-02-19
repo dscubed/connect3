@@ -80,7 +80,7 @@ interface RouteParameters {
 }
 
 /**
- * Retrieve a single event by it's id
+ * Retrieve a single event by its id
  * @param request
  * @param param1
  * @returns
