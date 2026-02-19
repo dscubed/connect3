@@ -42,7 +42,7 @@ export default function useInfiniteScroll<T>(
       process.env.NODE_ENV !== "production"
         ? "http://localhost:3000"
         : "https://connect3.app";
-    const setLimit = limit ?? 10;
+    const setLimit = limit ?? 18;
 
     const params = new URLSearchParams();
     params.set("limit", setLimit.toString());

@@ -51,7 +51,7 @@ function transformDbEventToEventSchema(dbEvent: any): Event {
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const cursor = searchParams.get("cursor");
-  const limit = parseInt(searchParams.get("limit") || "10");
+  const limit = parseInt(searchParams.get("limit") || "18");
   try {
     let query = supabase
       .from("events")
@@ -73,10 +73,16 @@ export async function GET(request: NextRequest) {
       `,
       )
       .eq("is_attendable", true)
-      .order("start", { ascending: false });
+      .order("start", { ascending: false, nullsFirst: false })
+      .order("created_at", { ascending: false });
 
     if (cursor) {
-      query = query.lt("created_at", cursor);
+      if (cursor.startsWith("null:")) {
+        const createdAtCursor = cursor.slice(5);
+        query = query.is("start", null).lt("created_at", createdAtCursor);
+      } else {
+        query = query.or(`start.lt.${cursor},start.is.null`);
+      }
     }
 
     query = query.limit(limit + 1);
@@ -88,14 +94,16 @@ export async function GET(request: NextRequest) {
     }
 
     const morePagesExist = data.length > limit;
-
-    // if it more pages exist remove the final item and use its timestamp as the cursor
     const events = morePagesExist ? data.slice(0, limit) : data;
-
-    // Transform the database records to match our event schema
     const typedEvents: Event[] = events.map(transformDbEventToEventSchema);
 
-    const newCursor = morePagesExist ? data[limit - 1].created_at : null;
+    let newCursor: string | null = null;
+    if (morePagesExist) {
+      const lastEvent = data[limit - 1];
+      newCursor = lastEvent.start
+        ? lastEvent.start
+        : `null:${lastEvent.created_at}`;
+    }
     return NextResponse.json({ items: typedEvents, cursor: newCursor });
   } catch (error) {
     return NextResponse.json({ error: error }, { status: 500 });
