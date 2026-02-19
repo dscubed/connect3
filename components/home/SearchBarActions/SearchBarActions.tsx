@@ -26,7 +26,9 @@ export function SearchBarActions({
 }: SearchBarActionsProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [openAbove, setOpenAbove] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -41,6 +43,15 @@ export function SearchBarActions({
       document.addEventListener("mousedown", handleClickOutside);
     }
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  useEffect(() => {
+    if (open && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const spaceAbove = rect.top;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      setOpenAbove(spaceAbove > spaceBelow && spaceAbove > 300);
+    }
   }, [open]);
 
   const filtered = UNIVERSITY_ENTRIES.filter(([, info]) =>
@@ -64,7 +75,12 @@ export function SearchBarActions({
         </button>
 
         {open && (
-          <div className="absolute bottom-full left-0 mb-2 w-64 rounded-xl border bg-popover text-popover-foreground shadow-xl z-50 overflow-hidden">
+          <div
+            ref={popupRef}
+            className={`absolute left-0 w-64 rounded-xl border bg-popover text-popover-foreground shadow-xl z-50 overflow-hidden ${
+              openAbove ? "bottom-full mb-2" : "top-full mt-2"
+            }`}
+          >
             <div className="flex items-center gap-2 border-b px-3 py-2">
               <input
                 type="text"
