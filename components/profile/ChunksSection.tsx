@@ -10,7 +10,7 @@ interface ChunksSectionProps {
 }
 
 export default function ChunksSection({ editingProfile }: ChunksSectionProps) {
-  const { fetchChunks } = useChunkContext();
+  const { fetchChunks, loadingChunks } = useChunkContext();
   const profile = useAuthStore((state) => state.profile);
   const fetchedRef = useRef(false);
 
@@ -22,9 +22,10 @@ export default function ChunksSection({ editingProfile }: ChunksSectionProps) {
 
   return (
     <div className="w-full flex flex-col gap-6 mb-24">
-      {editingProfile && <ChunkActions />}
+      {/* Only show ChunkActions when content is ready - avoid skeleton + component overlap */}
+      {editingProfile && !loadingChunks && <ChunkActions />}
 
-      {/* Chunks */}
+      {/* Chunks - shows ChunksSkeleton or content, never both */}
       <ChunksDisplay />
     </div>
   );

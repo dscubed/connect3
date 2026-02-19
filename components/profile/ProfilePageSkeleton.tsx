@@ -56,26 +56,6 @@ export function ProfilePageSkeleton() {
             <Skeleton className="h-4 w-[75%]" />
           </CardContent>
         </SectionCard>
-
-        {/* Chunks Section */}
-        <div className="w-full flex flex-col gap-6 mb-24">
-          {[1, 2, 3].map((i) => (
-            <SectionCard
-              key={i}
-              className="flex flex-col items-start justify-center w-full shadow-none bg-card/50 border-foreground/30"
-            >
-              <SectionCardHeader
-                title={<Skeleton className="h-6 w-28 rounded-2xl" />}
-                className="w-full flex flex-row items-center justify-between gap-2 !px-4 !pt-4 !pb-3 !space-y-0"
-              />
-              <CardContent className="w-full !p-4 !pt-0">
-                <Skeleton className="h-4 w-full mb-2" />
-                <Skeleton className="h-4 w-full mb-2" />
-                <Skeleton className="h-4 w-2/3" />
-              </CardContent>
-            </SectionCard>
-          ))}
-        </div>
       </div>
     </div>
   );
