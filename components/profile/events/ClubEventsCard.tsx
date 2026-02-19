@@ -269,20 +269,20 @@ export default function ClubEventsCard({
 
   if (isLoading) {
     return (
-      <div className="py-4 text-sm text-slate-400">Loading events...</div>
+      <div className="py-4 text-base text-muted">Loading events...</div>
     );
   }
 
   if (displayEvents.length === 0) {
     return (
-      <div className="py-4 text-sm text-slate-400">No events yet.</div>
+      <div className="text-base leading-relaxed text-muted/80">No events yet.</div>
     );
   }
 
   return (
     <>
       {isOwnProfile && events.length > 4 ? (
-        <div className="mb-3 flex justify-end">
+        <div className="mb-4 flex justify-end">
           <button
             type="button"
             onClick={() => setShowAll((prev) => !prev)}

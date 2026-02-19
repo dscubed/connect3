@@ -72,7 +72,7 @@ export default function EventFormHeader({
         <button
           type="button"
           onClick={handleAddButtonClick}
-          className="inline-flex items-center gap-2 rounded-full border border-muted/40 px-3 py-1 text-sm font-medium text-muted transition-colors hover:text-card-foreground"
+          className="inline-flex items-center gap-1 rounded-full border border-muted/40 px-2 py-1 text-sm font-medium text-muted transition-colors hover:text-card-foreground"
         >
           Add Event
           <Plus className="h-4 w-4" />
@@ -88,7 +88,7 @@ export default function EventFormHeader({
             className="w-full flex items-center justify-between group"
             onClick={handleAddButtonClick}
           >
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
               <h3 className="text-xl font-semibold">Add Event</h3>
               <span className="text-sm px-3 py-1 rounded-full">
                 <Plus className="h-5 w-5 text-muted/70 group-hover:text-muted transition-colors" />

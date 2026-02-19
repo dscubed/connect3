@@ -1,5 +1,6 @@
 import { SortableCategory } from "./SortableCategory";
 import { CategoryChunks } from "./CategoryChunks";
+import { CategoryHeaderDropdown } from "./CategoryHeaderDropdown";
 import { ChunkEntry } from "../../ChunkUtils";
 import { useChunkContext } from "@/components/profile/chunks/hooks/ChunkProvider";
 import { AllCategories } from "../../ChunkUtils";
@@ -9,7 +10,6 @@ import {
 } from "@/components/profile/SectionCard";
 import { CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PencilLine } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
 import { useProfileContext } from "@/components/profile/ProfileProvider";
@@ -61,29 +61,24 @@ export function CategoryItem({ category, chunks }: CategoryItemProps) {
           onClick={() => focusDiv(category)}
           variant="white"
         >
-          {/* Category Header (Drag Handle) */}
+          {/* Category Header */}
           <SectionCardHeader
-            title={category}
-            {...(isEditing ? { ...attributes, ...listeners } : {})}
-          >
-            {isEventsCategory ? (
-              canManageEvents ? (
-                <EventFormHeader variant="compact" />
-              ) : null
-            ) : (
-              !isEditingCategory(category) &&
-              isEditing && (
-                <Button
-                  variant="ghost"
-                  className="!bg-transparent !text-muted rounded-full border border-muted/50 !p-1.5 h-fit"
-                  onClick={() => editCategory(category)}
-                >
-                  <PencilLine className="!size-4" />
-                </Button>
+            title={
+              !isEventsCategory && isEditing ? (
+                <CategoryHeaderDropdown category={category} />
+              ) : (
+                category
               )
-            )}
+            }
+            dragHandleProps={
+              isEditing ? { ...attributes, ...listeners } : undefined
+            }
+          >
+            {isEventsCategory && canManageEvents ? (
+              <EventFormHeader variant="compact" />
+            ) : null}
           </SectionCardHeader>
-          <CardContent className="w-full">
+          <CardContent className="w-full flex flex-col gap-4 !p-4 !pt-0">
             {isEventsCategory ? (
               <ClubEventsCard
                 profileId={profile.id}
@@ -94,12 +89,12 @@ export function CategoryItem({ category, chunks }: CategoryItemProps) {
                 {/* Category Chunks */}
                 <CategoryChunks chunks={chunks} category={category} />
                 {isEditingCategory(category) && (
-                  <div className="w-full flex flex-row justify-end mt-2 gap-2">
+                  <div className="w-full flex flex-row justify-end gap-2">
                     <Button
                       variant="ghost"
                       onClick={() => saveEdits(category)}
                       className={cn(
-                        "!bg-transparent text-muted hover:text-card-foreground"
+                        "rounded-full bg-purple-500 px-4 py-1.5 text-white hover:bg-purple-600 hover:text-white"
                       )}
                     >
                       Save
@@ -108,7 +103,7 @@ export function CategoryItem({ category, chunks }: CategoryItemProps) {
                       variant="ghost"
                       onClick={() => cancelEdits(category)}
                       className={cn(
-                        "!bg-transparent text-muted hover:text-card-foreground"
+                        "rounded-full bg-gray-200 px-4 py-1.5 text-muted hover:bg-gray-300 hover:text-card-foreground"
                       )}
                     >
                       Cancel

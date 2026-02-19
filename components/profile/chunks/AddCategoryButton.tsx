@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { ChevronDown, Plus } from "lucide-react";
 import { SectionCard, SectionCardHeader } from "../SectionCard";
 import { CardContent } from "@/components/ui/card";
 
@@ -62,16 +62,17 @@ export function AddCategoryButton() {
                 setShowSelector={setShowSelector}
               />
             }
-          ></SectionCardHeader>
+            showDragHandle
+          />
 
-          <CardContent className="w-full">
-            <p className="text-lg text-muted/80 pointer-events-none select-none">
+          <CardContent className="w-full flex flex-col gap-0 !p-4 !pt-0">
+            <p className="text-base text-muted/80 pointer-events-none select-none">
               Select a category first to start adding chunks
             </p>
-            <div className="flex w-full justify-end mt-4">
+            <div className="w-full flex flex-row justify-end gap-2">
               <Button
                 variant="ghost"
-                className="!bg-transparent text-muted hover:text-card-foreground"
+                className="rounded-full bg-gray-200 px-4 py-1.5 text-muted hover:bg-gray-300 hover:text-card-foreground"
                 onClick={() => setShowSelector(false)}
               >
                 Cancel
@@ -99,10 +100,11 @@ const CategorySelector = ({
         asChild
         className="rounded-md px-2 py-1 cursor-pointer transition-all focus-visible:ring-0 focus-visible::outline-none"
       >
-        <Button variant="ghost" className="!p-0 !bg-transparent h-fit">
-          <h1 className="text-base font-medium !text-card-foreground">
+        <Button variant="ghost" className="!p-0 !bg-transparent h-fit inline-flex items-center gap-1.5">
+          <span className="text-base font-medium !text-card-foreground">
             Select Category
-          </h1>
+          </span>
+          <ChevronDown className="size-3.5 shrink-0 text-muted" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent

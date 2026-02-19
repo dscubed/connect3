@@ -102,7 +102,7 @@ export function SummaryCard({
         )}
       </SectionCardHeader>
 
-      <CardContent className="w-full flex flex-col gap-2 !p-4 !pt-0">
+      <CardContent className="w-full flex flex-col gap-4 !p-4 !pt-0">
         {isEditing ? (
           <>
             <Textarea
@@ -110,11 +110,11 @@ export function SummaryCard({
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                 setNewTldr(e.target.value)
               }
-              className="w-full focus-visible:ring-0 resize-none min-h-0 border-none !text-base placeholder:italic py-0 px-2 !leading-relaxed placeholder:text-muted"
+              className="w-full focus-visible:ring-0 resize-none min-h-0 border-none !text-base py-0 !leading-relaxed placeholder:text-muted"
               placeholder="Add a short summary of yourself to allow others to get to know you better and make your profile more discoverable."
               onKeyDown={handleKeyDown}
             />
-            <div className="flex justify-end gap-2 animate-fade-in">
+            <div className="w-full flex flex-row justify-end gap-2 animate-fade-in">
               <Button
                 variant="ghost"
                 onClick={cancel}
@@ -132,12 +132,12 @@ export function SummaryCard({
             </div>
           </>
         ) : newTldr.length > 0 ? (
-          <span className="leading-relaxed text-base px-2" onClick={editTldr}>
+          <span className="leading-relaxed text-base" onClick={editTldr}>
             {newTldr}
           </span>
         ) : (
           <span
-            className="flex leading-relaxed text-base px-2 italic text-muted"
+            className="flex leading-relaxed text-base text-muted"
             onClick={editTldr}
           >
             Add a short summary of yourself to allow others to get to know you

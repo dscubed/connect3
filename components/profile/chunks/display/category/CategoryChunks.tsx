@@ -16,7 +16,7 @@ interface CategoryChunksProps {
 export function CategoryChunks({ chunks, category }: CategoryChunksProps) {
   const { sensors, handleChunkDragEnd } = useDnd();
   return (
-    <ul className="w-full">
+    <ul className="w-full flex flex-col gap-2">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
