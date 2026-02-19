@@ -162,14 +162,14 @@ export default function DesktopLayout() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl z-50 overflow-hidden border-l border-gray-200"
+              className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl z-50 overflow-hidden"
             >
               <div className="relative h-full overflow-y-auto scrollbar-hide">
                 <button
                   onClick={() => setSelectedEvent(null)}
-                  className="absolute top-3 left-3 z-20 flex items-center gap-1 bg-white/80 backdrop-blur-sm hover:bg-white text-gray-600 hover:text-gray-900 transition-colors text-sm px-3 py-1.5 rounded-full shadow-sm"
+                  className="absolute top-3 left-3 z-20 flex items-center justify-center w-8 h-8 bg-white hover:bg-gray-100 text-gray-600 hover:text-gray-900 transition-colors rounded-full shadow-sm"
                 >
-                  ✕ Close
+                  ✕
                 </button>
                 <EventDetailPanel event={selectedEvent} />
               </div>
