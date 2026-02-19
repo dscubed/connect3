@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useState } from "react";
+// Disable Google sign-up for now
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { FcGoogle } from "react-icons/fc";
 import { useSignUp } from "./hooks/useSignup";
 
@@ -26,10 +28,11 @@ export function SignUpForm({
   const [repeatPassword, setRepeatPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [accountType, setAccountType] = useState<"user" | "organisation">(
-    "user",
-  );
+  // Disable organisation sign-up for now
+  const accountType = "user" as const;
 
+  // Disable Google sign-up for now
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { isSigningUp, handleEmailSignUp, handleGoogleSignUp } = useSignUp();
 
   const onSubmit = (e: React.FormEvent) => {
@@ -65,8 +68,8 @@ export function SignUpForm({
         <CardContent className="px-0 pt-0">
           <form onSubmit={onSubmit}>
             <div className="flex flex-col gap-5">
-              {/* user / organisation toggle */}
-              <div className="inline-flex items-center rounded-full bg-muted/10 p-1 text-xs font-medium">
+              {/* Disable organisation sign-up for now */}
+              {/* <div className="inline-flex items-center rounded-full bg-muted/10 p-1 text-xs font-medium">
                 <button
                   type="button"
                   onClick={() => setAccountType("user")}
@@ -94,7 +97,7 @@ export function SignUpForm({
                 >
                   Organisation
                 </button>
-              </div>
+              </div> */}
 
               {/* name row */}
               <div
@@ -214,14 +217,13 @@ export function SignUpForm({
                 {isSigningUp ? "Creating account..." : "Create account"}
               </Button>
 
-              {/* divider */}
-              <div className="flex items-center gap-3 text-xs text-muted">
+              {/* Disable Google sign-up for now */}
+              {/* <div className="flex items-center gap-3 text-xs text-muted">
                 <span className="h-px flex-1 bg-muted/20" />
                 <span>Or register with</span>
                 <span className="h-px flex-1 bg-muted/20" />
               </div>
 
-              {/* Google (always visible) */}
               <Button
                 type="button"
                 onClick={handleGoogleSignUp}
@@ -236,7 +238,7 @@ export function SignUpForm({
                     Redirecting...
                   </span>
                 )}
-              </Button>
+              </Button> */}
             </div>
           </form>
         </CardContent>
