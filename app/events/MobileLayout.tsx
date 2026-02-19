@@ -1,21 +1,46 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import EventsHeader from "@/components/events/HeaderSection";
 import EventGridFilters, {
   type DateFilter,
   type TagFilter,
 } from "@/components/events/EventGridFilters";
 import { EventListCard } from "@/components/events/EventListCard";
+import { EventGridCardSkeleton } from "@/components/events/EventGridCard";
 import { type Event } from "@/lib/schemas/events/event";
 import { EventDetailPanel } from "@/components/events/EventDetailPanel";
-import { CubeLoader } from "@/components/ui/CubeLoader";
-import { filterEvents } from "@/lib/events/eventUtils";
+
 import { toast } from "sonner";
 import useInfiniteScroll from "@/hooks/useInfiniteScroll";
+
+const CATEGORY_OPTIONS = [
+  "All", "competition", "fun", "miscellaneous", "networking", "panel", "study", "workshop",
+];
 
 export default function MobileLayout() {
   const eventListRef = useRef<HTMLDivElement>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [search, setSearch] = useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [dateFilter, setDateFilter] = useState<DateFilter>("all");
+  const [tagFilter, setTagFilter] = useState<TagFilter>("all");
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const queryParams = useMemo(() => {
+    const params: Record<string, string> = {};
+    if (debouncedSearch.trim()) params.search = debouncedSearch.trim();
+    if (selectedCategory !== "All") params.category = selectedCategory;
+    if (dateFilter !== "all") params.dateFilter = dateFilter;
+    if (tagFilter !== "all") params.tagFilter = tagFilter;
+    return params;
+  }, [debouncedSearch, selectedCategory, dateFilter, tagFilter]);
+
   const {
     items: events,
     error,
@@ -23,12 +48,7 @@ export default function MobileLayout() {
     isValidating,
     hasMore,
     sentinelRef,
-  } = useInfiniteScroll<Event>(eventListRef, "/api/events");
-  const [search, setSearch] = useState<string>("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const [dateFilter, setDateFilter] = useState<DateFilter>("all");
-  const [tagFilter, setTagFilter] = useState<TagFilter>("all");
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  } = useInfiniteScroll<Event>(eventListRef, "/api/events", { queryParams });
 
   const handleEventSelect = (event: Event) => {
     setSelectedEvent(event);
@@ -43,31 +63,8 @@ export default function MobileLayout() {
     toast.error("Could not get events");
   }
 
-  if (isLoading) {
-    return (
-      <div className="min-h-[100dvh] w-full flex flex-col justify-center items-center bg-black">
-        <CubeLoader size={32} />
-        <p>Loading events...</p>
-      </div>
-    );
-  }
-
-  const categoryOptions = [
-    "All",
-    ...Array.from(new Set(events.map((e) => e.category).filter(Boolean))).sort(),
-  ];
-
-  const filtered = filterEvents(
-    events,
-    search,
-    selectedCategory === "All" ? null : selectedCategory,
-    dateFilter,
-    tagFilter,
-  );
-
-  // Deduplicate by event.id (keep first occurrence) to avoid duplicate key errors
   const seenIds = new Set<string>();
-  const deduped = filtered.filter((event) => {
+  const deduped = events.filter((event) => {
     if (seenIds.has(event.id)) return false;
     seenIds.add(event.id);
     return true;
@@ -95,7 +92,7 @@ export default function MobileLayout() {
                   setSearch={setSearch}
                   selectedCategory={selectedCategory}
                   setSelectedCategory={setSelectedCategory}
-                  categoryOptions={categoryOptions}
+                  categoryOptions={CATEGORY_OPTIONS}
                   dateFilter={dateFilter}
                   setDateFilter={setDateFilter}
                   tagFilter={tagFilter}
@@ -106,27 +103,28 @@ export default function MobileLayout() {
                 className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 scrollbar-hide"
                 ref={eventListRef}
               >
-                {deduped.map((event: Event, index) => (
-                  <EventListCard
-                    key={`${event.id}-${index}`}
-                    event={event}
-                    isSelected={
-                      selectedEvent ? selectedEvent.id === event.id : false
-                    }
-                    onClick={() => handleEventSelect(event)}
-                  />
-                ))}
+                {isLoading
+                  ? Array.from({ length: 6 }).map((_, i) => <EventGridCardSkeleton key={i} />)
+                  : deduped.map((event: Event, index) => (
+                      <EventListCard
+                        key={`${event.id}-${index}`}
+                        event={event}
+                        isSelected={
+                          selectedEvent ? selectedEvent.id === event.id : false
+                        }
+                        onClick={() => handleEventSelect(event)}
+                      />
+                    ))}
 
-                {deduped.length === 0 && (
+                {!isLoading && deduped.length === 0 && (
                   <div className="py-8 text-center text-sm text-gray-400">
                     No events found.
                   </div>
                 )}
 
-                {hasMore && <div ref={sentinelRef} className="h-1 w-full" aria-hidden />}
-                <div className="min-h-[64px] flex items-center justify-center py-4">
-                  {isValidating && <CubeLoader size={32} />}
-                </div>
+                {hasMore && deduped.length > 0 && <div ref={sentinelRef} className="h-1 w-full" aria-hidden />}
+
+                {isValidating && Array.from({ length: 18 }).map((_, i) => <EventGridCardSkeleton key={`skel-${i}`} />)}
               </div>
             </motion.div>
           ) : (
