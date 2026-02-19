@@ -19,6 +19,8 @@ export default function MobileLayout() {
     error,
     isLoading,
     isValidating,
+    hasMore,
+    sentinelRef,
   } = useInfiniteScroll<Event>(eventListRef, "/api/events");
   const [search, setSearch] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<
@@ -54,8 +56,16 @@ export default function MobileLayout() {
     selectedCategory === "All" ? null : selectedCategory
   );
 
+  // Deduplicate by event.id (keep first occurrence) to avoid duplicate key errors
+  const seenIds = new Set<string>();
+  const deduped = filtered.filter((event) => {
+    if (seenIds.has(event.id)) return false;
+    seenIds.add(event.id);
+    return true;
+  });
+
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
       <div className="flex-1 overflow-hidden">
         <AnimatePresence mode="wait">
           {!showDetails ? (
@@ -80,9 +90,9 @@ export default function MobileLayout() {
                 className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 scrollbar-hide"
                 ref={eventListRef}
               >
-                {filtered.map((event: Event) => (
+                {deduped.map((event: Event, index) => (
                   <EventListCard
-                    key={event.id}
+                    key={`${event.id}-${index}`}
                     event={event}
                     isSelected={
                       selectedEvent ? selectedEvent.id === event.id : false
@@ -90,16 +100,14 @@ export default function MobileLayout() {
                     onClick={() => handleEventSelect(event)}
                   />
                 ))}
+                {hasMore && <div ref={sentinelRef} className="h-1 w-full" aria-hidden />}
+                <div className="min-h-[64px] flex items-center justify-center py-4">
+                  {isValidating && <CubeLoader size={32} />}
+                </div>
               </div>
-              {filtered.length === 0 && (
+              {deduped.length === 0 && !isValidating && (
                 <div className="p-4 text-sm text-white/60">
                   No events found.
-                </div>
-              )}
-
-              {isValidating && (
-                <div className="flex justify-center">
-                  <CubeLoader size={32} />
                 </div>
               )}
             </motion.div>

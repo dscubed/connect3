@@ -9,6 +9,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+// Disable Google login for now
+// @eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { FcGoogle } from "react-icons/fc";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,6 +30,9 @@ export function LoginForm({
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  // Disable Google login for now
+  // @eslint-disable-next-line
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { isLoggingIn, handleEmailLogin, handleGoogleLogin } =
     useLogin(onLoggingInChange);
 
@@ -120,7 +126,8 @@ export function LoginForm({
               </div>
 
               {/* Google */}
-              <Button
+              {/* Disable Google login for now */}
+              {/* <Button
                 type="button"
                 onClick={handleGoogleLogin}
                 disabled={busy}
@@ -134,7 +141,7 @@ export function LoginForm({
                     Redirecting...
                   </span>
                 )}
-              </Button>
+              </Button> */}
             </div>
             <div className="mt-4 text-center text-sm">
               Don&apos;t have an account?{" "}

@@ -21,6 +21,8 @@ export default function DesktopLayout() {
     error,
     isLoading,
     isValidating,
+    hasMore,
+    sentinelRef,
   } = useInfiniteScroll<Event>(eventListRef, "/api/events");
   const [search, setSearch] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -69,6 +71,14 @@ export default function DesktopLayout() {
     tagFilter,
   );
 
+  // Deduplicate by event.id (keep first occurrence) to avoid duplicate key errors
+  const seenIds = new Set<string>();
+  const deduped = filtered.filter((event) => {
+    if (seenIds.has(event.id)) return false;
+    seenIds.add(event.id);
+    return true;
+  });
+
   return (
     <div className="flex flex-1 overflow-hidden">
       <div
@@ -77,7 +87,7 @@ export default function DesktopLayout() {
           selectedEvent ? "flex-1" : "flex-1"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-6 space-y-8 bg-white shadow-md z-30">
+        <div className="max-w-7xl mx-auto p-4 space-y-8 bg-white z-30">
           <EventsHeroSection events={featuredEvents} onEventClick={setSelectedEvent} />
 
           <div className="space-y-5">
@@ -96,30 +106,32 @@ export default function DesktopLayout() {
             />
 
             <p className="text-sm text-gray-400">
-              Viewing {filtered.length} of {events.length} results
+              Viewing {deduped.length} of {events.length} results
             </p>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              {filtered.map((event) => (
+              {deduped.map((event, index) => (
                 <EventGridCard
-                  key={event.id}
+                  key={`${event.id}-${index}`}
                   event={event}
                   onClick={() => setSelectedEvent(event)}
                 />
               ))}
             </div>
 
-            {filtered.length === 0 && (
+            {deduped.length === 0 && (
               <div className="py-8 text-center text-sm text-gray-400">
                 No events found.
               </div>
             )}
 
-            {isValidating && (
-              <div className="flex justify-center py-4">
-                <CubeLoader size={32} />
-              </div>
-            )}
+            {/* Sentinel for infinite scroll - must be inside scroll container */}
+            {hasMore && <div ref={sentinelRef} className="h-1 w-full" aria-hidden />}
+
+            {/* Fixed-height loading area to prevent layout shift */}
+            <div className="min-h-[64px] flex items-center justify-center py-4">
+              {isValidating && <CubeLoader size={32} />}
+            </div>
           </div>
         </div>
       </div>

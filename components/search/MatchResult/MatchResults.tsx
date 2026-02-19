@@ -90,6 +90,7 @@ function ProfileMatchCardWrapper({
       <ProfileMatchCard
         name={name || "User"}
         avatarUrl={profile?.avatar_url || ""}
+        userId={match.id}
         tldr={profile?.tldr}
         entity={match}
         onClick={onProfileClick}
@@ -123,6 +124,7 @@ function EventMatchCardWrapper({
 const ProfileMatchCard = memo(function ProfileMatchCard({
   name,
   avatarUrl,
+  userId,
   tldr,
   entity,
   onClick,
@@ -130,6 +132,7 @@ const ProfileMatchCard = memo(function ProfileMatchCard({
   name: string;
   tldr?: string;
   avatarUrl?: string;
+  userId: string;
   entity: EntityResult;
   onClick?: (entity: EntityResult) => void;
 }) {
@@ -146,7 +149,12 @@ const ProfileMatchCard = memo(function ProfileMatchCard({
       tabIndex={0}
     >
       <CardHeader className="flex flex-row gap-2 justify-center items-center p-4">
-        <UserAvatar avatarUrl={avatarUrl || ""} fullName={name} />
+        <UserAvatar
+          avatarUrl={avatarUrl || ""}
+          fullName={name}
+          userId={userId}
+          isOrganisation={entity.type === "organisation"}
+        />
         <span className="font-medium text-base lg:text-lg flex-1 !m-0 truncate text-secondary-foreground">
           {name || "User"}
         </span>

@@ -1,9 +1,6 @@
-import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
-import Image from "next/image";
-import { FastAverageColor } from "fast-average-color";
 import { Club } from "@/types/clubs/club";
 import { universities, University } from "../profile/details/univeristies";
+import ProfilePicture from "@/components/profile/ProfilePicture";
 
 export function ClubListCard({
   club,
@@ -14,37 +11,13 @@ export function ClubListCard({
   isSelected: boolean;
   onClick: () => void;
 }) {
-  const [bgColor, setBgColor] = useState<string | undefined>(undefined);
-  const imgRef = useRef<HTMLImageElement>(null);
-
-  useEffect(() => {
-    if (club.avatar_url && imgRef.current) {
-      const fac = new FastAverageColor();
-      fac
-        .getColorAsync(imgRef.current)
-        .then((color) => {
-          // Lighten the color by blending with white (e.g., 70% white)
-          const lighten = (c: number) => Math.round(c + (255 - c) * 0.7);
-          const [r, g, b = 255] = color.value; // alpha defaults to 255 if not present
-          const lr = lighten(r),
-            lg = lighten(g),
-            lb = lighten(b);
-
-          setBgColor(`rgb(${lr}, ${lg}, ${lb})`);
-        })
-        .catch(() => setBgColor(undefined));
-    }
-  }, [club.avatar_url, club.first_name]);
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
+    <div
       onClick={onClick}
-      className={`cursor-pointer rounded-xl sm:rounded-2xl border transition-all duration-300 ${
+      className={`cursor-pointer rounded-lg border transition-all duration-300 ${
         isSelected
-          ? "bg-primary border-white/20 shadow-xl shadow-black/10"
-          : "bg-secondary border-white/20 hover:bg-primary/80 hover:shadow-lg hover:shadow-black/5"
+          ? "bg-primary border-white/20"
+          : "bg-[#f9f9f9] border-white/20 hover:bg-primary/80"
       }`}
     >
       <div
@@ -53,23 +26,14 @@ export function ClubListCard({
         }`}
       >
         {/* Logo */}
-        <div
-          className={`rounded-lg sm:rounded-xl flex-shrink-0 border overflow-hidden ${
-            isSelected ? "border-white" : "border-white"
-          }`}
-          style={{
-            background: club.avatar_url && bgColor ? bgColor : undefined,
-          }}
-        >
-          <div className="w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center">
-            <Image
-              ref={imgRef}
-              src={club.avatar_url || "/placeholder.png"}
-              alt={`${club.first_name} logo`}
-              width={48}
-              height={48}
-              className="w-full h-full object-cover drop-shadow-md"
-              crossOrigin="anonymous"
+        <div className="w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center overflow-hidden shrink-0 border border-gray-200 rounded-[10%]">
+          <div className="scale-[0.31] sm:scale-[0.44] origin-center">
+            <ProfilePicture
+              avatar={club.avatar_url}
+              userId={club.id}
+              fullName={club.first_name}
+              editingProfile={false}
+              isOrganisation={true}
             />
           </div>
         </div>
@@ -94,10 +58,10 @@ export function ClubListCard({
           >
             {club.university && club.university in universities
               ? universities[club.university as University].name
-              : club.university || "No university"}
+              : club.university || "No university set"}
           </p>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

@@ -9,6 +9,7 @@ export interface UseChunkExports {
   updateChunk: (data: ChunkInput) => void;
   removeChunk: (id: string) => void;
   getChunk: (id: string) => ProfileChunk | null;
+  changeCategory: (oldCategory: AllCategories, newCategory: AllCategories) => void;
 }
 
 export function useChunks({
@@ -151,11 +152,29 @@ export function useChunks({
     return chunk;
   };
 
+  const changeCategory = (oldCategory: AllCategories, newCategory: AllCategories) => {
+    /**
+     * Moves all chunks from oldCategory to newCategory.
+     * The useEffect will sync categoryOrder when chunks change.
+     */
+    if (oldCategory === newCategory) return;
+    if (!profile) return;
+
+    setChunks((prev) =>
+      prev.map((chunk) =>
+        chunk.category === oldCategory
+          ? { ...chunk, category: newCategory }
+          : chunk
+      )
+    );
+  };
+
   return {
     orderedCategoryChunks,
     addChunk,
     updateChunk,
     removeChunk,
     getChunk,
+    changeCategory,
   };
 }

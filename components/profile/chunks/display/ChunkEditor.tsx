@@ -58,22 +58,24 @@ export function ChunkEditor({
   };
 
   return (
-    <div>
-      <div className="flex items-baseline justify-center gap-2 w-full">
+    <div className="w-full">
+      <div className="flex items-center gap-3 w-full">
         <span
-          className="inline-block w-2 h-2 bg-black rounded-full"
+          className="inline-flex w-4 shrink-0 justify-center"
           aria-hidden="true"
-        />
-        <div className="flex w-full items-end gap-2">
+        >
+          <span className="w-2 h-2 rounded-full bg-black" />
+        </span>
+        <div className="flex flex-1 min-w-0 items-center gap-3">
           <Textarea
             ref={inputRef}
-            className="flex-1 p-2 min-h-0 border-none outline-none shadow-none focus-visible:ring-0 focus:ring-0 resize-none !text-base"
+            className="flex-1 min-h-0 min-w-0 p-0 border-none outline-none shadow-none focus-visible:ring-0 focus:ring-0 resize-none !text-base"
             placeholder={CATEGORY_PLACEHOLDERS[chunk.category]}
             onKeyDown={handleKeyDown}
             onChange={handleChange}
             value={chunk.text}
           />
-          <div className="items-end min-h-10">
+          <div className="shrink-0 flex items-center">
             <AiEnhanceDialog
               initialText={chunk.text}
               fieldType="chunk"

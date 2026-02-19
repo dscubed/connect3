@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import UserAvatar from "@/components/search/MatchResult/UserAvatar";
 import { LogoutButton } from "./logout-button";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -17,19 +17,13 @@ export function AuthButton() {
     <div className="flex items-center gap-2">
       <Link href="/profile" className="flex-shrink-0">
         <div className="relative w-8 h-8 rounded-full overflow-hidden ring-1 ring-black/20 hover:ring-black/40 transition-all hover:scale-105">
-          {profile?.avatar_url ? (
-            <Image
-              src={profile.avatar_url}
-              alt={`${profile.first_name || "User"}'s avatar`}
-              fill
-              className="object-cover"
-              sizes="32px"
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-xs">
-              {profile?.first_name?.[0] || "U"}
-            </div>
-          )}
+          <UserAvatar
+            avatarUrl={profile?.avatar_url}
+            fullName={profile?.first_name || "User"}
+            userId={profile?.id || ""}
+            size="sm"
+            isOrganisation={profile?.account_type === "organisation"}
+          />
         </div>
       </Link>
       <span className="text-sm font-medium hidden sm:block">

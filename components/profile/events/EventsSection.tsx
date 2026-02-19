@@ -17,6 +17,8 @@ export default function EventsSection() {
     items: events,
     isLoading,
     isValidating,
+    hasMore,
+    sentinelRef,
   } = useInfiniteScroll<HostedEvent>(
     eventDisplayRef,
     profile?.id ? `/api/users/${profile.id}/events` : null,
@@ -53,9 +55,12 @@ export default function EventsSection() {
                     <ProfileEventListCard key={i} index={i} event={event} />
                   );
                 })}
+                {hasMore && <div ref={sentinelRef} className="h-1 w-full" aria-hidden />}
+                <div className="min-h-[48px] flex items-center justify-center py-4">
+                  {isValidating && <CubeLoader size={24} />}
+                </div>
               </>
             )}
-            {isValidating && <p>Loading...</p>}
           </div>
         </div>
       </div>

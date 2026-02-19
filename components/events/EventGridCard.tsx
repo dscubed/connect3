@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { type Event } from "@/lib/schemas/events/event";
@@ -11,7 +10,7 @@ function getEventTags(event: Event): { label: string; color: string }[] {
   if (event.pricing.min > 0 || event.pricing.max > 0) {
     tags.push({ label: "Paid", color: "bg-red-400 text-white" });
   } else {
-    tags.push({ label: "Free", color: "bg-green-400 text-white" });
+    tags.push({ label: "Free", color: "bg-teal-500 text-white" });
   }
 
   if (!event.isOnline) {
@@ -50,9 +49,7 @@ export function EventGridCard({ event, onClick }: EventGridCardProps) {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
+    <div
       onClick={handleClick}
       className="flex items-start gap-4 cursor-pointer group"
     >
@@ -102,6 +99,6 @@ export function EventGridCard({ event, onClick }: EventGridCardProps) {
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

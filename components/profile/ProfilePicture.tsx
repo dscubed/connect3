@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import Avvvatars from "avvvatars-react";
 import { Edit3, Upload, RotateCcw } from "lucide-react";
 import EditAvatarModal from "./edit-modals/EditAvatarModal";
 import { cn } from "@/lib/utils";
@@ -16,15 +17,25 @@ import { toast } from "sonner";
 
 interface ProfilePictureProps {
   avatar: string | null;
+  userId: string;
+  fullName?: string;
   editingProfile: boolean;
+  /** When true, shows rounded square (like Twitter orgs); otherwise circular. */
+  isOrganisation?: boolean;
 }
 
 export default function ProfilePicture({
   avatar,
+  userId,
+  fullName = "User",
   editingProfile,
+  isOrganisation = false,
 }: ProfilePictureProps) {
   const [modalOpen, setModalOpen] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const { profile, updateProfile, getSupabaseClient } = useAuthStore();
+
+  const showGeneratedAvatar = !avatar || imageError;
 
   const handleReset = async () => {
     if (!profile?.id) return;
@@ -52,25 +63,39 @@ export default function ProfilePicture({
     <div className="relative w-fit">
       <div
         className={cn(
-          "relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4",
-          "border-secondary bg-secondary-foreground",
+          "relative w-32 h-32 md:w-40 md:h-40 overflow-hidden border-4",
+          "border-white bg-white",
+          isOrganisation ? "rounded-[10%]" : "rounded-full",
           editingProfile && "hover:scale-105 transition-all"
         )}
       >
-        <Image
-          src={avatar || "/placeholder.png"}
-          alt={`User Avatar`}
-          fill
-          className="object-cover"
-          priority
-        />
+        {avatar && !showGeneratedAvatar ? (
+          <Image
+            src={avatar}
+            alt={`User Avatar`}
+            fill
+            className="object-cover"
+            priority
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Avvvatars
+              value={userId || "anonymous"}
+              displayValue={fullName}
+              size={160}
+              radius={isOrganisation ? 16 : 160}
+              border={false}
+            />
+          </div>
+        )}
       </div>
       {/* Edit Avatar Dropdown */}
       {editingProfile && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <motion.button
-              className="absolute bottom-2 right-2 p-2 rounded-full bg-white text-black hover:bg-white/90 transition-colors shadow-lg animate-fade-in"
+              className="absolute bottom-2 right-2 p-2 rounded-full bg-white text-black hover:bg-white/90 transition-colors shadow-lg"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
             >
@@ -80,7 +105,7 @@ export default function ProfilePicture({
           <DropdownMenuContent 
             align="end" 
             sideOffset={4}
-            className="w-44 rounded-xl border border-black/10 bg-white shadow-lg p-1"
+            className="w-44 rounded-xl border border-gray-200 bg-white shadow-lg p-1"
           >
             <DropdownMenuItem 
               onClick={() => setModalOpen(true)}

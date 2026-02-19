@@ -106,7 +106,7 @@ export default function RecentChatrooms({
                   <Input
                     value={renameValue}
                     onChange={(e) => setRenameValue(e.target.value)}
-                    className="w-full bg-white border border-black/10 rounded-md px-2 py-1.5 text-sm text-black outline-none focus:border-violet-400 focus:ring-1 focus:ring-violet-400"
+                    className="w-full bg-white border border-gray-200 rounded-md px-2 py-1.5 text-sm text-black outline-none focus:border-violet-400 focus:ring-1 focus:ring-violet-400"
                     autoFocus
                     onKeyDown={(e) => {
                       if (e.key === "Enter") onRenameSave(chat.id);

@@ -51,7 +51,7 @@ function transformDbEventToEventSchema(dbEvent: any): Event {
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const cursor = searchParams.get("cursor");
-  const limit = parseInt(searchParams.get("limit") || "10");
+  const limit = parseInt(searchParams.get("limit") || "18");
   try {
     let query = supabase
       .from("events")
@@ -88,11 +88,7 @@ export async function GET(request: NextRequest) {
     }
 
     const morePagesExist = data.length > limit;
-
-    // if it more pages exist remove the final item and use its timestamp as the cursor
     const events = morePagesExist ? data.slice(0, limit) : data;
-
-    // Transform the database records to match our event schema
     const typedEvents: Event[] = events.map(transformDbEventToEventSchema);
 
     const lastWithStart = data.findLast(event => event.start !== null);

@@ -44,7 +44,7 @@ export default function EventsHeroSection({
             router.push(`/events/${event.id}`);
           }
         }}
-        className="flex-shrink-0 w-64 bg-white rounded-2xl overflow-hidden shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
+        className="flex-shrink-0 w-64 bg-white rounded-2xl overflow-hidden cursor-pointer transition-shadow"
       >
         <div className="relative h-36 w-full bg-purple-100">
           {event.thumbnail ? (

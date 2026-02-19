@@ -37,8 +37,8 @@
     --accent-foreground: 133 78 203;
     --destructive: 130 29 29;
     --destructive-foreground: 250 250 250;
-    --border: 38 38 38;
-    --input: 38 38 38;
+    --border: 229 231 235;
+    --input: 229 231 235;
     --ring: 212 212 212;
     --chart-1: 51 92 204;
     --chart-2: 51 183 153;
@@ -65,8 +65,8 @@
     --accent-foreground: 133 78 203;
     --destructive: 130 29 29;
     --destructive-foreground: 250 250 250;
-    --border: 38 38 38;
-    --input: 38 38 38;
+    --border: 229 231 235;
+    --input: 229 231 235;
     --ring: 212 212 212;
     --chart-1: 51 92 204;
     --chart-2: 51 183 153;
@@ -125,6 +125,29 @@
 
 .scrollbar-styled::-webkit-scrollbar-thumb:hover {
   background: #c084fc;
+}
+
+/* Skeleton shimmer animation - silver gradient sweep */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    #e2e4e8 0%,
+    #e2e4e8 35%,
+    #f1f3f5 50%,
+    #e2e4e8 65%,
+    #e2e4e8 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
 }
 
 @layer utilities {

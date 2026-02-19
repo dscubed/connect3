@@ -95,10 +95,10 @@ export function ResumeResultContent({
             {Object.entries(updatedSections).map(([category, chunks]) => (
               <SectionCard variant="white" key={category} className="mb-2">
                 <SectionCardHeader title={category} />
-                <CardContent>
-                  <ul className="list-disc list-inside space-y-1">
+                <CardContent className="w-full flex flex-col gap-4 !p-4 !pt-0">
+                  <ul className="list-disc list-inside space-y-2">
                     {chunks?.map((chunk, idx) => (
-                      <li key={chunk.id || idx} className="text-sm">
+                      <li key={chunk.id || idx} className="text-base">
                         {chunk.text}
                       </li>
                     ))}
@@ -123,10 +123,10 @@ export function ResumeResultContent({
             {Object.entries(newSections).map(([category, chunks]) => (
               <SectionCard variant="white" key={category} className="mb-2">
                 <SectionCardHeader title={category} />
-                <CardContent>
-                  <ul className="list-disc list-inside space-y-1">
+                <CardContent className="w-full flex flex-col gap-4 !p-4 !pt-0">
+                  <ul className="list-disc list-inside space-y-2">
                     {chunks?.map((chunk, idx) => (
-                      <li key={idx} className="text-sm">
+                      <li key={idx} className="text-base">
                         {chunk.text}
                       </li>
                     ))}

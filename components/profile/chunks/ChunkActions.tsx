@@ -10,9 +10,9 @@ export function ChunkActions() {
   const [resumeOpen, setResumeOpen] = useState(false);
 
   return (
-    <div className="flex gap-4 animate-fade-in">
+    <div className="flex gap-4">
       <div className="flex gap-2 items-center">
-        <h1 className="text-lg font-medium pr-4">Actions:</h1>
+        <h1 className="text-lg font-medium pr-2">Actions:</h1>
 
         {/* Save and Cancel for Editing */}
         <ActionButton
@@ -57,14 +57,12 @@ const ActionButton = ({
       aria-label={label}
       disabled={disabled}
       className={cn(
-        "border-none h-fit min-w-16 px-2 py-1",
-        disabled ? "cursor-not-allowed" : "hover:scale-105 cursor-pointer"
+        "rounded-full bg-gray-200 px-3 py-2 text-muted-foreground hover:bg-purple-200 hover:text-purple-900 transition-colors flex items-center gap-1.5",
+        disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
       )}
     >
-      <div className="flex flex-col items-center transition-all">
-        <Icon className="h-5 w-5 cursor-pointer transition-colors" />
-        <span className="text-xs mt-1">{label}</span>
-      </div>
+      <span>{label}</span>
+      <Icon className="size-4 shrink-0" />
     </Button>
   );
 };

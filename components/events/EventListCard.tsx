@@ -22,12 +22,10 @@ export function EventListCard({
     (url) => fetch(url).then((res) => res.json())
   );
 
-  if (isLoadingCreator) return;
-
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={false}
+      animate={{ opacity: 1 }}
       onClick={onClick}
       className={`cursor-pointer rounded-xl sm:rounded-2xl border transition-all duration-300 ${
         isSelected
@@ -60,15 +58,13 @@ export function EventListCard({
             {event.name}
           </h3>
 
-          <span className="text-foreground text-sm md:text-md font-semibold">
+          <span className="text-foreground text-sm md:text-md font-semibold min-h-[1.25em] block">
             {isLoadingCreator ? (
-              <p>Fetching organisers...</p>
+              <span className="animate-pulse text-muted-foreground">Loading…</span>
             ) : creatorError ? (
-              <p>Unknown</p>
+              "Unknown"
             ) : (
-              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                {creator.full_name || "Unknown"}
-              </motion.p>
+              creator.full_name || "Unknown"
             )}
           </span>
           
@@ -76,8 +72,17 @@ export function EventListCard({
           <div className="space-y-1">
             <p className="text-muted text-xs sm:text-sm line-clamp-1 leading-relaxed flex items-center gap-1">
               <Calendar className="size-3" />
-              {new Date(event.start).toLocaleDateString()} -{" "}
-              {new Date(event.end).toLocaleDateString()}
+              {new Date(event.start).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}{" "}
+              -{" "}
+              {new Date(event.end).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
             </p>
             
             {/* <p className="text-white/50 text-xs sm:text-sm line-clamp-1 leading-relaxed flex items-center gap-1">

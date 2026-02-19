@@ -1,14 +1,8 @@
 "use client";
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useRef,
-  ReactNode,
-} from "react";
+import React, { createContext, useContext, ReactNode } from "react";
+import useSWR from "swr";
 import { Profile, useAuthStore } from "@/stores/authStore";
-import { CubeLoader } from "@/components/ui/CubeLoader";
+import { ProfilePageSkeleton } from "./ProfilePageSkeleton";
 
 interface ProfileContextType {
   profile: Profile;
@@ -35,89 +29,42 @@ export function ProfileProvider({
   const authProfile = useAuthStore((state) => state.profile);
   const getSupabaseClient = useAuthStore((state) => state.getSupabaseClient);
 
-  const [profile, setProfile] = useState<Profile | null>(
-    initialProfile ?? null
-  );
-  const [isLoading, setIsLoading] = useState(!initialProfile);
-
-  // Track current profileId to handle race conditions
-  const currentProfileIdRef = useRef<string>(profileId);
-
   const isOwnProfile = authUser?.id === profileId;
 
-  useEffect(() => {
-    // Update ref immediately when profileId changes
-    currentProfileIdRef.current = profileId;
+  // Use initialProfile or authProfile when applicable - skip fetch
+  const useInitialData =
+    (initialProfile?.id === profileId) || (isOwnProfile && !!authProfile);
 
-    // If we have an initial profile that matches, use it
-    if (initialProfile && initialProfile.id === profileId) {
-      setProfile(initialProfile);
-      setIsLoading(false);
-      return;
+  const swrKey = !useInitialData ? `profile_full_${profileId}` : null;
+  const { data: fetchedProfile, isLoading: isFetching, error } = useSWR<Profile>(
+    swrKey,
+    async () => {
+      const supabase = getSupabaseClient();
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", profileId)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 60000,
     }
+  );
 
-    // If viewing own profile, use cached auth profile
-    if (isOwnProfile && authProfile) {
-      setProfile(authProfile);
-      setIsLoading(false);
-      return;
-    }
+  const profile = useInitialData
+    ? (initialProfile?.id === profileId ? initialProfile! : authProfile!)
+    : fetchedProfile;
+  const isLoading = useInitialData ? false : isFetching;
 
-    // Fetch profile for visiting
-    const fetchProfile = async () => {
-      setIsLoading(true);
-      setProfile(null); // Clear immediately to prevent stale data
-
-      const fetchingForId = profileId;
-
-      try {
-        const supabase = getSupabaseClient();
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", fetchingForId)
-          .single();
-
-        if (error) throw error;
-
-        // Only apply if still current profile
-        if (currentProfileIdRef.current === fetchingForId) {
-          console.log("ProfileProvider: Setting profile for", fetchingForId);
-          setProfile(data);
-        } else {
-          console.log(
-            "ProfileProvider: Discarding stale fetch for",
-            fetchingForId,
-            "current is",
-            currentProfileIdRef.current
-          );
-        }
-      } catch (error) {
-        console.error("ProfileProvider: Failed to fetch profile:", error);
-      } finally {
-        if (currentProfileIdRef.current === fetchingForId) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchProfile();
-  }, [profileId, isOwnProfile, authProfile, getSupabaseClient, initialProfile]);
-
-  // Show loading state
   if (isLoading) {
-    return (
-      <div className="min-h-[200px] flex items-center justify-center">
-        <div className="flex items-center gap-4">
-          <CubeLoader size={32} />
-          <p>Loading profile...</p>
-        </div>
-      </div>
-    );
+    return <ProfilePageSkeleton />;
   }
 
-  // Show error state
-  if (!profile) {
+  if (error || !profile) {
     return (
       <div className="min-h-[200px] flex items-center justify-center">
         <p className="text-muted">Profile not found.</p>

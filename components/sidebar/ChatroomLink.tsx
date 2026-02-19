@@ -69,7 +69,7 @@ export function ChatroomLink({
 
           <DropdownMenuContent
             align="end"
-            className="w-36 border border-black/10 shadow-lg"
+            className="z-[110] w-36 border border-gray-200"
           >
             {onRename && (
               <DropdownMenuItem onClick={onRename} className="cursor-pointer">

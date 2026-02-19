@@ -19,27 +19,30 @@ export default function ClubsPage() {
   const [showDetails, setShowDetails] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [search, setSearch] = useState("");
+  const [selectedUniversity, setSelectedUniversity] = useState<string>("All");
 
   // Debounce search to avoid too many API calls
   const debouncedSearch = useDebouncedValue(search, 300);
-
-  // Track previous search to detect when it actually changes
-  const prevSearchRef = useRef(debouncedSearch);
 
   const clubListRef = useRef<HTMLDivElement>(null);
   const isDesktop = useBreakpointLarge();
 
   // Memoize query params to prevent unnecessary re-fetches
-  const queryParams = useMemo(
-    () => (debouncedSearch ? { search: debouncedSearch } : undefined),
-    [debouncedSearch]
-  );
+  const queryParams = useMemo(() => {
+    const params: Record<string, string> = {};
+    if (debouncedSearch) params.search = debouncedSearch;
+    if (selectedUniversity && selectedUniversity !== "All")
+      params.university = selectedUniversity;
+    return Object.keys(params).length > 0 ? params : undefined;
+  }, [debouncedSearch, selectedUniversity]);
 
   const {
     items: clubs,
     error,
     isLoading,
     isValidating,
+    hasMore,
+    sentinelRef,
   } = useInfiniteScroll<Club>(clubListRef, "/api/clubs", { queryParams });
 
   // Set initial selected club once data loads
@@ -50,20 +53,15 @@ export default function ClubsPage() {
     }
   }, [isLoading, clubs, loaded]);
 
-  // Reset selection only when search query actually changes
+  // Reset selection when current selection is no longer in the filtered list
   useEffect(() => {
-    // Check if search actually changed (not just clubs loading more)
-    if (prevSearchRef.current !== debouncedSearch) {
-      prevSearchRef.current = debouncedSearch;
-
-      // Wait a tick for new data to load, then select first result
-      if (!isValidating && clubs.length > 0) {
-        setSelectedClub(clubs[0]);
-      } else if (!isValidating && clubs.length === 0) {
-        setSelectedClub(null);
-      }
+    if (isValidating) return;
+    const selectionStillValid =
+      selectedClub && clubs.some((c) => c.id === selectedClub.id);
+    if (!selectionStillValid) {
+      setSelectedClub(clubs.length > 0 ? clubs[0] : null);
     }
-  }, [debouncedSearch, clubs, isValidating]);
+  }, [clubs, isValidating, selectedClub]);
 
   const handleClubSelect = (club: Club) => {
     setSelectedClub(club);
@@ -104,16 +102,15 @@ export default function ClubsPage() {
           onClick={() => handleClubSelect(club)}
         />
       ))}
-      {isValidating && (
-        <div className="flex justify-center py-4">
-          <CubeLoader size={24} />
-        </div>
-      )}
+      {hasMore && <div ref={sentinelRef} className="h-1 w-full" aria-hidden />}
+      <div className="min-h-[48px] flex items-center justify-center py-4">
+        {isValidating && <CubeLoader size={24} />}
+      </div>
     </>
   );
 
   return (
-    <div className="flex h-[100dvh] overflow-hidden">
+    <div className="flex flex-col md:flex-row h-[100dvh] overflow-hidden">
       <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
 
       {isDesktop ? (
@@ -122,11 +119,16 @@ export default function ClubsPage() {
           {/* Left Panel - Club List */}
           <div className="w-80 xl:w-96 border-r border-white/10 backdrop-blur-sm overflow-hidden flex flex-col">
             <ClubsHeader clubCount={clubs.length} isLoading={isValidating} />
-            <ClubFilters search={search} setSearch={setSearch} />
+            <ClubFilters
+              search={search}
+              setSearch={setSearch}
+              selectedUniversity={selectedUniversity}
+              setSelectedUniversity={setSelectedUniversity}
+            />
 
             {/* Club List */}
             <div
-              className="flex-1 overflow-y-auto p-5 space-y-3 scrollbar-hide"
+              className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-hide"
               ref={clubListRef}
             >
               {clubListContent}
@@ -135,7 +137,13 @@ export default function ClubsPage() {
 
           {/* Right Panel - Club Details */}
           <div className="flex-1 overflow-hidden">
-            <div className="h-full overflow-y-auto p-6 lg:p-8 scrollbar-hide">
+            <div
+              className="h-full overflow-y-auto"
+              style={{
+                scrollbarWidth: "thin",
+                scrollbarColor: "rgba(255,255,255,0.3) transparent",
+              }}
+            >
               <AnimatePresence mode="wait">
                 {selectedClub ? (
                   <ClubDetailPanel club={selectedClub} />
@@ -150,7 +158,7 @@ export default function ClubsPage() {
         </div>
       ) : (
         // Mobile: Show either list or details
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
           <AnimatePresence mode="wait">
             {!showDetails ? (
               <motion.div
@@ -164,11 +172,16 @@ export default function ClubsPage() {
                   clubCount={clubs.length}
                   isLoading={isValidating}
                 />
-                <ClubFilters search={search} setSearch={setSearch} />
+                <ClubFilters
+                  search={search}
+                  setSearch={setSearch}
+                  selectedUniversity={selectedUniversity}
+                  setSelectedUniversity={setSelectedUniversity}
+                />
 
                 {/* Club List */}
                 <div
-                  className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 scrollbar-hide"
+                  className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-hide"
                   ref={clubListRef}
                 >
                   {clubListContent}
@@ -182,7 +195,13 @@ export default function ClubsPage() {
                 exit={{ opacity: 0, x: 20 }}
                 className="h-full overflow-hidden"
               >
-                <div className="h-full overflow-y-auto p-4 sm:p-6 scrollbar-hide">
+                <div
+                  className="h-full overflow-y-auto"
+                  style={{
+                    scrollbarWidth: "thin",
+                    scrollbarColor: "rgba(255,255,255,0.3) transparent",
+                  }}
+                >
                   {selectedClub && (
                     <ClubDetailPanel
                       club={selectedClub}

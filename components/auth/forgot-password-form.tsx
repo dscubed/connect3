@@ -81,7 +81,7 @@ export function ForgotPasswordForm({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={cn(
-                  "h-12 rounded-full border-2 border-black/10 bg-white px-5",
+                  "h-12 rounded-full border-2 border-gray-200 bg-white px-5",
                   "text-black placeholder:text-black/40",
                   "focus-visible:ring-0 focus-visible:border-foreground",
                 )}
@@ -104,7 +104,7 @@ export function ForgotPasswordForm({
 
             {/* Divider like your other pages */}
             <div className="relative my-2 flex items-center">
-              <span className="w-full border-t border-black/10" />
+              <span className="w-full border-t border-gray-200" />
             </div>
 
             <div className="text-center text-sm text-black/70">
