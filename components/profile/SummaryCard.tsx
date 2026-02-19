@@ -75,7 +75,7 @@ export function SummaryCard({
   };
 
   return (
-    <SectionCard className="mb-8">
+    <SectionCard className="mb-4">
       <SectionCardHeader title="Summary">
         {/* Enhance button (only when profile is in edit mode) */}
 

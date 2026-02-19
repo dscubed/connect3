@@ -142,7 +142,7 @@ function ProfilePageContentBody({
 
         {/* Summary chunk - replace with skeleton when loading, don't render SummaryCard */}
         {loadingChunks ? (
-          <div className="mb-8">
+          <div className="mb-4">
             <ChunkSkeleton />
           </div>
         ) : (
