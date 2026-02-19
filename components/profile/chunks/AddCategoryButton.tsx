@@ -48,7 +48,7 @@ export function AddCategoryButton() {
         <Button
           variant={"ghost"}
           onClick={() => setShowSelector(true)}
-          className="rounded-full bg-gray-200 px-5 py-2 text-muted-foreground hover:bg-purple-200 hover:text-purple-900 transition-colors animate-fade-in flex items-center gap-2"
+          className="rounded-full bg-gray-200 px-3 py-2 text-muted-foreground hover:bg-purple-200 hover:text-purple-900 transition-colors flex items-center gap-1.5"
         >
           <span>Add section</span>
           <Plus className="!size-4" />

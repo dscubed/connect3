@@ -6,7 +6,6 @@ import { verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CategoryItem } from "./category/CategoryItem";
 import { AddCategoryButton } from "../AddCategoryButton";
 import { CubeLoader } from "@/components/ui/CubeLoader";
-import { Fade } from "@/components/ui/Fade";
 
 export function ChunksDisplay() {
   const { orderedCategoryChunks, loadingChunks, isEditing } = useChunkContext();
@@ -41,12 +40,11 @@ export function ChunksDisplay() {
             ))}
           </SortableContext>
         </DndContext>
-        <Fade
-          show={isEditing}
-          className="flex flex-col gap-2 items-center justify-center w-full"
-        >
-          <AddCategoryButton />
-        </Fade>
+        {isEditing && (
+          <div className="flex flex-col gap-2 items-center justify-center w-full">
+            <AddCategoryButton />
+          </div>
+        )}
       </div>
     </div>
   );

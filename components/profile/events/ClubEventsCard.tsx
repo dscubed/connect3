@@ -269,7 +269,7 @@ export default function ClubEventsCard({
 
   if (isLoading) {
     return (
-      <div className="py-4 text-base text-muted">Loading events...</div>
+      <div className="text-base leading-relaxed text-muted/80">Loading events...</div>
     );
   }
 
