@@ -150,7 +150,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           initial={false}
           animate={{ x: isDesktop ? "0%" : sidebarOpen ? "0%" : "-100%" }}
           transition={hasMounted ? { duration: 0.3, ease: "easeInOut" } : { duration: 0 }}
-          className={`relative z-50 flex flex-col px-3 gap-2 h-[100dvh] bg-white backdrop-blur-xl pt-4 pb-4 safe-area-inset-top justify-between rounded-r-lg
+          className={`relative z-50 flex flex-col px-3 gap-2 h-[100dvh] bg-white backdrop-blur-xl pt-4 pb-4 safe-area-inset-top justify-between
             ${isDesktop ? "w-fit relative" : "w-fit"}`}
         >
           <div className="flex flex-col gap-4 items-center">
