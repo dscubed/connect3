@@ -73,10 +73,10 @@ export async function GET(request: NextRequest) {
       `,
       )
       .eq("is_attendable", true)
-      .order("start", { ascending: false });
+      .order("start", { ascending: false, nullsFirst: false })
 
     if (cursor) {
-      query = query.lt("created_at", cursor);
+      query = query.lt("start", cursor);
     }
 
     query = query.limit(limit + 1);
@@ -95,7 +95,8 @@ export async function GET(request: NextRequest) {
     // Transform the database records to match our event schema
     const typedEvents: Event[] = events.map(transformDbEventToEventSchema);
 
-    const newCursor = morePagesExist ? data[limit - 1].created_at : null;
+    const lastWithStart = data.findLast(event => event.start !== null);
+    const newCursor = morePagesExist ? lastWithStart?.start ?? null : null;
     return NextResponse.json({ items: typedEvents, cursor: newCursor });
   } catch (error) {
     return NextResponse.json({ error: error }, { status: 500 });
