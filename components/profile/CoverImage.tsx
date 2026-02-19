@@ -1,8 +1,9 @@
+"use client";
+
 import { motion } from "framer-motion";
-import { Check } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
-import { Button } from "../ui/button";
+import { useEffect, useState } from "react";
+import { FastAverageColor } from "fast-average-color";
 
 const COVER_IMAGES = {
   Purple: {
@@ -25,17 +26,95 @@ const COVER_IMAGES = {
     source: "/cover/cover-yellow.png",
     color: "#FAEAA5",
   },
+} as const;
+
+const COVER_KEYS = Object.keys(COVER_IMAGES) as (keyof typeof COVER_IMAGES)[];
+
+const COVER_RGB: Record<keyof typeof COVER_IMAGES, [number, number, number]> = {
+  Purple: [0xd5, 0xa5, 0xfa],
+  Blue: [0xa5, 0xc8, 0xfa],
+  Green: [0xa5, 0xfa, 0xc9],
+  Red: [0xfa, 0xa5, 0xa5],
+  Yellow: [0xfa, 0xea, 0xa5],
 };
 
-interface CoverImageProps {
-  editingProfile: boolean;
+function colorDistance(
+  r1: number,
+  g1: number,
+  b1: number,
+  r2: number,
+  g2: number,
+  b2: number
+): number {
+  return Math.sqrt(
+    Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2)
+  );
 }
 
-export default function CoverImage({
-  editingProfile = false,
-}: CoverImageProps) {
+export function getCoverColorFromUserId(userId: string): keyof typeof COVER_IMAGES {
+  const hash = userId
+    .split("")
+    .reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const index = Math.abs(hash) % COVER_KEYS.length;
+  return COVER_KEYS[index];
+}
+
+function getClosestCoverColor(r: number, g: number, b: number): keyof typeof COVER_IMAGES {
+  let closest: keyof typeof COVER_IMAGES = "Purple";
+  let minDist = Infinity;
+
+  for (const key of COVER_KEYS) {
+    const [cr, cg, cb] = COVER_RGB[key];
+    const dist = colorDistance(r, g, b, cr, cg, cb);
+    if (dist < minDist) {
+      minDist = dist;
+      closest = key;
+    }
+  }
+  return closest;
+}
+
+interface CoverImageProps {
+  userId: string;
+  avatarUrl?: string | null;
+}
+
+export default function CoverImage({ userId, avatarUrl }: CoverImageProps) {
+  const fallbackColor = getCoverColorFromUserId(userId);
   const [selectedColor, setSelectedColor] =
-    useState<keyof typeof COVER_IMAGES>("Purple");
+    useState<keyof typeof COVER_IMAGES>(fallbackColor);
+
+  useEffect(() => {
+    if (!avatarUrl?.trim()) {
+      setSelectedColor(fallbackColor);
+      return;
+    }
+
+    let cancelled = false;
+    const fac = new FastAverageColor();
+
+    fac
+      .getColorAsync(avatarUrl, {
+        algorithm: "dominant",
+        crossOrigin: "anonymous",
+      })
+      .then((result) => {
+        if (cancelled) return;
+        const [r, g, b] = result.value;
+        setSelectedColor(getClosestCoverColor(r, g, b));
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setSelectedColor(fallbackColor);
+      })
+      .finally(() => {
+        fac.destroy();
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [avatarUrl, fallbackColor]);
 
   return (
     <motion.div
@@ -44,7 +123,6 @@ export default function CoverImage({
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
     >
-      {/* Image */}
       <Image
         src={COVER_IMAGES[selectedColor].source}
         alt="Cover Image"
@@ -54,43 +132,6 @@ export default function CoverImage({
         unoptimized
         quality={1280}
       />
-
-      {/* <div className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent" /> */}
-
-      {/* Vignette Effect */}
-      {/* <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-background/40" /> */}
-
-      {/* Additional edge blur effect */}
-      {/* <div className="absolute inset-0 bg-gradient-to-r from-background/30 via-transparent to-background/30" /> */}
-      {/* <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-transparent to-background/50" /> */}
-
-      {/* Edit Cover Button */}
-      {editingProfile && (
-        <div className="absolute bottom-12 right-2 md:bottom-6 md:right-12 items-center justify-center flex animate-fade-in">
-          {Object.keys(COVER_IMAGES).map((color) => {
-            const selected = color === selectedColor;
-
-            return (
-              <Button
-                key={color}
-                variant="outline"
-                className={`mx-1 p-2 rounded-full h-8 w-8${
-                  selected ? " ring-2 ring-primary" : ""
-                }`}
-                style={{
-                  backgroundColor:
-                    COVER_IMAGES[color as keyof typeof COVER_IMAGES].color,
-                }}
-                onClick={() =>
-                  setSelectedColor(color as keyof typeof COVER_IMAGES)
-                }
-              >
-                {selected && <Check className="h-4 w-4" />}
-              </Button>
-            );
-          })}
-        </div>
-      )}
     </motion.div>
   );
 }
