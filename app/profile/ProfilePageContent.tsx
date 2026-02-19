@@ -92,9 +92,9 @@ function ProfilePageContentInner({
           </div>
         </div>
 
-        <div className="max-w-3xl mx-auto px-4 md:px-6 lg:px-8 pt-20">
+        <div className="max-w-3xl mx-auto px-4 md:px-6 lg:px-8 pt-24">
           <div className="flex flex-col gap-6 mb-8">
-            <div className="flex flex-col">
+            <div className="flex flex-col gap-5">
               <UserDetails
                 profile={profile}
                 editingProfile={editingProfile}
