@@ -44,7 +44,7 @@ export function ActionsButton({
         {!href.includes("profile") ? (
           <Button
             variant="outline"
-            className="text-lg !bg-foreground font-medium !text-white border-[3px] border-white hover:scale-105 transition-all rounded-full py-5 shadow-none"
+            className="text-md !bg-foreground font-medium !text-white border-[3px] border-white hover:scale-105 transition-all rounded-full py-5 shadow-none"
             onClick={() => {
               window.open(`/profile/${profile.id}`, "_blank");
             }}

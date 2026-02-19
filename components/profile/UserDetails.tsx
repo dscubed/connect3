@@ -29,7 +29,7 @@ export default function UserDetails({
       <div className="flex flex-col gap-2 mb-2">
         <h1
           className={cn(
-            "text-4xl font-medium",
+            "text-2xl font-medium",
             editingProfile && "hover:scale-105 transition-all cursor-pointer"
           )}
         >
