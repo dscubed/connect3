@@ -82,7 +82,7 @@ function ProfilePageContentBody({
 
   return (
     <div
-      className="h-[100dvh] w-full max-w-screen-lg mx-auto overflow-y-auto"
+      className="h-[100dvh] w-full max-w-screen-lg mx-auto overflow-y-auto p-0 pb-8 md:p-4 md:pb-8"
       style={{
         scrollbarWidth: "thin",
         scrollbarColor: "rgba(255,255,255,0.3) transparent",

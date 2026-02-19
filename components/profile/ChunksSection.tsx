@@ -21,7 +21,7 @@ export default function ChunksSection({ editingProfile }: ChunksSectionProps) {
   }, [fetchChunks, profile]);
 
   return (
-    <div className="w-full flex flex-col gap-4 mb-24">
+    <div className="w-full flex flex-col gap-4">
       {/* Only show ChunkActions when content is ready - avoid skeleton + component overlap */}
       {editingProfile && !loadingChunks && <ChunkActions />}
 

@@ -19,7 +19,7 @@ export function ChunksDisplay() {
   return (
     <div
       className={`flex flex-col gap-4 min-h-32 items-center w-full ${
-        !isEditing ? "mb-16 justify-start" : "justify-center"
+        !isEditing ? "justify-start" : "justify-center"
       }`}
     >
       <DndContext

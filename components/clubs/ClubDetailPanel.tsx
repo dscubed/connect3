@@ -11,7 +11,7 @@ export function ClubDetailPanel({
   onBack?: () => void;
 }) {
   return (
-    <div key={club.id} className="relative h-full overflow-y-auto scrollbar-hide">
+    <div key={club.id} className="relative min-h-full">
       {/* Mobile Back Button - sits inside gradient with p-4 from edge */}
       {onBack && (
         <button

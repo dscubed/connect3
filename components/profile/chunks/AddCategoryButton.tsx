@@ -41,7 +41,7 @@ export function AddCategoryButton() {
   if (categoriesList.length === 0) return null;
 
   return (
-    <div className="w-full flex flex-col items-center gap-2 mb-12">
+    <div className="w-full flex flex-col items-center gap-2">
       {!profile || loading ? (
         <Spinner className="h-4 w-4" />
       ) : !showSelector ? (

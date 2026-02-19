@@ -61,7 +61,7 @@ export default function CoverImage({ userId, avatarUrl }: CoverImageProps) {
 
   return (
     <div
-      className="relative h-48 w-full shrink-0 overflow-hidden rounded-xl"
+      className="relative h-48 w-full shrink-0 overflow-hidden rounded-none md:rounded-xl"
       style={{
         minHeight: "12rem",
         ...gradientStyle,

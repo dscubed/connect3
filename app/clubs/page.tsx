@@ -136,7 +136,13 @@ export default function ClubsPage() {
 
           {/* Right Panel - Club Details */}
           <div className="flex-1 overflow-hidden">
-            <div className="h-full overflow-y-auto p-6 lg:p-8 scrollbar-hide">
+            <div
+              className="h-full overflow-y-auto"
+              style={{
+                scrollbarWidth: "thin",
+                scrollbarColor: "rgba(255,255,255,0.3) transparent",
+              }}
+            >
               <AnimatePresence mode="wait">
                 {selectedClub ? (
                   <ClubDetailPanel club={selectedClub} />
@@ -188,7 +194,13 @@ export default function ClubsPage() {
                 exit={{ opacity: 0, x: 20 }}
                 className="h-full overflow-hidden"
               >
-                <div className="h-full overflow-y-auto p-4 sm:p-6 scrollbar-hide">
+                <div
+                  className="h-full overflow-y-auto"
+                  style={{
+                    scrollbarWidth: "thin",
+                    scrollbarColor: "rgba(255,255,255,0.3) transparent",
+                  }}
+                >
                   {selectedClub && (
                     <ClubDetailPanel
                       club={selectedClub}
