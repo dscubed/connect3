@@ -17,7 +17,7 @@ interface SearchBarUIProps {
 }
 
 const DEFAULT_CONTAINER_CLASSNAME =
-  "rounded-3xl border border-foreground/20 px-4 py-3 backdrop-blur shadow-xl hover:shadow-white/10";
+  "rounded-3xl border border-gray-300 p-2.5 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.08)]";
 
 const SearchBarUIComponent: React.FC<SearchBarUIProps> = ({
   query,
@@ -48,18 +48,18 @@ const SearchBarUIComponent: React.FC<SearchBarUIProps> = ({
   return (
     <form onSubmit={handleSubmit} className="w-full">
       <div
-        className={`bg-background text-foreground mx-auto max-w-3xl flex flex-col items-center ${containerClassName} transition-all ${
+        className={`bg-white text-foreground mx-auto max-w-3xl flex flex-col items-center ${containerClassName} transition-all ${
           disabled || isLoading
             ? "opacity-50 pointer-events-none grayscale"
             : ""
         }`}
       >
-        <div className="flex w-full items-center gap-3 py-2">
+        <div className="flex w-full items-center gap-3 pb-2.5">
           <Textarea
             className={cn(
-              "w-full bg-transparent text-sm transition-all placeholder:text-foreground/50",
+              "w-full bg-transparent !text-base transition-all placeholder:text-foreground/50 pb-0 pt-1 px-2",
               "scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-transparent focus:scrollbar-thumb-white/50",
-              "max-h-32 outline-none resize-none focus-visible:ring-0 border-none min-h-0"
+              "max-h-32 outline-none resize-none focus-visible:ring-0 border-none min-h-12"
             )}
             placeholder="Ask me anything..."
             value={localQuery}

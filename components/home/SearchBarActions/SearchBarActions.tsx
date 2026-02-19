@@ -53,9 +53,9 @@ export function SearchBarActions({
         <button
           type="button"
           onClick={() => setOpen((prev) => !prev)}
-          className="flex flex-row items-center gap-1.5 rounded-full px-2.5 py-1.5 text-background bg-foreground text-sm font-medium cursor-pointer hover:bg-foreground/90 transition-all hover:scale-105 shadow-lg"
+          className="flex items-center justify-center rounded-full p-2 text-neutral-600 bg-neutral-200 cursor-pointer hover:bg-neutral-300 transition-all hover:scale-105"
         >
-          <GraduationCap className="h-5 w-5" />
+          <GraduationCap className="h-5.5 w-5.5" />
           {selectedUniversities.length > 2 && (
             <span className="text-xs">
               {selectedUniversities.length} unis
@@ -165,12 +165,12 @@ export function SearchBarActions({
         <button
           type="submit"
           disabled={searchDisabled}
-          className="flex flex-row items-center gap-2 rounded-full p-1.5 text-background bg-foreground text-sm font-medium cursor-pointer hover:bg-foreground/90 transition-all hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex flex-row items-center gap-2 rounded-full p-2 text-white text-sm font-medium cursor-pointer transition-all hover:scale-105 disabled:bg-purple-300 disabled:cursor-not-allowed bg-purple-600 hover:bg-purple-700"
         >
           {isLoading ? (
-            <Loader2 className="inline-block h-5 w-5 animate-spin" />
+            <Loader2 className="inline-block h-5.5 w-5.5 animate-spin" />
           ) : (
-            <ArrowUp className="inline-block h-5 w-5" />
+            <ArrowUp className="inline-block h-5.5 w-5.5" />
           )}
         </button>
       </div>
