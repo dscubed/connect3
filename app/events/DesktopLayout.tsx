@@ -24,7 +24,6 @@ export default function DesktopLayout() {
     isValidating,
   } = useInfiniteScroll<Event>(eventListRef, "/api/events");
   const [search, setSearch] = useState<string>("");
-  const [location, setLocation] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [dateFilter, setDateFilter] = useState<DateFilter>("all");
   const [tagFilter, setTagFilter] = useState<TagFilter>("all");
@@ -66,7 +65,6 @@ export default function DesktopLayout() {
     events,
     search,
     selectedCategory === "All" ? null : selectedCategory,
-    location,
     dateFilter,
     tagFilter,
     sortOption,
@@ -89,8 +87,6 @@ export default function DesktopLayout() {
             <EventGridFilters
               search={search}
               setSearch={setSearch}
-              location={location}
-              setLocation={setLocation}
               selectedCategory={selectedCategory}
               setSelectedCategory={setSelectedCategory}
               categoryOptions={categoryOptions}

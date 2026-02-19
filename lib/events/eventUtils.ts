@@ -9,13 +9,11 @@ export const filterEvents = (
   events: HostedEvent[],
   search: string,
   category: string | null,
-  location?: string,
   dateFilter: DateFilter = "all",
   tagFilter: TagFilter = "all",
   sortOption: SortOption = "date-asc",
 ) => {
   const searchLowered = search.toLowerCase().trim();
-  const locationLowered = (location || "").toLowerCase().trim();
   const now = new Date();
 
   const filtered = events
@@ -25,20 +23,6 @@ export const filterEvents = (
       // Search filter
       if (searchLowered !== "" && !eventNameLower.includes(searchLowered)) {
         return accumulator;
-      }
-
-      // Location filter
-      if (locationLowered !== "") {
-        const eventLocation = event.location;
-        const locationMatch =
-          eventLocation &&
-          (
-            (eventLocation.venue?.toLowerCase().includes(locationLowered)) ||
-            (eventLocation.city?.toLowerCase().includes(locationLowered)) ||
-            (eventLocation.address?.toLowerCase().includes(locationLowered)) ||
-            (eventLocation.country?.toLowerCase().includes(locationLowered))
-          );
-        if (!locationMatch) return accumulator;
       }
 
       // Category filter

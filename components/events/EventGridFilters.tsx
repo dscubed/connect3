@@ -15,8 +15,6 @@ export type TagFilter = "all" | "free" | "paid" | "online" | "in-person";
 interface EventGridFiltersProps {
   search: string;
   setSearch: React.Dispatch<React.SetStateAction<string>>;
-  location: string;
-  setLocation: React.Dispatch<React.SetStateAction<string>>;
   selectedCategory: string;
   setSelectedCategory: React.Dispatch<React.SetStateAction<string>>;
   categoryOptions: string[];
@@ -61,8 +59,6 @@ function formatCategory(cat: string): string {
 export default function EventGridFilters({
   search,
   setSearch,
-  location,
-  setLocation,
   selectedCategory,
   setSelectedCategory,
   categoryOptions,
