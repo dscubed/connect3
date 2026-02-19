@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, ReactNode } from "react";
 import { ProfileModal } from "./details/ProfileModal";
 import { Profile } from "@/stores/authStore";
 import { universities, University } from "./details/univeristies";
@@ -8,11 +8,14 @@ import { cn } from "@/lib/utils";
 interface UserDetailsProps {
   profile: Profile;
   editingProfile: boolean;
+  /** Renders on the same line as university (e.g. social links for clubs) */
+  universitySuffix?: ReactNode;
 }
 
 export default function UserDetails({
   profile,
   editingProfile,
+  universitySuffix,
 }: UserDetailsProps) {
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -35,17 +38,20 @@ export default function UserDetails({
         >
           {profile.first_name} {profile.last_name || ""}
         </h1>
-        {/* University */}
-        <h1
-          className={cn(
-            "text-xl font-normal text-muted/80 flex items-center gap-2",
-            editingProfile && "hover:scale-105 transition-all cursor-pointer "
-          )}
-        >
-          {profile.university && profile.university in universities
-            ? universities[profile.university as University].name
-            : "-"}
-        </h1>
+        {/* University row - with optional suffix (e.g. social links) on the same line */}
+        <div className="flex flex-row flex-wrap items-center justify-between gap-2 min-h-10">
+          <h1
+            className={cn(
+              "text-lg font-normal text-muted/80 flex items-center gap-2",
+              editingProfile && "hover:scale-105 transition-all cursor-pointer "
+            )}
+          >
+            {profile.university && profile.university in universities
+              ? universities[profile.university as University].name
+              : "No university set"}
+          </h1>
+          {universitySuffix}
+        </div>
       </div>
 
       {/* Modals */}

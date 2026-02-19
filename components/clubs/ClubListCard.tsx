@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Club } from "@/types/clubs/club";
 import { universities, University } from "../profile/details/univeristies";
 import ProfilePicture from "@/components/profile/ProfilePicture";
@@ -13,9 +12,7 @@ export function ClubListCard({
   onClick: () => void;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
+    <div
       onClick={onClick}
       className={`cursor-pointer rounded-xl sm:rounded-2xl border transition-all duration-300 ${
         isSelected
@@ -61,10 +58,10 @@ export function ClubListCard({
           >
             {club.university && club.university in universities
               ? universities[club.university as University].name
-              : club.university || "No university"}
+              : club.university || "No university set"}
           </p>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

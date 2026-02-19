@@ -99,11 +99,21 @@ function ProfilePageContentInner({
               <UserDetails
                 profile={profile}
                 editingProfile={editingProfile}
+                universitySuffix={
+                  profile.account_type === "organisation" ? (
+                    <LinksSection
+                      editingProfile={editingProfile}
+                      profile={profile}
+                    />
+                  ) : undefined
+                }
               />
-              <LinksSection
-                editingProfile={editingProfile}
-                profile={profile}
-              />
+              {profile.account_type !== "organisation" && (
+                <LinksSection
+                  editingProfile={editingProfile}
+                  profile={profile}
+                />
+              )}
             </div>
           </div>
           <SummaryCard editingProfile={editingProfile} profile={profile} />
