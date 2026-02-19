@@ -24,7 +24,6 @@ interface CategoryItemProps {
 export function CategoryItem({ category, chunks }: CategoryItemProps) {
   const {
     isEditing,
-    editCategory,
     isEditingCategory,
     saveEdits,
     cancelEdits,

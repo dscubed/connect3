@@ -5,6 +5,16 @@ import { useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { toast } from "sonner";
 
+const SAVING_MESSAGES = [
+  "Polishing your profile...",
+  "Making you look great...",
+  "Connecting the dots...",
+  "Sprinkling some magic...",
+  "Almost there...",
+  "Saving your awesomeness...",
+  "Putting it all together...",
+];
+
 export function ActionsButton({
   profile,
   editingProfile,
@@ -37,9 +47,23 @@ export function ActionsButton({
 
       isSavingRef.current = true;
       setIsSaving(true);
+
+      const toastId = toast.loading(
+        SAVING_MESSAGES[Math.floor(Math.random() * SAVING_MESSAGES.length)]
+      );
+      let msgIndex = Math.floor(Math.random() * SAVING_MESSAGES.length);
+      const interval = setInterval(() => {
+        msgIndex = (msgIndex + 1) % SAVING_MESSAGES.length;
+        toast.loading(SAVING_MESSAGES[msgIndex], { id: toastId });
+      }, 2000);
+
       try {
         await saveChunks();
+        toast.success("Profile saved!", { id: toastId });
+      } catch {
+        toast.error("Failed to save profile.", { id: toastId });
       } finally {
+        clearInterval(interval);
         isSavingRef.current = false;
         setIsSaving(false);
       }

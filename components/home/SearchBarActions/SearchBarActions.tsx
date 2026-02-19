@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { ArrowUp, GraduationCap, Loader2, Search, X, Check } from "lucide-react";
+import { ArrowUp, GraduationCap, Loader2, Search, Check } from "lucide-react";
 import {
   universities,
   University,
