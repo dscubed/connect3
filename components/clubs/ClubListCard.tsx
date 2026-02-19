@@ -29,13 +29,14 @@ export function ClubListCard({
         }`}
       >
         {/* Logo */}
-        <div className="w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center overflow-hidden rounded-full shrink-0 border border-white/20">
+        <div className="w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center overflow-hidden shrink-0 border border-black/10 rounded-[10%]">
           <div className="scale-[0.31] sm:scale-[0.44] origin-center">
             <ProfilePicture
               avatar={club.avatar_url}
               userId={club.id}
               fullName={club.first_name}
               editingProfile={false}
+              isOrganisation={true}
             />
           </div>
         </div>

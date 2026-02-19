@@ -79,6 +79,7 @@ function ProfilePageContentInner({
                       : `${profile.first_name} ${profile.last_name || ""}`.trim()
                   }
                   editingProfile={editingProfile}
+                  isOrganisation={profile.account_type === "organisation"}
                 />
               </div>
               <div className="translate-y-1/2">

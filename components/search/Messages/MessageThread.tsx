@@ -90,6 +90,7 @@ export function MessageThread({
           avatarUrl={profile?.avatar_url || ""}
           fullName={profile?.first_name || "User"}
           userId={profile?.id || ""}
+          isOrganisation={profile?.account_type === "organisation"}
         />
       </motion.div>
 

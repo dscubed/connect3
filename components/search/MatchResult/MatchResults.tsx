@@ -153,6 +153,7 @@ const ProfileMatchCard = memo(function ProfileMatchCard({
           avatarUrl={avatarUrl || ""}
           fullName={name}
           userId={userId}
+          isOrganisation={entity.type === "organisation"}
         />
         <span className="font-medium text-base lg:text-lg flex-1 !m-0 truncate text-secondary-foreground">
           {name || "User"}

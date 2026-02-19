@@ -22,6 +22,7 @@ export function AuthButton() {
             fullName={profile?.first_name || "User"}
             userId={profile?.id || ""}
             size="sm"
+            isOrganisation={profile?.account_type === "organisation"}
           />
         </div>
       </Link>

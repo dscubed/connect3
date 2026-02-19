@@ -20,6 +20,8 @@ interface ProfilePictureProps {
   userId: string;
   fullName?: string;
   editingProfile: boolean;
+  /** When true, shows rounded square (like Twitter orgs); otherwise circular. */
+  isOrganisation?: boolean;
 }
 
 export default function ProfilePicture({
@@ -27,6 +29,7 @@ export default function ProfilePicture({
   userId,
   fullName = "User",
   editingProfile,
+  isOrganisation = false,
 }: ProfilePictureProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -60,8 +63,9 @@ export default function ProfilePicture({
     <div className="relative w-fit">
       <div
         className={cn(
-          "relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4",
+          "relative w-32 h-32 md:w-40 md:h-40 overflow-hidden border-4",
           "border-secondary bg-white",
+          isOrganisation ? "rounded-[10%]" : "rounded-full",
           editingProfile && "hover:scale-105 transition-all"
         )}
       >
@@ -80,7 +84,7 @@ export default function ProfilePicture({
               value={userId || "anonymous"}
               displayValue={fullName}
               size={160}
-              radius={160}
+              radius={isOrganisation ? 16 : 160}
               border={false}
             />
           </div>

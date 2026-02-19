@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Avvvatars from "avvvatars-react";
+import { cn } from "@/lib/utils";
 
 interface UserAvatarProps {
   avatarUrl?: string | null;
@@ -9,6 +10,8 @@ interface UserAvatarProps {
   /** Required for generated avatar fallback when no image. Falls back to "anonymous" if omitted. */
   userId?: string;
   size?: "sm" | "md" | "lg";
+  /** When true, shows rounded square (like Twitter orgs); otherwise circular. */
+  isOrganisation?: boolean;
 }
 
 const SIZE_MAP = {
@@ -22,6 +25,7 @@ export default function UserAvatar({
   fullName,
   userId = "",
   size = "sm",
+  isOrganisation = false,
 }: UserAvatarProps) {
   const [imageError, setImageError] = useState(false);
   const sizeClasses = {
@@ -29,7 +33,6 @@ export default function UserAvatar({
     md: "w-12 h-12",
     lg: "w-16 h-16",
   };
-
   const pixelSize = SIZE_MAP[size];
   const hasValidAvatar = avatarUrl && avatarUrl.trim().length > 0;
   const showGeneratedAvatar = !hasValidAvatar || imageError;
@@ -38,13 +41,17 @@ export default function UserAvatar({
   if (showGeneratedAvatar) {
     return (
       <div
-        className={`relative ${sizeClasses[size]} rounded-full overflow-hidden border border-white/20 flex-shrink-0`}
+        className={cn(
+          "relative flex-shrink-0 overflow-hidden border border-black/10",
+          sizeClasses[size],
+          isOrganisation ? "rounded-[20%]" : "rounded-full"
+        )}
       >
         <Avvvatars
           value={seed}
           displayValue={fullName}
           size={pixelSize}
-          radius={pixelSize}
+          radius={isOrganisation ? Math.round(pixelSize * 0.1) : pixelSize}
           border={false}
         />
       </div>
@@ -53,7 +60,11 @@ export default function UserAvatar({
 
   return (
     <div
-      className={`relative ${sizeClasses[size]} rounded-full overflow-hidden border border-white/20 flex-shrink-0`}
+      className={cn(
+        "relative flex-shrink-0 overflow-hidden border border-black/10",
+        sizeClasses[size],
+        isOrganisation ? "rounded-[20%]" : "rounded-full"
+      )}
     >
       <Image
         src={avatarUrl!}
