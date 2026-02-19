@@ -1,9 +1,11 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useRef, useState } from "react";
 import EventsHeader from "@/components/events/HeaderSection";
-import EventFilters from "@/components/events/EventFilters";
+import EventGridFilters, {
+  type DateFilter,
+  type TagFilter,
+} from "@/components/events/EventGridFilters";
 import { EventListCard } from "@/components/events/EventListCard";
-import { EventCategory } from "@/types/events/event";
 import { type Event } from "@/lib/schemas/events/event";
 import { EventDetailPanel } from "@/components/events/EventDetailPanel";
 import { CubeLoader } from "@/components/ui/CubeLoader";
@@ -23,9 +25,9 @@ export default function MobileLayout() {
     sentinelRef,
   } = useInfiniteScroll<Event>(eventListRef, "/api/events");
   const [search, setSearch] = useState<string>("");
-  const [selectedCategory, setSelectedCategory] = useState<
-    EventCategory | "All"
-  >("All");
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [dateFilter, setDateFilter] = useState<DateFilter>("all");
+  const [tagFilter, setTagFilter] = useState<TagFilter>("all");
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   const handleEventSelect = (event: Event) => {
@@ -50,10 +52,17 @@ export default function MobileLayout() {
     );
   }
 
+  const categoryOptions = [
+    "All",
+    ...Array.from(new Set(events.map((e) => e.category).filter(Boolean))).sort(),
+  ];
+
   const filtered = filterEvents(
     events,
     search,
-    selectedCategory === "All" ? null : selectedCategory
+    selectedCategory === "All" ? null : selectedCategory,
+    dateFilter,
+    tagFilter,
   );
 
   // Deduplicate by event.id (keep first occurrence) to avoid duplicate key errors
@@ -80,12 +89,19 @@ export default function MobileLayout() {
                 eventCount={events.length}
                 isLoading={isValidating}
               />
-              <EventFilters
-                search={search}
-                setSearch={setSearch}
-                selectedCategory={selectedCategory}
-                setSelectedCategory={setSelectedCategory}
-              />
+              <div className="px-4 pt-4">
+                <EventGridFilters
+                  search={search}
+                  setSearch={setSearch}
+                  selectedCategory={selectedCategory}
+                  setSelectedCategory={setSelectedCategory}
+                  categoryOptions={categoryOptions}
+                  dateFilter={dateFilter}
+                  setDateFilter={setDateFilter}
+                  tagFilter={tagFilter}
+                  setTagFilter={setTagFilter}
+                />
+              </div>
               <div
                 className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 scrollbar-hide"
                 ref={eventListRef}
