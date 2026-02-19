@@ -42,7 +42,7 @@ export default function UserAvatar({
     return (
       <div
         className={cn(
-          "relative flex-shrink-0 overflow-hidden border border-black/10",
+          "relative flex-shrink-0 overflow-hidden border border-gray-200",
           sizeClasses[size],
           isOrganisation ? "rounded-[20%]" : "rounded-full"
         )}
@@ -61,7 +61,7 @@ export default function UserAvatar({
   return (
     <div
       className={cn(
-        "relative flex-shrink-0 overflow-hidden border border-black/10",
+        "relative flex-shrink-0 overflow-hidden border border-gray-200",
         sizeClasses[size],
         isOrganisation ? "rounded-[20%]" : "rounded-full"
       )}

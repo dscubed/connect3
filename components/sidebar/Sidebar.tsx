@@ -117,7 +117,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -200, opacity: 0 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className={`absolute top-0 left-full h-[100dvh] w-64 bg-white/95 backdrop-blur-xl border-l border-black/5 pt-6 px-3 z-30 shadow-lg`}
+              className={`absolute top-0 left-full h-[100dvh] w-64 bg-white/95 backdrop-blur-xl border-l border-gray-200 pt-6 px-3 z-30 shadow-lg`}
             >
               <div className="flex flex-col h-full">
                 {/* Chatrooms header with collapse button */}

@@ -105,7 +105,7 @@ export default function ProfilePicture({
           <DropdownMenuContent 
             align="end" 
             sideOffset={4}
-            className="w-44 rounded-xl border border-black/10 bg-white shadow-lg p-1"
+            className="w-44 rounded-xl border border-gray-200 bg-white shadow-lg p-1"
           >
             <DropdownMenuItem 
               onClick={() => setModalOpen(true)}

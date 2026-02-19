@@ -23,7 +23,7 @@ export function ChunksDisplay() {
   return (
     <div>
       <div
-        className={`flex flex-col gap-8 min-h-32 items-center w-full ${
+        className={`flex flex-col gap-4 min-h-32 items-center w-full ${
           !isEditing ? "mb-16 justify-start" : "justify-center"
         }`}
       >

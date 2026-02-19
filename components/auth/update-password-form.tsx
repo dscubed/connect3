@@ -61,7 +61,7 @@ export function UpdatePasswordForm({
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className={cn(
-                "h-12 rounded-full border-2 border-black/10 bg-white px-5",
+                "h-12 rounded-full border-2 border-gray-200 bg-white px-5",
                 "text-black placeholder:text-black/40",
                 "focus-visible:ring-0 focus-visible:border-foreground",
               )}

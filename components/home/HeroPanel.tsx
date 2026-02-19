@@ -35,7 +35,7 @@ export function HeroPanel({
           )}
         >
           {/* Front of card */}
-          <div className="absolute inset-0 backface-hidden rounded-2xl border border-black/10 bg-white p-6 shadow-md overflow-hidden flex flex-col items-center">
+          <div className="absolute inset-0 backface-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-md overflow-hidden flex flex-col items-center">
             {/* Background SVG - fills entire card */}
             {children}
 
@@ -46,7 +46,7 @@ export function HeroPanel({
           </div>
 
           {/* Back of card */}
-          <div className="absolute inset-0 backface-hidden rotate-y-180 rounded-2xl border bg-white border-black/10 shadow-md overflow-hidden flex flex-col items-center p-6">
+          <div className="absolute inset-0 backface-hidden rotate-y-180 rounded-2xl border border-gray-200 bg-white shadow-md overflow-hidden flex flex-col items-center p-6">
             {/* Title - same position as front */}
             <h2 className="text-md font-medium text-muted select-none">
               {title}
