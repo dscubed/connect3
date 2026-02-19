@@ -255,35 +255,6 @@ export function useChunkData({
     return { newChunks, newCategories };
   };
 
-  const isChunksEdited = ({
-    deletedChunkIds,
-    deletedCategories,
-    editedChunks,
-    editedCategories,
-  }: {
-    deletedChunkIds: string[];
-    deletedCategories: CategoryOrderData[];
-    editedChunks: ProfileChunk[];
-    editedCategories: CategoryOrderData[];
-  }) => {
-    /**
-     * Checks if there are any unsaved changes in chunks or category order.
-     *
-     * @param deletedChunkIds - An array of deleted chunk IDs.
-     * @param deletedCategories - An array of deleted categories.
-     * @param editedChunks - An array of edited chunks.
-     * @param editedCategories - An array of edited categories.
-     * @return A boolean indicating whether there are unsaved changes.
-     */
-    return (
-      deletedChunkIds.length > 0 ||
-      deletedCategories.length > 0 ||
-      editedChunks.length > 0 ||
-      editedCategories.length > 0 ||
-      prevCategoryOrder.length !== categoryOrder.length
-    );
-  };
-
   const deleteChunksFromSupabase = async (
     deletedChunkIds: string[],
     deletedCategories: AllCategories[]

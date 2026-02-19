@@ -81,7 +81,6 @@ export function CategoryItem({ category, chunks }: CategoryItemProps) {
             {isEventsCategory ? (
               <ClubEventsCard
                 profileId={profile.id}
-                clubName={profile.first_name || "Club"}
               />
             ) : (
               <>
