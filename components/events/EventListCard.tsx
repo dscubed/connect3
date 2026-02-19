@@ -72,8 +72,17 @@ export function EventListCard({
           <div className="space-y-1">
             <p className="text-muted text-xs sm:text-sm line-clamp-1 leading-relaxed flex items-center gap-1">
               <Calendar className="size-3" />
-              {new Date(event.start).toLocaleDateString()} -{" "}
-              {new Date(event.end).toLocaleDateString()}
+              {new Date(event.start).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}{" "}
+              -{" "}
+              {new Date(event.end).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
             </p>
             
             {/* <p className="text-white/50 text-xs sm:text-sm line-clamp-1 leading-relaxed flex items-center gap-1">

@@ -81,6 +81,7 @@ export function EventGridCard({ event, onClick }: EventGridCardProps) {
             weekday: "short",
             month: "short",
             day: "numeric",
+            year: "numeric",
           })}
           ,{" "}
           {new Date(event.start).toLocaleTimeString("en-US", {
