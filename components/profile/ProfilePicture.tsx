@@ -64,7 +64,7 @@ export default function ProfilePicture({
       <div
         className={cn(
           "relative w-32 h-32 md:w-40 md:h-40 overflow-hidden border-4",
-          "border-secondary bg-white",
+          "border-white bg-white",
           isOrganisation ? "rounded-[10%]" : "rounded-full",
           editingProfile && "hover:scale-105 transition-all"
         )}
