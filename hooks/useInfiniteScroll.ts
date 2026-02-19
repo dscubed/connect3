@@ -1,4 +1,5 @@
-import { RefObject, useCallback, useEffect } from "react";
+import type { RefObject } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import useSWRInfinite from "swr/infinite";
 
 interface PaginatedResponse<T> {
@@ -10,21 +11,26 @@ interface UseInfiniteScrollOptions {
   limit?: number;
   /** Additional query params to append to the URL */
   queryParams?: Record<string, string>;
+  /** Root margin for Intersection Observer - load more when sentinel is this far from viewport (default: 200px) */
+  rootMargin?: string;
 }
 
 /**
- * Hook to implement infinite scroll with a cursor paginated endpoint
- * @param listRef ref to the scrollable div containing the data
+ * Hook to implement infinite scroll with a cursor paginated endpoint.
+ * Uses Intersection Observer for reliable, performant scroll detection.
  * @param endpoint api endpoint in the form "/api/your-endpoint"
- * @param options optional config: limit, queryParams
+ * @param options optional config: limit, queryParams, rootMargin
+ * @returns items, sentinelRef (attach to a div at the bottom of your list), and other fields
  */
 export default function useInfiniteScroll<T>(
   listRef: RefObject<HTMLDivElement | null>,
   endpoint: string | null,
   options?: UseInfiniteScrollOptions
 ) {
-  const { limit, queryParams } = options ?? {};
+  const { limit, queryParams, rootMargin = "200px" } = options ?? {};
   const fetcher = (url: string) => fetch(url).then((res) => res.json());
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const isLoadingMoreRef = useRef(false);
 
   const getKey = (
     pageIndex: number,
@@ -38,11 +44,9 @@ export default function useInfiniteScroll<T>(
         : "https://connect3.app";
     const setLimit = limit ?? 10;
 
-    // Build query string with additional params
     const params = new URLSearchParams();
     params.set("limit", setLimit.toString());
 
-    // Add any additional query params
     if (queryParams) {
       Object.entries(queryParams).forEach(([key, value]) => {
         if (value && value.trim() !== "") {
@@ -67,40 +71,57 @@ export default function useInfiniteScroll<T>(
       revalidateOnReconnect: false,
     });
 
-  const items: T[] = !!data ? data.flatMap((d) => d.items) : [];
-  const handleScroll = useCallback(() => {
-    if (!listRef.current) {
-      return;
-    }
+  const rawItems: T[] = !!data ? data.flatMap((d) => d.items) : [];
+  const items: T[] = rawItems.filter((item, index, arr) => {
+    const id = (item as { id?: string }).id;
+    if (id == null || id === "") return true;
+    const firstIndex = arr.findIndex((i) => (i as { id?: string }).id === id);
+    return firstIndex === index;
+  });
 
-    const SCROLL_THRESHOLD = 5; // measured in pixels
-    const bottomPosition = Math.abs(
-      listRef.current.scrollHeight - listRef.current.scrollTop
+  const lastPage = data?.at(-1);
+  const hasMore = !!lastPage?.cursor;
+
+  const loadMore = useCallback(() => {
+    if (isValidating || isLoadingMoreRef.current || !hasMore) return;
+    isLoadingMoreRef.current = true;
+    setSize((s) => s + 1);
+  }, [setSize, isValidating, hasMore]);
+
+  useEffect(() => {
+    isLoadingMoreRef.current = false;
+  }, [data]);
+
+  useEffect(() => {
+    if (isLoading || !hasMore) return;
+
+    const sentinel = sentinelRef.current;
+    const scrollRoot = listRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) loadMore();
+      },
+      {
+        root: scrollRoot ?? null,
+        rootMargin,
+        threshold: 0,
+      }
     );
 
-    if (
-      bottomPosition - listRef.current.clientHeight <= SCROLL_THRESHOLD &&
-      !isValidating
-    ) {
-      // update once we scroll to the bottom and are not in the process of refetching / revalidating
-      setSize((original) => original + 1);
-    }
-  }, [listRef, setSize, isValidating]);
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [loadMore, hasMore, isLoading, listRef]);
 
-  // attach scroll event listener to list once data loads
-  useEffect(() => {
-    if (isLoading) {
-      return;
-    }
-
-    listRef.current?.addEventListener("scroll", handleScroll);
-    const refCopy = listRef.current;
-    return () => {
-      if (refCopy) {
-        refCopy.removeEventListener("scroll", handleScroll);
-      }
-    };
-  }, [handleScroll, isLoading, listRef]);
-
-  return { items, error, isLoading, isValidating, setSize, mutate };
+  return {
+    items,
+    error,
+    isLoading,
+    isValidating,
+    hasMore,
+    sentinelRef,
+    setSize,
+    mutate,
+  };
 }

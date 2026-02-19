@@ -41,6 +41,8 @@ export default function ClubsPage() {
     error,
     isLoading,
     isValidating,
+    hasMore,
+    sentinelRef,
   } = useInfiniteScroll<Club>(clubListRef, "/api/clubs", { queryParams });
 
   // Set initial selected club once data loads
@@ -100,11 +102,10 @@ export default function ClubsPage() {
           onClick={() => handleClubSelect(club)}
         />
       ))}
-      {isValidating && (
-        <div className="flex justify-center py-4">
-          <CubeLoader size={24} />
-        </div>
-      )}
+      {hasMore && <div ref={sentinelRef} className="h-1 w-full" aria-hidden />}
+      <div className="min-h-[48px] flex items-center justify-center py-4">
+        {isValidating && <CubeLoader size={24} />}
+      </div>
     </>
   );
 

@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { type Event } from "@/lib/schemas/events/event";
@@ -50,9 +49,7 @@ export function EventGridCard({ event, onClick }: EventGridCardProps) {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
+    <div
       onClick={handleClick}
       className="flex items-start gap-4 cursor-pointer group"
     >
@@ -109,6 +106,6 @@ export function EventGridCard({ event, onClick }: EventGridCardProps) {
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
