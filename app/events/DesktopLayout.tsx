@@ -7,7 +7,7 @@ import EventGridFilters, {
 import { EventGridCard } from "@/components/events/EventGridCard";
 import { useEffect, useRef, useState } from "react";
 import { CubeLoader } from "@/components/ui/CubeLoader";
-import { filterEvents } from "@/lib/events/eventUtils";
+import { filterEvents, getFeaturedEvents } from "@/lib/events/eventUtils";
 import { type Event } from "@/lib/schemas/events/event";
 import { toast } from "sonner";
 import useInfiniteScroll from "@/hooks/useInfiniteScroll";
@@ -59,6 +59,8 @@ export default function DesktopLayout() {
     ...Array.from(new Set(events.map((e) => e.category).filter(Boolean))).sort(),
   ];
 
+  const featuredEvents = getFeaturedEvents(events);
+
   const filtered = filterEvents(
     events,
     search,
@@ -75,8 +77,8 @@ export default function DesktopLayout() {
           selectedEvent ? "flex-1" : "flex-1"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-6 space-y-8">
-          <EventsHeroSection events={events} onEventClick={setSelectedEvent} />
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-6 space-y-8 bg-white shadow-md z-30">
+          <EventsHeroSection events={featuredEvents} onEventClick={setSelectedEvent} />
 
           <div className="space-y-5">
             <h2 className="text-2xl font-bold text-black">All Events</h2>

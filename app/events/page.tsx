@@ -4,6 +4,7 @@ import Sidebar from "@/components/sidebar/Sidebar";
 import DesktopLayout from "./DesktopLayout";
 import MobileLayout from "./MobileLayout";
 import { useBreakpointLarge } from "@/hooks/useMediaQuery";
+import { CharacterBackground } from "@/components/ui/CharacterBackground";
 
 export default function EventsPage() {
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
@@ -12,6 +13,7 @@ export default function EventsPage() {
   return (
     <div className="flex h-[100dvh] overflow-hidden">
       <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
+      <CharacterBackground />
       {isDesktop ? <DesktopLayout /> : <MobileLayout />}
     </div>
   );

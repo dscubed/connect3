@@ -137,8 +137,8 @@ const Sidebar: React.FC<SidebarProps> = ({
           initial={false}
           animate={{ x: isDesktop ? "0%" : sidebarOpen ? "0%" : "-100%" }}
           transition={hasMounted ? { duration: 0.3, ease: "easeInOut" } : { duration: 0 }}
-          className={`z-50 flex flex-col px-4 gap-2 h-[100dvh] bg-white backdrop-blur-xl shadow-xl pt-12 md:pt-6 safe-area-inset-top justify-between
-            ${isDesktop ? "w-fit relative md:shadow-none" : "w-fit"}          `}
+          className={`z-50 flex flex-col px-4 gap-2 h-[100dvh] bg-white backdrop-blur-xl shadow-md pt-12 md:pt-6 safe-area-inset-top justify-between
+            ${isDesktop ? "w-fit relative" : "w-fit"}`}
         >
           {/* Mobile close button */}
           {sidebarOpen && !isDesktop && (

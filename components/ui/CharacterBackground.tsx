@@ -99,7 +99,7 @@ export function CharacterBackground() {
   }, [characterCount, charactersPerRow, spacing]);
 
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+    <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
       {characterData.map((character, i) => (
         <CharacterSprite
           key={i}

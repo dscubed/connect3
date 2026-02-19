@@ -80,7 +80,16 @@ export const filterEvents = (
 
   // Sort by most recent event first (events with start dates come first, sorted by start date descending,
   // events without start dates come last in no particular order)
-  filtered.sort((a, b) => {
+  return sortEvents(filtered);
+};
+
+export const getFeaturedEvents = (events: Event[]) => {
+  const sorted = sortEvents(events);
+  return sorted.slice(0, 8);
+}
+
+const sortEvents = (events: Event[]) => {
+  events.sort((a, b) => {
     const aHasStartDate = !!a.start;
     const bHasStartDate = !!b.start;
 
@@ -102,6 +111,5 @@ export const filterEvents = (
     // If neither has start dates, their order doesn't matter
     return 0;
   });
-
-  return filtered;
-};
+  return events;
+}
