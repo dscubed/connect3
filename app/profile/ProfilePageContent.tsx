@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import CoverImage from "@/components/profile/CoverImage";
 import ProfilePicture from "@/components/profile/ProfilePicture";
 import UserDetails from "@/components/profile/UserDetails";
@@ -58,25 +57,19 @@ function ProfilePageContentInner({
   const { profile } = useProfileContext();
 
   return (
-    <div
-      className="h-[100dvh] w-full max-w-screen-lg mx-auto overflow-y-auto"
-      style={{
-        scrollbarWidth: "thin",
-        scrollbarColor: "rgba(255,255,255,0.3) transparent",
-      }}
-    >
-      <CoverImage editingProfile={editingProfile} />
-
-      <ChunkProvider isEditing={editingProfile} visitingProfileId={profile.id}>
-        <div className="max-w-3xl mx-auto px-4 md:px-6 lg:px-8">
-          <motion.div
-            className="relative -mt-20 mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-row justify-between">
+    <ChunkProvider isEditing={editingProfile} visitingProfileId={profile.id}>
+      <div
+        className="h-[100dvh] w-full max-w-screen-lg mx-auto overflow-y-auto"
+        style={{
+          scrollbarWidth: "thin",
+          scrollbarColor: "rgba(255,255,255,0.3) transparent",
+        }}
+      >
+        <div className="relative">
+          <CoverImage editingProfile={editingProfile} />
+          <div className="absolute bottom-0 left-0 right-0 px-4 md:px-6 lg:px-8">
+            <div className="max-w-3xl mx-auto flex items-end justify-between">
+              <div className="translate-y-1/2">
                 <ProfilePicture
                   avatar={profile.avatar_url}
                   userId={profile.id}
@@ -87,30 +80,37 @@ function ProfilePageContentInner({
                   }
                   editingProfile={editingProfile}
                 />
+              </div>
+              <div className="translate-y-1/2">
                 <ActionsButton
                   profile={profile}
                   setEditingProfile={setEditingProfile}
                   editingProfile={editingProfile}
                 />
               </div>
-              <div className="flex flex-col">
-                <UserDetails
-                  profile={profile}
-                  editingProfile={editingProfile}
-                />
-                <LinksSection
-                  editingProfile={editingProfile}
-                  profile={profile}
-                />
-              </div>
             </div>
-          </motion.div>
+          </div>
+        </div>
+
+        <div className="max-w-3xl mx-auto px-4 md:px-6 lg:px-8 pt-20">
+          <div className="flex flex-col gap-6 mb-8">
+            <div className="flex flex-col">
+              <UserDetails
+                profile={profile}
+                editingProfile={editingProfile}
+              />
+              <LinksSection
+                editingProfile={editingProfile}
+                profile={profile}
+              />
+            </div>
+          </div>
           <SummaryCard editingProfile={editingProfile} profile={profile} />
 
           {/* Chunks Section */}
           <ChunksSection editingProfile={editingProfile} />
         </div>
-      </ChunkProvider>
-    </div>
+      </div>
+    </ChunkProvider>
   );
 }

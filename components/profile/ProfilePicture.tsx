@@ -91,7 +91,7 @@ export default function ProfilePicture({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <motion.button
-              className="absolute bottom-2 right-2 p-2 rounded-full bg-white text-black hover:bg-white/90 transition-colors shadow-lg animate-fade-in"
+              className="absolute bottom-2 right-2 p-2 rounded-full bg-white text-black hover:bg-white/90 transition-colors shadow-lg"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
             >
