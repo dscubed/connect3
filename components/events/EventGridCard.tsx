@@ -10,7 +10,7 @@ function getEventTags(event: Event): { label: string; color: string }[] {
   if (event.pricing.min > 0 || event.pricing.max > 0) {
     tags.push({ label: "Paid", color: "bg-red-400 text-white" });
   } else {
-    tags.push({ label: "Free", color: "bg-green-400 text-white" });
+    tags.push({ label: "Free", color: "bg-teal-500 text-white" });
   }
 
   if (!event.isOnline) {

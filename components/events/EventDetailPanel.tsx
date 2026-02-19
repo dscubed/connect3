@@ -36,7 +36,7 @@ function getEventTags(event: Event): { label: string; color: string }[] {
   if (event.pricing.min > 0 || event.pricing.max > 0) {
     tags.push({ label: "Paid", color: "bg-red-400" });
   } else {
-    tags.push({ label: "Free", color: "bg-green-400" });
+    tags.push({ label: "Free", color: "bg-teal-500" });
   }
   if (!event.isOnline) {
     tags.push({ label: "In-person", color: "bg-blue-400" });
