@@ -43,19 +43,6 @@ export function ProfilePageSkeleton() {
             </div>
           </div>
         </div>
-
-        {/* Summary Card */}
-        <SectionCard className="mb-8 flex flex-col items-start justify-center w-full shadow-none bg-card/50 border-foreground/30">
-          <SectionCardHeader
-            title={<Skeleton className="h-6 w-24 rounded-2xl inline-block" />}
-            className="w-full flex flex-row items-center justify-between gap-2 !px-4 !pt-4 !pb-3 !space-y-0"
-          />
-          <CardContent className="w-full flex flex-col gap-4 !p-4 !pt-0">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-[75%]" />
-          </CardContent>
-        </SectionCard>
       </div>
     </div>
   );
