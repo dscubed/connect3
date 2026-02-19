@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 export function LinksDisplay({ links }: { links: LinkItem[] }) {
   return (
-    <div className="flex gap-4">
+    <div className="flex gap-2">
       {links.map((link) => {
         const pattern = LinkTypes[link.type].pattern;
         const href = pattern ? pattern.prefix + link.details : undefined;
