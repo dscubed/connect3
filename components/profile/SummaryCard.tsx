@@ -8,6 +8,8 @@ import { Profile, useAuthStore } from "@/stores/authStore";
 import { uploadProfileToVectorStore } from "@/lib/vectorStores/profile/client";
 import { PencilLine } from "lucide-react";
 import { toast } from "sonner";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export function SummaryCard({
   editingProfile = false,
@@ -132,9 +134,39 @@ export function SummaryCard({
             </div>
           </>
         ) : newTldr.length > 0 ? (
-          <span className="leading-relaxed text-base" onClick={editTldr}>
-            {newTldr}
-          </span>
+          <div className="leading-relaxed text-base" onClick={editTldr}>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                h1: ({ children }) => (
+                  <h1 className="text-xl font-bold mt-3 mb-1">{children}</h1>
+                ),
+                h2: ({ children }) => (
+                  <h2 className="text-lg font-bold mt-2 mb-1">{children}</h2>
+                ),
+                h3: ({ children }) => (
+                  <h3 className="text-base font-semibold mt-2 mb-1">{children}</h3>
+                ),
+                p: ({ children }) => (
+                  <p className="mb-2 last:mb-0">{children}</p>
+                ),
+                ul: ({ children }) => (
+                  <ul className="list-disc pl-5 mb-2 last:mb-0">{children}</ul>
+                ),
+                ol: ({ children }) => (
+                  <ol className="list-decimal pl-5 mb-2 last:mb-0">{children}</ol>
+                ),
+                li: ({ children }) => (
+                  <li className="my-0.5">{children}</li>
+                ),
+                strong: ({ children }) => (
+                  <strong className="font-semibold">{children}</strong>
+                ),
+              }}
+            >
+              {newTldr}
+            </ReactMarkdown>
+          </div>
         ) : (
           <span
             className="flex leading-relaxed text-base text-muted"
