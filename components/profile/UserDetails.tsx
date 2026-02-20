@@ -33,7 +33,7 @@ export default function UserDetails({
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
-    <div className="flex-1 md:pb-4">
+    <div className="flex-1">
       {/* Name */}
       <div className="flex flex-col gap-2 mb-2">
         <div className="flex items-center gap-2">
