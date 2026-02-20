@@ -43,7 +43,7 @@ export default function UserDetails({
           {editingProfile && <EditPill onClick={() => setModalOpen(true)} />}
         </div>
         {/* University row - with optional suffix (e.g. social links) on the same line */}
-        <div className="flex flex-row flex-wrap items-center justify-between gap-2 min-h-10">
+        <div className="flex flex-row flex-wrap items-center justify-between gap-3 min-h-10">
           <div className="flex items-center gap-2">
             <h1 className="text-lg font-normal text-muted/80 flex items-center gap-2">
               {profile.university && profile.university in universities
