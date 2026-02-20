@@ -112,24 +112,24 @@ export function SummaryCard({
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                 setNewTldr(e.target.value)
               }
-              className="w-full focus-visible:ring-0 resize-none min-h-0 border-none !text-base py-0 !leading-relaxed placeholder:text-muted"
+              className="w-full min-h-0 p-0 border-none outline-none shadow-none focus-visible:ring-0 focus:ring-0 resize-none !text-base !leading-relaxed placeholder:text-muted"
               placeholder="Add a short summary of yourself to allow others to get to know you better and make your profile more discoverable."
               onKeyDown={handleKeyDown}
             />
             <div className="w-full flex flex-row justify-end gap-2 animate-fade-in">
               <Button
                 variant="ghost"
-                onClick={cancel}
-                className="text-card-foreground hover:bg-transparent hover:text-muted"
+                onClick={submit}
+                className="rounded-full bg-purple-500 px-4 py-1.5 text-white hover:bg-purple-600 hover:text-white"
               >
-                Cancel
+                Save
               </Button>
               <Button
                 variant="ghost"
-                onClick={submit}
-                className="text-card-foreground hover:bg-transparent hover:text-muted"
+                onClick={cancel}
+                className="rounded-full bg-gray-200 px-4 py-1.5 text-muted hover:bg-gray-300 hover:text-card-foreground"
               >
-                Save
+                Cancel
               </Button>
             </div>
           </>
