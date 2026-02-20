@@ -162,6 +162,17 @@ export function SummaryCard({
                 strong: ({ children }) => (
                   <strong className="font-semibold">{children}</strong>
                 ),
+                a: ({ children, href, ...props }) => (
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-800"
+                    {...props}
+                  >
+                    {children}
+                  </a>
+                ),
               }}
             >
               {newTldr}
