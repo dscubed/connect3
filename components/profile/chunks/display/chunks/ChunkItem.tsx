@@ -50,9 +50,9 @@ export function ChunkItem({
             setChunk={(updatedChunk) => updateChunk(updatedChunk)}
           />
         ) : (
-          <div className="flex items-center gap-3 rounded-lg w-full hover:bg-white/20 transition-all">
+          <div className="flex items-start gap-3 rounded-lg w-full hover:bg-white/20 transition-all">
             <span
-              className="inline-flex w-4 shrink-0 justify-center"
+              className="inline-flex w-4 shrink-0 justify-center mt-[0.55rem]"
               aria-hidden="true"
             >
               <span className="w-2 h-2 rounded-full bg-black" />
