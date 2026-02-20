@@ -59,7 +59,8 @@ export function ChunkItem({
             </span>
             <span className="flex-1 min-w-0 text-base leading-relaxed">{chunk.text}</span>
             {isEditing && isEditingCategory(category) && (
-              <button
+              <Button
+                variant="ghost"
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -67,10 +68,12 @@ export function ChunkItem({
                   removeChunk(chunk.id);
                 }}
                 aria-label="Delete chunk"
-                className="shrink-0 rounded-full border border-muted/50 p-1.5 text-muted hover:text-red-500 hover:border-red-500/50 transition-colors"
+                className={cn(
+                  "shrink-0 rounded-full border border-muted/50 h-auto w-auto p-1.5 text-muted hover:text-red-500 hover:border-red-500/50"
+                )}
               >
                 <Trash className="h-4 w-4" />
-              </button>
+              </Button>
             )}
           </div>
         )}

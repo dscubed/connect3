@@ -85,7 +85,7 @@ export function SummaryCard({
           <AiEnhanceDialog
             initialText={newTldr}
             fieldType="external_tldr"
-            title="Enhance your TLDR"
+            title="Enhance your summary"
             onApply={(updated) => {
               // Apply the improved/generate TLDR into the editor
               setNewTldr(updated);
