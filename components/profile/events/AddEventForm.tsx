@@ -46,6 +46,7 @@ interface AddEventFormProps {
   onCancel: () => void;
   initialValues?: Partial<Omit<CreateEventBody, "id">>;
   submitLabel?: string;
+  source?: string;
 }
 
 const SECTION_CARD =
@@ -78,29 +79,14 @@ const TIMEZONE_OPTIONS = [
   { offset: "GMT+10:00", city: "Hobart" },
 ];
 
-function EventThemeIconPlaceholder({ theme }: { theme: ThemePreset }) {
-  // TODO: Replace with real theme icon asset that matches selected colour.
-  return (
-    <div
-      className="flex h-14 w-14 items-center justify-center rounded-full border text-[12px] font-semibold shadow-sm"
-      style={{
-        backgroundColor: theme.tint100,
-        borderColor: theme.border,
-        color: theme.main,
-      }}
-    >
-      ICON
-    </div>
-  );
-}
-
 export default function AddEventForm({
   onSubmit,
   onCancel,
   initialValues,
   submitLabel = "Add Event",
+  source,
 }: AddEventFormProps) {
-  const { user } = useAuthStore();
+  const { user, profile } = useAuthStore();
   const [name, setName] = useState<string>("");
   const [start, setStart] = useState<string>("");
   const [end, setEnd] = useState<string>("");
@@ -247,13 +233,20 @@ export default function AddEventForm({
   }, [initialValues]);
 
   const categories: EventCategory[] = [
-    "networking",
-    "study",
-    "fun",
-    "workshop",
-    "competition",
-    "panel",
-    "miscellaneous",
+    "academic_workshops",
+    "arts_music",
+    "career_networking",
+    "entrepreneurship",
+    "environment_sustainability",
+    "food_dining",
+    "gaming_esports",
+    "health_wellness",
+    "social_cultural",
+    "sports_fitness",
+    "tech_innovation",
+    "travel_adventure",
+    "volunteering_community",
+    "recruitment",
   ] as const;
 
   const themePresets: ThemePreset[] = [
@@ -432,6 +425,10 @@ export default function AddEventForm({
         location_type: locationType,
         location: locationPayload,
         thumbnailUrl: uploadedThumbnailUrl,
+        source: source ?? undefined,
+        university: profile?.university
+          ? [profile.university]
+          : undefined,
       };
       await onSubmit(eventData);
     } catch (error) {
@@ -483,9 +480,6 @@ export default function AddEventForm({
                 disabled={isSubmitting}
               />
             </label>
-            <div className="absolute right-0 top-0 z-10 -translate-y-1/2 translate-x-1/2">
-              <EventThemeIconPlaceholder theme={currentTheme} />
-            </div>
           </div>
           <div className="mt-4 flex w-full max-w-[320px] items-center justify-center gap-3">
             {themePresets.map((theme) => {
@@ -537,6 +531,7 @@ export default function AddEventForm({
                   initialText={description}
                   fieldType="chunk"
                   title="Enhance event description"
+                  assistantIntro="Tell me what you want this description to emphasise, and I'll refine it."
                   onApply={setDescription}
                 />
                 <button

@@ -1,6 +1,6 @@
 import { Club } from "@/types/clubs/club";
-import { universities, University } from "../profile/details/univeristies";
 import ProfilePicture from "@/components/profile/ProfilePicture";
+import { universities, University } from "../profile/details/univeristies";
 
 export function ClubListCard({
   club,
@@ -56,9 +56,9 @@ export function ClubListCard({
                 : "text-secondary-foreground/50"
             }`}
           >
-            {club.university && club.university in universities
-              ? universities[club.university as University].name
-              : club.university || "No university set"}
+            {universities[club.university as University]?.name ||
+              club.university ||
+              "No University Set"}
           </p>
         </div>
       </div>

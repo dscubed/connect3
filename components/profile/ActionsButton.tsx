@@ -49,7 +49,7 @@ export function ActionsButton({
       setIsSaving(true);
 
       const toastId = toast.loading(
-        SAVING_MESSAGES[Math.floor(Math.random() * SAVING_MESSAGES.length)]
+        SAVING_MESSAGES[Math.floor(Math.random() * SAVING_MESSAGES.length)],
       );
       let msgIndex = Math.floor(Math.random() * SAVING_MESSAGES.length);
       const interval = setInterval(() => {

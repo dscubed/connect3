@@ -31,7 +31,6 @@ export default function UserDetails({
   universitySuffix,
 }: UserDetailsProps) {
   const [modalOpen, setModalOpen] = useState(false);
-
   return (
     <div className="flex-1">
       {/* Name */}
@@ -46,9 +45,9 @@ export default function UserDetails({
         <div className="flex flex-row flex-wrap items-center justify-between gap-3 min-h-10">
           <div className="flex items-center gap-2">
             <h1 className="text-lg font-normal text-muted/80 flex items-center gap-2">
-              {profile.university && profile.university in universities
-                ? universities[profile.university as University].name
-                : "No university set"}
+              {universities[profile.university as University]?.name ||
+                profile.university ||
+                "No university set"}
             </h1>
             {editingProfile && <EditPill onClick={() => setModalOpen(true)} />}
           </div>
