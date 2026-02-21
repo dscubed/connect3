@@ -4,6 +4,11 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuthStore } from "@/stores/authStore";
 import { createChatroom } from "@/lib/chatrooms/chatroomUtils";
+import { universities } from "@/components/profile/details/univeristies";
+
+const ALL_UNIVERSITIES = Object.keys(universities).filter(
+  (key) => key !== "others"
+);
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
 
 const allSuggestions = [
@@ -42,7 +47,7 @@ export function SearchBar({ containerClassName }: SearchBarProps) {
   const [query, setQuery] = useState("");
   const [creatingChatroom, setCreatingChatroom] = useState(false);
   const [selectedUniversities, setSelectedUniversities] = useState<string[]>(
-    []
+    ALL_UNIVERSITIES
   );
   const router = useRouter();
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -52,6 +57,11 @@ export function SearchBar({ containerClassName }: SearchBarProps) {
   }, []);
 
   const handleUniversityChange = useCallback((uni: string) => {
+    if (uni == "all") {
+      setSelectedUniversities(ALL_UNIVERSITIES);
+      return;
+    }
+
     setSelectedUniversities((prev) =>
       prev.includes(uni) ? prev.filter((u) => u !== uni) : [...prev, uni]
     );
