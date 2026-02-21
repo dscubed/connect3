@@ -4,7 +4,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { universities } from "@/components/profile/details/univeristies";
 
 const ALL_UNIVERSITIES = Object.keys(universities).filter(
-  (key) => key !== "others"
+  (key) => key !== "others",
 );
 
 interface ChatRoomSearchBarProps {
@@ -20,7 +20,7 @@ export function ChatRoomSearchBar({
 }: ChatRoomSearchBarProps) {
   const [query, setQuery] = useState("");
   const [selectedUniversities, setSelectedUniversities] = useState<string[]>(
-    ALL_UNIVERSITIES,
+    [],
   );
   const dirty = useRef(false);
   const pendingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -41,7 +41,7 @@ export function ChatRoomSearchBar({
         setSelectedUniversities(
           typeof stored === "string" && stored.length > 0
             ? stored.split(",")
-            : ALL_UNIVERSITIES,
+            : [],
         );
       });
     return () => {
@@ -70,7 +70,13 @@ export function ChatRoomSearchBar({
   }, [selectedUniversities]);
 
   const handleUniversityChange = useCallback((uni: string) => {
+    console.log("[ChatroomSearchBar]: uni received:", uni);
     dirty.current = true;
+    if (uni == "all") {
+      setSelectedUniversities(ALL_UNIVERSITIES);
+      return;
+    }
+
     setSelectedUniversities((prev) =>
       prev.includes(uni) ? prev.filter((u) => u !== uni) : [...prev, uni],
     );

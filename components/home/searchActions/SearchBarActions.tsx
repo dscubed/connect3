@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { ArrowUp, Check, GraduationCap, Loader2, Search, X } from "lucide-react";
+import {
+  ArrowUp,
+  Check,
+  GraduationCap,
+  Loader2,
+  Search,
+  X,
+} from "lucide-react";
 import {
   universities,
   University,
@@ -13,7 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const UNIVERSITY_ENTRIES = Object.entries(universities).filter(
-  ([key]) => key !== "others"
+  ([key]) => key !== "others",
 ) as [University, (typeof universities)[University]][];
 
 interface SearchBarActionsProps {
@@ -34,7 +41,7 @@ export function SearchBarActions({
   const [search, setSearch] = useState("");
 
   const filtered = UNIVERSITY_ENTRIES.filter(([, info]) =>
-    info.name.toLowerCase().includes(search.toLowerCase())
+    info.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -105,7 +112,7 @@ export function SearchBarActions({
               <X className="h-3.5 w-3.5" />
               Clear
             </button>
-            <div className="w-px self-stretch bg-muted/80" />            
+            <div className="w-px self-stretch bg-muted/80" />
             <button
               type="button"
               onClick={() => {

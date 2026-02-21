@@ -59,7 +59,7 @@ const SearchBarUIComponent: React.FC<SearchBarUIProps> = ({
             className={cn(
               "w-full bg-transparent !text-base transition-all placeholder:text-foreground/50 pb-0 pt-1 px-2",
               "scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-transparent focus:scrollbar-thumb-white/50",
-              "max-h-32 outline-none resize-none focus-visible:ring-0 border-none min-h-12"
+              "max-h-32 outline-none resize-none focus-visible:ring-0 border-none min-h-12",
             )}
             placeholder="Ask me anything..."
             value={localQuery}
