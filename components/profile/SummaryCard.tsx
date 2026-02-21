@@ -5,10 +5,10 @@ import { AiEnhanceDialog } from "@/components/profile/edit-modals/AiEnhanceDialo
 import { CardContent } from "@/components/ui/card";
 import { SectionCard, SectionCardHeader } from "./SectionCard";
 import { Profile, useAuthStore } from "@/stores/authStore";
-import { uploadProfileToVectorStore } from "@/lib/vectorStores/profile/client";
 import { PencilLine } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import { useProfileEditContext } from "./hooks/ProfileEditProvider";
 
 export function SummaryCard({
   editingProfile = false,
@@ -18,30 +18,17 @@ export function SummaryCard({
   profile?: Profile;
 }) {
   const [isEditing, setIsEditing] = useState(false);
-  const [newTldr, setNewTldr] = useState(profile?.tldr || "");
+  const [preEditTldr, setPreEditTldr] = useState("");
   const { user } = useAuthStore();
-  const saveTldr = async (updatedTldr: string) => {
-    if (profile && profile.id === user?.id) {
-      useAuthStore.getState().updateProfile({ tldr: updatedTldr });
-      uploadProfileToVectorStore();
-    } else {
-      toast.error("Cannot update TLDR for other users' profiles.");
-    }
-  };
+  const { draft, setDraftFields } = useProfileEditContext();
+
+  const displayTldr =
+    editingProfile && draft ? draft.tldr : profile?.tldr || "";
 
   useEffect(() => {
-    if (profile) {
-      setNewTldr(profile.tldr || "");
-    } else {
-      setNewTldr("");
-    }
-  }, [profile]);
-
-  useEffect(() => {
-    if (isEditing) {
-      setNewTldr(profile?.tldr || "");
-    }
-  }, [isEditing, profile?.tldr]);
+    if (!isEditing) return;
+    setPreEditTldr(displayTldr);
+  }, [isEditing, displayTldr]);
 
   useEffect(() => {
     if (!editingProfile) {
@@ -52,17 +39,20 @@ export function SummaryCard({
   const editTldr = () => {
     if (!editingProfile) return;
     setIsEditing(true);
-    setNewTldr(profile?.tldr || "");
+    setPreEditTldr(displayTldr);
   };
 
   const cancel = () => {
     setIsEditing(false);
-    setNewTldr(profile?.tldr || "");
+    setDraftFields({ tldr: preEditTldr });
   };
 
   const submit = () => {
     setIsEditing(false);
-    saveTldr(newTldr);
+    if (profile && profile.id !== user?.id) {
+      toast.error("Cannot update TLDR for other users' profiles.");
+      return;
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -82,12 +72,12 @@ export function SummaryCard({
 
         {!editingProfile ? null : isEditing ? (
           <AiEnhanceDialog
-            initialText={newTldr}
+            initialText={displayTldr}
             fieldType="external_tldr"
             title="Enhance your TLDR"
             onApply={(updated) => {
               // Apply the improved/generate TLDR into the editor
-              setNewTldr(updated);
+              setDraftFields({ tldr: updated });
 
               // If they weren’t already editing this field, open editing state
               if (!isEditing) setIsEditing(true);
@@ -107,9 +97,9 @@ export function SummaryCard({
         {isEditing ? (
           <>
             <Textarea
-              value={newTldr}
+              value={displayTldr}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                setNewTldr(e.target.value)
+                setDraftFields({ tldr: e.target.value })
               }
               className="w-full focus-visible:ring-0 resize-none min-h-0 border-none !text-base py-0 !leading-relaxed placeholder:text-muted"
               placeholder="Add a short summary of yourself to allow others to get to know you better and make your profile more discoverable."
@@ -132,10 +122,10 @@ export function SummaryCard({
               </Button>
             </div>
           </>
-        ) : newTldr.length > 0 ? (
+        ) : displayTldr.length > 0 ? (
           <div className="loading-relaxed text-base" onClick={editTldr}>
             <ReactMarkdown>
-              {newTldr}
+              {displayTldr}
             </ReactMarkdown>
           </div>
         ) : (

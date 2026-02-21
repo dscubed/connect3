@@ -3,6 +3,7 @@ import { useState, ReactNode } from "react";
 import { Pencil } from "lucide-react";
 import { ProfileModal } from "./details/ProfileModal";
 import { Profile } from "@/stores/authStore";
+import { useProfileEditContext } from "./hooks/ProfileEditProvider";
 
 interface UserDetailsProps {
   profile: Profile;
@@ -30,13 +31,21 @@ export default function UserDetails({
   universitySuffix,
 }: UserDetailsProps) {
   const [modalOpen, setModalOpen] = useState(false);
+  const { draft } = useProfileEditContext();
+  const displayFirstName =
+    editingProfile && draft ? draft.first_name : profile.first_name;
+  const displayLastName =
+    editingProfile && draft ? draft.last_name : profile.last_name;
+  const displayUniversity =
+    editingProfile && draft ? draft.university : profile.university;
+
   return (
     <div className="flex-1 md:pb-4">
       {/* Name */}
       <div className="flex flex-col gap-2 mb-2">
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-medium">
-            {profile.first_name} {profile.last_name || ""}
+            {displayFirstName} {displayLastName || ""}
           </h1>
           {editingProfile && <EditPill onClick={() => setModalOpen(true)} />}
         </div>
@@ -44,7 +53,7 @@ export default function UserDetails({
         <div className="flex flex-row flex-wrap items-center justify-between gap-2 min-h-10">
           <div className="flex items-center gap-2">
             <h1 className="text-lg font-normal text-muted/80 flex items-center gap-2">
-              {profile.university || "No university set"}
+              {displayUniversity || "No university set"}
             </h1>
             {editingProfile && <EditPill onClick={() => setModalOpen(true)} />}
           </div>

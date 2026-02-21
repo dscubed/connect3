@@ -9,6 +9,7 @@ import { LinksSection } from "@/components/profile/LinksSection";
 import { ActionsButton } from "@/components/profile/ActionsButton";
 import { Profile } from "@/stores/authStore";
 import { SummaryCard } from "@/components/profile/SummaryCard";
+import { ProfileEditProvider } from "@/components/profile/hooks/ProfileEditProvider";
 import {
   ProfileProvider,
   useProfileContext,
@@ -59,13 +60,15 @@ function ProfilePageContentInner({
   const { profile } = useProfileContext();
 
   return (
-    <ChunkProvider isEditing={editingProfile} visitingProfileId={profile.id}>
-      <ProfilePageContentBody
-        editingProfile={editingProfile}
-        setEditingProfile={setEditingProfile}
-        profile={profile}
-      />
-    </ChunkProvider>
+    <ProfileEditProvider profile={profile} editingProfile={editingProfile}>
+      <ChunkProvider isEditing={editingProfile} visitingProfileId={profile.id}>
+        <ProfilePageContentBody
+          editingProfile={editingProfile}
+          setEditingProfile={setEditingProfile}
+          profile={profile}
+        />
+      </ChunkProvider>
+    </ProfileEditProvider>
   );
 }
 

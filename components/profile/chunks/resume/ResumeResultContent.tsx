@@ -7,6 +7,7 @@ import { CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DialogTitle } from "@/components/ui/dialog";
 import { DialogDescription } from "@radix-ui/react-dialog";
+import { useProfileEditContext } from "@/components/profile/hooks/ProfileEditProvider";
 
 export function ResumeResultContent({
   result,
@@ -16,6 +17,7 @@ export function ResumeResultContent({
   onClose: () => void;
 }) {
   const { updateChunk, addChunk } = useChunkContext();
+  const { applyResumeDetails } = useProfileEditContext();
 
   // Map results to category sections
   const updatedChunks = () => {
@@ -67,8 +69,12 @@ export function ResumeResultContent({
       addChunk(chunk.category, chunk.text);
     });
 
+    if (result.profileDetails) {
+      applyResumeDetails(result.profileDetails);
+    }
+
     onClose();
-    toast.success("Resume chunks applied to profile successfully!");
+    toast.success("Resume changes applied to profile successfully!");
   };
 
   return (

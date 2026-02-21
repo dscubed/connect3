@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
 import { processResume } from "@/lib/resume/processResume";
+import { extractResumeProfileDetails } from "@/lib/resume/extractProfileDetails";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -84,8 +85,36 @@ export async function POST(req: NextRequest) {
       throw new Error("Error processing resume");
     }
 
+    // Extract profile details for preview only (no auto-save)
+    let profileDetails = null;
+    try {
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("tldr, university")
+        .eq("id", profileId)
+        .single();
+
+      const { data: existingLinks, error: linksError } = await supabase
+        .from("profile_links")
+        .select("id")
+        .eq("profile_id", profileId);
+
+      const needsTldr = !profileData?.tldr?.trim();
+      const needsUniversity = !profileData?.university?.trim();
+      const needsLinks = (existingLinks ?? []).length === 0;
+
+      if (profileError || linksError || needsTldr || needsUniversity || needsLinks) {
+        profileDetails = await extractResumeProfileDetails(resumeText, openai);
+      }
+    } catch (extractError) {
+      console.error(
+        "Error extracting profile details from resume:",
+        extractError
+      );
+    }
+
     return NextResponse.json(
-      { success: true, chunks: chunkResult },
+      { success: true, result: { ...chunkResult, profileDetails } },
       { status: 200 }
     );
   } catch (err) {

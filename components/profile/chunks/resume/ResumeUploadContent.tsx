@@ -60,7 +60,13 @@ export function ResumeUploadContent({
 
       toast.success(`Resume ${file?.name} processed successfully!`);
 
-      setResult((await response.json()).chunks);
+      const data = await response.json();
+      const result = data.result ?? data.chunks;
+      if (!result) {
+        toast.error("Failed to process resume. Please try again.");
+        return;
+      }
+      setResult(result);
     } catch (err) {
       console.error("Error processing resume:", err);
       toast.error("Failed to process resume. Please try again.");

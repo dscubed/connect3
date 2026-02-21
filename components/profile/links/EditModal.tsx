@@ -4,19 +4,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  addLinksToSupabase,
-  deleteLinksFromSupabase,
-  LinkItem,
-  LinkType,
-  updateLinksInSupabase,
-} from "./LinksUtils";
+import { LinkItem, LinkType } from "./LinksUtils";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { EditLinksDisplay } from "./EditLinksDisplay";
-import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
-import { uploadProfileToVectorStore } from "@/lib/vectorStores/profile/client";
 import { Plus } from "lucide-react";
 import { LinkInput } from "./LinkInput";
 
@@ -44,9 +36,6 @@ export function EditModal({
   );
   const [prevLinks, setPrevLinks] = useState<LinkItem[]>(links);
   const [saving, setSaving] = useState(false);
-  const { getSupabaseClient, profile } = useAuthStore.getState();
-
-  const supabase = getSupabaseClient();
 
   const updateLink = (id: string, newDetails: string) => {
     const updatedLinks = links.map((link) =>
@@ -65,47 +54,23 @@ export function EditModal({
     deleteLink,
   };
 
-  const saveToSupabase = async () => {
-    setSaving(true);
+  const saveLinks = () => {
+    const hasChanges =
+      prevLinks.length !== links.length ||
+      prevLinks.some((prevLink) => {
+        const next = links.find((link) => link.id === prevLink.id);
+        return !next || next.details !== prevLink.details;
+      });
 
-    // Get deleted links and new links
-    const deletedLinks = prevLinks.filter(
-      (prevLink) => !links.find((link) => link.id === prevLink.id),
-    );
-    const newLinks = links.filter(
-      (link) => !prevLinks.find((prevLink) => prevLink.id === link.id),
-    );
-    const updatedLinks = links.filter((link) =>
-      prevLinks.find(
-        (prevLink) =>
-          prevLink.id === link.id && prevLink.details !== link.details,
-      ),
-    );
-
-    // No changes
-    if (
-      deletedLinks.length === 0 &&
-      newLinks.length === 0 &&
-      updatedLinks.length === 0
-    ) {
+    if (!hasChanges) {
       toast.info("No changes to save.");
-      setSaving(false);
       onOpenChange(false);
       return;
     }
 
-    // Save changes to supabase
-    console.log("Deleted links:", deletedLinks);
-    await deleteLinksFromSupabase(
-      deletedLinks.map((link) => link.id),
-      supabase,
-    );
-    console.log("New links to add:", newLinks);
-    await addLinksToSupabase(newLinks, supabase, profile?.id || "");
-    console.log("Updated links:", updatedLinks);
-    await updateLinksInSupabase(updatedLinks, supabase);
+    setSaving(true);
     setSaving(false);
-    toast.success("Links updated successfully!");
+    toast.success("Links staged successfully!");
     onOpenChange(false);
   };
 
@@ -185,9 +150,7 @@ export function EditModal({
             </Button>
             <Button
               onClick={() => {
-                // Save to supabase
-                saveToSupabase();
-                uploadProfileToVectorStore();
+                saveLinks();
               }}
               disabled={saving}
               className="animate-fade-in"

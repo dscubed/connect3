@@ -4,6 +4,7 @@ import { ResumeUploadContent } from "./ResumeUploadContent";
 import { UserCategories } from "../ChunkUtils";
 import { ResumeResultContent } from "./ResumeResultContent";
 import { AnimatePresence, motion } from "framer-motion";
+import { ResumeProfileDetails } from "@/components/profile/hooks/ProfileEditProvider";
 
 export interface ResumeChunkResult {
   updatedChunks: {
@@ -15,6 +16,7 @@ export interface ResumeChunkResult {
     category: UserCategories;
     text: string;
   }[];
+  profileDetails?: ResumeProfileDetails | null;
 }
 
 export const ResumeUploadModal = ({
