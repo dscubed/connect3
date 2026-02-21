@@ -1,5 +1,4 @@
 import { Club } from "@/types/clubs/club";
-import { universities, University } from "../profile/details/univeristies";
 import ProfilePicture from "@/components/profile/ProfilePicture";
 
 export function ClubListCard({
