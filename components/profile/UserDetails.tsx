@@ -3,7 +3,6 @@ import { useState, ReactNode } from "react";
 import { Pencil } from "lucide-react";
 import { ProfileModal } from "./details/ProfileModal";
 import { Profile } from "@/stores/authStore";
-import { universities, University } from "./details/univeristies";
 
 interface UserDetailsProps {
   profile: Profile;
