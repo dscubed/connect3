@@ -30,7 +30,21 @@ const baseUrl =
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 const CATEGORY_OPTIONS = [
-  "All", "competition", "fun", "miscellaneous", "networking", "panel", "study", "workshop",
+  "All",
+  "academic_workshops",
+  "arts_music",
+  "career_networking",
+  "entrepreneurship",
+  "environment_sustainability",
+  "food_dining",
+  "gaming_esports",
+  "health_wellness",
+  "social_cultural",
+  "sports_fitness",
+  "tech_innovation",
+  "travel_adventure",
+  "volunteering_community",
+  "recruitment",
 ];
 
 function getPageNumbers(current: number, total: number): (number | "ellipsis")[] {

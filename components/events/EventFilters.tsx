@@ -25,13 +25,20 @@ export default function EventFilters({
 }: EventFiltersProps) {
   const categoryOptions = [
     "All",
-    "networking",
-    "study",
-    "fun",
-    "workshop",
-    "competition",
-    "panel",
-    "miscellaneous",
+    "academic_workshops",
+    "arts_music",
+    "career_networking",
+    "entrepreneurship",
+    "environment_sustainability",
+    "food_dining",
+    "gaming_esports",
+    "health_wellness",
+    "social_cultural",
+    "sports_fitness",
+    "tech_innovation",
+    "travel_adventure",
+    "volunteering_community",
+    "recruitment",
   ] as const;
   return (
     <div className="p-4 flex-row gap-4 flex w-full">
