@@ -48,6 +48,7 @@ interface AiEnhanceDialogProps {
   fieldType: "external_tldr" | "chunk";
   title?: string;
   onApply: (newText: string) => void;
+  assistantIntro?: string;
 }
 
 const CARD =
@@ -62,6 +63,7 @@ export function AiEnhanceDialog({
   fieldType,
   title,
   onApply,
+  assistantIntro,
 }: AiEnhanceDialogProps) {
   const [open, setOpen] = useState(false);
   const [draftText, setDraftText] = useState(initialText);
@@ -106,14 +108,15 @@ export function AiEnhanceDialog({
       setExample(random);
 
       if (messages.length === 0) {
+        const defaultIntro =
+          fieldType === "chunk"
+            ? "Tell me what you want this highlight to emphasise, and I'll refine it."
+            : "Tell me what you want this summary to highlight — or ask me to write one for you.";
         setMessages([
           {
             id: "welcome",
             role: "assistant",
-            content:
-              fieldType === "chunk"
-                ? "Tell me what you want this highlight to emphasise, and I'll refine it."
-                : "Tell me what you want this summary to highlight — or ask me to write one for you.",
+            content: assistantIntro ?? defaultIntro,
           },
         ]);
       }
@@ -193,7 +196,9 @@ export function AiEnhanceDialog({
     }
   };
 
-  const handleApply = () => {
+  const handleApply = (event?: React.MouseEvent<HTMLButtonElement>) => {
+    event?.preventDefault();
+    event?.stopPropagation();
     onApply(draftText);
     setOpen(false);
   };
