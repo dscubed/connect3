@@ -9,9 +9,15 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Search, X, Check, Loader2 } from "lucide-react";
+import { ChevronDown, Search, X, Loader2 } from "lucide-react";
+import Image from "next/image";
 
-export type DateFilter = "all" | "today" | "this-week" | "this-month" | "upcoming";
+export type DateFilter =
+  | "all"
+  | "today"
+  | "this-week"
+  | "this-month"
+  | "upcoming";
 export type TagFilter = "all" | "free" | "paid" | "online" | "in-person";
 
 interface Club {
@@ -34,29 +40,32 @@ function useInfiniteClubs(searchQuery: string) {
   const [isLoading, setIsLoading] = useState(false);
   const [initialLoaded, setInitialLoaded] = useState(false);
 
-  const fetchClubs = useCallback(async (cursorVal: string | null, reset: boolean) => {
-    setIsLoading(true);
-    try {
-      const params = new URLSearchParams();
-      params.set("limit", String(CLUBS_PAGE_SIZE));
-      if (cursorVal) params.set("cursor", cursorVal);
-      if (searchQuery.trim()) params.set("search", searchQuery.trim());
+  const fetchClubs = useCallback(
+    async (cursorVal: string | null, reset: boolean) => {
+      setIsLoading(true);
+      try {
+        const params = new URLSearchParams();
+        params.set("limit", String(CLUBS_PAGE_SIZE));
+        if (cursorVal) params.set("cursor", cursorVal);
+        if (searchQuery.trim()) params.set("search", searchQuery.trim());
 
-      const res = await fetch(`${baseUrl}/api/clubs?${params.toString()}`);
-      const data = await res.json();
-      const newItems: Club[] = data.items ?? [];
-      const newCursor: string | null = data.cursor ?? null;
+        const res = await fetch(`${baseUrl}/api/clubs?${params.toString()}`);
+        const data = await res.json();
+        const newItems: Club[] = data.items ?? [];
+        const newCursor: string | null = data.cursor ?? null;
 
-      setClubs((prev) => reset ? newItems : [...prev, ...newItems]);
-      setCursor(newCursor);
-      setHasMore(newCursor !== null);
-      setInitialLoaded(true);
-    } catch {
-      setHasMore(false);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [searchQuery]);
+        setClubs((prev) => (reset ? newItems : [...prev, ...newItems]));
+        setCursor(newCursor);
+        setHasMore(newCursor !== null);
+        setInitialLoaded(true);
+      } catch {
+        setHasMore(false);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [searchQuery],
+  );
 
   // Reset and fetch when search changes
   useEffect(() => {
@@ -105,7 +114,6 @@ const tagLabels: Record<TagFilter, string> = {
   "in-person": "In-Person",
 };
 
-
 function formatCategory(cat: string): string {
   return cat
     .split(/[_\s]+/)
@@ -135,7 +143,12 @@ export default function EventGridFilters({
     return () => clearTimeout(timer);
   }, [clubSearch]);
 
-  const { clubs, isLoading: clubsLoading, hasMore, loadMore, initialLoaded } = useInfiniteClubs(debouncedClubSearch);
+  const {
+    clubs,
+    isLoading: clubsLoading,
+    loadMore,
+    initialLoaded,
+  } = useInfiniteClubs(debouncedClubSearch);
 
   const handleClubScroll = useCallback(() => {
     const el = clubListRef.current;
@@ -149,7 +162,7 @@ export default function EventGridFilters({
     setSelectedClubs((prev) =>
       prev.includes(clubId)
         ? prev.filter((id) => id !== clubId)
-        : [...prev, clubId]
+        : [...prev, clubId],
     );
   };
 
@@ -214,7 +227,9 @@ export default function EventGridFilters({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-1.5 px-4 py-2.5 rounded-full border border-gray-200 bg-white text-sm text-gray-600 hover:bg-gray-50 transition-colors shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-200">
-              {selectedCategory === "All" ? "Categories" : formatCategory(selectedCategory)}
+              {selectedCategory === "All"
+                ? "Categories"
+                : formatCategory(selectedCategory)}
               <ChevronDown className="w-3.5 h-3.5" />
             </button>
           </DropdownMenuTrigger>
@@ -232,7 +247,14 @@ export default function EventGridFilters({
         </DropdownMenu>
 
         {/* Clubs multi-select dropdown */}
-        <DropdownMenu onOpenChange={(open) => { if (!open) { setClubSearch(""); setDebouncedClubSearch(""); } }}>
+        <DropdownMenu
+          onOpenChange={(open) => {
+            if (!open) {
+              setClubSearch("");
+              setDebouncedClubSearch("");
+            }
+          }}
+        >
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-1.5 px-4 py-2.5 rounded-full border border-gray-200 bg-white text-sm text-gray-600 hover:bg-gray-50 transition-colors shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-200">
               {selectedClubs.length === 0
@@ -277,9 +299,11 @@ export default function EventGridFilters({
                   className="flex items-center gap-2 px-3 py-2"
                 >
                   {club.avatar_url ? (
-                    <img
+                    <Image
                       src={club.avatar_url}
-                      alt=""
+                      alt={club.first_name}
+                      width={20}
+                      height={20}
                       className="h-5 w-5 rounded-full object-cover shrink-0"
                     />
                   ) : (
