@@ -523,7 +523,7 @@ export default function AddEventForm({
               <div className="flex items-center gap-2">
                 <AiEnhanceDialog
                   initialText={description}
-                  fieldType="chunk"
+                  fieldType="event_description"
                   title="Enhance event description"
                   assistantIntro="Tell me what you want this description to emphasise, and I'll refine it."
                   onApply={setDescription}
