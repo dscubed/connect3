@@ -120,7 +120,7 @@ export function OrgSignUpForm({
       <p className="text-center text-sm text-black/50">
         Already have an organisation account?{" "}
         <Link
-          href="/auth/org/login"
+          href="/auth/login"
           className="font-semibold text-foreground hover:underline"
         >
           Log in

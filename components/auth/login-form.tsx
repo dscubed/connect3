@@ -98,6 +98,20 @@ export function LoginForm({
           Sign up
         </Link>
       </p>
+
+      {process.env.NODE_ENV !== "production" && (
+        <p className="text-center text-sm text-black/50">
+          <Link
+            href="/auth/org/sign-up"
+            className="font-semibold text-foreground hover:underline"
+          >
+            Organisation sign up
+          </Link>
+          <span className="ml-1.5 inline-block rounded-md bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800 ring-1 ring-amber-300">
+            DEV
+          </span>
+        </p>
+      )}
     </div>
   );
 }
