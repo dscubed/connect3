@@ -1,7 +1,7 @@
 import React from "react";
 import { useSearch } from "@/components/home/hooks/useSearch";
 import { Textarea } from "../ui/TextArea";
-import { SearchBarActions } from "./SearchBarActions/SearchBarActions";
+import { SearchBarActions } from "./searchActions/SearchBarActions";
 import { cn } from "@/lib/utils";
 
 interface SearchBarUIProps {
