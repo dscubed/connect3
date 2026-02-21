@@ -44,18 +44,157 @@ function transformDbEventToEventSchema(dbEvent: any): Event {
 }
 
 /**
- * Cursor based paginated retrieval of many events with server-side filtering
+ * Build common filters for event queries.
+ */
+function applyFilters(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  query: any,
+  params: {
+    search: string | null;
+    category: string | null;
+    dateFilter: string | null;
+    tagFilter: string | null;
+  },
+) {
+  if (params.search && params.search.trim()) {
+    query = query.ilike("name", `%${params.search.trim()}%`);
+  }
+
+  if (params.category) {
+    query = query.eq("category", params.category);
+  }
+
+  if (params.dateFilter && params.dateFilter !== "all") {
+    const now = new Date();
+    if (params.dateFilter === "today") {
+      const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const dayEnd = new Date(dayStart);
+      dayEnd.setDate(dayEnd.getDate() + 1);
+      query = query.gte("start", dayStart.toISOString()).lt("start", dayEnd.toISOString());
+    } else if (params.dateFilter === "this-week") {
+      const weekStart = new Date(now);
+      weekStart.setDate(now.getDate() - now.getDay());
+      weekStart.setHours(0, 0, 0, 0);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 7);
+      query = query.gte("start", weekStart.toISOString()).lt("start", weekEnd.toISOString());
+    } else if (params.dateFilter === "this-month") {
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      query = query.gte("start", now.toISOString()).lt("start", monthEnd.toISOString());
+    } else if (params.dateFilter === "upcoming") {
+      query = query.gte("start", now.toISOString());
+    }
+  }
+
+  if (params.tagFilter === "online") {
+    query = query.eq("is_online", true);
+  } else if (params.tagFilter === "in-person") {
+    query = query.eq("is_online", false);
+  }
+
+  return query;
+}
+
+/**
+ * Paginated retrieval of events. Supports both:
+ * - Offset pagination: ?page=1&limit=18 (returns items + totalCount)
+ * - Cursor pagination: ?cursor=xxx&limit=18 (returns items + cursor)
  */
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const cursor = searchParams.get("cursor");
+  const page = searchParams.get("page");
   const limit = parseInt(searchParams.get("limit") || "18");
   const search = searchParams.get("search");
   const category = searchParams.get("category");
   const dateFilter = searchParams.get("dateFilter");
   const tagFilter = searchParams.get("tagFilter");
 
+  const filterParams = { search, category, dateFilter, tagFilter };
+  const needsPostFilter = tagFilter === "free" || tagFilter === "paid";
+
   try {
+    if (page !== null) {
+      const pageNum = Math.max(1, parseInt(page));
+      const from = (pageNum - 1) * limit;
+
+      if (needsPostFilter) {
+
+        let allQuery = supabase
+          .from("events")
+          .select(
+            `*, event_pricings (min, max), event_locations (venue, address, latitude, longitude, city, country)`,
+          )
+          .eq("is_attendable", true)
+          .order("start", { ascending: false, nullsFirst: false })
+          .order("created_at", { ascending: false });
+
+        allQuery = applyFilters(allQuery, filterParams);
+        const { data, error } = await allQuery;
+
+        if (error) {
+          return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let filtered: any[] = data;
+        if (tagFilter === "free") {
+          filtered = data.filter((e) => {
+            const min = e.event_pricings?.min ?? 0;
+            const max = e.event_pricings?.max ?? 0;
+            return min <= 0 && max <= 0;
+          });
+        } else if (tagFilter === "paid") {
+          filtered = data.filter((e) => {
+            const min = e.event_pricings?.min ?? 0;
+            const max = e.event_pricings?.max ?? 0;
+            return min > 0 || max > 0;
+          });
+        }
+
+        const totalCount = filtered.length;
+        const pageItems = filtered.slice(from, from + limit);
+        const typedEvents: Event[] = pageItems.map(transformDbEventToEventSchema);
+
+        return NextResponse.json({
+          items: typedEvents,
+          totalCount,
+          page: pageNum,
+          totalPages: Math.ceil(totalCount / limit),
+        });
+      }
+
+      // Standard offset pagination with exact count
+      let query = supabase
+        .from("events")
+        .select(
+          `*, event_pricings (min, max), event_locations (venue, address, latitude, longitude, city, country)`,
+          { count: "exact" },
+        )
+        .eq("is_attendable", true)
+        .order("start", { ascending: false, nullsFirst: false })
+        .order("created_at", { ascending: false })
+        .range(from, from + limit - 1);
+
+      query = applyFilters(query, filterParams);
+      const { data, error, count } = await query;
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      const typedEvents: Event[] = (data ?? []).map(transformDbEventToEventSchema);
+      const totalCount = count ?? 0;
+
+      return NextResponse.json({
+        items: typedEvents,
+        totalCount,
+        page: pageNum,
+        totalPages: Math.ceil(totalCount / limit),
+      });
+    }
+
+    // ── Cursor-based pagination (legacy / infinite scroll) ──
     let query = supabase
       .from("events")
       .select(
@@ -79,41 +218,7 @@ export async function GET(request: NextRequest) {
       .order("start", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false });
 
-    if (search && search.trim()) {
-      query = query.ilike("name", `%${search.trim()}%`);
-    }
-
-    if (category) {
-      query = query.eq("category", category);
-    }
-
-    if (dateFilter && dateFilter !== "all") {
-      const now = new Date();
-      if (dateFilter === "today") {
-        const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const dayEnd = new Date(dayStart);
-        dayEnd.setDate(dayEnd.getDate() + 1);
-        query = query.gte("start", dayStart.toISOString()).lt("start", dayEnd.toISOString());
-      } else if (dateFilter === "this-week") {
-        const weekStart = new Date(now);
-        weekStart.setDate(now.getDate() - now.getDay());
-        weekStart.setHours(0, 0, 0, 0);
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 7);
-        query = query.gte("start", weekStart.toISOString()).lt("start", weekEnd.toISOString());
-      } else if (dateFilter === "this-month") {
-        const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-        query = query.gte("start", now.toISOString()).lt("start", monthEnd.toISOString());
-      } else if (dateFilter === "upcoming") {
-        query = query.gte("start", now.toISOString());
-      }
-    }
-
-    if (tagFilter === "online") {
-      query = query.eq("is_online", true);
-    } else if (tagFilter === "in-person") {
-      query = query.eq("is_online", false);
-    }
+    query = applyFilters(query, filterParams);
 
     if (cursor) {
       if (cursor.startsWith("null:")) {
@@ -124,10 +229,6 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Pricing filters (free/paid) can't be cleanly expressed in PostgREST
-    // because "free" includes events with no pricing record. Over-fetch and
-    // filter in JS so cursor pagination stays correct.
-    const needsPostFilter = tagFilter === "free" || tagFilter === "paid";
     const fetchSize = needsPostFilter ? limit * 3 : limit;
     query = query.limit(fetchSize + 1);
 
