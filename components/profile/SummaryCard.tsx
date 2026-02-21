@@ -8,6 +8,7 @@ import { Profile, useAuthStore } from "@/stores/authStore";
 import { uploadProfileToVectorStore } from "@/lib/vectorStores/profile/client";
 import { PencilLine } from "lucide-react";
 import { toast } from "sonner";
+import ReactMarkdown from "react-markdown";
 
 export function SummaryCard({
   editingProfile = false,
@@ -132,9 +133,11 @@ export function SummaryCard({
             </div>
           </>
         ) : newTldr.length > 0 ? (
-          <span className="leading-relaxed text-base" onClick={editTldr}>
-            {newTldr}
-          </span>
+          <div className="loading-relaxed text-base" onClick={editTldr}>
+            <ReactMarkdown>
+              {newTldr}
+            </ReactMarkdown>
+          </div>
         ) : (
           <span
             className="flex leading-relaxed text-base text-muted"

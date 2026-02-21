@@ -56,9 +56,7 @@ export function ClubListCard({
                 : "text-secondary-foreground/50"
             }`}
           >
-            {club.university && club.university in universities
-              ? universities[club.university as University].name
-              : club.university || "No university set"}
+            {club.university || "No University Set"}
           </p>
         </div>
       </div>
