@@ -45,6 +45,7 @@ export const createEventBodySchema = z.object({
     })
     .optional()
     .nullable(),
+  source: z.string().optional().nullable(),
   university: z.array(z.string()).optional(),
 });
 

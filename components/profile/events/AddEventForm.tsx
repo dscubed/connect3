@@ -40,12 +40,14 @@ import { useAuthStore } from "@/stores/authStore";
 import type { CreateEventBody } from "@/lib/schemas/api/events";
 import { uploadEventThumbnail } from "@/lib/supabase/storage";
 import { toast } from "sonner";
+import { universities } from "@/components/profile/details/univeristies";
 
 interface AddEventFormProps {
   onSubmit: (event: Omit<CreateEventBody, "id">) => Promise<void> | void;
   onCancel: () => void;
   initialValues?: Partial<Omit<CreateEventBody, "id">>;
   submitLabel?: string;
+  source?: string;
 }
 
 const SECTION_CARD =
@@ -83,8 +85,9 @@ export default function AddEventForm({
   onCancel,
   initialValues,
   submitLabel = "Add Event",
+  source,
 }: AddEventFormProps) {
-  const { user } = useAuthStore();
+  const { user, profile } = useAuthStore();
   const [name, setName] = useState<string>("");
   const [start, setStart] = useState<string>("");
   const [end, setEnd] = useState<string>("");
@@ -416,6 +419,10 @@ export default function AddEventForm({
         location_type: locationType,
         location: locationPayload,
         thumbnailUrl: uploadedThumbnailUrl,
+        source: source ?? undefined,
+        university: profile?.university
+          ? [universities[profile.university]?.name ?? profile.university]
+          : undefined,
       };
       await onSubmit(eventData);
     } catch (error) {

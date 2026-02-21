@@ -14,6 +14,7 @@ interface EventFormSheetProps {
   submitLabel?: string;
   modeLabel?: string;
   formKey?: string;
+  source?: string;
 }
 
 export default function EventFormSheet({
@@ -24,6 +25,7 @@ export default function EventFormSheet({
   submitLabel,
   modeLabel,
   formKey,
+  source,
 }: EventFormSheetProps) {
   const [sheetHeight, setSheetHeight] = useState<number | null>(null);
   const boundsRef = useRef<{ min: number; max: number }>({ min: 0, max: 0 });
@@ -147,6 +149,7 @@ export default function EventFormSheet({
                   onCancel={() => onOpenChange(false)}
                   initialValues={initialValues}
                   submitLabel={submitLabel}
+                  source={source}
                 />
               </div>
             </div>

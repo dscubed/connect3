@@ -166,6 +166,8 @@ export async function POST(request: NextRequest, { params }: RouteParameters) {
         pricing_max,
         currency,
         location,
+        university,
+        source,
     } = validatedBody;
 
     const bookingUrl = booking_link?.[0] ?? null;
@@ -205,6 +207,8 @@ export async function POST(request: NextRequest, { params }: RouteParameters) {
                 published_at: publishedAt,
                 thumbnail: thumbnailUrl ?? null,
                 currency: currency ?? null,
+                source: source ?? null,
+                university: university && university.length > 0 ? university : null,
             })
             .select()
             .single();
