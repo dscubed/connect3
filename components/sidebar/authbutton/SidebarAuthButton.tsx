@@ -6,11 +6,11 @@ import { LoggedInAuthButton } from "./LoggedInAuthButton";
 import { LoggedOutAuthButton } from "./LoggedOutAuthButton";
 
 export function SidebarAuthButton() {
-  const { user, loading } = useAuthStore();
+  const { user, profile, loading } = useAuthStore();
 
   if (loading && !user) {
     return <div className="w-10 h-10 rounded-full bg-black/10 animate-pulse" />;
   }
 
-  return user ? <LoggedInAuthButton /> : <LoggedOutAuthButton />;
+  return user && profile ? <LoggedInAuthButton /> : <LoggedOutAuthButton />;
 }

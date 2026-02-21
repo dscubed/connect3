@@ -20,9 +20,7 @@ export function useLogin(onLoggingInChange?: (loggingIn: boolean) => void) {
   }) => {
     if (user?.is_anonymous) {
       await useAuthStore.getState().signOut();
-    }
-
-    if (user) {
+    } else if (user) {
       toast.error("Already signed in!");
       return;
     }
@@ -50,7 +48,7 @@ export function useLogin(onLoggingInChange?: (loggingIn: boolean) => void) {
       if (error) throw error;
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Google login failed"
+        error instanceof Error ? error.message : "Google login failed",
       );
       setLoggingState(false);
     }
