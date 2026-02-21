@@ -10,6 +10,7 @@ import { EventGridCard } from "@/components/events/EventGridCard";
 import { EventDetailPanel } from "@/components/events/EventDetailPanel";
 import type { Event } from "@/lib/schemas/events/event";
 import type { CreateEventBody } from "@/lib/schemas/api/events";
+import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 type RawEvent = {
@@ -78,12 +79,15 @@ export default function ClubEventsCard({
 }: {
   profileId: string;
 }) {
-  const { isOwnProfile } = useProfileContext();
+  const { profile, isOwnProfile } = useProfileContext();
+  const canManageEvents =
+    isOwnProfile && profile?.account_type === "organisation";
   const { makeAuthenticatedRequest } = useAuthStore();
   const { mutate } = useSWRConfig();
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
   const [viewingEvent, setViewingEvent] = useState<Event | null>(null);
   const [showAll, setShowAll] = useState(false);
+  const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
   const { data, isLoading } = useSWR(
     profileId ? `/api/users/${profileId}/events?limit=24` : null,
     fetcher
@@ -213,6 +217,35 @@ export default function ClubEventsCard({
     mutate(`/api/events/${editingEventId}`);
   };
 
+  const handleDeleteEvent = async (eventId: string) => {
+    const confirmed = window.confirm(
+      "Delete this event? This action cannot be undone."
+    );
+    if (!confirmed) return;
+
+    setDeletingEventId(eventId);
+    try {
+      const response = await makeAuthenticatedRequest(`/api/events/${eventId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        toast.error("Failed to delete event");
+        return;
+      }
+
+      toast.success("Event deleted");
+      if (editingEventId === eventId) setEditingEventId(null);
+      if (viewingEvent?.id === eventId) setViewingEvent(null);
+      mutate(`/api/users/${profileId}/events?limit=24`);
+    } catch (error) {
+      console.error("Failed to delete event", error);
+      toast.error("Failed to delete event");
+    } finally {
+      setDeletingEventId(null);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="text-base leading-relaxed text-muted/80">Loading events...</div>
@@ -243,19 +276,36 @@ export default function ClubEventsCard({
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {displayEvents.map((event) => {
             const mapped = rawEventToEvent(event, profileId);
+            const isDeleting = deletingEventId === event.id;
             return (
-              <EventGridCard
-                key={event.id}
-                event={mapped}
-                onClick={() => {
-                  if (isOwnProfile) {
-                    setEditingEventId(event.id);
-                    setViewingEvent(null);
-                  } else {
-                    setViewingEvent(mapped);
-                  }
-                }}
-              />
+              <div key={event.id} className="relative group">
+                <EventGridCard
+                  event={mapped}
+                  onClick={() => {
+                    if (isOwnProfile) {
+                      setEditingEventId(event.id);
+                      setViewingEvent(null);
+                    } else {
+                      setViewingEvent(mapped);
+                    }
+                  }}
+                />
+                {canManageEvents && (
+                  <button
+                    type="button"
+                    onClick={(eventClick) => {
+                      eventClick.preventDefault();
+                      eventClick.stopPropagation();
+                      handleDeleteEvent(event.id);
+                    }}
+                    disabled={isDeleting}
+                    aria-label={`Delete ${mapped.name}`}
+                    className="absolute right-1 top-2 inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
             );
           })}
         </div>
