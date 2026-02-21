@@ -421,7 +421,7 @@ export default function AddEventForm({
         thumbnailUrl: uploadedThumbnailUrl,
         source: source ?? undefined,
         university: profile?.university
-          ? [universities[profile.university]?.name ?? profile.university]
+          ? [universities[profile.university as keyof typeof universities]?.name ?? profile.university]
           : undefined,
       };
       await onSubmit(eventData);
