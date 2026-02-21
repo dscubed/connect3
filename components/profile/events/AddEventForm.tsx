@@ -40,7 +40,6 @@ import { useAuthStore } from "@/stores/authStore";
 import type { CreateEventBody } from "@/lib/schemas/api/events";
 import { uploadEventThumbnail } from "@/lib/supabase/storage";
 import { toast } from "sonner";
-import { universities } from "@/components/profile/details/univeristies";
 
 interface AddEventFormProps {
   onSubmit: (event: Omit<CreateEventBody, "id">) => Promise<void> | void;
@@ -428,7 +427,7 @@ export default function AddEventForm({
         thumbnailUrl: uploadedThumbnailUrl,
         source: source ?? undefined,
         university: profile?.university
-          ? [universities[profile.university as keyof typeof universities]?.name ?? profile.university]
+          ? [profile.university]
           : undefined,
       };
       await onSubmit(eventData);
