@@ -1,15 +1,79 @@
 "use client";
 
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuCheckboxItem,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Search, X, Check, Loader2 } from "lucide-react";
 
 export type DateFilter = "all" | "today" | "this-week" | "this-month" | "upcoming";
 export type TagFilter = "all" | "free" | "paid" | "online" | "in-person";
+
+interface Club {
+  id: string;
+  first_name: string;
+  avatar_url: string | null;
+}
+
+const baseUrl =
+  process.env.NODE_ENV !== "production"
+    ? "http://localhost:3000"
+    : "https://connect3.app";
+
+const CLUBS_PAGE_SIZE = 20;
+
+function useInfiniteClubs(searchQuery: string) {
+  const [clubs, setClubs] = useState<Club[]>([]);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [initialLoaded, setInitialLoaded] = useState(false);
+
+  const fetchClubs = useCallback(async (cursorVal: string | null, reset: boolean) => {
+    setIsLoading(true);
+    try {
+      const params = new URLSearchParams();
+      params.set("limit", String(CLUBS_PAGE_SIZE));
+      if (cursorVal) params.set("cursor", cursorVal);
+      if (searchQuery.trim()) params.set("search", searchQuery.trim());
+
+      const res = await fetch(`${baseUrl}/api/clubs?${params.toString()}`);
+      const data = await res.json();
+      const newItems: Club[] = data.items ?? [];
+      const newCursor: string | null = data.cursor ?? null;
+
+      setClubs((prev) => reset ? newItems : [...prev, ...newItems]);
+      setCursor(newCursor);
+      setHasMore(newCursor !== null);
+      setInitialLoaded(true);
+    } catch {
+      setHasMore(false);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [searchQuery]);
+
+  // Reset and fetch when search changes
+  useEffect(() => {
+    setClubs([]);
+    setCursor(null);
+    setHasMore(true);
+    fetchClubs(null, true);
+  }, [fetchClubs]);
+
+  const loadMore = useCallback(() => {
+    if (!isLoading && hasMore) {
+      fetchClubs(cursor, false);
+    }
+  }, [isLoading, hasMore, cursor, fetchClubs]);
+
+  return { clubs, isLoading, hasMore, loadMore, initialLoaded };
+}
 
 interface EventGridFiltersProps {
   search: string;
@@ -21,6 +85,8 @@ interface EventGridFiltersProps {
   setDateFilter: React.Dispatch<React.SetStateAction<DateFilter>>;
   tagFilter: TagFilter;
   setTagFilter: React.Dispatch<React.SetStateAction<TagFilter>>;
+  selectedClubs: string[];
+  setSelectedClubs: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const dateLabels: Record<DateFilter, string> = {
@@ -57,7 +123,35 @@ export default function EventGridFilters({
   setDateFilter,
   tagFilter,
   setTagFilter,
+  selectedClubs,
+  setSelectedClubs,
 }: EventGridFiltersProps) {
+  const [clubSearch, setClubSearch] = useState("");
+  const [debouncedClubSearch, setDebouncedClubSearch] = useState("");
+  const clubListRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedClubSearch(clubSearch), 300);
+    return () => clearTimeout(timer);
+  }, [clubSearch]);
+
+  const { clubs, isLoading: clubsLoading, hasMore, loadMore, initialLoaded } = useInfiniteClubs(debouncedClubSearch);
+
+  const handleClubScroll = useCallback(() => {
+    const el = clubListRef.current;
+    if (!el) return;
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 20) {
+      loadMore();
+    }
+  }, [loadMore]);
+
+  const handleClubToggle = (clubId: string) => {
+    setSelectedClubs((prev) =>
+      prev.includes(clubId)
+        ? prev.filter((id) => id !== clubId)
+        : [...prev, clubId]
+    );
+  };
 
   return (
     <div className="flex flex-wrap items-center gap-3">
@@ -134,6 +228,90 @@ export default function EventGridFilters({
                 {cat === "All" ? "All Categories" : formatCategory(cat)}
               </DropdownMenuItem>
             ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Clubs multi-select dropdown */}
+        <DropdownMenu onOpenChange={(open) => { if (!open) { setClubSearch(""); setDebouncedClubSearch(""); } }}>
+          <DropdownMenuTrigger asChild>
+            <button className="flex items-center gap-1.5 px-4 py-2.5 rounded-full border border-gray-200 bg-white text-sm text-gray-600 hover:bg-gray-50 transition-colors shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-200">
+              {selectedClubs.length === 0
+                ? "Clubs"
+                : `${selectedClubs.length} Club${selectedClubs.length > 1 ? "s" : ""}`}
+              <ChevronDown className="w-3.5 h-3.5" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className="w-64 rounded-xl shadow-xl p-0"
+            onCloseAutoFocus={(e) => e.preventDefault()}
+          >
+            <div className="flex items-center gap-2 border-b px-3 py-2">
+              <input
+                type="text"
+                placeholder="Search clubs..."
+                value={clubSearch}
+                onChange={(e) => setClubSearch(e.target.value)}
+                className="flex-1 bg-transparent text-sm outline-none placeholder:text-gray-400"
+                autoFocus
+                onKeyDown={(e) => e.stopPropagation()}
+              />
+              <Search className="h-4 w-4 text-gray-400 shrink-0" />
+            </div>
+
+            <div
+              ref={clubListRef}
+              onScroll={handleClubScroll}
+              className="max-h-52 overflow-y-auto py-1"
+            >
+              {initialLoaded && clubs.length === 0 && !clubsLoading && (
+                <div className="px-3 py-2 text-sm text-gray-400">
+                  No clubs found
+                </div>
+              )}
+              {clubs.map((club) => (
+                <DropdownMenuCheckboxItem
+                  key={club.id}
+                  checked={selectedClubs.includes(club.id)}
+                  onCheckedChange={() => handleClubToggle(club.id)}
+                  onSelect={(e) => e.preventDefault()}
+                  className="flex items-center gap-2 px-3 py-2"
+                >
+                  {club.avatar_url ? (
+                    <img
+                      src={club.avatar_url}
+                      alt=""
+                      className="h-5 w-5 rounded-full object-cover shrink-0"
+                    />
+                  ) : (
+                    <div className="h-5 w-5 rounded-full bg-gray-200 flex items-center justify-center shrink-0">
+                      <span className="text-[10px] font-medium text-gray-500">
+                        {club.first_name.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                  <span className="truncate">{club.first_name}</span>
+                </DropdownMenuCheckboxItem>
+              ))}
+              {clubsLoading && (
+                <div className="flex items-center justify-center py-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                </div>
+              )}
+            </div>
+
+            {selectedClubs.length > 0 && (
+              <>
+                <DropdownMenuSeparator className="m-0" />
+                <button
+                  type="button"
+                  onClick={() => setSelectedClubs([])}
+                  className="flex w-full items-center justify-center gap-1 py-2 text-sm font-medium hover:bg-gray-100 transition-colors"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  Clear All
+                </button>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

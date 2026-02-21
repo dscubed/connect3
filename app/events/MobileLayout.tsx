@@ -68,6 +68,7 @@ export default function MobileLayout() {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [dateFilter, setDateFilter] = useState<DateFilter>("all");
   const [tagFilter, setTagFilter] = useState<TagFilter>("all");
+  const [selectedClubs, setSelectedClubs] = useState<string[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [currentPage, setCurrentPage] = useState(() => {
     const p = searchParams.get("page");
@@ -85,11 +86,12 @@ export default function MobileLayout() {
     if (selectedCategory !== "All") params.category = selectedCategory;
     if (dateFilter !== "all") params.dateFilter = dateFilter;
     if (tagFilter !== "all") params.tagFilter = tagFilter;
+    if (selectedClubs.length > 0) params.clubs = selectedClubs.join(",");
     return params;
-  }, [debouncedSearch, selectedCategory, dateFilter, tagFilter]);
+  }, [debouncedSearch, selectedCategory, dateFilter, tagFilter, selectedClubs]);
 
   // Reset to page 1 when filters actually change
-  const filterKey = `${debouncedSearch}|${selectedCategory}|${dateFilter}|${tagFilter}`;
+  const filterKey = `${debouncedSearch}|${selectedCategory}|${dateFilter}|${tagFilter}|${selectedClubs.join(",")}`;
   const prevFilterKey = useRef(filterKey);
   useEffect(() => {
     if (prevFilterKey.current === filterKey) return;
@@ -151,6 +153,8 @@ export default function MobileLayout() {
               setDateFilter={setDateFilter}
               tagFilter={tagFilter}
               setTagFilter={setTagFilter}
+              selectedClubs={selectedClubs}
+              setSelectedClubs={setSelectedClubs}
             />
 
             <p className="text-sm text-gray-400">

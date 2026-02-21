@@ -54,6 +54,7 @@ function applyFilters(
     category: string | null;
     dateFilter: string | null;
     tagFilter: string | null;
+    clubs: string | null;
   },
 ) {
   if (params.search && params.search.trim()) {
@@ -86,6 +87,13 @@ function applyFilters(
     }
   }
 
+  if (params.clubs) {
+    const clubIds = params.clubs.split(",").filter(Boolean);
+    if (clubIds.length > 0) {
+      query = query.in("creator_profile_id", clubIds);
+    }
+  }
+
   if (params.tagFilter === "online") {
     query = query.eq("is_online", true);
   } else if (params.tagFilter === "in-person") {
@@ -109,8 +117,9 @@ export async function GET(request: NextRequest) {
   const category = searchParams.get("category");
   const dateFilter = searchParams.get("dateFilter");
   const tagFilter = searchParams.get("tagFilter");
+  const clubs = searchParams.get("clubs");
 
-  const filterParams = { search, category, dateFilter, tagFilter };
+  const filterParams = { search, category, dateFilter, tagFilter, clubs };
   const needsPostFilter = tagFilter === "free" || tagFilter === "paid";
 
   try {
@@ -125,7 +134,6 @@ export async function GET(request: NextRequest) {
           .select(
             `*, event_pricings (min, max), event_locations (venue, address, latitude, longitude, city, country)`,
           )
-          .eq("is_attendable", true)
           .order("start", { ascending: false, nullsFirst: false })
           .order("created_at", { ascending: false });
 
@@ -171,7 +179,6 @@ export async function GET(request: NextRequest) {
           `*, event_pricings (min, max), event_locations (venue, address, latitude, longitude, city, country)`,
           { count: "exact" },
         )
-        .eq("is_attendable", true)
         .order("start", { ascending: false, nullsFirst: false })
         .order("created_at", { ascending: false })
         .range(from, from + limit - 1);
@@ -214,7 +221,6 @@ export async function GET(request: NextRequest) {
         )
       `,
       )
-      .eq("is_attendable", true)
       .order("start", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false });
 
