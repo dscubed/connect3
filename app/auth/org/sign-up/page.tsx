@@ -1,0 +1,25 @@
+"use client";
+
+import { AuthShell } from "@/components/auth/AuthShell";
+import { OrgSignUpForm } from "@/components/auth/org-sign-up-form";
+import LoadingIndicator from "@/components/ui/LoadingSpinner";
+import { useAuthStore } from "@/stores/authStore";
+import AlreadyAuthenticatedDialog from "@/components/auth/AlreadyAuthenticatedDialog";
+
+export default function Page() {
+  const user = useAuthStore((state) => state.user);
+  const profile = useAuthStore((state) => state.profile);
+  const loading = useAuthStore((state) => state.loading);
+
+  return (
+    <>
+      <AuthShell>{loading ? <LoadingIndicator /> : <OrgSignUpForm />}</AuthShell>
+
+      {user && !user.is_anonymous && !loading && (
+        <AlreadyAuthenticatedDialog
+          onboardingCompleted={profile?.onboarding_completed}
+        />
+      )}
+    </>
+  );
+}
