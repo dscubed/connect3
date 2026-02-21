@@ -1,9 +1,38 @@
 import { SearchBarUI } from "./SearchBarUI";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuthStore } from "@/stores/authStore";
 import { createChatroom } from "@/lib/chatrooms/chatroomUtils";
+import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
+
+const allSuggestions = [
+  "Find clubs related to AI and machine learning",
+  "Who's attending the hackathon this weekend?",
+  "Show me upcoming networking events",
+  "Find students interested in web development",
+  "What events are happening on campus today?",
+  "Are there any study groups for math?",
+  "Find people who play basketball",
+  "What clubs are accepting new members?",
+  "Show me music and arts societies",
+  "Find students looking for project partners",
+  "Any volunteering opportunities on campus?",
+  "Who's organising career fairs this semester?",
+  "Find gaming communities near me",
+  "Show me entrepreneurship and startup clubs",
+  "Are there any free workshops this week?",
+  "Find photography or film clubs",
+  "What social events are coming up this month?",
+  "Show me debate or public speaking clubs",
+  "Find students interested in data science",
+  "Any cultural festivals happening soon?",
+];
+
+function pickRandom<T>(arr: T[], count: number): T[] {
+  const shuffled = [...arr].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+}
 
 interface SearchBarProps {
   containerClassName?: string;
@@ -16,6 +45,11 @@ export function SearchBar({ containerClassName }: SearchBarProps) {
     []
   );
   const router = useRouter();
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+
+  useEffect(() => {
+    setSuggestions(pickRandom(allSuggestions, 5));
+  }, []);
 
   const handleUniversityChange = useCallback((uni: string) => {
     setSelectedUniversities((prev) =>
@@ -69,15 +103,28 @@ export function SearchBar({ containerClassName }: SearchBarProps) {
   };
 
   return (
-    <SearchBarUI
-      query={query}
-      setQuery={setQuery}
-      disabled={creatingChatroom}
-      onSubmit={handleSearch}
-      containerClassName={containerClassName}
-      selectedUniversities={selectedUniversities}
-      onUniversityChange={handleUniversityChange}
-      onUniversityClear={handleUniversityClear}
-    />
+    <div className="flex flex-col gap-3 w-full">
+      {query.trim() === "" && suggestions.length > 0 && (
+        <Suggestions className="mx-auto max-w-3xl">
+          {suggestions.map((s) => (
+            <Suggestion
+              key={s}
+              suggestion={s}
+              onClick={setQuery}
+            />
+          ))}
+        </Suggestions>
+      )}
+      <SearchBarUI
+        query={query}
+        setQuery={setQuery}
+        disabled={creatingChatroom}
+        onSubmit={handleSearch}
+        containerClassName={containerClassName}
+        selectedUniversities={selectedUniversities}
+        onUniversityChange={handleUniversityChange}
+        onUniversityClear={handleUniversityClear}
+      />
+    </div>
   );
 }
