@@ -120,7 +120,7 @@ export function SearchBar({ containerClassName }: SearchBarProps) {
             <Suggestion
               key={s}
               suggestion={s}
-              onClick={setQuery}
+              onClick={handleSearch}
             />
           ))}
         </Suggestions>
