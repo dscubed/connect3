@@ -7,6 +7,7 @@ import {
   Save,
 } from "lucide-react";
 import { useChunkContext } from "../hooks/ChunkProvider";
+import { useAuthStore } from "@/stores/authStore";
 
 export function ChunkActions({
   isEditing,
@@ -16,6 +17,8 @@ export function ChunkActions({
   setIsEditing: (editing: boolean) => void;
 }) {
   const { reset, saveChunks, fetchChunks } = useChunkContext();
+  const profile = useAuthStore((state) => state.profile);
+  const showResume = profile?.account_type === "user";
   return (
     <div className="flex justify-between">
       <div className="flex gap-4">
@@ -59,7 +62,7 @@ export function ChunkActions({
         {/* Separator */}
         <div className="border-l border-white/20 h-full py-4 self-center" />
         <div className="flex gap-8">
-          <ActionButton icon={FileUp} label="Resume" />
+          {showResume && <ActionButton icon={FileUp} label="Resume" />}
           <ActionButton icon={MessageCircle} label="Chat" />
         </div>
       </div>

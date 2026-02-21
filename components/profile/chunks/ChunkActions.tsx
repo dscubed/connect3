@@ -4,10 +4,13 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { ResumeUploadModal } from "./resume/ChunkResumeModal";
+import { useAuthStore } from "@/stores/authStore";
 
 export function ChunkActions() {
   const { reset } = useChunkContext();
   const [resumeOpen, setResumeOpen] = useState(false);
+  const profile = useAuthStore((state) => state.profile);
+  const showResume = profile?.account_type === "user";
 
   return (
     <div className="flex gap-4">
@@ -22,18 +25,22 @@ export function ChunkActions() {
             reset();
           }}
         />
-        <ActionButton
-          icon={FileUp}
-          label="Resume"
-          onClick={() => setResumeOpen(true)}
-        />
+        {showResume && (
+          <ActionButton
+            icon={FileUp}
+            label="Resume"
+            onClick={() => setResumeOpen(true)}
+          />
+        )}
       </div>
 
       {/* Resume Upload Modal */}
-      <ResumeUploadModal
-        isOpen={resumeOpen}
-        onClose={() => setResumeOpen(false)}
-      />
+      {showResume && (
+        <ResumeUploadModal
+          isOpen={resumeOpen}
+          onClose={() => setResumeOpen(false)}
+        />
+      )}
     </div>
   );
 }
