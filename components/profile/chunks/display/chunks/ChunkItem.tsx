@@ -3,6 +3,7 @@ import { ChunkEditor } from "../ChunkEditor";
 import { useChunkContext } from "../../hooks/ChunkProvider";
 import { AllCategories, ChunkEntry } from "../../ChunkUtils";
 import { SortableChunk } from "./SortableChunk";
+import { Button } from "@/components/ui/button";
 
 export function ChunkItem({
   chunk,
@@ -68,9 +69,7 @@ export function ChunkItem({
                   removeChunk(chunk.id);
                 }}
                 aria-label="Delete chunk"
-                className={cn(
-                  "shrink-0 rounded-full border border-muted/50 h-auto w-auto p-1.5 text-muted hover:text-red-500 hover:border-red-500/50"
-                )}
+                className="shrink-0 rounded-full border border-muted/50 h-auto w-auto p-1.5 text-muted hover:text-red-500 hover:border-red-500/50"
               >
                 <Trash className="h-4 w-4" />
               </Button>
