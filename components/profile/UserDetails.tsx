@@ -4,6 +4,7 @@ import { Pencil } from "lucide-react";
 import { ProfileModal } from "./details/ProfileModal";
 import { Profile } from "@/stores/authStore";
 import { useProfileEditContext } from "./hooks/ProfileEditProvider";
+import { universities, University } from "./details/univeristies";
 
 interface UserDetailsProps {
   profile: Profile;
@@ -49,11 +50,13 @@ export default function UserDetails({
           </h1>
           {editingProfile && <EditPill onClick={() => setModalOpen(true)} />}
         </div>
-        {/* University row - with optional suffix (e.g. social links) on the same line */}
+        {/* University row - with nal suffix (e.g. social links) on the same line */}
         <div className="flex flex-row flex-wrap items-center justify-between gap-2 min-h-10">
           <div className="flex items-center gap-2">
             <h1 className="text-lg font-normal text-muted/80 flex items-center gap-2">
-              {displayUniversity || "No university set"}
+              {universities[profile.university as University]?.name ||
+                profile.university ||
+                "No university set"}
             </h1>
             {editingProfile && <EditPill onClick={() => setModalOpen(true)} />}
           </div>
