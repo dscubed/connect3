@@ -14,6 +14,13 @@ import {
   University,
 } from "@/components/profile/details/univeristies";
 import type { ConversationMessage, OrchestratorResponse } from "./types";
+import { readFileSync } from "fs";
+import { join } from "path";
+
+const connect3Info = readFileSync(
+  join(process.cwd(), "lib/search/connect3_info.md"),
+  "utf-8",
+);
 
 /** Streaming callbacks for the agent run */
 export interface StreamCallbacks {
@@ -136,6 +143,14 @@ export class Connect3Agent {
       }),
     });
 
+    const getConnect3Info = tool({
+      name: "get_connect3_info",
+      description:
+        "Get information about the Connect3 platform — what it is, supported universities, features, how search works, and platform values. Call this when the user asks about Connect3 itself.",
+      parameters: z.object({}),
+      execute: async () => connect3Info,
+    });
+
     const getMyProfile = tool({
       name: "get_my_profile",
       description:
@@ -220,6 +235,7 @@ export class Connect3Agent {
         searchClubs,
         searchEvents,
         getMyProfile,
+        getConnect3Info,
         webSearchTool(),
         getCurrentDate,
       ],
