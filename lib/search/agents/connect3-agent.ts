@@ -50,13 +50,10 @@ async function searchVectorStore(
     };
 
     if (universityFilter && universityFilter.length > 0) {
-      const uniNames = universityFilter.map(
-        (key) => universityMap[key as University]?.name ?? key,
-      );
       searchParams.filters = {
         type: "in",
         key: "university",
-        value: uniNames,
+        value: universityFilter,
       };
     }
 
