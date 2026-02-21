@@ -14,13 +14,6 @@ import {
   University,
 } from "@/components/profile/details/univeristies";
 import type { ConversationMessage, OrchestratorResponse } from "./types";
-import { readFileSync } from "fs";
-import { join } from "path";
-
-const connect3Info = readFileSync(
-  join(process.cwd(), "lib/search/connect3_info.md"),
-  "utf-8",
-);
 
 /** Streaming callbacks for the agent run */
 export interface StreamCallbacks {
@@ -41,6 +34,7 @@ async function searchVectorStore(
   query: string | string[],
   label: string,
   universityFilter?: string[],
+  extraFilter?: Record<string, unknown>,
 ): Promise<string> {
   console.log(
     `[${label}] Searching for:`,
@@ -56,16 +50,28 @@ async function searchVectorStore(
       },
     };
 
-    if (universityFilter && universityFilter.length > 0) {
+    const hasUniFilter = universityFilter && universityFilter.length > 0;
+    const uniCondition = hasUniFilter
+      ? { type: "in", key: "university", value: universityFilter }
+      : null;
+
+    if (uniCondition && extraFilter) {
+      // Merge both filters under a top-level `and`
       searchParams.filters = {
-        type: "in",
-        key: "university",
-        value: universityFilter,
+        type: "and",
+        filters: [extraFilter, uniCondition],
       };
+    } else if (uniCondition) {
+      searchParams.filters = uniCondition;
+    } else if (extraFilter) {
+      searchParams.filters = extraFilter;
     }
 
-    // @ts-expect-error — `in` filter operator not yet in the JS SDK types
-    const results = await openai.vectorStores.search(vectorStoreId, searchParams);
+    const results = await openai.vectorStores.search(
+      vectorStoreId,
+      // @ts-expect-error — `in` filter operator not yet in the JS SDK types
+      searchParams,
+    );
     if (results.data.length === 0) {
       console.log(`[${label}] Found 0 results`);
       return JSON.stringify({
@@ -143,12 +149,117 @@ export class Connect3Agent {
       }),
     });
 
-    const getConnect3Info = tool({
-      name: "get_connect3_info",
+    const searchEventsByDate = tool({
+      name: "search_events_by_date",
       description:
-        "Get information about the Connect3 platform — what it is, supported universities, features, how search works, and platform values. Call this when the user asks about Connect3 itself.",
-      parameters: z.object({}),
-      execute: async () => connect3Info,
+        "Search for events within a specific date range. Use this when the user asks about events on a particular date, this week, this weekend, next month, etc. Provide a search query describing what kind of events they want, plus the date window.",
+      parameters: z.object({
+        query: z
+          .union([z.string(), z.array(z.string()).min(1).max(5)])
+          .describe(
+            "The search query describing the type of events (e.g. 'hackathon', 'social', 'career fair'). Can be a single string or array of strings.",
+          ),
+        startDate: z
+          .string()
+          .describe(
+            "The start of the date range in ISO 8601 format (e.g. '2026-02-22T00:00:00Z'). Events on or after this date will be included.",
+          ),
+        endDate: z
+          .string()
+          .nullable()
+          .describe(
+            "The end of the date range in ISO 8601 format (e.g. '2026-02-28T23:59:59Z'). Pass null to return all events from startDate onwards.",
+          ),
+      }),
+      execute: async ({ query, startDate, endDate }) => {
+        const startTs = Math.floor(new Date(startDate).getTime() / 1000);
+
+        // Build the date filter
+        let dateFilter: Record<string, unknown>;
+        if (endDate) {
+          const endTs = Math.floor(new Date(endDate).getTime() / 1000);
+          dateFilter = {
+            type: "and",
+            filters: [
+              { type: "gte", key: "start", value: startTs },
+              { type: "lte", key: "start", value: endTs },
+            ],
+          };
+        } else {
+          dateFilter = { type: "gte", key: "start", value: startTs };
+        }
+
+        // Merge with university filter if active
+        let combinedFilter: Record<string, unknown>;
+        if (uniFilter && uniFilter.length > 0) {
+          combinedFilter = {
+            type: "and",
+            filters: [
+              dateFilter,
+              { type: "in", key: "university", value: uniFilter },
+            ],
+          };
+        } else {
+          combinedFilter = dateFilter;
+        }
+
+        const label = "search_events_by_date";
+        const endTs = endDate
+          ? Math.floor(new Date(endDate).getTime() / 1000)
+          : null;
+        console.log(
+          `[${label}] Date range: ${startDate}${endDate ? ` -> ${endDate}` : "+"} (unix: ${startTs}${endTs ? ` -> ${endTs}` : "+"})`,
+        );
+
+        try {
+          const searchParams: Record<string, unknown> = {
+            query,
+            max_num_results: 8,
+            rewrite_query: true,
+            ranking_options: { score_threshold: 0.1 },
+            filters: combinedFilter,
+          };
+
+          const results = await openai.vectorStores.search(
+            eventsVectorStoreId,
+            // @ts-expect-error — compound filter not yet in the JS SDK types
+            searchParams,
+          );
+
+          if (results.data.length === 0) {
+            console.log(`[${label}] Found 0 results`);
+            return JSON.stringify({
+              results: [],
+              message: "No events found in that date range.",
+            });
+          }
+
+          const items = results.data
+            .map((r) => {
+              const text = r.content.map((c) => c.text).join("\n");
+              if (!r.attributes) return null;
+              const id = r.attributes.id as string;
+              const type = r.attributes.type as string;
+              return {
+                marker: `@@@${type}:${id}@@@`,
+                type,
+                entityId: id,
+                score: Math.round(r.score * 1000) / 1000,
+                content: text,
+              };
+            })
+            .filter((i) => i !== null);
+
+          console.log(`[${label}] Found ${items.length} results`);
+          return JSON.stringify({ results: items });
+        } catch (err) {
+          console.error(`[${label}] Error:`, err);
+          return JSON.stringify({
+            results: [],
+            message: `Search failed: ${String(err)}`,
+          });
+        }
+      },
     });
 
     const getMyProfile = tool({
@@ -188,7 +299,13 @@ export class Connect3Agent {
           ),
       }),
       execute: async ({ query }) =>
-        searchVectorStore(openai, studentsVectorStoreId, query, "search_users", uniFilter),
+        searchVectorStore(
+          openai,
+          studentsVectorStoreId,
+          query,
+          "search_users",
+          uniFilter,
+        ),
     });
 
     const searchClubs = tool({
@@ -202,13 +319,19 @@ export class Connect3Agent {
           ),
       }),
       execute: async ({ query }) =>
-        searchVectorStore(openai, clubsVectorStoreId, query, "search_clubs", uniFilter),
+        searchVectorStore(
+          openai,
+          clubsVectorStoreId,
+          query,
+          "search_clubs",
+          uniFilter,
+        ),
     });
 
     const searchEvents = tool({
       name: "search_events",
       description:
-        "Search for events, hackathons, workshops, career fairs, socials, and activities.",
+        "Search for upcoming events, hackathons, workshops, career fairs, socials, and activities. A default filter of start >= now is automatically applied, so results will only include future events.",
       parameters: z.object({
         query: z
           .union([z.string(), z.array(z.string()).min(1).max(5)])
@@ -216,8 +339,17 @@ export class Connect3Agent {
             "The search query for events. You may pass a single query string, or a list of query strings to batch search.",
           ),
       }),
-      execute: async ({ query }) =>
-        searchVectorStore(openai, eventsVectorStoreId, query, "search_events", uniFilter),
+      execute: async ({ query }) => {
+        const nowTs = Math.floor(Date.now() / 1000);
+        return searchVectorStore(
+          openai,
+          eventsVectorStoreId,
+          query,
+          "search_events",
+          uniFilter,
+          { type: "gte", key: "start", value: nowTs },
+        );
+      },
     });
 
     this.agent = new Agent({
@@ -234,8 +366,8 @@ export class Connect3Agent {
         searchUsers,
         searchClubs,
         searchEvents,
+        searchEventsByDate,
         getMyProfile,
-        getConnect3Info,
         webSearchTool(),
         getCurrentDate,
       ],
@@ -264,12 +396,19 @@ CONVERSATION FLOW FOR VAGUE QUERIES:
 TOOL ROUTING:
 - People -> search_users
 - Clubs -> search_clubs
-- Events -> search_events
+- Upcoming events (default) -> search_events. This ALWAYS filters to future events only (start >= now). Use this for all standard event searches.
+- Events in a specific date range -> search_events_by_date. Use this when the user asks about a specific date, day, week, or month window.
+- Past events -> search_events_by_date with endDate set to now (call get_current_date first). Only do this if the user explicitly asks about past events or past events help answering the query.
 - Multiple categories -> call ALL relevant tools in parallel.
 - Retry with different queries if first results are poor.
 - For a SINGLE category with multiple query phrasings, you MAY pass a list of query strings to the tool (query can be an array) to batch search.
 - Use get_my_profile to understand the current user for personalized results.
 - General uni info -> web_search
+
+EVENT DATE BEHAVIOUR:
+- By default, event searches ONLY return upcoming/future events. Do NOT mention this to the user unless relevant.
+- If the user asks for past or historical events, use search_events_by_date with endDate = now to find events that have already occurred.
+- If the user asks about events "this week" or "this weekend", call get_current_date first to get today's date, then use search_events_by_date with the correct start/end window.
 
 ENTITY MARKERS:
 - Each search result has a "marker" field (e.g. "@@@user:uuid@@@").
