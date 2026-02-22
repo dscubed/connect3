@@ -5,6 +5,7 @@ import { ChatMessage } from "../utils";
 import { useSearchStream } from "./useStreamSearch";
 import { normalizeToMarkdownResponse } from "@/lib/search/markdownParser";
 import type { SearchResponse } from "@/lib/search/types";
+import { toast } from "sonner";
 
 type PartialSearchResponse = Partial<SearchResponse>;
 
@@ -85,6 +86,20 @@ export function useChatroom(chatroomId: string | null) {
             body: JSON.stringify({ messageId, universities }),
           },
         );
+
+        if (response.status === 413) {
+          toast.error(
+            "Your message is too long. Please shorten it and try again.",
+          );
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === messageId
+                ? { ...m, status: "failed" as const }
+                : m,
+            ),
+          );
+          return;
+        }
 
         // HTTP fallback in case realtime missed the "done" event
         if (response.ok) {
