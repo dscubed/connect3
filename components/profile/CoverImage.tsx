@@ -2,10 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { FastAverageColor } from "fast-average-color";
-import {
-  getMeshGradientStyle,
-  getRgbFromUserId,
-} from "@/lib/gradientUtils";
+import { getMeshGradientStyle, getRgbFromUserId } from "@/lib/gradientUtils";
 
 const PLACEHOLDER_RGB: [number, number, number] = [220, 218, 225];
 
@@ -15,13 +12,10 @@ interface CoverImageProps {
 }
 
 export default function CoverImage({ userId, avatarUrl }: CoverImageProps) {
-  const fallbackRgb = useMemo(
-    () => getRgbFromUserId(userId),
-    [userId]
-  );
-  const [resolvedRgb, setResolvedRgb] = useState<[number, number, number] | null>(
-    avatarUrl?.trim() ? null : fallbackRgb
-  );
+  const fallbackRgb = useMemo(() => getRgbFromUserId(userId), [userId]);
+  const [resolvedRgb, setResolvedRgb] = useState<
+    [number, number, number] | null
+  >(avatarUrl?.trim() ? null : fallbackRgb);
 
   useEffect(() => {
     if (!avatarUrl?.trim()) {
@@ -35,7 +29,7 @@ export default function CoverImage({ userId, avatarUrl }: CoverImageProps) {
 
     fac
       .getColorAsync(avatarUrl, {
-        algorithm: "dominant",
+        algorithm: "simple",
         crossOrigin: "anonymous",
       })
       .then((result) => {
@@ -56,7 +50,8 @@ export default function CoverImage({ userId, avatarUrl }: CoverImageProps) {
     };
   }, [avatarUrl, fallbackRgb]);
 
-  const rgb = resolvedRgb ?? (avatarUrl?.trim() ? PLACEHOLDER_RGB : fallbackRgb);
+  const rgb =
+    resolvedRgb ?? (avatarUrl?.trim() ? PLACEHOLDER_RGB : fallbackRgb);
   const gradientStyle = getMeshGradientStyle(rgb[0], rgb[1], rgb[2]);
 
   return (
