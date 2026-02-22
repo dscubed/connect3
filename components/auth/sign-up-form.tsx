@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useState } from "react";
 import { useSignUp } from "./hooks/useSignup";
+import { validatePassword } from "@/lib/auth/validatePassword";
 
 export function SignUpForm({
   className,
@@ -17,13 +18,22 @@ export function SignUpForm({
   const [repeatPassword, setRepeatPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [formError, setFormError] = useState<string | null>(null);
   const accountType = "user" as const;
 
   const { isSigningUp, handleEmailSignUp } = useSignUp();
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    handleEmailSignUp({
+    setFormError(null);
+
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+      setFormError(passwordValidation.error ?? "Invalid password");
+      return;
+    }
+
+    const result = await handleEmailSignUp({
       email,
       password,
       repeatPassword,
@@ -31,6 +41,7 @@ export function SignUpForm({
       lastName,
       accountType,
     });
+    if (result?.error) setFormError(result.error);
   };
 
   const inputClass =
@@ -48,6 +59,14 @@ export function SignUpForm({
       </div>
 
       <form onSubmit={onSubmit} className="space-y-3">
+        {formError && (
+          <div
+            role="alert"
+            className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          >
+            {formError}
+          </div>
+        )}
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="first-name" className="text-sm font-medium text-black">
@@ -99,6 +118,11 @@ export function SignUpForm({
           <Label htmlFor="password" className="text-sm font-medium text-black">
             Password
           </Label>
+          <div className="rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm text-neutral-600">
+            <p className="font-medium text-neutral-800">Password Requirements</p>
+            <p className="mt-0.5">Lowercase, uppercase letters, digits and symbols</p>
+            <p className="mt-0.5 text-neutral-500">Minimum length: 6 characters</p>
+          </div>
           <Input
             id="password"
             type="password"

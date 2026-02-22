@@ -13,7 +13,7 @@ export function useSignUp() {
     toast.error("Already signed in!");
     return {
       isSigningUp: false,
-      handleEmailSignUp: async () => {},
+      handleEmailSignUp: async () => ({}),
       handleGoogleSignUp: async () => {},
     };
   }
@@ -25,13 +25,12 @@ export function useSignUp() {
     firstName: string;
     lastName: string;
     accountType: "user" | "organisation";
-  }) => {
+  }): Promise<{ error?: string }> => {
     setIsSigningUp(true);
 
     if (params.password !== params.repeatPassword) {
-      toast.error("Passwords do not match");
       setIsSigningUp(false);
-      return;
+      return { error: "Passwords do not match" };
     }
 
     try {
@@ -46,25 +45,27 @@ export function useSignUp() {
         anonymousId,
       });
       if (error) {
-        toast.error(error.message || "An error occurred");
         setIsSigningUp(false);
-        return;
+        return { error: error.message || "An error occurred" };
       }
       if (
         data?.user &&
         Array.isArray(data.user.identities) &&
         data.user.identities.length === 0
       ) {
-        toast.error("Account already exists.");
         setIsSigningUp(false);
-        return;
+        return { error: "Account already exists." };
       }
       if (data?.user?.email) {
         localStorage.setItem("pendingVerificationEmail", data.user.email);
       }
       router.push("/auth/sign-up-success");
+      return {};
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "An error occurred");
+      setIsSigningUp(false);
+      return {
+        error: error instanceof Error ? error.message : "An error occurred",
+      };
     } finally {
       setIsSigningUp(false);
     }
