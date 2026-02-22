@@ -24,6 +24,7 @@ type RawEvent = {
   is_online?: boolean | null;
   thumbnail?: string | null;
   created_at?: string | null;
+  category?: string | null;
 };
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -134,10 +135,13 @@ export default function ClubEventsCard({
     const rawCategory =
       typeof detailCategory === "string"
         ? detailCategory
-        : detailCategory?.category ?? detailCategory?.type ?? "";
-    const allowedCategories = new Set<string>(EVENT_CATEGORIES);
+        : detailCategory?.category ?? detailCategory?.type ?? editingEventSummary?.category ?? (detail && "category" in detail ? (detail as { category?: string | null }).category : null) ?? "";
+    const rawCategoryStr = String(rawCategory || "").trim();
+    const matchedCategory = EVENT_CATEGORIES.find(
+      (c) => c.toLowerCase() === rawCategoryStr.toLowerCase()
+    );
     const mappedCategories: EventCategory[] =
-      allowedCategories.has(rawCategory) ? [rawCategory as EventCategory] : [];
+      matchedCategory != null ? [matchedCategory] : [];
     const locationPayload = detailLocation
       ? {
           venue: detailLocation.venue ?? "",

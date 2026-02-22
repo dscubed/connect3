@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
 import { useState } from "react";
+import { useSWRConfig } from "swr";
 import EventFormSheet from "./EventFormSheet";
 import { useAuthStore } from "@/stores/authStore";
 import type { CreateEventBody } from "@/lib/schemas/api/events";
@@ -11,7 +12,8 @@ export default function EventFormHeader({
 }: {
   variant?: "default" | "compact";
 }) {
-  const { makeAuthenticatedRequest } = useAuthStore();
+  const { makeAuthenticatedRequest, profile } = useAuthStore();
+  const { mutate } = useSWRConfig();
   const [addingEvent, setAddingEvent] = useState<boolean>(false);
 
   const handleAddButtonClick = () => {
@@ -41,7 +43,10 @@ export default function EventFormHeader({
 
     if (dbResponse.ok) {
       toast.success("Successfully added event");
-      // optimistically update ui by closing form while vector store is being populated
+      // Revalidate events list so the new event appears immediately (e.g. while still in edit profile mode)
+      if (profile?.id) {
+        mutate(`/api/users/${profile.id}/events?limit=24`);
+      }
       handleFormCancel();
     } else {
       toast.error("Failed to create event");

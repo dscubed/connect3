@@ -19,18 +19,7 @@ import {
   ImagePlus,
   Layers,
   PencilLine,
-  Plus,
-  Tag,
 } from "lucide-react";
-import { LinkInput } from "@/components/profile/links/LinkInput";
-import { EditLinksDisplay } from "@/components/profile/links/EditLinksDisplay";
-import {
-  LinkItem,
-  LinkType,
-  LinkTypes,
-  UrlToLinkDetails,
-  AddingState,
-} from "@/components/profile/links/LinksUtils";
 import {
   EVENT_CATEGORIES,
   EventCategory,
@@ -96,7 +85,7 @@ export default function AddEventForm({
   const [description, setDescription] = useState<string>("");
   const [type, setType] = useState<EventCategory[]>([]);
   const [collaborators] = useState<{ id: string; name: string }[]>([]);
-  const [bookingLinks, setBookingLinks] = useState<string[]>([""]);
+  const [bookingLink, setBookingLink] = useState<string>("");
   const [pricingMin, setPricingMin] = useState<string>("");
   const [pricingMax, setPricingMax] = useState<string>("");
   const [pricingCurrency, setPricingCurrency] = useState<string>("AUD");
@@ -106,31 +95,15 @@ export default function AddEventForm({
   const [locationCountry, setLocationCountry] = useState<string>("");
   const [locationType, setLocationType] =
     useState<EventLocationType>("physical");
-  const [tagFilters, setTagFilters] = useState({
-    membersOnly: false,
-    earlyBird: false,
-  });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [accentColor, setAccentColor] = useState<string>("#6F63FF");
-  const [tagsTouched, setTagsTouched] = useState<boolean>(false);
-  const [tagsManuallyChosen, setTagsManuallyChosen] = useState<boolean>(false);
-  const [addingLink, setAddingLink] = useState<AddingState | undefined>(
-    undefined
-  );
   const [timezone, setTimezone] = useState(
     TIMEZONE_OPTIONS.find((option) => option.city === "Melbourne") ??
       TIMEZONE_OPTIONS[0]
   );
   const previewUrlRef = useRef<string | null>(null);
-  const tagsCardRef = useRef<HTMLDivElement | null>(null);
-  const tagsOpenedAtRef = useRef<number>(0);
-
-  const openTagsPicker = () => {
-    tagsOpenedAtRef.current = Date.now();
-    setTagsTouched(true);
-  };
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -159,27 +132,6 @@ export default function AddEventForm({
   }, []);
 
   useEffect(() => {
-    if (!tagsTouched) {
-      return;
-    }
-    const handlePointerDown = (event: PointerEvent) => {
-      if (Date.now() - tagsOpenedAtRef.current < 150) {
-        return;
-      }
-      if (
-        tagsCardRef.current &&
-        !tagsCardRef.current.contains(event.target as Node)
-      ) {
-        setTagsTouched(false);
-      }
-    };
-    document.addEventListener("pointerdown", handlePointerDown);
-    return () => {
-      document.removeEventListener("pointerdown", handlePointerDown);
-    };
-  }, [tagsTouched]);
-
-  useEffect(() => {
     if (!initialValues) {
       return;
     }
@@ -205,10 +157,8 @@ export default function AddEventForm({
     setStartTime(toTimeInputValue(initialValues.start));
     setEndTime(toTimeInputValue(initialValues.end));
     setType(initialValues.type ?? []);
-    setBookingLinks(
-      initialValues.booking_link && initialValues.booking_link.length > 0
-        ? initialValues.booking_link
-        : [""]
+    setBookingLink(
+      initialValues.booking_link?.[0] ?? ""
     );
     setLocationType(initialValues.location_type ?? "physical");
     setLocationVenue(initialValues.location?.venue ?? "");
@@ -310,14 +260,6 @@ export default function AddEventForm({
     }
   };
 
-  const buildLinkUrl = (item: { type: LinkType; details: string }) => {
-    const pattern = LinkTypes[item.type]?.pattern;
-    if (pattern) {
-      return `${pattern.prefix}${item.details}`;
-    }
-    return item.details;
-  };
-
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -338,31 +280,7 @@ export default function AddEventForm({
 
   if (!user) return null;
 
-  const isLinksEmpty = bookingLinks.every((link) => link.trim() === "");
   const isCategoriesEmpty = type.length === 0;
-  const linkItems: LinkItem[] = bookingLinks
-    .map((link, index) => {
-      const trimmed = link.trim();
-      if (!trimmed) return null;
-      const detected = UrlToLinkDetails(trimmed);
-      if (detected) {
-        return {
-          id: `link-${index}`,
-          type: detected.type,
-          details: detected.details,
-        };
-      }
-      return {
-        id: `link-${index}`,
-        type: "website",
-        details: trimmed,
-      };
-    })
-    .filter((item): item is LinkItem => Boolean(item));
-  const pricingMinNumber = Number(pricingMin || 0);
-  const pricingMaxNumber = Number(pricingMax || 0);
-  const pricingTag: EventPricing =
-    pricingMinNumber > 0 || pricingMaxNumber > 0 ? "paid" : "free";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -376,9 +294,9 @@ export default function AddEventForm({
       const pricingMaxValue = Number(pricingMax || 0);
       const derivedPricing: EventPricing =
         pricingMinValue > 0 || pricingMaxValue > 0 ? "paid" : "free";
-      const bookingLinkValues = bookingLinks
-        .map((link) => link.trim())
-        .filter((link) => link !== "");
+      const bookingLinkValues = bookingLink.trim()
+        ? [bookingLink.trim()]
+        : [];
       const trimmedCurrency = pricingCurrency.trim().toUpperCase();
       const locationPayload = {
         venue: locationVenue.trim() || null,
@@ -732,102 +650,27 @@ export default function AddEventForm({
             </div>
           </div>
 
-          <div className={`${SECTION_CARD} group min-h-[112px]`}>
-            <div className="flex items-start justify-between gap-4">
-              <span className={SECTION_LABEL}>Links</span>
-              <button
-                type="button"
-                className={`${ICON_BUTTON} h-10 w-10 text-slate-500`}
-                onClick={() => {
-                  setAddingLink({ typeInput: "", details: "" });
-                }}
-                disabled={isSubmitting}
-                aria-label="Add link"
-              >
-                <Plus className="h-5 w-5" />
-              </button>
-            </div>
-            {isLinksEmpty && !addingLink ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setAddingLink({ typeInput: "", details: "" });
-                }}
-                className="mt-4 flex items-center justify-between gap-3 rounded-lg px-2 py-2 text-base font-normal text-slate-400 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--theme-200)]"
-              >
-                <div className="flex items-center gap-3">
-                  <Globe className="h-5 w-5 text-slate-400" />
-                  <span>Add a link ...</span>
-                </div>
-                <PencilLine className="h-4 w-4 text-slate-400" />
-              </button>
-            ) : null}
-            {linkItems.length > 0 && (
-              <div className="mt-4">
-                <EditLinksDisplay
-                  links={linkItems}
-                  editFunctions={{
-                    updateLink: (id: string, newDetails: string) => {
-                      const index = Number(id.replace("link-", ""));
-                      if (Number.isNaN(index)) return;
-                      const linkItem = linkItems.find((item) => item.id === id);
-                      if (!linkItem) return;
-                      const trimmed = newDetails.trim();
-                      if (!trimmed) return;
-                      const nextUrl = buildLinkUrl({
-                        type: linkItem.type,
-                        details: trimmed,
-                      });
-                      setBookingLinks((prev) => {
-                        const next = [...prev];
-                        if (index >= 0 && index < next.length) {
-                          next[index] = nextUrl;
-                        }
-                        return next;
-                      });
-                    },
-                    deleteLink: (id: string) => {
-                      const index = Number(id.replace("link-", ""));
-                      if (Number.isNaN(index)) return;
-                      setBookingLinks((prev) => {
-                        if (prev.length <= 1) return [""];
-                        return prev.filter((_, i) => i !== index);
-                      });
-                    },
-                  }}
-                />
-              </div>
-            )}
-            {addingLink ? (
-              <div className="mt-4">
-                <LinkInput
-                  addingLink={addingLink}
-                  setAddingLink={setAddingLink}
-                  links={[]}
-                  addLink={() => {
-                    if (!addingLink?.type || !addingLink.details.trim()) {
-                      return;
-                    }
-                    const nextUrl = buildLinkUrl({
-                      type: addingLink.type,
-                      details: addingLink.details.trim(),
-                    });
-                    setBookingLinks((prev) => {
-                      const next = [...prev];
-                      const emptyIndex = next.findIndex(
-                        (link) => link.trim() === ""
-                      );
-                      if (emptyIndex >= 0) {
-                        next[emptyIndex] = nextUrl;
-                        return next;
-                      }
-                      return [...next, nextUrl];
-                    });
-                    setAddingLink(undefined);
-                  }}
-                />
-              </div>
-            ) : null}
+          <div className={SECTION_CARD}>
+            <Label
+              htmlFor="booking-link"
+              className="mb-2 flex items-center gap-2 text-base font-semibold text-slate-700"
+            >
+              <Globe className="h-4 w-4 text-slate-500" />
+              Booking link
+            </Label>
+            <Input
+              id="booking-link"
+              type="url"
+              inputMode="url"
+              placeholder="https://..."
+              value={bookingLink}
+              onChange={(e) => setBookingLink(e.target.value)}
+              disabled={isSubmitting}
+              className="h-11 rounded-[14px] border-2 border-slate-200/70 px-4 text-base text-slate-600 shadow-none focus-visible:ring-0"
+            />
+            <p className="mt-1.5 text-sm text-slate-500">
+              Optional. Add a ticket or registration URL.
+            </p>
           </div>
 
           <div className={`${SECTION_CARD} group min-h-[112px]`}>
@@ -886,96 +729,6 @@ export default function AddEventForm({
                 );
               })}
             </div>
-          </div>
-
-          <div ref={tagsCardRef} className={SECTION_CARD}>
-            <div className="flex items-start justify-between gap-4">
-              <span className={SECTION_LABEL}>Tags</span>
-              {tagsManuallyChosen && (
-                <button
-                  type="button"
-                  className={`${ICON_BUTTON} h-8 w-8`}
-                  aria-label="Edit tags"
-                  onClick={openTagsPicker}
-                >
-                  <PencilLine className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-            {!tagsManuallyChosen && !tagsTouched ? (
-              <button
-                type="button"
-                onClick={openTagsPicker}
-                className="mt-2 flex items-center gap-2 rounded-lg px-2 py-1 text-base text-slate-400 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--theme-200)]"
-              >
-                <Tag className="h-4 w-4 text-[color:var(--theme)] opacity-60" />
-                <span>Add a tag ...</span>
-              </button>
-            ) : !tagsTouched ? (
-              <div className="mt-2 flex flex-wrap gap-2">
-                <span
-                  className={`${CHIP_BASE} border-[color:var(--theme-200)] bg-[color:var(--theme-100)] text-slate-700`}
-                >
-                  {pricingTag === "free" ? "Free" : "Paid"}
-                </span>
-                {tagFilters.membersOnly && (
-                  <span
-                    className={`${CHIP_BASE} border-[color:var(--theme-200)] bg-[color:var(--theme-100)] text-slate-700`}
-                  >
-                    Members-only
-                  </span>
-                )}
-                {tagFilters.earlyBird && (
-                  <span
-                    className={`${CHIP_BASE} border-[color:var(--theme-200)] bg-[color:var(--theme-100)] text-slate-700`}
-                  >
-                    Early-bird
-                  </span>
-                )}
-              </div>
-            ) : null}
-            {tagsTouched ? (
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setTagFilters((prev) => ({
-                      ...prev,
-                      membersOnly: !prev.membersOnly,
-                    }));
-                    setTagsTouched(true);
-                    setTagsManuallyChosen(true);
-                  }}
-                  className={`${CHIP_BASE} border-slate-200/70 text-slate-400 ${
-                    tagFilters.membersOnly
-                      ? "border-[color:var(--theme-200)] bg-[color:var(--theme-100)] text-slate-700"
-                      : "hover:border-[color:var(--theme-200)] hover:text-slate-600"
-                  }`}
-                  aria-pressed={tagFilters.membersOnly}
-                >
-                  Members-only
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setTagFilters((prev) => ({
-                      ...prev,
-                      earlyBird: !prev.earlyBird,
-                    }));
-                    setTagsTouched(true);
-                    setTagsManuallyChosen(true);
-                  }}
-                  className={`${CHIP_BASE} border-slate-200/70 text-slate-400 ${
-                    tagFilters.earlyBird
-                      ? "border-[color:var(--theme-200)] bg-[color:var(--theme-100)] text-slate-700"
-                      : "hover:border-[color:var(--theme-200)] hover:text-slate-600"
-                  }`}
-                  aria-pressed={tagFilters.earlyBird}
-                >
-                  Early-bird
-                </button>
-              </div>
-            ) : null}
           </div>
 
           <div className="mt-2 flex w-full flex-wrap gap-3">
