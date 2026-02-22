@@ -9,19 +9,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-export default function AlreadyAuthenticatedDialog({
-  onboardingCompleted,
-}: {
-  onboardingCompleted?: boolean;
-}) {
+export default function AlreadyAuthenticatedDialog() {
   const router = useRouter();
-  const handleGo = () => {
-    if (onboardingCompleted === false) {
-      router.replace("/onboarding");
-    } else {
-      router.replace("/");
-    }
-  };
   return (
     <Dialog open={true}>
       <DialogContent
@@ -33,11 +22,11 @@ export default function AlreadyAuthenticatedDialog({
         <DialogHeader>
           <DialogTitle>Already Authenticated</DialogTitle>
           <DialogDescription>
-            You are already signed in. Would you like to go to the next step?
+            You are already signed in. Would you like to go home?
           </DialogDescription>
         </DialogHeader>
-        <Button className="w-full" onClick={handleGo}>
-          {onboardingCompleted === false ? "Go to Onboarding" : "Go Home"}
+        <Button className="w-full" onClick={() => router.replace("/")}>
+          Go Home
         </Button>
       </DialogContent>
     </Dialog>

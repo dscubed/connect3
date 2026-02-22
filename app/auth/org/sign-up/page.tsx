@@ -8,7 +8,6 @@ import AlreadyAuthenticatedDialog from "@/components/auth/AlreadyAuthenticatedDi
 
 export default function Page() {
   const user = useAuthStore((state) => state.user);
-  const profile = useAuthStore((state) => state.profile);
   const loading = useAuthStore((state) => state.loading);
 
   return (
@@ -16,9 +15,7 @@ export default function Page() {
       <AuthShell>{loading ? <LoadingIndicator /> : <OrgSignUpForm />}</AuthShell>
 
       {user && !user.is_anonymous && !loading && (
-        <AlreadyAuthenticatedDialog
-          onboardingCompleted={profile?.onboarding_completed}
-        />
+        <AlreadyAuthenticatedDialog />
       )}
     </>
   );

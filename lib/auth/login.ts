@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
+import { getSiteUrl } from "@/lib/site-url";
 
 export async function loginWithEmail({
   email,
@@ -19,7 +20,7 @@ export async function loginWithGoogle() {
   return supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      redirectTo: `${getSiteUrl()}/auth/callback`,
       queryParams: {
         access_type: "offline",
         prompt: "consent",

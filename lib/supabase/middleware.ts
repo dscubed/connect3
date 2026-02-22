@@ -51,6 +51,14 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  const isAuthenticatedUser = user && user.is_anonymous !== true;
+  if (
+    isAuthenticatedUser &&
+    request.nextUrl.pathname === "/auth/login"
+  ) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
   // If you're creating a new response object with NextResponse.next() make sure to:
   // 1. Pass the request in it, like so:

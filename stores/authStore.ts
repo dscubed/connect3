@@ -10,7 +10,7 @@ export interface Profile {
   blurred_avatar_url?: string;
   created_at: string;
   updated_at: string;
-  onboarding_completed: boolean;
+
   humanitix_event_integration_setup: boolean; // Later should be moved to orgs table
   name_provided: boolean;
   location?: string;
