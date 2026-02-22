@@ -99,7 +99,7 @@ interface EventGridFiltersProps {
 }
 
 const dateLabels: Record<DateFilter, string> = {
-  all: "All Dates",
+  all: "All Upcoming",
   today: "Today",
   "this-week": "This Week",
   "this-month": "This Month",
