@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Calendar, MapPin, Globe } from "lucide-react";
 import Image from "next/image";
 import Markdown from "@/components/ui/Markdown";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const entityColorVariants: Record<EntityType, string> = {
   user: "bg-blue-50 border-blue-200 hover:bg-blue-100",
@@ -77,7 +78,16 @@ function ProfileMatchCardWrapper({
   userIndex,
   onProfileClick,
 }: MatchResultsProps) {
-  const profile = useEntityCache(match.id, match.type) || null;
+  const profile = useEntityCache(match.id, match.type);
+
+  // SWR hasn't resolved yet — show skeleton
+  if (profile === undefined) {
+    return (
+      <AnimatedCardWrapper index={userIndex} keyPrefix="user">
+        <ProfileMatchCardSkeleton type={match.type} />
+      </AnimatedCardWrapper>
+    );
+  }
 
   const name =
     profile?.account_type === "organisation"
@@ -105,7 +115,15 @@ function EventMatchCardWrapper({
   userIndex,
   onProfileClick,
 }: MatchResultsProps) {
-  const { event } = useEventCache(match.id);
+  const { event, isLoading } = useEventCache(match.id);
+
+  if (isLoading) {
+    return (
+      <AnimatedCardWrapper index={userIndex} keyPrefix="event">
+        <EventMatchCardSkeleton />
+      </AnimatedCardWrapper>
+    );
+  }
 
   return (
     <AnimatedCardWrapper index={userIndex} keyPrefix="event">
@@ -142,7 +160,7 @@ const ProfileMatchCard = memo(function ProfileMatchCard({
       className={cn(
         "w-56 md:w-60 lg:w-80 max-h-40",
         INTERACTIVE_CARD_STYLES,
-        entityColorVariants[entity.type]
+        entityColorVariants[entity.type],
       )}
       onClick={() => onClick?.(entity)}
       onKeyDown={(e) => e.key === "Enter" && onClick?.(entity)}
@@ -170,7 +188,10 @@ const ProfileMatchCard = memo(function ProfileMatchCard({
 });
 
 function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  return html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 const EventMatchCard = memo(function EventMatchCard({
@@ -205,7 +226,7 @@ const EventMatchCard = memo(function EventMatchCard({
       className={cn(
         "w-56 md:w-60 lg:w-80 max-h-48",
         INTERACTIVE_CARD_STYLES,
-        entityColorVariants[entity.type]
+        entityColorVariants[entity.type],
       )}
       onClick={() => onClick?.(entity)}
       onKeyDown={(e) => e.key === "Enter" && onClick?.(entity)}
@@ -252,9 +273,50 @@ const EventMatchCard = memo(function EventMatchCard({
           )}
         </div>
         <span className="text-sm text-muted-foreground line-clamp-2">
-          <Markdown rawText={plainDescription || "No description available."}/>
+          <Markdown rawText={plainDescription || "No description available."} />
         </span>
       </CardContent>
     </Card>
   );
 });
+
+function ProfileMatchCardSkeleton({ type }: { type: EntityType }) {
+  return (
+    <Card
+      className={cn("w-56 md:w-60 lg:w-80 max-h-40", entityColorVariants[type])}
+    >
+      <CardHeader className="flex flex-row gap-2 justify-center items-center p-4">
+        <Skeleton className="w-10 h-10 rounded-full" />
+        <Skeleton className="h-5 flex-1 rounded-md" />
+      </CardHeader>
+      <CardContent className="p-4 pt-0 space-y-2">
+        <Skeleton className="h-3 w-full rounded-md" />
+        <Skeleton className="h-3 w-3/4 rounded-md" />
+      </CardContent>
+    </Card>
+  );
+}
+
+function EventMatchCardSkeleton() {
+  return (
+    <Card
+      className={cn(
+        "w-56 md:w-60 lg:w-80 max-h-48",
+        entityColorVariants.events,
+      )}
+    >
+      <CardHeader className="flex flex-row gap-3 items-center p-4">
+        <Skeleton className="w-10 h-10 rounded-lg" />
+        <Skeleton className="h-5 flex-1 rounded-md" />
+      </CardHeader>
+      <CardContent className="p-4 pt-0 space-y-2">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-3 w-20 rounded-md" />
+          <Skeleton className="h-3 w-16 rounded-md" />
+        </div>
+        <Skeleton className="h-3 w-full rounded-md" />
+        <Skeleton className="h-3 w-2/3 rounded-md" />
+      </CardContent>
+    </Card>
+  );
+}

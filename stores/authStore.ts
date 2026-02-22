@@ -27,6 +27,7 @@ interface AuthState {
   user: User | null;
   profile: Profile | null;
   loading: boolean;
+  profileLoading: boolean;
   session: Session | null;
   authSub: Subscription | null;
   initialize: () => Promise<void>;
@@ -42,15 +43,22 @@ interface AuthState {
 async function fetchProfile(
   userId: string,
   set: (state: Partial<AuthState>) => void,
+  get: () => AuthState,
 ) {
+  // Only show loading skeleton if we don't already have a cached profile.
+  // On token-refresh re-fetches (tab focus), silently update in the background.
+  if (!get().profile) {
+    set({ profileLoading: true });
+  }
   const profile = await fetchProfileApi<Profile>(userId);
-  set({ profile: profile ?? null });
+  set({ profile: profile ?? null, profileLoading: false });
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   profile: null,
   loading: true,
+  profileLoading: false,
   session: null,
   authSub: null,
 
@@ -69,7 +77,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ user: session?.user ?? null, session, loading: false });
 
     if (session?.user && !isAnon) {
-      fetchProfile(session.user.id, set);
+      fetchProfile(session.user.id, set, get);
     } else {
       set({ profile: null });
     }
@@ -81,7 +89,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const isAnon = session?.user?.is_anonymous ?? false;
       set({ user: session?.user ?? null, session, loading: false });
       if (session?.user && !isAnon) {
-        fetchProfile(session.user.id, set);
+        fetchProfile(session.user.id, set, get);
       } else {
         set({ profile: null });
       }
