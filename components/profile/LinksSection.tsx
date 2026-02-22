@@ -4,6 +4,7 @@ import { EditLinkButton } from "./links/EditLinkButton";
 import { EditModal } from "./links/EditModal";
 import { LinksDisplay } from "./links/LinksDisplay";
 import { useProfileEditContext } from "./hooks/ProfileEditProvider";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface LinksSectionProps {
   editingProfile: boolean;
@@ -18,7 +19,6 @@ export function LinksSection({
   const { draft, loadingLinks, setDraftLinks } = useProfileEditContext();
   const [linkData, setLinkData] = useState(draft?.links ?? []);
   const [displayEditModal, setDisplayEditModal] = useState(false);
-  const loading = loadingLinks;
 
   useEffect(() => {
     if (!draft) return;
@@ -27,19 +27,23 @@ export function LinksSection({
 
   return (
     <>
-      {!loading && (
-        <div className="flex items-center gap-2 h-9 max-w-full overflow-scroll scrollbar-hide">
-          {linkData.length > 0 ? (
-            <LinksDisplay links={linkData} />
-          ) : (
-            <p className="text-muted-foreground">No links added</p>
-          )}
+      <div className="flex items-center gap-2 h-9 max-w-full overflow-scroll scrollbar-hide">
+        {loadingLinks ? (
+          <div className="flex gap-2">
+            <Skeleton className="w-8 h-8 rounded-md" />
+            <Skeleton className="w-8 h-8 rounded-md" />
+            <Skeleton className="w-8 h-8 rounded-md" />
+          </div>
+        ) : linkData.length > 0 ? (
+          <LinksDisplay links={linkData} />
+        ) : (
+          <p className="text-muted-foreground">No links added</p>
+        )}
 
-          {editingProfile && (
-            <EditLinkButton onClick={() => setDisplayEditModal(true)} />
-          )}
-        </div>
-      )}
+        {editingProfile && (
+          <EditLinkButton onClick={() => setDisplayEditModal(true)} />
+        )}
+      </div>
 
       <EditModal
         open={displayEditModal}
