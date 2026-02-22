@@ -75,6 +75,17 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   }, [isDesktop, setSidebarOpen]);
 
+  // On mobile, delay showing chatrooms until the sidebar has mostly slid in
+  const [showChatrooms, setShowChatrooms] = useState(false);
+
+  useEffect(() => {
+    if (!isDesktop && sidebarOpen) {
+      const timer = setTimeout(() => setShowChatrooms(true), 250);
+      return () => clearTimeout(timer);
+    }
+    setShowChatrooms(false);
+  }, [sidebarOpen, isDesktop]);
+
   return (
     <>
       {/* Mobile sticky navbar - logo left, collapse button right */}
@@ -83,7 +94,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         className="sticky top-0 z-40 w-full md:hidden flex items-center justify-between px-4 py-3 safe-area-inset-top bg-white border-b border-neutral-200 shrink-0"
       >
         <Link href="/" className="flex items-center p-1">
-          <LogoAnimated width={20} height={20} onHover={false} />
+          <LogoAnimated width={20} height={20} onHover={true} />
         </Link>
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -113,9 +124,9 @@ const Sidebar: React.FC<SidebarProps> = ({
         ref={sidebarRef}
         className={`${isDesktop ? "relative" : "fixed top-0 left-0 z-[100]"}`}
       >
-        {/* Chatrooms panel - behind main sidebar. On mobile, show with sidebar (no extra click) */}
+        {/* Chatrooms panel - behind main sidebar. On mobile, delayed until sidebar finishes sliding in */}
         <AnimatePresence>
-          {(isDesktop ? chatroomsOpen : sidebarOpen) && (
+          {(isDesktop ? chatroomsOpen : showChatrooms) && (
             <motion.div
               initial={{ x: -200, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
