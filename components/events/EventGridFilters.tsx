@@ -11,7 +11,6 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, Search, X, Loader2 } from "lucide-react";
-import Image from "next/image";
 
 export type DateFilter =
   | "all"
