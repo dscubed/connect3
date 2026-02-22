@@ -172,22 +172,9 @@ export const deleteLinksFromSupabase = async (
   ids: string[],
   supabase: SupabaseClient,
 ) => {
+  if (ids.length === 0) return;
   console.log("Deleting links with IDs:", ids);
 
-  // check if ids exist
-  const { data, error: checkError } = await supabase
-    .from("profile_links")
-    .select("id")
-    .in("id", ids);
-  if (checkError) {
-    console.error("Error checking links before deletion:", checkError);
-    toast.error(`Error deleting links: ${checkError.message}`);
-    return;
-  }
-  if (data.length === 0) {
-    console.log("No links found to delete.");
-    return;
-  }
   const { error } = await supabase.from("profile_links").delete().in("id", ids);
 
   if (error) {
