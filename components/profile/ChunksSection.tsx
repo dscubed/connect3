@@ -23,7 +23,9 @@ export default function ChunksSection({ editingProfile }: ChunksSectionProps) {
   return (
     <div className="w-full flex flex-col gap-4">
       {/* Only show ChunkActions when content is ready - avoid skeleton + component overlap */}
-      {editingProfile && !loadingChunks && <ChunkActions />}
+      {editingProfile && !loadingChunks && (
+        <ChunkActions showResume={profile?.account_type === "user"} />
+      )}
 
       {/* Chunks - shows ChunksSkeleton or content, never both */}
       <ChunksDisplay />

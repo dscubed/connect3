@@ -5,7 +5,11 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { ResumeUploadModal } from "./resume/ChunkResumeModal";
 
-export function ChunkActions() {
+export function ChunkActions({
+  showResume = false,
+}: {
+  showResume?: boolean;
+}) {
   const { reset } = useChunkContext();
   const [resumeOpen, setResumeOpen] = useState(false);
 
@@ -14,7 +18,6 @@ export function ChunkActions() {
       <div className="flex gap-2 items-center">
         <h1 className="text-lg font-medium pr-2">Actions:</h1>
 
-        {/* Save and Cancel for Editing */}
         <ActionButton
           icon={Undo}
           label="Revert"
@@ -22,18 +25,21 @@ export function ChunkActions() {
             reset();
           }}
         />
-        <ActionButton
-          icon={FileUp}
-          label="Resume"
-          onClick={() => setResumeOpen(true)}
-        />
+        {showResume && (
+          <ActionButton
+            icon={FileUp}
+            label="Resume"
+            onClick={() => setResumeOpen(true)}
+          />
+        )}
       </div>
 
-      {/* Resume Upload Modal */}
-      <ResumeUploadModal
-        isOpen={resumeOpen}
-        onClose={() => setResumeOpen(false)}
-      />
+      {showResume && (
+        <ResumeUploadModal
+          isOpen={resumeOpen}
+          onClose={() => setResumeOpen(false)}
+        />
+      )}
     </div>
   );
 }
