@@ -7,6 +7,8 @@ const ALL_UNIVERSITIES = Object.keys(universities).filter(
   (key) => key !== "others",
 );
 
+const STORAGE_KEY = "uni-preferences";
+
 interface ChatRoomSearchBarProps {
   chatroomId: string | null;
   addNewMessage: (query: string, universities?: string[]) => void;
@@ -20,7 +22,14 @@ export function ChatRoomSearchBar({
 }: ChatRoomSearchBarProps) {
   const [query, setQuery] = useState("");
   const [selectedUniversities, setSelectedUniversities] = useState<string[]>(
-    [],
+    () => {
+      if (typeof window === "undefined") return [];
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) { const parsed = JSON.parse(raw); if (Array.isArray(parsed)) return parsed; }
+      } catch { /* ignore */ }
+      return [];
+    },
   );
   const dirty = useRef(false);
   const pendingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -38,11 +47,9 @@ export function ChatRoomSearchBar({
       .then(({ data }) => {
         if (cancelled) return;
         const stored = data?.universities;
-        setSelectedUniversities(
-          typeof stored === "string" && stored.length > 0
-            ? stored.split(",")
-            : [],
-        );
+        if (typeof stored === "string" && stored.length > 0) {
+          setSelectedUniversities(stored.split(","));
+        }
       });
     return () => {
       cancelled = true;
@@ -51,6 +58,7 @@ export function ChatRoomSearchBar({
   }, [chatroomId]);
 
   useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(selectedUniversities));
     if (!dirty.current || !chatroomId) return;
     pendingTimer.current = setTimeout(() => {
       pendingTimer.current = null;
@@ -70,7 +78,6 @@ export function ChatRoomSearchBar({
   }, [selectedUniversities]);
 
   const handleUniversityChange = useCallback((uni: string) => {
-    console.log("[ChatroomSearchBar]: uni received:", uni);
     dirty.current = true;
     if (uni == "all") {
       setSelectedUniversities(ALL_UNIVERSITIES);
