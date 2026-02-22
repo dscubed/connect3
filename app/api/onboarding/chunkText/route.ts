@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkBotId } from "botid/server";
 
 /**
  * Deterministic stub for chunking resume text.
@@ -51,6 +52,11 @@ function detectCategory(section: string) {
 
 export async function POST(req: NextRequest) {
   try {
+    const botVerification = await checkBotId();
+    if (botVerification.isBot) {
+      return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
+    }
+
     const body = await req.json().catch(() => null);
     const text = body?.text;
     if (!text || typeof text !== "string") {
