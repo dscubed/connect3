@@ -28,7 +28,7 @@ export function LinksSection({
   return (
     <>
       {!loading && (
-        <div className="flex items-center gap-2 h-9 max-w-full overflow-scroll">
+        <div className="flex items-center gap-2 h-9 max-w-full overflow-scroll scrollbar-hide">
           {linkData.length > 0 ? (
             <LinksDisplay links={linkData} />
           ) : (

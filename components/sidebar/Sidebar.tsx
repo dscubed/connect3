@@ -48,12 +48,16 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
       if (
         !isDesktop &&
         sidebarOpen &&
         sidebarRef.current &&
-        !sidebarRef.current.contains(event.target as Node) &&
-        !(event.target as HTMLElement).closest("[data-menu-button]")
+        !sidebarRef.current.contains(target) &&
+        !target.closest("[data-menu-button]") &&
+        // Radix portals (dropdown menus) render outside the sidebar DOM tree;
+        // don't close the sidebar when interacting with them.
+        !target.closest("[data-radix-popper-content-wrapper]")
       ) {
         setSidebarOpen(false);
         setChatroomsOpen(false);
