@@ -52,10 +52,11 @@ export async function updateSession(request: NextRequest) {
   }
 
   const isAuthenticatedUser = user && user.is_anonymous !== true;
-  if (
-    isAuthenticatedUser &&
-    request.nextUrl.pathname === "/auth/login"
-  ) {
+  const authRoutes = ["/auth/login", "/auth/sign-up", "/auth/org/sign-up"];
+  const isAuthRoute = authRoutes.some((route) =>
+    request.nextUrl.pathname === route
+  );
+  if (isAuthenticatedUser && isAuthRoute) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 

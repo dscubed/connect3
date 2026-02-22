@@ -293,6 +293,7 @@ export function AiEnhanceDialog({
               )}
               onSubmit={(e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 sendMessage();
               }}
             >
@@ -354,7 +355,11 @@ export function AiEnhanceDialog({
                 className={cn(
                   "rounded-full bg-gray-200 px-4 py-1.5 text-muted hover:bg-gray-300 hover:text-card-foreground"
                 )}
-                onClick={() => setDraftText(initialText)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setDraftText(initialText);
+                }}
               >
                 Reset to original
               </Button>
@@ -365,7 +370,11 @@ export function AiEnhanceDialog({
                 className={cn(
                   "rounded-full bg-purple-500 px-4 py-1.5 text-white hover:bg-purple-600 hover:text-white"
                 )}
-                onClick={handleApply}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleApply(e);
+                }}
               >
                 Apply changes
               </Button>
