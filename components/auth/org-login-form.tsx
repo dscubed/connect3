@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useLogin } from "@/components/auth/hooks/useLogin";
 import { useState } from "react";
 
-export function LoginForm({
+export function OrgLoginForm({
   className,
   onLoggingInChange,
   isLoading = false,
@@ -31,11 +31,14 @@ export function LoginForm({
   return (
     <div className={cn("flex flex-col gap-8", className)} {...props}>
       <div className="space-y-2">
+        <div className="mb-3 inline-block rounded-md bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800 ring-1 ring-amber-300">
+          DEV &mdash; Organisation Account
+        </div>
         <h1 className="text-3xl font-bold tracking-tight text-black">
-          Welcome back
+          Organisation login
         </h1>
         <p className="text-sm text-black/50">
-          Log in to your account to continue
+          Log in to your organisation account to continue
         </p>
       </div>
 
@@ -47,7 +50,7 @@ export function LoginForm({
           <Input
             id="email"
             type="email"
-            placeholder="you@example.com"
+            placeholder="admin@organisation.com"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -57,10 +60,7 @@ export function LoginForm({
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label
-              htmlFor="password"
-              className="text-sm font-medium text-black"
-            >
+            <Label htmlFor="password" className="text-sm font-medium text-black">
               Password
             </Label>
             <Link
@@ -93,9 +93,9 @@ export function LoginForm({
       </form>
 
       <p className="text-center text-sm text-black/50">
-        Don&apos;t have an account?{" "}
+        Don&apos;t have an organisation account?{" "}
         <Link
-          href="/auth/sign-up"
+          href="/auth/org/sign-up"
           className="font-semibold text-foreground hover:underline"
         >
           Sign up

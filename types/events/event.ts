@@ -55,4 +55,18 @@ export type EventFile = {
 };
 
 // Define the EventCategory type as a union of strings
-export type EventCategory = "networking" | "study" | "fun" | "workshop" | "competition" | "panel" | "miscellaneous";
+export type EventCategory =
+  | "academic_workshops"
+  | "arts_music"
+  | "career_networking"
+  | "entrepreneurship"
+  | "environment_sustainability"
+  | "food_dining"
+  | "gaming_esports"
+  | "health_wellness"
+  | "social_cultural"
+  | "sports_fitness"
+  | "tech_innovation"
+  | "travel_adventure"
+  | "volunteering_community"
+  | "recruitment";

@@ -3,6 +3,7 @@ import { ChunkEditor } from "../ChunkEditor";
 import { useChunkContext } from "../../hooks/ChunkProvider";
 import { AllCategories, ChunkEntry } from "../../ChunkUtils";
 import { SortableChunk } from "./SortableChunk";
+import { Button } from "@/components/ui/button";
 
 export function ChunkItem({
   chunk,
@@ -50,16 +51,17 @@ export function ChunkItem({
             setChunk={(updatedChunk) => updateChunk(updatedChunk)}
           />
         ) : (
-          <div className="flex items-center gap-3 rounded-lg w-full hover:bg-white/20 transition-all">
+          <div className="flex items-start gap-3 rounded-lg w-full hover:bg-white/20 transition-all">
             <span
-              className="inline-flex w-4 shrink-0 justify-center"
+              className="inline-flex w-4 shrink-0 justify-center mt-[0.55rem]"
               aria-hidden="true"
             >
               <span className="w-2 h-2 rounded-full bg-black" />
             </span>
             <span className="flex-1 min-w-0 text-base leading-relaxed">{chunk.text}</span>
             {isEditing && isEditingCategory(category) && (
-              <button
+              <Button
+                variant="ghost"
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -67,10 +69,10 @@ export function ChunkItem({
                   removeChunk(chunk.id);
                 }}
                 aria-label="Delete chunk"
-                className="shrink-0 rounded-full border border-muted/50 p-1.5 text-muted hover:text-red-500 hover:border-red-500/50 transition-colors"
+                className="shrink-0 rounded-full border border-muted/50 h-auto w-auto p-1.5 text-muted hover:text-red-500 hover:border-red-500/50"
               >
                 <Trash className="h-4 w-4" />
-              </button>
+              </Button>
             )}
           </div>
         )}

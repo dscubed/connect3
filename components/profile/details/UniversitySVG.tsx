@@ -147,14 +147,14 @@ export const UniversityLogos: Record<University, React.ReactNode> = {
         fill="#DDB00A"
       />
       <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
+        fillRule="evenodd"
+        clipRule="evenodd"
         d="M133.634 32.2978V77.6328C122.078 73.7808 109.337 75.5586 98.9663 82.3737V37.335C105.781 30.8162 121.782 27.8532 133.634 32.2978Z"
         fill="white"
       />
       <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
+        fillRule="evenodd"
+        clipRule="evenodd"
         d="M61.0396 32.2972V77.6322C72.5955 73.7802 85.3367 75.5581 95.7075 82.3731V37.6307C88.8924 30.8157 72.5955 27.8526 61.0396 32.2972Z"
         fill="white"
       />
@@ -207,14 +207,14 @@ export const UniversityLogos: Record<University, React.ReactNode> = {
         fill="#21409A"
       />
       <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
+        fillRule="evenodd"
+        clipRule="evenodd"
         d="M244.453 32.2978V77.6328C232.897 73.7808 220.156 75.5586 209.785 82.3737V37.335C216.6 30.8162 232.897 27.8532 244.453 32.2978Z"
         fill="white"
       />
       <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
+        fillRule="evenodd"
+        clipRule="evenodd"
         d="M171.858 32.2972V77.6322C183.414 73.7802 196.155 75.5581 206.526 82.3731V37.6307C199.711 30.8157 183.71 27.8526 171.858 32.2972Z"
         fill="white"
       />

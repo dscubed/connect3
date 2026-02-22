@@ -59,17 +59,17 @@ export function ChunkEditor({
 
   return (
     <div className="w-full">
-      <div className="flex items-center gap-3 w-full">
+      <div className="flex items-start gap-3 w-full">
         <span
-          className="inline-flex w-4 shrink-0 justify-center"
+          className="inline-flex w-4 shrink-0 justify-center mt-[0.55rem]"
           aria-hidden="true"
         >
           <span className="w-2 h-2 rounded-full bg-black" />
         </span>
-        <div className="flex flex-1 min-w-0 items-center gap-3">
+        <div className="flex flex-1 min-w-0 items-start gap-3">
           <Textarea
             ref={inputRef}
-            className="flex-1 min-h-0 min-w-0 p-0 border-none outline-none shadow-none focus-visible:ring-0 focus:ring-0 resize-none !text-base"
+            className="flex-1 min-h-0 min-w-0 p-0 border-none outline-none shadow-none focus-visible:ring-0 focus:ring-0 resize-none !text-base !leading-relaxed"
             placeholder={CATEGORY_PLACEHOLDERS[chunk.category]}
             onKeyDown={handleKeyDown}
             onChange={handleChange}

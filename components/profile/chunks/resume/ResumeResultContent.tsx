@@ -52,10 +52,10 @@ export function ResumeResultContent({
   const newSections = newChunks();
 
   const hasUpdated = Object.values(updatedSections).some(
-    (arr) => Array.isArray(arr) && arr.length > 0
+    (arr) => Array.isArray(arr) && arr.length > 0,
   );
   const hasNew = Object.values(newSections).some(
-    (arr) => Array.isArray(arr) && arr.length > 0
+    (arr) => Array.isArray(arr) && arr.length > 0,
   );
 
   const applyChanges = () => {
@@ -79,28 +79,28 @@ export function ResumeResultContent({
 
   return (
     <>
-      <DialogTitle className="text-2xl font-semibold text-center text-white drop-shadow-md mb-2">
+      <DialogTitle className="text-2xl font-semibold text-center drop-shadow-md mb-2">
         Chunks Extracted from Resume
       </DialogTitle>
-      <DialogDescription className="text-center text-white/80 mb-4 drop-shadow-sm">
+      <DialogDescription className="text-center text-muted mb-4 drop-shadow-sm">
         Review the chunks extracted from your resume. You can apply these
         changes to your profile.
       </DialogDescription>
       <div className="flex flex-col gap-4 p-6 rounded-lg max-h-[60vh] overflow-y-auto scrollbar-hide">
         {hasUpdated && (
           <>
-            <h2 className="flex flex-row items-center gap-2 text-lg font-semibold text-white drop-shadow-sm">
+            <h2 className="flex flex-row items-center gap-2 text-lg font-semibold drop-shadow-sm">
               Updated Chunks
-              <span className="flex justify-center items-center rounded-full p-2 bg-muted text-sm w-6 h-6">
+              <span className="flex justify-center items-center rounded-full p-2 bg-muted/20 text-sm w-6 h-6">
                 {Object.values(updatedSections).reduce(
                   (sum, arr) => sum + (arr ? arr.length : 0),
-                  0
+                  0,
                 )}
               </span>
             </h2>
             {Object.entries(updatedSections).map(([category, chunks]) => (
               <SectionCard variant="white" key={category} className="mb-2">
-                <SectionCardHeader title={category} />
+                <SectionCardHeader title={category}></SectionCardHeader>
                 <CardContent className="w-full flex flex-col gap-4 !p-4 !pt-0">
                   <ul className="list-disc list-inside space-y-2">
                     {chunks?.map((chunk, idx) => (
@@ -117,12 +117,12 @@ export function ResumeResultContent({
 
         {hasNew && (
           <>
-            <h2 className="flex flex-row items-center gap-2 text-lg font-semibold text-white drop-shadow-sm">
+            <h2 className="flex flex-row items-center gap-2 text-lg font-semibold drop-shadow-sm">
               New Chunks
-              <span className="flex justify-center items-center rounded-full p-2 bg-muted text-sm w-6 h-6">
+              <span className="flex justify-center items-center rounded-full p-2 bg-muted/20 text-sm w-6 h-6">
                 {Object.values(newSections).reduce(
                   (sum, arr) => sum + (arr ? arr.length : 0),
-                  0
+                  0,
                 )}
               </span>
             </h2>

@@ -9,7 +9,7 @@ export const processResume = async (
   text: string,
   profileId: string,
   chunks: ProfileChunk[],
-  openai: OpenAI
+  openai: OpenAI,
 ) => {
   // Convert existing chunks to text format for context
   const chunksText = chunksToText(chunks);
@@ -24,7 +24,7 @@ export const processResume = async (
   }
   if (user.account_type === "organisation") {
     throw new Error(
-      `Profile ID ${profileId} is an organisation, expected a user`
+      `Profile ID ${profileId} is an organisation, expected a user`,
     );
   }
 
@@ -39,17 +39,11 @@ export const processResume = async (
   const validationResult = await validateResume(
     sanitizedText,
     fullname,
-    openai
+    openai,
   );
 
   if (!validationResult.safe || !validationResult.relevant) {
     throw new Error(`Resume validation failed: ${validationResult.reason}`);
-  }
-
-  if (!validationResult.belongsToUser) {
-    throw new Error(
-      `Resume does not appear to belong to ${fullname}: ${validationResult.reason}`
-    );
   }
 
   // Call chunkResume with sanitized text

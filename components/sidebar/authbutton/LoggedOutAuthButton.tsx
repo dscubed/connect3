@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { LogIn, User, UserPlus } from "lucide-react";
+import { LogIn, UserRound, UserPlus } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,7 +25,7 @@ export function LoggedOutAuthButton() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="flex items-center justify-center w-8 h-8 rounded-full text-muted hover:text-black hover:bg-muted/15 hover:scale-105 transition-all focus:outline-none border border-muted/50">
-          <User className="w-4 h-4" />
+          <UserRound className="w-4 h-4" />
         </button>
       </DropdownMenuTrigger>
 

@@ -9,7 +9,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, Sparkles } from "lucide-react";
+import { ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/stores/authStore";
 import { Textarea } from "@/components/ui/TextArea";
@@ -58,9 +58,6 @@ interface AiEnhanceDialogProps {
   onApply: (newText: string) => void;
   assistantIntro?: string;
 }
-
-const CARD =
-  "bg-secondary text-secondary-foreground rounded-2xl border border-foreground/20 backdrop-blur shadow-xl";
 
 const INPUT =
   "bg-transparent text-sm transition-all placeholder:text-secondary-foreground/50 " +
@@ -242,35 +239,29 @@ export function AiEnhanceDialog({
           <Sparkles className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      {/* DialogContent styled like your SearchBar card */}
+      {/* DialogContent styled like your SearchBar "bg-secondary text-secondary-foreground rounded-2xl border border-foreground/20 backdrop-blur shadow-xl" */}
       <DialogContent
         className={cn(
-          "w-[min(100vw-2rem,760px)] max-h-[85vh] overflow-hidden p-6",
-          CARD
+          "w-[min(100vw-2rem,760px)] max-h-[85vh] overflow-hidden p-2 border-none",
+          "bg-secondary text-secondary-foreground rounded-2xl backdrop-blur shadow-xl"
         )}
       >
-        <DialogHeader>
-          <DialogTitle>{dialogTitle}</DialogTitle>
+        <DialogHeader className="pr-4 pl-2 pt-2">
+          <DialogTitle className="font-medium">{dialogTitle}</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-4 h-[70vh]">
           {/* CHATROOM SECTION */}
-          <div
-            className={cn(
-              "flex flex-col flex-1 min-h-0 p-4",
-              CARD,
-              "shadow-none"
-            )}
-          >
+          <div className="flex flex-col flex-1 min-h-0 p-2 pt-0 text-secondary-foreground rounded-2xl border border-border">
             <div
               ref={chatContainerRef}
-              className="flex-1 overflow-y-auto space-y-3 pr-1"
+              className="flex-1 overflow-y-auto space-y-2 pt-2"
             >
               {messages.map((m) => (
                 <div
                   key={m.id}
                   className={cn(
-                    "rounded-2xl px-4 py-3",
+                    "rounded-xl px-2.5 py-2",
                     "border border-foreground/15",
                     m.role === "assistant"
                       ? "bg-background/60"
@@ -296,8 +287,8 @@ export function AiEnhanceDialog({
             {/* Input row styled like your SearchBar */}
             <form
               className={cn(
-                "mt-3 flex items-end gap-3 px-4 py-3",
-                CARD,
+                "mt-3 flex gap-3 px-2.5 py-2",
+                "bg-secondary text-secondary-foreground rounded-2xl border border-foreground/20 backdrop-blur shadow-xl",
                 "shadow-none"
               )}
               onSubmit={(e) => {
@@ -306,7 +297,7 @@ export function AiEnhanceDialog({
               }}
             >
               <Textarea
-                className={cn(INPUT, "w-full max-h-24")}
+                className={cn(INPUT, "flex-1 max-h-24 p-0 pl-1 py-1 my-auto")}
                 placeholder={
                   example ? `Ask (e.g. “${example}”)` : "Ask the AI for help..."
                 }
@@ -324,30 +315,31 @@ export function AiEnhanceDialog({
               <Button
                 type="submit"
                 disabled={isLoading || !input.trim()}
-                className="rounded-2xl"
+                className="rounded-full shadow-none bg-purple-600 hover:bg-purple-700 w-8 h-8 text-white mt-auto"
               >
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Send
+                {isLoading 
+                  ? <Loader2 className="size-6 animate-spin" /> 
+                  : <ArrowRight className="!size-5" />}
               </Button>
             </form>
           </div>
 
           {/* EDITABLE DRAFT SECTION */}
-          <div className="flex flex-col flex-[0.8] min-h-0 overflow-hidden">
-            <div className="mb-2 text-sm font-medium">
+          <div className="flex flex-col gap-2 flex-[0.8] min-h-0 overflow-hidden">
+            <div className="ml-2 text-sm font-medium">
               Current draft{" "}
-              <span className="ml-1 text-xs text-secondary-foreground/60">
+              <span className="ml-1 text-xs text-muted">
                 (you can edit this while chatting)
               </span>
             </div>
 
             <div
-              className={cn("px-4 py-3 flex-1 min-h-0", CARD, "shadow-none")}
+              className="flex-1 min-h-0 rounded-2xl border border-border"
             >
               <Textarea
                 className={cn(
                   INPUT,
-                  "w-full h-full min-h-[120px] max-h-full overflow-y-auto scrollbar-hide"
+                  "w-full h-full min-h-[120px] max-h-full overflow-y-auto scrollbar-hide px-3.5 py-3"
                 )}
                 value={draftText}
                 onChange={(e) => setDraftText(e.target.value)}
@@ -355,10 +347,13 @@ export function AiEnhanceDialog({
               />
             </div>
 
-            <div className="mt-3 flex justify-end gap-2">
+            <div className="p-2 flex justify-end gap-2">
               <Button
                 type="button"
-                className="rounded-2xl border bg-secondary hover:bg-secondary/80 text-secondary-foreground border-secondary-foreground/20"
+                variant="ghost"
+                className={cn(
+                  "rounded-full bg-gray-200 px-4 py-1.5 text-muted hover:bg-gray-300 hover:text-card-foreground"
+                )}
                 onClick={() => setDraftText(initialText)}
               >
                 Reset to original
@@ -366,7 +361,10 @@ export function AiEnhanceDialog({
 
               <Button
                 type="button"
-                className="rounded-2xl"
+                variant="ghost"
+                className={cn(
+                  "rounded-full bg-purple-500 px-4 py-1.5 text-white hover:bg-purple-600 hover:text-white"
+                )}
                 onClick={handleApply}
               >
                 Apply changes

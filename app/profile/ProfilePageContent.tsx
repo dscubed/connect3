@@ -14,6 +14,9 @@ import {
   ProfileProvider,
   useProfileContext,
 } from "@/components/profile/ProfileProvider";
+import { DeleteAccountDialog } from "@/components/profile/DeleteAccountDialog";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 interface ProfilePageContentProps {
   editingProfile: boolean;
@@ -82,6 +85,7 @@ function ProfilePageContentBody({
   profile: Profile;
 }) {
   const { loadingChunks } = useChunkContext();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   return (
     <div className="w-full max-w-screen-lg mx-auto min-h-full p-0 pb-8 md:p-4 md:pb-8">
@@ -120,24 +124,15 @@ function ProfilePageContentBody({
               profile={profile}
               editingProfile={editingProfile}
               universitySuffix={
-                profile.account_type === "organisation" ? (
-                  <LinksSection
-                    editingProfile={editingProfile}
-                    profile={profile}
-                  />
-                ) : undefined
+                <LinksSection
+                  editingProfile={editingProfile}
+                  profile={profile}
+                />
               }
             />
-            {profile.account_type !== "organisation" && (
-              <LinksSection
-                editingProfile={editingProfile}
-                profile={profile}
-              />
-            )}
           </div>
         </div>
 
-        {/* Summary chunk - replace with skeleton when loading, don't render SummaryCard */}
         {loadingChunks ? (
           <div className="mb-4">
             <ChunkSkeleton />
@@ -148,6 +143,22 @@ function ProfilePageContentBody({
 
         {/* Chunks Section - ChunksDisplay replaces content with ChunksSkeleton when loading */}
         <ChunksSection editingProfile={editingProfile} />
+
+        {editingProfile && (
+          <div className="flex justify-center mt-12 mb-4">
+            <Button
+              variant="ghost"
+              className="rounded-full px-4 bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-700"
+              onClick={() => setDeleteDialogOpen(true)}
+            >
+              Delete Account
+            </Button>
+            <DeleteAccountDialog
+              open={deleteDialogOpen}
+              onOpenChange={setDeleteDialogOpen}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

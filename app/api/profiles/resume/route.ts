@@ -7,7 +7,7 @@ import { extractResumeProfileDetails } from "@/lib/resume/extractProfileDetails"
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SECRET_KEY!
+  process.env.SUPABASE_SECRET_KEY!,
 );
 
 const openai = new OpenAI({
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
   if (!user) {
     return NextResponse.json(
       { success: false, error: "Unauthorized" },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       if (!body || typeof body !== "object") {
         return NextResponse.json(
           { error: "Invalid JSON body" },
-          { status: 400 }
+          { status: 400 },
         );
       }
       profileId = body.profileId;
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       if (!profileId || !resumeText) {
         return NextResponse.json(
           { error: "Missing profileId or text" },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
       console.error("Error fetching existing chunks:", fetchError);
       return NextResponse.json(
         { success: false, error: "Failed to fetch existing chunks" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
       resumeText,
       profileId,
       existingChunksData || [],
-      openai
+      openai,
     );
 
     if (!chunkResult) {
@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
         success: false,
         error: err instanceof Error ? err.message : "Internal error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

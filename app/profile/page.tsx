@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
-import { CubeLoader } from "@/components/ui/CubeLoader";
 import { ProfilePageContent } from "./ProfilePageContent";
+import { ProfilePageSkeleton } from "@/components/profile/ProfilePageSkeleton";
 // import SetupEventsModal from "@/components/profile/SetupEventsModal";
 import Sidebar from "@/components/sidebar/Sidebar";
 
@@ -76,10 +76,18 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-[100dvh] flex items-center justify-center">
-        <div className="flex items-center gap-4">
-          <CubeLoader size={32} />
-          <p>Loading profile...</p>
+      <div className="min-h-[100dvh] relative overflow-hidden">
+        <div className="flex flex-col md:flex-row relative z-10 h-[100dvh]">
+          <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
+          <main
+            className="flex-1 min-h-0 relative overflow-y-auto"
+            style={{
+              scrollbarWidth: "thin",
+              scrollbarColor: "rgba(255,255,255,0.3) transparent",
+            }}
+          >
+            <ProfilePageSkeleton />
+          </main>
         </div>
       </div>
     );

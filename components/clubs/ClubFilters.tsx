@@ -62,7 +62,7 @@ export default function ClubFilters({
             >
               {uni === "All"
                 ? "All universities"
-                : universities[uni as University]?.name ?? uni}
+                : (universities[uni as University]?.name ?? uni)}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>

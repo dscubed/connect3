@@ -9,6 +9,7 @@ import { PencilLine } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import { useProfileEditContext } from "./hooks/ProfileEditProvider";
+import remarkGfm from "remark-gfm";
 
 export function SummaryCard({
   editingProfile = false,
@@ -74,7 +75,7 @@ export function SummaryCard({
           <AiEnhanceDialog
             initialText={displayTldr}
             fieldType="external_tldr"
-            title="Enhance your TLDR"
+            title="Enhance your summary"
             onApply={(updated) => {
               // Apply the improved/generate TLDR into the editor
               setDraftFields({ tldr: updated });
@@ -101,30 +102,69 @@ export function SummaryCard({
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                 setDraftFields({ tldr: e.target.value })
               }
-              className="w-full focus-visible:ring-0 resize-none min-h-0 border-none !text-base py-0 !leading-relaxed placeholder:text-muted"
+              className="w-full min-h-0 p-0 border-none outline-none shadow-none focus-visible:ring-0 focus:ring-0 resize-none !text-base !leading-relaxed placeholder:text-muted"
               placeholder="Add a short summary of yourself to allow others to get to know you better and make your profile more discoverable."
               onKeyDown={handleKeyDown}
             />
             <div className="w-full flex flex-row justify-end gap-2 animate-fade-in">
               <Button
                 variant="ghost"
-                onClick={cancel}
-                className="text-card-foreground hover:bg-transparent hover:text-muted"
+                onClick={submit}
+                className="rounded-full bg-purple-500 px-4 py-1.5 text-white hover:bg-purple-600 hover:text-white"
               >
-                Cancel
+                Save
               </Button>
               <Button
                 variant="ghost"
-                onClick={submit}
-                className="text-card-foreground hover:bg-transparent hover:text-muted"
+                onClick={cancel}
+                className="rounded-full bg-gray-200 px-4 py-1.5 text-muted hover:bg-gray-300 hover:text-card-foreground"
               >
-                Save
+                Cancel
               </Button>
             </div>
           </>
         ) : displayTldr.length > 0 ? (
-          <div className="loading-relaxed text-base" onClick={editTldr}>
-            <ReactMarkdown>
+          <div className="leading-relaxed text-base" onClick={editTldr}>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                h1: ({ children }) => (
+                  <h1 className="text-xl font-bold mt-3 mb-1">{children}</h1>
+                ),
+                h2: ({ children }) => (
+                  <h2 className="text-lg font-bold mt-2 mb-1">{children}</h2>
+                ),
+                h3: ({ children }) => (
+                  <h3 className="text-base font-semibold mt-2 mb-1">{children}</h3>
+                ),
+                p: ({ children }) => (
+                  <p className="mb-2 last:mb-0">{children}</p>
+                ),
+                ul: ({ children }) => (
+                  <ul className="list-disc pl-5 mb-2 last:mb-0">{children}</ul>
+                ),
+                ol: ({ children }) => (
+                  <ol className="list-decimal pl-5 mb-2 last:mb-0">{children}</ol>
+                ),
+                li: ({ children }) => (
+                  <li className="my-0.5">{children}</li>
+                ),
+                strong: ({ children }) => (
+                  <strong className="font-semibold">{children}</strong>
+                ),
+                a: ({ children, href, ...props }) => (
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-800"
+                    {...props}
+                  >
+                    {children}
+                  </a>
+                ),
+              }}
+            >
               {displayTldr}
             </ReactMarkdown>
           </div>
