@@ -3,7 +3,6 @@ import { useChunkContext } from "./chunks/hooks/ChunkProvider";
 import { useProfileEditContext } from "./hooks/ProfileEditProvider";
 import { Button } from "../ui/button";
 import { useRef, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { toast } from "sonner";
 
 const SAVING_MESSAGES = [
@@ -26,13 +25,14 @@ export function ActionsButton({
   setEditingProfile: (editing: boolean) => void;
 }) {
   const { user } = useAuthStore();
-  const { hasPendingEdits, saveChunks, savingChunks } = useChunkContext();
   const {
-    hasPendingProfileEdits,
-    saveProfileEdits,
-    savingProfileEdits,
-  } = useProfileEditContext();
-  const [pendingModalOpen, setPendingModalOpen] = useState(false);
+    saveChunks,
+    saveAllEdits,
+    exitEdit,
+    savingChunks,
+    resumeProcessing,
+  } = useChunkContext();
+  const { saveProfileEdits, savingProfileEdits } = useProfileEditContext();
   const [isSaving, setIsSaving] = useState(false);
   const isSavingRef = useRef(false);
 
@@ -42,10 +42,6 @@ export function ActionsButton({
 
   const handleEditToggle = async () => {
     if (editingProfile) {
-      if (hasPendingEdits() || hasPendingProfileEdits()) {
-        setPendingModalOpen(true);
-        return;
-      }
       if (isSavingRef.current || savingChunks || savingProfileEdits) {
         toast.error("Profile is currently being saved. Try again later.");
         return;
@@ -64,8 +60,10 @@ export function ActionsButton({
       }, 2000);
 
       try {
+        saveAllEdits();
         await saveProfileEdits();
         await saveChunks();
+        exitEdit();
         toast.success("Profile saved!", { id: toastId });
       } catch {
         toast.error("Failed to save profile.", { id: toastId });
@@ -78,7 +76,7 @@ export function ActionsButton({
     setEditingProfile(!editingProfile);
   };
 
-  const saving = isSaving || savingChunks || savingProfileEdits;
+  const saving = isSaving || savingChunks || savingProfileEdits || resumeProcessing;
 
   return (
     <>
@@ -106,63 +104,6 @@ export function ActionsButton({
           )
         )}
       </div>
-      <PendingChangesModal
-        open={pendingModalOpen}
-        onOpenChange={setPendingModalOpen}
-      />
     </>
   );
 }
-
-const PendingChangesModal = ({
-  open,
-  onOpenChange,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}) => {
-  const { reset, saveChunks, exitEdit, saveAllEdits } = useChunkContext();
-  const { resetDraft, saveProfileEdits } = useProfileEditContext();
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-secondary">
-        <DialogHeader>
-          <DialogTitle>Action Required</DialogTitle>
-        </DialogHeader>
-        <p className="text-muted-foreground">
-          You have unsaved profile changes. Please choose an action below to
-          proceed.
-        </p>
-        <div className="mt-2 flex flex-col">
-          {/* Add Links */}
-          <div className="flex justify-between items-center mt-4">
-            <Button
-              className="w-fit h-fit animate-fade-in"
-              onClick={() => {
-                reset();
-                resetDraft();
-                exitEdit();
-                onOpenChange(false);
-              }}
-            >
-              Revert All Changes
-            </Button>
-            <Button
-              onClick={() => {
-                saveProfileEdits();
-                saveAllEdits();
-                saveChunks();
-                exitEdit();
-                onOpenChange(false);
-              }}
-              className="animate-fade-in"
-            >
-              Save All Changes
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-};

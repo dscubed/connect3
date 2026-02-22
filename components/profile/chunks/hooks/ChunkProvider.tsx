@@ -21,6 +21,8 @@ type ChunkContextType = ChunkHelpers &
     // Core editing state
     isEditing: boolean;
     exitEdit: () => void;
+    resumeProcessing: boolean;
+    setResumeProcessing: (processing: boolean) => void;
   };
 
 const ChunkContext = createContext<ChunkContextType | undefined>(undefined);
@@ -37,6 +39,7 @@ export function ChunkProvider({
   // Core chunk states
   const [chunks, setChunks] = useState<ProfileChunk[]>([]);
   const [categoryOrder, setCategoryOrder] = useState<CategoryOrderData[]>([]);
+  const [resumeProcessing, setResumeProcessing] = useState(false);
 
   // Chunk Actions
   const chunkHelpers = useChunks({
@@ -83,6 +86,8 @@ export function ChunkProvider({
         ...editHelpers,
         isEditing,
         exitEdit,
+        resumeProcessing,
+        setResumeProcessing,
       }}
     >
       {children}
