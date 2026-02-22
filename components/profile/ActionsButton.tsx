@@ -36,9 +36,7 @@ export function ActionsButton({
   const [isSaving, setIsSaving] = useState(false);
   const isSavingRef = useRef(false);
 
-  // Get the current link state
   const href = typeof window !== "undefined" ? window.location.href : "";
-  console.log("HREF", href);
 
   const handleEditToggle = async () => {
     if (editingProfile) {
@@ -59,24 +57,44 @@ export function ActionsButton({
         toast.loading(SAVING_MESSAGES[msgIndex], { id: toastId });
       }, 2000);
 
-      try {
-        saveAllEdits();
-        await saveProfileEdits();
-        await saveChunks();
-        exitEdit();
-        toast.success("Profile saved!", { id: toastId });
-      } catch {
-        toast.error("Failed to save profile.", { id: toastId });
-      } finally {
+      const clearLoading = () => {
         clearInterval(interval);
         isSavingRef.current = false;
         setIsSaving(false);
+      };
+
+      try {
+        saveAllEdits();
+        await Promise.race([
+          (async () => {
+            await saveProfileEdits();
+            await saveChunks();
+          })(),
+          new Promise<never>((_, reject) =>
+            setTimeout(
+              () => reject(new Error("Save timed out after 60 seconds")),
+              60000,
+            ),
+          ),
+        ]);
+        exitEdit();
+        toast.success("Profile saved!", { id: toastId });
+      } catch (err) {
+        toast.error(
+          err instanceof Error && err.message.includes("timed out")
+            ? "Save took too long. Please try again."
+            : "Failed to save profile.",
+          { id: toastId },
+        );
+      } finally {
+        clearLoading();
       }
     }
     setEditingProfile(!editingProfile);
   };
 
   const saving = isSaving || savingChunks || savingProfileEdits || resumeProcessing;
+  const isActuallySaving = isSaving || savingChunks || savingProfileEdits;
 
   return (
     <>
@@ -99,7 +117,11 @@ export function ActionsButton({
               onClick={handleEditToggle}
               disabled={saving}
             >
-              {saving ? "Saving..." : editingProfile ? "Save" : "Edit Profile"}
+              {isActuallySaving
+                ? "Saving..."
+                : editingProfile
+                  ? "Save"
+                  : "Edit Profile"}
             </Button>
           )
         )}

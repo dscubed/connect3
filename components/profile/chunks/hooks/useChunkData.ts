@@ -28,10 +28,10 @@ export function useChunkData({
   categoryOrder: CategoryOrderData[];
   visitingProfileId: string | undefined;
 }) {
-  const { user, getSupabaseClient, profile } = useAuthStore.getState();
-  const supabase = getSupabaseClient();
+  const user = useAuthStore((s) => s.user);
+  const profile = useAuthStore((s) => s.profile);
+  const supabase = useAuthStore.getState().getSupabaseClient();
 
-  console.log("Visitor Id received:", visitingProfileId);
   const isVisiting = visitingProfileId && visitingProfileId !== user?.id;
   const profileId = visitingProfileId || user?.id || "";
 
