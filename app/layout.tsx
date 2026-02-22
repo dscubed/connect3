@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { AuthInitializer } from "@/components/auth/AuthInitializer";
 import { Toaster } from "@/components/ui/sonner";
@@ -22,12 +21,6 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  display: "swap",
-  subsets: ["latin"],
-});
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -35,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.className} antialiased`}>
+      <body className="font-sans antialiased">
         <AuthInitializer />
         <ThemeProvider
           attribute="class"

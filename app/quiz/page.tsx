@@ -1,6 +1,5 @@
 'use client';
 
-import { Fredoka } from 'next/font/google';
 import QuestionPage from '@/components/quiz/QuestionPage';
 import { getQuestions } from '@/data/quiz-questions';
 import Image from 'next/image';
@@ -40,8 +39,6 @@ function LoadingMessages() {
     </div>
   );
 }
-
-const fredoka = Fredoka({ subsets: ['latin'] });
 
 const STORAGE_KEY = 'quiz-progress';
 
@@ -158,7 +155,7 @@ export default function Page() {
   };
 
   return (
-    <main className={`h-dvh w-screen flex flex-col bg-gradient-to-bl from-[#dfcbff] to-[#5817c1] noise ${fredoka.className} overflow-clip`}>
+    <main className="h-dvh w-screen flex flex-col bg-gradient-to-bl from-[#dfcbff] to-[#5817c1] noise font-sans overflow-clip">
       <div className="flex flex-col overflow-auto h-full">
         <div className="sticky top-0 flex justify-between items-center gap-4 p-4 h-max w-full bg-transparent backdrop-blur-md z-50">
           <div className="flex gap-3 items-center">

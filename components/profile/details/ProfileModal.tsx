@@ -31,6 +31,13 @@ export function ProfileModal({ isOpen, setIsOpen }: ProfileModalProps) {
     draft?.university ?? null,
   );
 
+  useEffect(() => {
+    if (!isOpen) return;
+    setFirstName(draft?.first_name || "");
+    setLastName(draft?.last_name ?? null);
+    setUniversity(draft?.university ?? null);
+  }, [isOpen, draft]);
+
   if (!profile) {
     return null;
   }
@@ -67,13 +74,6 @@ export function ProfileModal({ isOpen, setIsOpen }: ProfileModalProps) {
     });
     setIsOpen(false);
   }
-
-  useEffect(() => {
-    if (!isOpen) return;
-    setFirstName(draft?.first_name || "");
-    setLastName(draft?.last_name ?? null);
-    setUniversity(draft?.university ?? null);
-  }, [isOpen, draft]);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

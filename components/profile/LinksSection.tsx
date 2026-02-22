@@ -10,7 +10,11 @@ interface LinksSectionProps {
   profile: Profile;
 }
 
-export function LinksSection({ editingProfile, profile: _profile }: LinksSectionProps) {
+export function LinksSection({
+  editingProfile,
+  profile: _profile,
+}: LinksSectionProps) {
+  void _profile; // required by interface; links are read from draft context
   const { draft, loadingLinks, setDraftLinks } = useProfileEditContext();
   const [linkData, setLinkData] = useState(draft?.links ?? []);
   const [displayEditModal, setDisplayEditModal] = useState(false);

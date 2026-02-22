@@ -30,7 +30,6 @@ export function ActionsButton({
   const {
     hasPendingProfileEdits,
     saveProfileEdits,
-    resetDraft,
     savingProfileEdits,
   } = useProfileEditContext();
   const [pendingModalOpen, setPendingModalOpen] = useState(false);

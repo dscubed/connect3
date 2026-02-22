@@ -4,7 +4,7 @@ import { Pencil } from "lucide-react";
 import { ProfileModal } from "./details/ProfileModal";
 import { Profile } from "@/stores/authStore";
 import { useProfileEditContext } from "./hooks/ProfileEditProvider";
-import { universities, University } from "./details/univeristies";
+import { universities, type University } from "./details/univeristies";
 
 interface UserDetailsProps {
   profile: Profile;
@@ -55,7 +55,7 @@ export default function UserDetails({
           <div className="flex items-center gap-2">
             <h1 className="text-lg font-normal text-muted/80 flex items-center gap-2">
               {displayUniversity != null
-                ? universities[displayUniversity]?.name ||
+                ? universities[displayUniversity as University]?.name ||
                   displayUniversity ||
                   "No university set"
                 : "No university set"}
