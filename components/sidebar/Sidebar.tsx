@@ -149,9 +149,11 @@ const Sidebar: React.FC<SidebarProps> = ({
         <motion.aside
           initial={false}
           animate={{ x: isDesktop ? "0%" : sidebarOpen ? "0%" : "-100%" }}
-          transition={hasMounted ? { duration: 0.3, ease: "easeInOut" } : { duration: 0 }}
-          className={`relative z-50 flex flex-col px-3 gap-2 h-[100dvh] bg-white backdrop-blur-xl pt-4 pb-4 safe-area-inset-top justify-between
-            ${isDesktop ? "w-fit relative" : "w-fit"}`}
+          transition={
+            hasMounted ? { duration: 0.3, ease: "easeInOut" } : { duration: 0 }
+          }
+          className={`relative z-50 flex flex-col px-3 gap-2 h-[100dvh] backdrop-blur-xl pt-4 pb-4 safe-area-inset-top justify-between transition-all
+            ${isDesktop ? "w-fit relative" : "w-fit bg-white"} ${isDesktop && chatroomsOpen && "bg-white"}`}
         >
           <div className="flex flex-col gap-4 items-center">
             <SidebarHeader />
@@ -173,7 +175,9 @@ const Sidebar: React.FC<SidebarProps> = ({
               <button
                 onClick={() => setChatroomsOpen(!chatroomsOpen)}
                 className="flex items-center justify-center w-10 h-10 rounded-lg text-muted hover:text-black hover:bg-muted/15 transition-colors"
-                aria-label={chatroomsOpen ? "Close chatrooms" : "Open chatrooms"}
+                aria-label={
+                  chatroomsOpen ? "Close chatrooms" : "Open chatrooms"
+                }
               >
                 <SidebarIcon className="h-5 w-5" />
               </button>
