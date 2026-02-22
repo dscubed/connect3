@@ -9,6 +9,7 @@ import { useEventCache } from "../hooks/useEventCache";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Calendar, MapPin, Globe } from "lucide-react";
 import Image from "next/image";
+import Markdown from "@/components/ui/Markdown";
 
 const entityColorVariants: Record<EntityType, string> = {
   user: "bg-blue-50 border-blue-200 hover:bg-blue-100",
@@ -160,9 +161,9 @@ const ProfileMatchCard = memo(function ProfileMatchCard({
         </span>
       </CardHeader>
       <CardContent className="p-4 pt-0">
-        <p className="text-sm text-muted-foreground line-clamp-3">
-          {tldr || "No profile summary available."}
-        </p>
+        <span className="text-sm text-muted-foreground line-clamp-3">
+          <Markdown rawText={tldr || "No profile summary available."} />
+        </span>
       </CardContent>
     </Card>
   );
@@ -250,9 +251,9 @@ const EventMatchCard = memo(function EventMatchCard({
             </span>
           )}
         </div>
-        <p className="text-sm text-muted-foreground line-clamp-2">
-          {plainDescription || "No description available."}
-        </p>
+        <span className="text-sm text-muted-foreground line-clamp-2">
+          <Markdown rawText={plainDescription || "No description available."}/>
+        </span>
       </CardContent>
     </Card>
   );

@@ -40,6 +40,7 @@
     "@supabase/supabase-js": "^2.56.1",
     "avvvatars-react": "^0.4.2",
     "axios": "^1.13.2",
+    "botid": "^1.5.10",
     "cheerio": "^1.1.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -78,7 +79,7 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
+    "@eslint/eslintrc": "^0.1.0",
     "@types/jsdom": "^27.0.0",
     "@types/next": "^8.0.7",
     "@types/node": "^20",
@@ -87,8 +88,8 @@
     "@types/turndown": "^5.0.6",
     "autoprefixer": "^10.4.20",
     "dotenv": "^17.2.3",
-    "eslint": "^9.39.3",
-    "eslint-config-next": "15.3.1",
+    "eslint": "^10.0.1",
+    "eslint-config-next": "^0.2.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "husky": "^8.0.0",

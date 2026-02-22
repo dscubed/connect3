@@ -15,6 +15,7 @@ const SEARCH_TOOLS = new Set([
   "search_users",
   "search_clubs",
   "search_events",
+  "search_events_by_date",
   "web_search",
 ]);
 

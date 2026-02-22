@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import type { User } from "@supabase/supabase-js";
+import { checkBotId } from "botid/server";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,6 +12,14 @@ export async function authenticateRequest(
   request: NextRequest
 ): Promise<{ user: User } | NextResponse> {
   try {
+    const botVerification = await checkBotId();
+    if (botVerification.isBot) {
+      return NextResponse.json(
+        { error: "Access denied" },
+        { status: 403 }
+      );
+    }
+
     // 1. Extract and validate auth token
     const authHeader = request.headers.get("authorization");
     if (!authHeader?.startsWith("Bearer ")) {

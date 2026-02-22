@@ -9,11 +9,11 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/stores/authStore";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UniversityInput } from "./UniversityInput";
 import { University } from "./univeristies";
-import { uploadProfileToVectorStore } from "@/lib/vectorStores/profile/client";
 import { toast } from "sonner";
+import { useProfileEditContext } from "../hooks/ProfileEditProvider";
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -21,12 +21,22 @@ interface ProfileModalProps {
 }
 
 export function ProfileModal({ isOpen, setIsOpen }: ProfileModalProps) {
-  const { profile, updateProfile } = useAuthStore.getState();
-  const [firstName, setFirstName] = useState(profile?.first_name || "");
-  const [lastName, setLastName] = useState(profile?.last_name || null);
-  const [university, setUniversity] = useState<University | null>(
-    (profile?.university as University) || null,
+  const { profile } = useAuthStore.getState();
+  const { draft, setDraftFields } = useProfileEditContext();
+  const [firstName, setFirstName] = useState(draft?.first_name || "");
+  const [lastName, setLastName] = useState<string | null>(
+    draft?.last_name ?? null,
   );
+  const [university, setUniversity] = useState<University | null>(
+    draft?.university ?? null,
+  );
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setFirstName(draft?.first_name || "");
+    setLastName(draft?.last_name ?? null);
+    setUniversity(draft?.university ?? null);
+  }, [isOpen, draft]);
 
   if (!profile) {
     return null;
@@ -57,13 +67,12 @@ export function ProfileModal({ isOpen, setIsOpen }: ProfileModalProps) {
       university: university,
     });
 
-    updateProfile({
+    setDraftFields({
       first_name: firstName,
       last_name: lastName,
       university: university,
     });
     setIsOpen(false);
-    uploadProfileToVectorStore();
   }
 
   return (

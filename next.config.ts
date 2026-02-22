@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
+import { withBotId } from 'botid/next/config';
 
 const nextConfig: NextConfig = {
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
@@ -22,8 +24,8 @@ const nextConfig: NextConfig = {
     ],
   },
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
+    removeConsole: process.env.NODE_ENV === "production",
   },
 };
 
-export default nextConfig;
+export default withBotId(nextConfig);

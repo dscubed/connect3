@@ -21,6 +21,7 @@ import {
   PaginationNext,
   PaginationEllipsis,
 } from "@/components/ui/pagination";
+import { EVENT_CATEGORIES } from "@/types/events/event";
 
 const baseUrl =
   process.env.NODE_ENV !== "production"
@@ -29,23 +30,7 @@ const baseUrl =
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-const CATEGORY_OPTIONS = [
-  "All",
-  "academic_workshops",
-  "arts_music",
-  "career_networking",
-  "entrepreneurship",
-  "environment_sustainability",
-  "food_dining",
-  "gaming_esports",
-  "health_wellness",
-  "social_cultural",
-  "sports_fitness",
-  "tech_innovation",
-  "travel_adventure",
-  "volunteering_community",
-  "recruitment",
-];
+const CATEGORY_OPTIONS = ["All", ...EVENT_CATEGORIES];
 
 function getPageNumbers(current: number, total: number): (number | "ellipsis")[] {
   if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1);

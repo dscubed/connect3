@@ -10,13 +10,13 @@ const chunkResumeSchema = z.object({
       id: z.string(),
       category: z.string(),
       text: z.string(),
-    })
+    }),
   ),
   newChunks: z.array(
     z.object({
       category: z.string(),
       text: z.string(),
-    })
+    }),
   ),
 });
 
@@ -88,7 +88,7 @@ Example response:
 export const chunkResume = async (
   resumeText: string,
   chunksText: string,
-  openai: OpenAI
+  openai: OpenAI,
 ): Promise<ChunkResumeResult> => {
   // Format existing chunks for the prompt
   const userPrompt = `Existing Chunks:\n${
@@ -96,7 +96,7 @@ export const chunkResume = async (
   }\n\nResume Text:\n${resumeText}`;
 
   const response = await openai.responses.parse({
-    model: "gpt-4o-mini",
+    model: "gpt-5-mini",
     input: [
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },

@@ -1,39 +1,51 @@
 import { FileUp, Undo } from "lucide-react";
 import { useChunkContext } from "./hooks/ChunkProvider";
+import { useProfileEditContext } from "@/components/profile/hooks/ProfileEditProvider";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { ResumeUploadModal } from "./resume/ChunkResumeModal";
 
-export function ChunkActions() {
+export function ChunkActions({
+  showResume = false,
+}: {
+  showResume?: boolean;
+}) {
   const { reset } = useChunkContext();
+  const { resetDraft } = useProfileEditContext();
   const [resumeOpen, setResumeOpen] = useState(false);
+
+  const handleRevert = () => {
+    reset();
+    resetDraft();
+  };
 
   return (
     <div className="flex gap-4">
       <div className="flex gap-2 items-center">
         <h1 className="text-lg font-medium pr-2">Actions:</h1>
 
-        {/* Save and Cancel for Editing */}
         <ActionButton
           icon={Undo}
           label="Revert"
-          onClick={() => {
-            reset();
-          }}
+          onClick={handleRevert}
         />
-        <ActionButton
-          icon={FileUp}
-          label="Resume"
-          onClick={() => setResumeOpen(true)}
-        />
+        {showResume && (
+          <ActionButton
+            icon={FileUp}
+            label="Resume"
+            onClick={() => setResumeOpen(true)}
+          />
+        )}
       </div>
 
       {/* Resume Upload Modal */}
-      <ResumeUploadModal
-        isOpen={resumeOpen}
-        onClose={() => setResumeOpen(false)}
-      />
+      {showResume && (
+        <ResumeUploadModal
+          isOpen={resumeOpen}
+          onClose={() => setResumeOpen(false)}
+        />
+      )}
     </div>
   );
 }

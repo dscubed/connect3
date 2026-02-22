@@ -1,40 +1,29 @@
-import { Profile, useAuthStore } from "@/stores/authStore";
+import { Profile } from "@/stores/authStore";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import { EditLinkButton } from "./links/EditLinkButton";
 import { EditModal } from "./links/EditModal";
-import { LinkItem } from "./links/LinksUtils";
 import { LinksDisplay } from "./links/LinksDisplay";
+import { useProfileEditContext } from "./hooks/ProfileEditProvider";
 
 interface LinksSectionProps {
   editingProfile: boolean;
   profile: Profile;
 }
 
-export function LinksSection({ editingProfile, profile }: LinksSectionProps) {
-  const { loading, getSupabaseClient } = useAuthStore.getState();
-  const [linkData, setLinkData] = useState<LinkItem[]>([]);
-  const [fetched, setFetched] = useState(false);
+export function LinksSection({
+  editingProfile,
+  profile: _profile,
+}: LinksSectionProps) {
+  void _profile; // required by interface; links are read from draft context
+  const { draft, loadingLinks, setDraftLinks } = useProfileEditContext();
+  const [linkData, setLinkData] = useState(draft?.links ?? []);
   const [displayEditModal, setDisplayEditModal] = useState(false);
-
-  const supabase = getSupabaseClient();
+  const loading = loadingLinks;
 
   useEffect(() => {
-    if (!profile || loading || fetched) return;
-    const fetchLinks = async () => {
-      const { data, error } = await supabase
-        .from("profile_links")
-        .select("id, type, details")
-        .eq("profile_id", profile.id);
-      if (error || !data) {
-        toast.error(`Error fetching links: ${error.message}`);
-        return;
-      }
-      setLinkData(data as LinkItem[]);
-      setFetched(true);
-    };
-    fetchLinks();
-  }, [profile, loading, supabase, fetched]);
+    if (!draft) return;
+    setLinkData(draft.links);
+  }, [draft]);
 
   return (
     <>
@@ -56,7 +45,10 @@ export function LinksSection({ editingProfile, profile }: LinksSectionProps) {
         open={displayEditModal}
         onOpenChange={setDisplayEditModal}
         links={linkData}
-        setLinks={setLinkData}
+        setLinks={(links) => {
+          setLinkData(links);
+          setDraftLinks(links);
+        }}
       />
     </>
   );

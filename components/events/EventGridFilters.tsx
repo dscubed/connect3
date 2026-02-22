@@ -11,8 +11,14 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, Search, X, Loader2 } from "lucide-react";
+import Image from "next/image";
 
-export type DateFilter = "all" | "today" | "this-week" | "this-month" | "upcoming";
+export type DateFilter =
+  | "all"
+  | "today"
+  | "this-week"
+  | "this-month"
+  | "past";
 export type TagFilter = "all" | "free" | "paid" | "online" | "in-person";
 
 interface Club {
@@ -35,29 +41,32 @@ function useInfiniteClubs(searchQuery: string) {
   const [isLoading, setIsLoading] = useState(false);
   const [initialLoaded, setInitialLoaded] = useState(false);
 
-  const fetchClubs = useCallback(async (cursorVal: string | null, reset: boolean) => {
-    setIsLoading(true);
-    try {
-      const params = new URLSearchParams();
-      params.set("limit", String(CLUBS_PAGE_SIZE));
-      if (cursorVal) params.set("cursor", cursorVal);
-      if (searchQuery.trim()) params.set("search", searchQuery.trim());
+  const fetchClubs = useCallback(
+    async (cursorVal: string | null, reset: boolean) => {
+      setIsLoading(true);
+      try {
+        const params = new URLSearchParams();
+        params.set("limit", String(CLUBS_PAGE_SIZE));
+        if (cursorVal) params.set("cursor", cursorVal);
+        if (searchQuery.trim()) params.set("search", searchQuery.trim());
 
-      const res = await fetch(`${baseUrl}/api/clubs?${params.toString()}`);
-      const data = await res.json();
-      const newItems: Club[] = data.items ?? [];
-      const newCursor: string | null = data.cursor ?? null;
+        const res = await fetch(`${baseUrl}/api/clubs?${params.toString()}`);
+        const data = await res.json();
+        const newItems: Club[] = data.items ?? [];
+        const newCursor: string | null = data.cursor ?? null;
 
-      setClubs((prev) => reset ? newItems : [...prev, ...newItems]);
-      setCursor(newCursor);
-      setHasMore(newCursor !== null);
-      setInitialLoaded(true);
-    } catch {
-      setHasMore(false);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [searchQuery]);
+        setClubs((prev) => (reset ? newItems : [...prev, ...newItems]));
+        setCursor(newCursor);
+        setHasMore(newCursor !== null);
+        setInitialLoaded(true);
+      } catch {
+        setHasMore(false);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [searchQuery],
+  );
 
   // Reset and fetch when search changes
   useEffect(() => {
@@ -91,11 +100,11 @@ interface EventGridFiltersProps {
 }
 
 const dateLabels: Record<DateFilter, string> = {
-  all: "All Dates",
+  all: "All Upcoming",
   today: "Today",
   "this-week": "This Week",
   "this-month": "This Month",
-  upcoming: "Upcoming",
+  past: "Past Events",
 };
 
 const tagLabels: Record<TagFilter, string> = {
@@ -105,7 +114,6 @@ const tagLabels: Record<TagFilter, string> = {
   online: "Online",
   "in-person": "In-Person",
 };
-
 
 function formatCategory(cat: string): string {
   return cat
@@ -130,13 +138,36 @@ export default function EventGridFilters({
   const [clubSearch, setClubSearch] = useState("");
   const [debouncedClubSearch, setDebouncedClubSearch] = useState("");
   const clubListRef = useRef<HTMLDivElement>(null);
+  // Persist full Club objects for selected IDs across searches
+  const [selectedClubsData, setSelectedClubsData] = useState<Club[]>([]);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedClubSearch(clubSearch), 300);
     return () => clearTimeout(timer);
   }, [clubSearch]);
 
-  const { clubs, isLoading: clubsLoading, loadMore, initialLoaded } = useInfiniteClubs(debouncedClubSearch);
+  const {
+    clubs,
+    isLoading: clubsLoading,
+    loadMore,
+    initialLoaded,
+  } = useInfiniteClubs(debouncedClubSearch);
+
+  // Keep selectedClubsData in sync: add newly selected, remove deselected
+  useEffect(() => {
+    setSelectedClubsData((prev) => {
+      const merged = [...prev];
+      for (const club of clubs) {
+        if (
+          selectedClubs.includes(club.id) &&
+          !merged.find((c) => c.id === club.id)
+        ) {
+          merged.push(club);
+        }
+      }
+      return merged.filter((c) => selectedClubs.includes(c.id));
+    });
+  }, [clubs, selectedClubs]);
 
   const handleClubScroll = useCallback(() => {
     const el = clubListRef.current;
@@ -150,7 +181,7 @@ export default function EventGridFilters({
     setSelectedClubs((prev) =>
       prev.includes(clubId)
         ? prev.filter((id) => id !== clubId)
-        : [...prev, clubId]
+        : [...prev, clubId],
     );
   };
 
@@ -215,7 +246,9 @@ export default function EventGridFilters({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-1.5 px-4 py-2.5 rounded-full border border-gray-200 bg-white text-sm text-gray-600 hover:bg-gray-50 transition-colors shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-200">
-              {selectedCategory === "All" ? "Categories" : formatCategory(selectedCategory)}
+              {selectedCategory === "All"
+                ? "Categories"
+                : formatCategory(selectedCategory)}
               <ChevronDown className="w-3.5 h-3.5" />
             </button>
           </DropdownMenuTrigger>
@@ -233,12 +266,55 @@ export default function EventGridFilters({
         </DropdownMenu>
 
         {/* Clubs multi-select dropdown */}
-        <DropdownMenu onOpenChange={(open) => { if (!open) { setClubSearch(""); setDebouncedClubSearch(""); } }}>
+        <DropdownMenu
+          onOpenChange={(open) => {
+            if (!open) {
+              setClubSearch("");
+              setDebouncedClubSearch("");
+            }
+          }}
+        >
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-1.5 px-4 py-2.5 rounded-full border border-gray-200 bg-white text-sm text-gray-600 hover:bg-gray-50 transition-colors shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-200">
-              {selectedClubs.length === 0
-                ? "Clubs"
-                : `${selectedClubs.length} Club${selectedClubs.length > 1 ? "s" : ""}`}
+            <button className="flex items-center gap-1.5 px-3 py-2 rounded-full border border-gray-200 bg-white text-sm text-gray-600 hover:bg-gray-50 transition-colors shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-200">
+              {selectedClubs.length === 0 ? (
+                <span className="px-1 py-0.5">Clubs</span>
+              ) : (
+                <span className="flex items-center gap-1">
+                  {/* Stacked avatars — show up to 3 */}
+                  <span className="flex items-center" style={{ gap: 0 }}>
+                    {selectedClubsData.slice(0, 3).map((club, i) => (
+                      <span
+                        key={club.id}
+                        className="relative inline-flex h-6 w-6 shrink-0 rounded-full border-2 border-white overflow-hidden"
+                        style={{ marginLeft: i === 0 ? 0 : -6, zIndex: 3 - i }}
+                      >
+                        {club.avatar_url ? (
+                          <Image
+                            src={club.avatar_url}
+                            alt={club.first_name}
+                            width={24}
+                            height={24}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span className="h-full w-full bg-gray-200 flex items-center justify-center text-[9px] font-semibold text-gray-500">
+                            {club.first_name.charAt(0).toUpperCase()}
+                          </span>
+                        )}
+                      </span>
+                    ))}
+                    {/* Overflow badge */}
+                    {selectedClubs.length > 3 && (
+                      <span
+                        className="relative inline-flex h-6 w-6 shrink-0 rounded-full border-2 border-white bg-gray-100 items-center justify-center text-[9px] font-semibold text-gray-500"
+                        style={{ marginLeft: -6, zIndex: 0 }}
+                      >
+                        +{selectedClubs.length - 3}
+                      </span>
+                    )}
+                  </span>
+                </span>
+              )}
               <ChevronDown className="w-3.5 h-3.5" />
             </button>
           </DropdownMenuTrigger>
@@ -262,39 +338,84 @@ export default function EventGridFilters({
             <div
               ref={clubListRef}
               onScroll={handleClubScroll}
-              className="max-h-52 overflow-y-auto py-1"
+              className="max-h-52 overflow-y-auto py-1 scrollbar-hide"
             >
-              {initialLoaded && clubs.length === 0 && !clubsLoading && (
-                <div className="px-3 py-2 text-sm text-gray-400">
-                  No clubs found
-                </div>
-              )}
-              {clubs.map((club) => (
+              {/* Selected clubs pinned at top */}
+              {selectedClubsData.map((club) => (
                 <DropdownMenuCheckboxItem
-                  key={club.id}
-                  checked={selectedClubs.includes(club.id)}
+                  key={`sel-${club.id}`}
+                  checked
                   onCheckedChange={() => handleClubToggle(club.id)}
                   onSelect={(e) => e.preventDefault()}
-                  className="flex items-center gap-2 px-3 py-2"
                 >
-                  {club.avatar_url ? (
-                    <Image
-                      src={club.avatar_url}
-                      alt=""
-                      width={20}
-                      height={20}
-                      className="h-5 w-5 rounded-full object-cover shrink-0"
-                    />
-                  ) : (
-                    <div className="h-5 w-5 rounded-full bg-gray-200 flex items-center justify-center shrink-0">
-                      <span className="text-[10px] font-medium text-gray-500">
-                        {club.first_name.charAt(0).toUpperCase()}
+                  <span className="flex items-center gap-2">
+                    {club.avatar_url ? (
+                      <Image
+                        src={club.avatar_url}
+                        alt={club.first_name}
+                        width={20}
+                        height={20}
+                        className="h-5 w-5 rounded-full object-cover shrink-0"
+                      />
+                    ) : (
+                      <span className="h-5 w-5 rounded-full bg-gray-200 flex items-center justify-center shrink-0">
+                        <span className="text-[10px] font-medium text-gray-500">
+                          {club.first_name.charAt(0).toUpperCase()}
+                        </span>
                       </span>
-                    </div>
-                  )}
-                  <span className="truncate">{club.first_name}</span>
+                    )}
+                    <span className="truncate font-medium">
+                      {club.first_name}
+                    </span>
+                  </span>
                 </DropdownMenuCheckboxItem>
               ))}
+
+              {/* Divider between selected and unselected */}
+              {selectedClubsData.length > 0 && (
+                <DropdownMenuSeparator className="my-1" />
+              )}
+
+              {/* Unselected clubs from search */}
+              {initialLoaded &&
+                clubs.filter((c) => !selectedClubs.includes(c.id)).length ===
+                  0 &&
+                !clubsLoading && (
+                  <div className="px-3 py-2 text-sm text-gray-400">
+                    {clubs.length === 0
+                      ? "No clubs found"
+                      : "All results selected"}
+                  </div>
+                )}
+              {clubs
+                .filter((club) => !selectedClubs.includes(club.id))
+                .map((club) => (
+                  <DropdownMenuCheckboxItem
+                    key={club.id}
+                    checked={false}
+                    onCheckedChange={() => handleClubToggle(club.id)}
+                    onSelect={(e) => e.preventDefault()}
+                  >
+                    <span className="flex items-center gap-2">
+                      {club.avatar_url ? (
+                        <Image
+                          src={club.avatar_url}
+                          alt={club.first_name}
+                          width={20}
+                          height={20}
+                          className="h-5 w-5 rounded-full object-cover shrink-0"
+                        />
+                      ) : (
+                        <span className="h-5 w-5 rounded-full bg-gray-200 flex items-center justify-center shrink-0">
+                          <span className="text-[10px] font-medium text-gray-500">
+                            {club.first_name.charAt(0).toUpperCase()}
+                          </span>
+                        </span>
+                      )}
+                      <span className="truncate">{club.first_name}</span>
+                    </span>
+                  </DropdownMenuCheckboxItem>
+                ))}
               {clubsLoading && (
                 <div className="flex items-center justify-center py-2">
                   <Loader2 className="h-4 w-4 animate-spin text-gray-400" />

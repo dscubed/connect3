@@ -24,8 +24,15 @@ interface PDFTextContent {
   styles: PDFTextStyles;
 }
 
+// Link annotations from getAnnotations() (external links have a url property)
+interface PDFLinkAnnotation {
+  url?: string;
+  [key: string]: unknown;
+}
+
 interface PDFPageProxy {
   getTextContent(): Promise<PDFTextContent>;
+  getAnnotations?(): Promise<PDFLinkAnnotation[]>;
 }
 
 interface PDFDocumentProxy {
@@ -88,15 +95,35 @@ export async function parsePDF(file: File): Promise<ParseResult> {
     const pdf = await window.pdfjsLib.getDocument(arrayBuffer).promise;
 
     let fullText = "";
+    const embeddedUrls = new Set<string>();
 
-    // Extract text from all pages
+    // Extract text and embedded link URLs from all pages
     for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
       const page = await pdf.getPage(pageNum);
       const textContent = await page.getTextContent();
 
       const pageText = textContent.items.map((item) => item.str).join(" ");
-
       fullText += pageText + "\n";
+
+      // Extract URLs from link annotations (hyperlinks) when available
+      if (typeof page.getAnnotations === "function") {
+        try {
+          const annotations = await page.getAnnotations();
+          for (const ann of annotations ?? []) {
+            const url = ann?.url?.trim();
+            if (url && (url.startsWith("http") || url.includes(".com") || url.includes(".io") || url.includes(".org"))) {
+              embeddedUrls.add(url);
+            }
+          }
+        } catch {
+          // getAnnotations can fail on some PDFs; ignore and keep text-only
+        }
+      }
+    }
+
+    // Append embedded link URLs so the resume extractor can use them
+    if (embeddedUrls.size > 0) {
+      fullText += "\n[Hyperlinks from document]:\n" + [...embeddedUrls].join("\n");
     }
 
     const cleanText = fullText.trim();

@@ -65,25 +65,23 @@ function applyFilters(
     query = query.eq("category", params.category);
   }
 
-  if (params.dateFilter && params.dateFilter !== "all") {
-    const now = new Date();
+  const now = new Date();
+  if (params.dateFilter === "past") {
+    query = query.lt("start", now.toISOString());
+  } else {
+    query = query.gte("start", now.toISOString());
     if (params.dateFilter === "today") {
-      const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const dayEnd = new Date(dayStart);
+      const dayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       dayEnd.setDate(dayEnd.getDate() + 1);
-      query = query.gte("start", dayStart.toISOString()).lt("start", dayEnd.toISOString());
+      query = query.lt("start", dayEnd.toISOString());
     } else if (params.dateFilter === "this-week") {
-      const weekStart = new Date(now);
-      weekStart.setDate(now.getDate() - now.getDay());
-      weekStart.setHours(0, 0, 0, 0);
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekStart.getDate() + 7);
-      query = query.gte("start", weekStart.toISOString()).lt("start", weekEnd.toISOString());
+      const weekEnd = new Date(now);
+      weekEnd.setDate(now.getDate() - now.getDay() + 7);
+      weekEnd.setHours(0, 0, 0, 0);
+      query = query.lt("start", weekEnd.toISOString());
     } else if (params.dateFilter === "this-month") {
       const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-      query = query.gte("start", now.toISOString()).lt("start", monthEnd.toISOString());
-    } else if (params.dateFilter === "upcoming") {
-      query = query.gte("start", now.toISOString());
+      query = query.lt("start", monthEnd.toISOString());
     }
   }
 
@@ -121,6 +119,8 @@ export async function GET(request: NextRequest) {
 
   const filterParams = { search, category, dateFilter, tagFilter, clubs };
   const needsPostFilter = tagFilter === "free" || tagFilter === "paid";
+  const isPast = dateFilter === "past";
+  const sortAscending = !isPast;
 
   try {
     if (page !== null) {
@@ -134,8 +134,8 @@ export async function GET(request: NextRequest) {
           .select(
             `*, event_pricings (min, max), event_locations (venue, address, latitude, longitude, city, country)`,
           )
-          .order("start", { ascending: false, nullsFirst: false })
-          .order("created_at", { ascending: false });
+          .order("start", { ascending: sortAscending, nullsFirst: false })
+          .order("created_at", { ascending: sortAscending });
 
         allQuery = applyFilters(allQuery, filterParams);
         const { data, error } = await allQuery;
@@ -179,8 +179,8 @@ export async function GET(request: NextRequest) {
           `*, event_pricings (min, max), event_locations (venue, address, latitude, longitude, city, country)`,
           { count: "exact" },
         )
-        .order("start", { ascending: false, nullsFirst: false })
-        .order("created_at", { ascending: false })
+        .order("start", { ascending: sortAscending, nullsFirst: false })
+        .order("created_at", { ascending: sortAscending })
         .range(from, from + limit - 1);
 
       query = applyFilters(query, filterParams);
@@ -221,17 +221,21 @@ export async function GET(request: NextRequest) {
         )
       `,
       )
-      .order("start", { ascending: false, nullsFirst: false })
-      .order("created_at", { ascending: false });
+      .order("start", { ascending: sortAscending, nullsFirst: false })
+      .order("created_at", { ascending: sortAscending });
 
     query = applyFilters(query, filterParams);
 
     if (cursor) {
       if (cursor.startsWith("null:")) {
         const createdAtCursor = cursor.slice(5);
-        query = query.is("start", null).lt("created_at", createdAtCursor);
+        query = sortAscending
+          ? query.is("start", null).gt("created_at", createdAtCursor)
+          : query.is("start", null).lt("created_at", createdAtCursor);
       } else {
-        query = query.or(`start.lt.${cursor},start.is.null`);
+        query = sortAscending
+          ? query.or(`start.gt.${cursor},start.is.null`)
+          : query.or(`start.lt.${cursor},start.is.null`);
       }
     }
 

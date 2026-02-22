@@ -10,6 +10,7 @@ import { EventGridCard } from "@/components/events/EventGridCard";
 import { EventDetailPanel } from "@/components/events/EventDetailPanel";
 import type { Event } from "@/lib/schemas/events/event";
 import type { CreateEventBody } from "@/lib/schemas/api/events";
+import { EVENT_CATEGORIES, type EventCategory } from "@/types/events/event";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -134,10 +135,9 @@ export default function ClubEventsCard({
       typeof detailCategory === "string"
         ? detailCategory
         : detailCategory?.category ?? detailCategory?.type ?? "";
-    const allowedCategories = new Set([
-      "networking", "study", "fun", "workshop", "competition", "panel", "miscellaneous",
-    ]);
-    const mappedCategories = allowedCategories.has(rawCategory) ? [rawCategory] : [];
+    const allowedCategories = new Set<string>(EVENT_CATEGORIES);
+    const mappedCategories: EventCategory[] =
+      allowedCategories.has(rawCategory) ? [rawCategory as EventCategory] : [];
     const locationPayload = detailLocation
       ? {
           venue: detailLocation.venue ?? "",

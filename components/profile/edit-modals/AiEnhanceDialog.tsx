@@ -37,6 +37,14 @@ const EXAMPLE_QUESTIONS_SUMMARY = [
   "Can you write a confident networking summary from my chunks?",
 ];
 
+const EXAMPLE_QUESTIONS_EVENT = [
+  "Can you make this more inviting for students?",
+  "Can you highlight who should attend and why?",
+  "Can you make the call-to-action stronger?",
+  "Can you tighten this while keeping key details?",
+  "Can you make this sound more energetic but still clear?",
+];
+
 type ChatMessage = {
   id: string;
   role: "user" | "assistant";
@@ -45,7 +53,7 @@ type ChatMessage = {
 
 interface AiEnhanceDialogProps {
   initialText: string;
-  fieldType: "external_tldr" | "chunk";
+  fieldType: "external_tldr" | "chunk" | "event_description";
   title?: string;
   onApply: (newText: string) => void;
   assistantIntro?: string;
@@ -100,6 +108,8 @@ export function AiEnhanceDialog({
       const examples =
         fieldType === "chunk"
           ? EXAMPLE_QUESTIONS_CHUNK
+          : fieldType === "event_description"
+          ? EXAMPLE_QUESTIONS_EVENT
           : EXAMPLE_QUESTIONS_SUMMARY;
       const random = examples[Math.floor(Math.random() * examples.length)];
       setExample(random);
@@ -108,6 +118,8 @@ export function AiEnhanceDialog({
         const defaultIntro =
           fieldType === "chunk"
             ? "Tell me what you want this highlight to emphasise, and I'll refine it."
+            : fieldType === "event_description"
+            ? "Tell me what you want this event description to emphasise, and I'll refine it."
             : "Tell me what you want this summary to highlight — or ask me to write one for you.";
         setMessages([
           {
@@ -202,7 +214,18 @@ export function AiEnhanceDialog({
 
   const dialogTitle =
     title ||
-    (fieldType === "chunk" ? "Enhance this highlight" : "Enhance your summary");
+    (fieldType === "chunk"
+      ? "Enhance this highlight"
+      : fieldType === "event_description"
+      ? "Enhance event description"
+      : "Enhance your summary");
+
+  const emptyStateText =
+    fieldType === "chunk"
+      ? "Start a conversation to get suggestions on how to improve this highlight."
+      : fieldType === "event_description"
+      ? "Start a conversation to get suggestions on how to improve this event description."
+      : "Start a conversation to get suggestions on how to improve your summary.";
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -256,8 +279,7 @@ export function AiEnhanceDialog({
 
               {messages.length === 0 && (
                 <p className="text-sm text-secondary-foreground/60">
-                  Start a conversation to get suggestions on how to improve your
-                  summary.
+                  {emptyStateText}
                 </p>
               )}
             </div>

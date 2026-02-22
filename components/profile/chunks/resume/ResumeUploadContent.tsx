@@ -6,20 +6,34 @@ import { parseDocument } from "@/lib/resume/parsers/documentParser";
 import { toast } from "sonner";
 import { ResumeChunkResult } from "./ChunkResumeModal";
 import { useState } from "react";
+import { useChunkContext } from "../hooks/ChunkProvider";
+import { useProfileEditContext } from "@/components/profile/hooks/ProfileEditProvider";
 
 export function ResumeUploadContent({
   file,
   setFile,
   onClose,
-  setResult,
 }: {
   file: File | null;
   setFile: (file: File | null) => void;
   onClose: () => void;
-  setResult: (result: ResumeChunkResult) => void;
 }) {
   const { makeAuthenticatedRequest, user } = useAuthStore.getState();
+  const { updateChunk, addChunk } = useChunkContext();
+  const { applyResumeDetails } = useProfileEditContext();
   const [fileProcessing, setFileProcessing] = useState(false);
+
+  const applyResult = (result: ResumeChunkResult) => {
+    result.updatedChunks?.forEach((chunk) => {
+      updateChunk({ id: chunk.id, category: chunk.category, text: chunk.text });
+    });
+    result.newChunks?.forEach((chunk) => {
+      addChunk(chunk.category, chunk.text);
+    });
+    if (result.profileDetails) {
+      applyResumeDetails(result.profileDetails);
+    }
+  };
 
   const handleProcessResume = async () => {
     if (!file) {
@@ -32,7 +46,6 @@ export function ResumeUploadContent({
     }
 
     setFileProcessing(true);
-    // Parse the file on the client and send text to the server
     try {
       const parseResult = await parseDocument(file);
       if (!parseResult.success) {
@@ -58,9 +71,18 @@ export function ResumeUploadContent({
         return;
       }
 
-      toast.success(`Resume ${file?.name} processed successfully!`);
+      const data = await response.json();
+      const result = data.result ?? data.chunks;
+      if (!result) {
+        toast.error("Failed to process resume. Please try again.");
+        return;
+      }
 
-      setResult((await response.json()).chunks);
+      applyResult(result);
+      toast.success(
+        "Resume applied to your profile. Use Revert to undo any changes."
+      );
+      onClose();
     } catch (err) {
       console.error("Error processing resume:", err);
       toast.error("Failed to process resume. Please try again.");
@@ -71,10 +93,10 @@ export function ResumeUploadContent({
 
   return (
     <>
-      <DialogTitle className="text-2xl font-semibold text-center text-white drop-shadow-md">
+      <DialogTitle className="text-2xl font-semibold text-center drop-shadow-md">
         Upload Your Resume
       </DialogTitle>
-      <DialogDescription className="text-center mb-16 text-white/80 drop-shadow-md">
+      <DialogDescription className="text-center mb-16 text-muted drop-shadow-md">
         Upload your resume to auto fill your profile information.
       </DialogDescription>
 

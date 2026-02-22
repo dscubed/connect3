@@ -14,9 +14,7 @@ function SearchPageFallback() {
 
 export default function SearchPage() {
   return (
-    <Suspense 
-     fallback={<SearchPageFallback />}
-    > 
+    <Suspense fallback={<SearchPageFallback />}>
       <CharacterBackground />
       <SearchPageContent />
     </Suspense>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
 import { EmailTemplate } from "@/components/email/ContactEmailTemplate";
+import { checkBotId } from "botid/server";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -10,6 +11,11 @@ const supabase = createClient(
 
 export async function POST(req: NextRequest) {
   try {
+    const botVerification = await checkBotId();
+    if (botVerification.isBot) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+    }
+
     const formData = await req.formData();
     const name = formData.get("name") as string;
     const email = formData.get("email") as string;

@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
 import sharp from "sharp";
+import { checkBotId } from "botid/server";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
 
 export async function POST(req: Request) {
+  const botVerification = await checkBotId();
+  if (botVerification.isBot) {
+    return NextResponse.json({ error: "Access denied" }, { status: 403 });
+  }
+
   // Parse the incoming file from the request
   const formData = await req.formData();
   const file = formData.get("file") as File;

@@ -1,4 +1,4 @@
-import { EventCategory } from "@/types/events/event";
+import { EVENT_CATEGORIES, EventCategory } from "@/types/events/event";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -23,23 +23,7 @@ export default function EventFilters({
   selectedCategory,
   setSelectedCategory,
 }: EventFiltersProps) {
-  const categoryOptions = [
-    "All",
-    "academic_workshops",
-    "arts_music",
-    "career_networking",
-    "entrepreneurship",
-    "environment_sustainability",
-    "food_dining",
-    "gaming_esports",
-    "health_wellness",
-    "social_cultural",
-    "sports_fitness",
-    "tech_innovation",
-    "travel_adventure",
-    "volunteering_community",
-    "recruitment",
-  ] as const;
+  const categoryOptions = ["All", ...EVENT_CATEGORIES] as const;
   return (
     <div className="p-4 flex-row gap-4 flex w-full">
       {/* Search Input */}

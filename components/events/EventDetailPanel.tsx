@@ -9,6 +9,7 @@ import { type Event } from "@/lib/schemas/events/event";
 import Image from "next/image";
 import useSWR from "swr";
 import parse from "html-react-parser";
+import Markdown from "../ui/Markdown";
 
 interface EventDetailPanelProps {
   event: Event;
@@ -153,7 +154,7 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
       <div className="mx-5 bg-purple-50/50 border border-purple-100 rounded-2xl p-4 mb-4">
         <SectionLabel>Description</SectionLabel>
         <div className="text-sm text-muted leading-relaxed">
-          {parse(event.description || "No description provided.")}
+          <Markdown rawText={event.description || "No description provided."} />
         </div>
       </div>
 

@@ -1,5 +1,6 @@
 import { Profile, useAuthStore } from "@/stores/authStore";
 import { useChunkContext } from "./chunks/hooks/ChunkProvider";
+import { useProfileEditContext } from "./hooks/ProfileEditProvider";
 import { Button } from "../ui/button";
 import { useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
@@ -26,6 +27,11 @@ export function ActionsButton({
 }) {
   const { user } = useAuthStore();
   const { hasPendingEdits, saveChunks, savingChunks } = useChunkContext();
+  const {
+    hasPendingProfileEdits,
+    saveProfileEdits,
+    savingProfileEdits,
+  } = useProfileEditContext();
   const [pendingModalOpen, setPendingModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const isSavingRef = useRef(false);
@@ -36,11 +42,11 @@ export function ActionsButton({
 
   const handleEditToggle = async () => {
     if (editingProfile) {
-      if (hasPendingEdits()) {
+      if (hasPendingEdits() || hasPendingProfileEdits()) {
         setPendingModalOpen(true);
         return;
       }
-      if (isSavingRef.current || savingChunks) {
+      if (isSavingRef.current || savingChunks || savingProfileEdits) {
         toast.error("Profile is currently being saved. Try again later.");
         return;
       }
@@ -58,6 +64,7 @@ export function ActionsButton({
       }, 2000);
 
       try {
+        await saveProfileEdits();
         await saveChunks();
         toast.success("Profile saved!", { id: toastId });
       } catch {
@@ -71,7 +78,7 @@ export function ActionsButton({
     setEditingProfile(!editingProfile);
   };
 
-  const saving = isSaving || savingChunks;
+  const saving = isSaving || savingChunks || savingProfileEdits;
 
   return (
     <>
@@ -115,6 +122,7 @@ const PendingChangesModal = ({
   onOpenChange: (open: boolean) => void;
 }) => {
   const { reset, saveChunks, exitEdit, saveAllEdits } = useChunkContext();
+  const { resetDraft, saveProfileEdits } = useProfileEditContext();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -123,8 +131,8 @@ const PendingChangesModal = ({
           <DialogTitle>Action Required</DialogTitle>
         </DialogHeader>
         <p className="text-muted-foreground">
-          You have unsaved changes to your profile chunks. Please choose an
-          action below to proceed.
+          You have unsaved profile changes. Please choose an action below to
+          proceed.
         </p>
         <div className="mt-2 flex flex-col">
           {/* Add Links */}
@@ -133,6 +141,7 @@ const PendingChangesModal = ({
               className="w-fit h-fit animate-fade-in"
               onClick={() => {
                 reset();
+                resetDraft();
                 exitEdit();
                 onOpenChange(false);
               }}
@@ -141,6 +150,7 @@ const PendingChangesModal = ({
             </Button>
             <Button
               onClick={() => {
+                saveProfileEdits();
                 saveAllEdits();
                 saveChunks();
                 exitEdit();

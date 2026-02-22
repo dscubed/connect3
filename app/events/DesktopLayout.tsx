@@ -24,23 +24,9 @@ import {
   PaginationEllipsis,
 } from "@/components/ui/pagination";
 
-const CATEGORY_OPTIONS = [
-  "All",
-  "academic_workshops",
-  "arts_music",
-  "career_networking",
-  "entrepreneurship",
-  "environment_sustainability",
-  "food_dining",
-  "gaming_esports",
-  "health_wellness",
-  "social_cultural",
-  "sports_fitness",
-  "tech_innovation",
-  "travel_adventure",
-  "volunteering_community",
-  "recruitment",
-];
+import { EVENT_CATEGORIES } from "@/types/events/event";
+
+const CATEGORY_OPTIONS = ["All", ...EVENT_CATEGORIES];
 
 const baseUrl =
   process.env.NODE_ENV !== "production"

@@ -32,6 +32,7 @@ import {
   AddingState,
 } from "@/components/profile/links/LinksUtils";
 import {
+  EVENT_CATEGORIES,
   EventCategory,
   EventPricing,
   EventLocationType,
@@ -232,22 +233,7 @@ export default function AddEventForm({
     }
   }, [initialValues]);
 
-  const categories: EventCategory[] = [
-    "academic_workshops",
-    "arts_music",
-    "career_networking",
-    "entrepreneurship",
-    "environment_sustainability",
-    "food_dining",
-    "gaming_esports",
-    "health_wellness",
-    "social_cultural",
-    "sports_fitness",
-    "tech_innovation",
-    "travel_adventure",
-    "volunteering_community",
-    "recruitment",
-  ] as const;
+  const categories = EVENT_CATEGORIES;
 
   const themePresets: ThemePreset[] = [
     {
@@ -310,11 +296,17 @@ export default function AddEventForm({
     themePresets.find((theme) => theme.swatch === accentColor) ??
     themePresets[1];
 
+  const isOrganisation = profile?.account_type === "organisation";
+
   const handleTypeChange = (category: EventCategory, checked: boolean) => {
-    if (checked) {
-      setType([...type, category]);
+    if (isOrganisation) {
+      setType(checked ? [category] : []);
     } else {
-      setType(type.filter((t) => t !== category));
+      if (checked) {
+        setType([...type, category]);
+      } else {
+        setType(type.filter((t) => t !== category));
+      }
     }
   };
 
@@ -529,7 +521,7 @@ export default function AddEventForm({
               <div className="flex items-center gap-2">
                 <AiEnhanceDialog
                   initialText={description}
-                  fieldType="chunk"
+                  fieldType="event_description"
                   title="Enhance event description"
                   assistantIntro="Tell me what you want this description to emphasise, and I'll refine it."
                   onApply={setDescription}
@@ -840,12 +832,12 @@ export default function AddEventForm({
 
           <div className={`${SECTION_CARD} group min-h-[112px]`}>
             <div className="flex items-start justify-between gap-4">
-              <span className={SECTION_LABEL}>Categories</span>
+              <span className={SECTION_LABEL}>Category</span>
               {!isCategoriesEmpty && (
                 <button
                   type="button"
                   className={`${ICON_BUTTON} h-8 w-8`}
-                  aria-label="Edit categories"
+                  aria-label="Edit category"
                 >
                   <PencilLine className="h-4 w-4" />
                 </button>
@@ -857,7 +849,9 @@ export default function AddEventForm({
                 className="mt-3 flex items-center gap-3 rounded-lg px-2 py-1 text-base font-normal text-slate-400 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--theme-200)]"
               >
                 <Layers className="h-5 w-5 text-slate-400" />
-                <span>Add a category ...</span>
+                <span>
+                  {isOrganisation ? "Select category ..." : "Add a category ..."}
+                </span>
               </button>
             ) : (
               <div className="mt-3 flex flex-wrap gap-2">
