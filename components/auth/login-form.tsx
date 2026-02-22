@@ -28,13 +28,16 @@ export function LoginForm({
 
   const busy = isLoading || isLoggingIn;
 
+  const inputClass =
+    "focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-violet-400";
+
   return (
-    <div className={cn("flex flex-col gap-8", className)} {...props}>
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-black">
+    <div className={cn("flex flex-col gap-4", className)} {...props}>
+      <div className="space-y-1">
+        <h1 className="text-2xl font-medium tracking-tight text-black">
           Welcome back
         </h1>
-        <p className="text-sm text-black/50">
+        <p className="text-base text-black/50">
           Log in to your account to continue
         </p>
       </div>
@@ -51,7 +54,7 @@ export function LoginForm({
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="h-12 rounded-xl border-2 border-black/10 bg-black/[0.02] px-4 text-sm text-black placeholder:text-black/30 focus-visible:ring-0 focus-visible:border-foreground transition-colors"
+            className={inputClass}
           />
         </div>
 
@@ -76,14 +79,14 @@ export function LoginForm({
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="h-12 rounded-xl border-2 border-black/10 bg-black/[0.02] px-4 text-sm text-black placeholder:text-black/30 focus-visible:ring-0 focus-visible:border-foreground transition-colors"
+            className={inputClass}
           />
         </div>
 
         <Button
           type="submit"
           className={cn(
-            "mt-2 h-12 w-full rounded-xl text-sm font-semibold text-white",
+            "mt-5 w-full rounded-md text-sm font-semibold text-white",
             "bg-foreground hover:bg-foreground/80 transition-colors",
           )}
           disabled={busy}
@@ -92,7 +95,7 @@ export function LoginForm({
         </Button>
       </form>
 
-      <p className="text-center text-sm text-black/50">
+      <p className="text-center text-base text-black/50">
         Don&apos;t have an account?{" "}
         <Link
           href="/auth/sign-up"
@@ -101,6 +104,18 @@ export function LoginForm({
           Sign up
         </Link>
       </p>
+
+      {process.env.NODE_ENV !== "production" && (
+        <p className="text-center text-base text-black/50">
+          Need an organisation account?{" "}
+          <Link
+            href="/auth/org/sign-up"
+            className="font-semibold text-foreground hover:underline"
+          >
+            Sign up (dev)
+          </Link>
+        </p>
+      )}
     </div>
   );
 }

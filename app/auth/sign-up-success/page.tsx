@@ -12,7 +12,6 @@ import { cn } from "@/lib/utils";
 
 export default function Page() {
   const user = useAuthStore((state) => state.user);
-  const profile = useAuthStore((state) => state.profile);
   const loading = useAuthStore((state) => state.loading);
   const router = useRouter();
 
@@ -45,25 +44,11 @@ export default function Page() {
   };
 
   useEffect(() => {
-    if (user && profile) {
-      if (!user) {
-        router.replace("/auth/login");
-      }
-
-      if (
-        (user.email_confirmed_at || user.confirmed_at) &&
-        profile.onboarding_completed
-      ) {
-        router.replace("/");
-      } else if (
-        (user.email_confirmed_at || user.confirmed_at) &&
-        !profile.onboarding_completed
-      ) {
-        localStorage.removeItem("pendingVerificationEmail");
-        router.replace("/profile");
-      }
+    if (user && (user.email_confirmed_at || user.confirmed_at)) {
+      localStorage.removeItem("pendingVerificationEmail");
+      router.replace("/");
     }
-  }, [user, profile, router]);
+  }, [user, router]);
 
   return (
     <AuthShell>

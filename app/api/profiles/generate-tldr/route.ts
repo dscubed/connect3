@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { createClient } from "@supabase/supabase-js";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
+import { validateTokenLimit } from "@/lib/api/token-guard";
 
 export const config = {
   runtime: "edge",
@@ -36,6 +37,11 @@ export async function POST(request: NextRequest) {
     const userId = body.userId;
     const userPrompt = body.userPrompt;
     const currentTldr = body.currentTldr || "";
+
+    if (userPrompt) {
+      const tokenCheck = validateTokenLimit(userPrompt, "verified");
+      if (!tokenCheck.ok) return tokenCheck.response;
+    }
 
     if (!userId || !user.id) {
       return NextResponse.json({ error: "User ID required" }, { status: 400 });

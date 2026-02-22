@@ -10,7 +10,7 @@ interface AuthHeaderProps {
 
 export function AuthHeader({ className }: AuthHeaderProps) {
   return (
-    <div className={cn("mb-8 flex items-center", className)}>
+    <div className={cn("mb-4 flex items-center", className)}>
       <Link
         href="/"
         aria-label="Go to home"

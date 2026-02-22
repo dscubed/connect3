@@ -32,16 +32,16 @@ export function OrgSignUpForm({
     });
   };
 
+  const inputClass =
+    "focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-violet-400";
+
   return (
-    <div className={cn("flex flex-col gap-8", className)} {...props}>
-      <div className="space-y-2">
-        <div className="mb-3 inline-block rounded-md bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800 ring-1 ring-amber-300">
-          DEV &mdash; Organisation Account
-        </div>
-        <h1 className="text-3xl font-bold tracking-tight text-black">
-          Create an organisation
+    <div className={cn("flex flex-col gap-4", className)} {...props}>
+      <div className="space-y-1">
+        <h1 className="text-2xl font-medium tracking-tight text-black">
+          Create an organisation (dev)
         </h1>
-        <p className="text-sm text-black/50">
+        <p className="text-base text-black/50">
           Sign up to register your organisation on Connect3
         </p>
       </div>
@@ -58,7 +58,7 @@ export function OrgSignUpForm({
             required
             value={orgName}
             onChange={(e) => setOrgName(e.target.value)}
-            className="h-12 rounded-xl border-2 border-black/10 bg-black/[0.02] px-4 text-sm text-black placeholder:text-black/30 focus-visible:ring-0 focus-visible:border-foreground transition-colors"
+            className={inputClass}
           />
         </div>
 
@@ -73,7 +73,7 @@ export function OrgSignUpForm({
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="h-12 rounded-xl border-2 border-black/10 bg-black/[0.02] px-4 text-sm text-black placeholder:text-black/30 focus-visible:ring-0 focus-visible:border-foreground transition-colors"
+            className={inputClass}
           />
         </div>
 
@@ -87,7 +87,7 @@ export function OrgSignUpForm({
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="h-12 rounded-xl border-2 border-black/10 bg-black/[0.02] px-4 text-sm text-black placeholder:text-black/30 focus-visible:ring-0 focus-visible:border-foreground transition-colors"
+            className={inputClass}
           />
         </div>
 
@@ -101,14 +101,14 @@ export function OrgSignUpForm({
             required
             value={repeatPassword}
             onChange={(e) => setRepeatPassword(e.target.value)}
-            className="h-12 rounded-xl border-2 border-black/10 bg-black/[0.02] px-4 text-sm text-black placeholder:text-black/30 focus-visible:ring-0 focus-visible:border-foreground transition-colors"
+            className={inputClass}
           />
         </div>
 
         <Button
           type="submit"
           className={cn(
-            "mt-2 h-12 w-full rounded-xl text-sm font-semibold text-white",
+            "mt-5 w-full rounded-md text-sm font-semibold text-white",
             "bg-foreground hover:bg-foreground/80 transition-colors",
           )}
           disabled={isSigningUp}
@@ -117,10 +117,10 @@ export function OrgSignUpForm({
         </Button>
       </form>
 
-      <p className="text-center text-sm text-black/50">
+      <p className="text-center text-base text-black/50">
         Already have an organisation account?{" "}
         <Link
-          href="/auth/org/login"
+          href="/auth/login"
           className="font-semibold text-foreground hover:underline"
         >
           Log in

@@ -29,7 +29,7 @@ export function useLogin(onLoggingInChange?: (loggingIn: boolean) => void) {
     try {
       const { error } = await loginWithEmail(params);
       if (error) throw error;
-      router.push("/auth/callback");
+      router.push("/");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Login failed");
       setLoggingState(false);

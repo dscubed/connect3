@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
+import { validateTokenLimit, Tier } from "@/lib/api/token-guard";
 import { createClient } from "@supabase/supabase-js";
 
 const client = new OpenAI({
@@ -32,6 +33,14 @@ export async function POST(request: NextRequest) {
       text: string;
       messages: { role: "user" | "assistant"; content: string }[];
     } = body;
+
+    const fullInput = [
+      text,
+      ...(messages ?? []).map((m: { content: string }) => m.content),
+    ].join("\n");
+    const tier: Tier = "verified";
+    const tokenCheck = validateTokenLimit(fullInput, tier);
+    if (!tokenCheck.ok) return tokenCheck.response;
 
     const isEventDescription = fieldType === "event_description";
     let chunksText = "";

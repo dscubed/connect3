@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
+import { getSiteUrl } from "@/lib/site-url";
 
 export async function signUpWithEmail({
   email,
@@ -16,18 +17,20 @@ export async function signUpWithEmail({
   anonymousId?: string | null;
 }) {
   const supabase = createClient();
+  const siteUrl = getSiteUrl();
 
   return supabase.auth.signUp({
     email,
     password,
     options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      emailRedirectTo: `${siteUrl}/auth/callback`,
       data: {
         first_name: firstName,
         last_name: lastName,
         name_provided: true,
         account_type: accountType,
         anonymousId,
+        origin: siteUrl,
       },
     },
   });
@@ -40,7 +43,7 @@ export async function resendVerificationEmail(email: string) {
     type: 'signup',
     email,
     options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      emailRedirectTo: `${getSiteUrl()}/auth/callback`,
     },
   });
 }
@@ -50,7 +53,7 @@ export async function signUpWithGoogle() {
   return supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      redirectTo: `${getSiteUrl()}/auth/callback`,
     },
   });
 }
