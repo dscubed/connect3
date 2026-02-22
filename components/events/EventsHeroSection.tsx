@@ -50,57 +50,58 @@ export default function EventsHeroSection({
 
   const eventsThisWeek = isLoading
     ? Array.from({ length: 4 }).map((_, i) => <HeroCardSkeleton key={i} />)
-    : (featuredEvents.map((event) => (
-      <div
-        key={event.id}
-        onClick={() => {
-          if (onEventClick) {
-            onEventClick(event);
-          } else {
-            router.push(`/events/${event.id}`);
-          }
-        }}
-        className="flex-shrink-0 w-64 bg-white rounded-2xl overflow-hidden cursor-pointer transition-shadow"
-      >
-        <div className="relative h-36 w-full bg-purple-100">
-          {event.thumbnail ? (
-            <Image
-              src={event.thumbnail}
-              alt={event.name}
-              fill
-              className="object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <span className="text-purple-300 text-sm">No Image</span>
-            </div>
-          )}
+    : featuredEvents.map((event) => (
+        <div
+          key={event.id}
+          onClick={() => {
+            if (onEventClick) {
+              onEventClick(event);
+            } else {
+              router.push(`/events/${event.id}`);
+            }
+          }}
+          className="flex-shrink-0 w-64 bg-white rounded-2xl overflow-hidden cursor-pointer transition-shadow"
+        >
+          <div className="relative h-36 w-full bg-purple-100">
+            {event.thumbnail ? (
+              <Image
+                src={event.thumbnail}
+                alt={event.name}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <span className="text-purple-300 text-sm">No Image</span>
+              </div>
+            )}
+          </div>
+          <div className="p-4">
+            <h3 className="font-semibold text-black text-sm truncate">
+              {event.name}
+            </h3>
+            <p className="text-purple-500 text-xs mt-0.5">
+              {event.category
+                ?.split(/[_\s]+/)
+                .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                .join(" ")}
+            </p>
+            <p className="text-gray-400 text-xs mt-0.5">
+              {new Date(event.start).toLocaleDateString("en-US", {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+              })}
+              ,{" "}
+              {new Date(event.start).toLocaleTimeString("en-US", {
+                hour: "numeric",
+                minute: "2-digit",
+              })}
+            </p>
+            <p className="text-black text-xs font-medium mt-2">View Event →</p>
+          </div>
         </div>
-        <div className="p-4">
-          <h3 className="font-semibold text-black text-sm truncate">
-            {event.name}
-          </h3>
-          <p className="text-purple-500 text-xs mt-0.5">
-            {event.category}
-          </p>
-          <p className="text-gray-400 text-xs mt-0.5">
-            {new Date(event.start).toLocaleDateString("en-US", {
-              weekday: "short",
-              month: "short",
-              day: "numeric",
-            })}
-            ,{" "}
-            {new Date(event.start).toLocaleTimeString("en-US", {
-              hour: "numeric",
-              minute: "2-digit",
-            })}
-          </p>
-          <p className="text-black text-xs font-medium mt-2">
-            View Event →
-          </p>
-        </div>
-      </div>
-    )))
+      ));
 
   return (
     <div className="relative rounded-3xl overflow-hidden p-6 md:p-10 min-h-[320px]">
