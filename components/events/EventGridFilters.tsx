@@ -17,7 +17,7 @@ export type DateFilter =
   | "today"
   | "this-week"
   | "this-month"
-  | "upcoming";
+  | "past events";
 export type TagFilter = "all" | "free" | "paid" | "online" | "in-person";
 
 interface Club {
@@ -103,7 +103,7 @@ const dateLabels: Record<DateFilter, string> = {
   today: "Today",
   "this-week": "This Week",
   "this-month": "This Month",
-  upcoming: "Upcoming",
+  past: "Past Events",
 };
 
 const tagLabels: Record<TagFilter, string> = {

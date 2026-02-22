@@ -82,8 +82,8 @@ function applyFilters(
     } else if (params.dateFilter === "this-month") {
       const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
       query = query.gte("start", now.toISOString()).lt("start", monthEnd.toISOString());
-    } else if (params.dateFilter === "upcoming") {
-      query = query.gte("start", now.toISOString());
+    } else if (params.dateFilter === "past") {
+      query = query.lt("start", now.toISOString());
     }
   }
 

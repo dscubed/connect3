@@ -51,8 +51,8 @@ export const filterEvents = (
             eventStart.getFullYear() !== now.getFullYear() ||
             eventStart.getMonth() !== now.getMonth()
           ) return accumulator;
-        } else if (dateFilter === "upcoming") {
-          if (eventStart < now) return accumulator;
+        } else if (dateFilter === "past") {
+          if (eventStart >= now) return accumulator;
         }
       }
 
