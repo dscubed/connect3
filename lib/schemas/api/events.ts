@@ -1,21 +1,7 @@
 import { z } from "zod";
+import { EVENT_CATEGORIES } from "@/types/events/event";
 
-const eventCategorySchema = z.enum([
-  "academic_workshops",
-  "arts_music",
-  "career_networking",
-  "entrepreneurship",
-  "environment_sustainability",
-  "food_dining",
-  "gaming_esports",
-  "health_wellness",
-  "social_cultural",
-  "sports_fitness",
-  "tech_innovation",
-  "travel_adventure",
-  "volunteering_community",
-  "recruitment",
-]);
+const eventCategorySchema = z.enum(EVENT_CATEGORIES);
 
 const eventPricingSchema = z.enum(["free", "paid"]);
 const eventLocationTypeSchema = z.enum(["virtual", "physical"]);
