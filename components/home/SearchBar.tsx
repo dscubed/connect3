@@ -9,6 +9,7 @@ import { universities } from "@/components/profile/details/univeristies";
 const ALL_UNIVERSITIES = Object.keys(universities).filter(
   (key) => key !== "others"
 );
+const STORAGE_KEY = "uni-preferences";
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
 
 const allSuggestions = [
@@ -47,7 +48,14 @@ export function SearchBar({ containerClassName }: SearchBarProps) {
   const [query, setQuery] = useState("");
   const [creatingChatroom, setCreatingChatroom] = useState(false);
   const [selectedUniversities, setSelectedUniversities] = useState<string[]>(
-    ALL_UNIVERSITIES
+    () => {
+      if (typeof window === "undefined") return ALL_UNIVERSITIES;
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) { const parsed = JSON.parse(raw); if (Array.isArray(parsed)) return parsed; }
+      } catch { /* ignore */ }
+      return ALL_UNIVERSITIES;
+    }
   );
   const router = useRouter();
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -55,6 +63,10 @@ export function SearchBar({ containerClassName }: SearchBarProps) {
   useEffect(() => {
     setSuggestions(pickRandom(allSuggestions, 5));
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(selectedUniversities));
+  }, [selectedUniversities]);
 
   const handleUniversityChange = useCallback((uni: string) => {
     if (uni == "all") {
