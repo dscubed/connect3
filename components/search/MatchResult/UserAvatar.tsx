@@ -50,7 +50,7 @@ export default function UserAvatar({
         <Avvvatars
           value={seed}
           displayValue={fullName}
-          size={pixelSize}
+          size={pixelSize - 2}
           radius={isOrganisation ? Math.round(pixelSize * 0.1) : pixelSize}
           border={false}
         />
