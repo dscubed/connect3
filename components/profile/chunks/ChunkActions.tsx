@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { ResumeUploadModal } from "./resume/ChunkResumeModal";
-import { useAuthStore } from "@/stores/authStore";
 
 export function ChunkActions({
   showResume = false,
@@ -15,8 +14,6 @@ export function ChunkActions({
   const { reset } = useChunkContext();
   const { resetDraft } = useProfileEditContext();
   const [resumeOpen, setResumeOpen] = useState(false);
-  const profile = useAuthStore((state) => state.profile);
-  const showResume = profile?.account_type === "user";
 
   const handleRevert = () => {
     reset();
