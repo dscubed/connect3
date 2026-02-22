@@ -27,11 +27,8 @@ export function ActionsButton({
 }) {
   const { user } = useAuthStore();
   const { hasPendingEdits, saveChunks, savingChunks } = useChunkContext();
-  const {
-    hasPendingProfileEdits,
-    saveProfileEdits,
-    savingProfileEdits,
-  } = useProfileEditContext();
+  const { hasPendingProfileEdits, saveProfileEdits, savingProfileEdits } =
+    useProfileEditContext();
   const [pendingModalOpen, setPendingModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const isSavingRef = useRef(false);
@@ -42,12 +39,17 @@ export function ActionsButton({
 
   const handleEditToggle = async () => {
     if (editingProfile) {
-      if (hasPendingEdits() || hasPendingProfileEdits()) {
-        setPendingModalOpen(true);
-        return;
-      }
       if (isSavingRef.current || savingChunks || savingProfileEdits) {
         toast.error("Profile is currently being saved. Try again later.");
+        return;
+      }
+
+      const hasProfileChanges = hasPendingProfileEdits();
+      const hasChunkChanges = hasPendingEdits();
+
+      if (!hasProfileChanges && !hasChunkChanges) {
+        // Nothing to save, just exit edit mode
+        setEditingProfile(false);
         return;
       }
 
@@ -149,12 +151,32 @@ const PendingChangesModal = ({
               Revert All Changes
             </Button>
             <Button
-              onClick={() => {
-                saveProfileEdits();
-                saveAllEdits();
-                saveChunks();
-                exitEdit();
+              onClick={async () => {
                 onOpenChange(false);
+                const toastId = toast.loading(
+                  SAVING_MESSAGES[
+                    Math.floor(Math.random() * SAVING_MESSAGES.length)
+                  ],
+                );
+                let msgIndex = Math.floor(
+                  Math.random() * SAVING_MESSAGES.length,
+                );
+                const interval = setInterval(() => {
+                  msgIndex = (msgIndex + 1) % SAVING_MESSAGES.length;
+                  toast.loading(SAVING_MESSAGES[msgIndex], { id: toastId });
+                }, 2000);
+
+                try {
+                  await saveProfileEdits();
+                  await saveAllEdits();
+                  await saveChunks();
+                  toast.success("Profile saved!", { id: toastId });
+                } catch {
+                  toast.error("Failed to save profile.", { id: toastId });
+                } finally {
+                  clearInterval(interval);
+                  exitEdit();
+                }
               }}
               className="animate-fade-in"
             >
