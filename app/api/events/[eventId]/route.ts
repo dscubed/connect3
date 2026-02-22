@@ -42,7 +42,8 @@ const deleteVectorStoreFile = async (fileId: string) => {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function transformDbEventToEventSchema(dbEvent: any): Event {
-    const fallbackCategory = dbEvent.category || "general";
+  // events table has category text null; single category per event
+  const category = dbEvent.category ?? "general";
   return {
     id: dbEvent.id,
     name: dbEvent.name,
@@ -59,7 +60,7 @@ function transformDbEventToEventSchema(dbEvent: any): Event {
     capacity: dbEvent.capacity || 50,
     currency: dbEvent.currency || "USD",
     thumbnail: dbEvent.thumbnail,
-    category: dbEvent.event_categories?.category || fallbackCategory,
+    category,
     location: {
       venue: dbEvent.event_locations?.venue || "TBA",
       address: dbEvent.event_locations?.address || "TBA",
@@ -171,6 +172,7 @@ export async function POST(request: NextRequest, { params }: RouteParameters) {
     } = validatedBody;
 
     const bookingUrl = booking_link?.[0] ?? null;
+    // events.category is text null; we store first selected category
     const category = type?.[0] ?? null;
     const isOnline = location_type === "virtual";
     const publishedAt = new Date().toISOString();
@@ -361,6 +363,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParameters) {
         }
 
         const bookingUrl = booking_link?.[0] ?? null;
+        // events.category is text null; we store first selected category
         const category = type?.[0] ?? null;
         const isOnline = location_type === "virtual";
         const normalizedPricingMin =

@@ -7,7 +7,11 @@ import { useState } from "react";
 import { ResumeUploadModal } from "./resume/ChunkResumeModal";
 import { useAuthStore } from "@/stores/authStore";
 
-export function ChunkActions() {
+export function ChunkActions({
+  showResume = false,
+}: {
+  showResume?: boolean;
+}) {
   const { reset } = useChunkContext();
   const { resetDraft } = useProfileEditContext();
   const [resumeOpen, setResumeOpen] = useState(false);
@@ -24,7 +28,6 @@ export function ChunkActions() {
       <div className="flex gap-2 items-center">
         <h1 className="text-lg font-medium pr-2">Actions:</h1>
 
-        {/* Save and Cancel for Editing */}
         <ActionButton
           icon={Undo}
           label="Revert"
