@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
 import { validateTokenLimit, Tier } from "@/lib/api/token-guard";
+import { checkTokenBudget, debitTokens, resolveIdentity } from "@/lib/api/token-budget";
 import { createClient } from "@supabase/supabase-js";
 
 const client = new OpenAI({
@@ -38,9 +39,13 @@ export async function POST(request: NextRequest) {
       text,
       ...(messages ?? []).map((m: { content: string }) => m.content),
     ].join("\n");
-    const tier: Tier = "verified";
+    const tier: Tier = user.is_anonymous ? "anon" : "verified";
     const tokenCheck = validateTokenLimit(fullInput, tier);
     if (!tokenCheck.ok) return tokenCheck.response;
+
+    const identity = resolveIdentity(user.id, request);
+    const budgetCheck = await checkTokenBudget(supabase, identity, tier, tokenCheck.tokenCount);
+    if (!budgetCheck.ok) return budgetCheck.response;
 
     const isEventDescription = fieldType === "event_description";
     let chunksText = "";
@@ -212,6 +217,9 @@ Do NOT wrap this JSON in backticks and do NOT add any extra commentary.
       input: inputMessages,
       temperature: 0.4,
     });
+
+    const actualTokens = response.usage?.total_tokens ?? tokenCheck.tokenCount;
+    await debitTokens(supabase, identity, tier, actualTokens);
 
     const raw = response.output_text ?? "{}";
 

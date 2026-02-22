@@ -101,6 +101,23 @@ export function useChatroom(chatroomId: string | null) {
           return;
         }
 
+        if (response.status === 429) {
+          const data = await response.json().catch(() => ({}));
+          toast.error(
+            data.resetsAt
+              ? `You've reached your daily limit. Try again at ${new Date(data.resetsAt).toLocaleTimeString()}.`
+              : "You've reached your daily limit. Please try again later.",
+          );
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === messageId
+                ? { ...m, status: "failed" as const }
+                : m,
+            ),
+          );
+          return;
+        }
+
         // HTTP fallback in case realtime missed the "done" event
         if (response.ok) {
           const data = await response.json();

@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { createClient } from "@/lib/supabase/client";
 import { fetchProfile as fetchProfileApi } from "@/lib/profiles/fetchProfile";
+import { getFingerprint } from "@/hooks/useFingerprint";
 import type { User, Session, Subscription } from "@supabase/supabase-js";
 
 export interface Profile {
@@ -127,6 +128,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       Authorization: `Bearer ${session.access_token}`,
       ...((options.headers as Record<string, string>) || {}),
     };
+
+    const fp = getFingerprint();
+    if (fp) {
+      headers["X-Fingerprint"] = fp;
+    }
+
     if (!isFormData) {
       headers["Content-Type"] = "application/json";
     } else {

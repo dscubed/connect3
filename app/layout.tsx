@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { ThemeProvider } from "next-themes";
 import { AuthInitializer } from "@/components/auth/AuthInitializer";
+import { FingerprintInitializer } from "@/components/auth/FingerprintInitializer";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -30,6 +31,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className="font-sans antialiased">
         <AuthInitializer />
+        <FingerprintInitializer />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

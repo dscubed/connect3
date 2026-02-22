@@ -4,6 +4,7 @@ import OpenAI from "openai";
 import { runSearch } from "@/lib/search/agent";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
 import { validateTokenLimit, Tier } from "@/lib/api/token-guard";
+import { checkTokenBudget, debitTokens, resolveIdentity, BudgetTier } from "@/lib/api/token-budget";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -56,7 +57,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const tier: Tier = user.email_confirmed_at ? "verified" : "anon";
+  const tier: Tier = user.is_anonymous ? "anon" : "verified";
   const tokenCheck = validateTokenLimit(messageData.query ?? "", tier);
   if (!tokenCheck.ok) {
     await supabase
@@ -64,6 +65,14 @@ export async function POST(req: NextRequest) {
       .update({ status: "failed" })
       .eq("id", messageId);
     return tokenCheck.response;
+  }
+
+  const identity = resolveIdentity(user.id, req);
+  const budgetTier: BudgetTier = user.is_anonymous ? "anon" : "verified";
+  const budgetCheck = await checkTokenBudget(supabase, identity, budgetTier, tokenCheck.tokenCount);
+  if (!budgetCheck.ok) {
+    await supabase.from("chatmessages").update({ status: "failed" }).eq("id", messageId);
+    return budgetCheck.response;
   }
 
   const channelName = `message:${messageId}`;
@@ -125,6 +134,8 @@ export async function POST(req: NextRequest) {
       console.error("Failed to update message status:", completeUpdateError);
       throw new Error("Failed to update message status");
     }
+
+    await debitTokens(supabase, identity, budgetTier, tokenCheck.tokenCount);
 
     return NextResponse.json({
       success: true,

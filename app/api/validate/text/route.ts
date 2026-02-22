@@ -5,6 +5,13 @@ import { zodTextFormat } from "openai/helpers/zod";
 import { rateLimit } from "@/lib/api/rate-limit";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
 import { validateTokenLimit, Tier } from "@/lib/api/token-guard";
+import { createClient } from "@supabase/supabase-js";
+import { checkTokenBudget, debitTokens, resolveIdentity } from "@/lib/api/token-budget";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SECRET_KEY!
+);
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -51,9 +58,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const tier: Tier = "verified";
+    const tier: Tier = user.is_anonymous ? "anon" : "verified";
     const tokenCheck = validateTokenLimit(text, tier);
     if (!tokenCheck.ok) return tokenCheck.response;
+
+    const identity = resolveIdentity(user.id, req);
+    const budgetCheck = await checkTokenBudget(supabase, identity, tier, tokenCheck.tokenCount);
+    if (!budgetCheck.ok) return budgetCheck.response;
 
     // Rate limiting per user
     try {
@@ -113,9 +124,12 @@ export async function POST(req: NextRequest) {
 
     const result = response.output_parsed;
 
+    const actualTokens = response.usage?.total_tokens ?? tokenCheck.tokenCount;
+    await debitTokens(supabase, identity, tier, actualTokens);
+
     // Log the validation result for monitoring
     console.log(
-      `Validation result for user ${user.id}: safe=${result?.safe}, relevant=${result?.relevant}, 
+      `Validation result for user ${user.id}: safe=${result?.safe}, relevant=${result?.relevant},
         belongsToUser=${result?.belongsToUser}`
     );
 
