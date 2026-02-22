@@ -41,10 +41,7 @@ const UNIVERSITY_KEYS = Object.keys(universities) as University[];
 
 const resumeProfileSchema = z.object({
   tldr: z.string().nullable().optional(),
-  universityKey: z
-    .enum(UNIVERSITY_KEYS as [University, ...University[]])
-    .nullable()
-    .optional(),
+  universityName: z.string().nullable().optional(),
   links: z
     .array(
       z.object({
@@ -114,6 +111,22 @@ const placeholderValues = new Set([
   "null",
 ]);
 
+// Platform names only (no URL/handle) — do not create a link for these
+const platformNameOnly = new Set([
+  "linkedin",
+  "github",
+  "instagram",
+  "facebook",
+  "discord",
+  "x",
+  "twitter",
+  "youtube",
+  "tiktok",
+  "reddit",
+  "wechat",
+  "xiaohongshu",
+]);
+
 const trailingPunctuation = /[).,;!?]+$/g;
 const urlScheme = /^https?:\/\//i;
 const urlLikeDomain =
@@ -147,6 +160,8 @@ const normalizeLink = (link: ExtractedLink): ExtractedLink | null => {
 
   const lower = raw.toLowerCase();
   if (placeholderValues.has(lower)) return null;
+  // Reject when only the platform name is present (e.g. "LinkedIn" with no URL/handle)
+  if (platformNameOnly.has(lower)) return null;
 
   const url = normalizeUrl(raw);
   if (url) {
@@ -184,7 +199,19 @@ const dedupeLinks = (links: ExtractedLink[]) => {
 };
 
 const buildUniversityList = () =>
-  UNIVERSITY_KEYS.map((key) => `${key} = ${universities[key].name}`).join("\n");
+  UNIVERSITY_KEYS.map((key) => universities[key].name).join("\n");
+
+// Map full university name (LLM output) back to University key
+const universityNameToKey = (name: string | null | undefined): University | null => {
+  const raw = name?.trim();
+  if (!raw) return null;
+  const lower = raw.toLowerCase();
+  for (const key of UNIVERSITY_KEYS) {
+    if (universities[key].name.toLowerCase() === lower) return key;
+  }
+  if (lower === "other university" || lower === "others") return "others";
+  return "others";
+};
 
 export async function extractResumeProfileDetails(
   resumeText: string,
@@ -199,23 +226,27 @@ Extract ONLY from the provided resume text. Do NOT invent or guess.
 Return a JSON object with:
 - "tldr": 2–3 sentences, first-person, LinkedIn-style summary. Professional and modest tone; no hype.
   Use "I" statements. If there is not enough information, return null.
-- "universityKey": one of the allowed keys below, or null if no university is mentioned.
-  If a university is mentioned but it does NOT match the allowed list, return "others".
+- "universityName": the full, long-hand university name from the list below, or null if no university is mentioned.
+  Return the exact name as written (e.g. "University of Melbourne", "Monash University"), not a short-hand or code.
+  If a university is mentioned but it does NOT match the allowed list, return "Other University".
 - "links": an array of objects { "type": <allowed type>, "details": <string> }.
 
-Allowed university keys:
+Allowed university names (return one of these exactly, or "Other University"):
 ${buildUniversityList()}
+Other University
 
 Allowed link types:
 ${LINK_TYPES.join(", ")}
 
 Link details rules:
-- Only include links/handles explicitly present in the resume text.
+- Only include a link when there is an actual URL (e.g. linkedin.com/in/username, https://...) or a platform handle (e.g. @username) present in the text.
+- Do NOT include a link when only the platform name appears as plain text (e.g. the word "LinkedIn" or "GitHub" with no URL or handle).
 - Do NOT include email addresses or phone numbers.
 - For known platforms (LinkedIn, GitHub, Instagram, Facebook, X, YouTube, TikTok, Reddit, Discord server),
   return ONLY the username/slug (no URL, no @).
 - For "website", return the full URL (include https:// if available).
 - For "discord", "wechat", "xiaohongshu", return the handle as written (no URL needed).
+- Text in "[Hyperlinks from document]:" is a list of URLs extracted from clickable links in the PDF; you may use these as link sources.
 
 Return ONLY the JSON object. No extra text.
 `.trim();
@@ -236,7 +267,7 @@ Return ONLY the JSON object. No extra text.
   const parsed = response.output_parsed as z.infer<typeof resumeProfileSchema>;
 
   const tldr = (parsed.tldr ?? "").trim();
-  const universityKey = parsed.universityKey ?? null;
+  const universityKey = universityNameToKey(parsed.universityName);
 
   const normalizedLinks = dedupeLinks(
     (parsed.links ?? [])

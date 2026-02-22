@@ -85,27 +85,10 @@ export async function POST(req: NextRequest) {
       throw new Error("Error processing resume");
     }
 
-    // Extract profile details for preview only (no auto-save)
+    // Extract profile details for preview (tldr, university, links); user applies in UI
     let profileDetails = null;
     try {
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .select("tldr, university")
-        .eq("id", profileId)
-        .single();
-
-      const { data: existingLinks, error: linksError } = await supabase
-        .from("profile_links")
-        .select("id")
-        .eq("profile_id", profileId);
-
-      const needsTldr = !profileData?.tldr?.trim();
-      const needsUniversity = !profileData?.university?.trim();
-      const needsLinks = (existingLinks ?? []).length === 0;
-
-      if (profileError || linksError || needsTldr || needsUniversity || needsLinks) {
-        profileDetails = await extractResumeProfileDetails(resumeText, openai);
-      }
+      profileDetails = await extractResumeProfileDetails(resumeText, openai);
     } catch (extractError) {
       console.error(
         "Error extracting profile details from resume:",

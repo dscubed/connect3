@@ -1,5 +1,6 @@
 import { FileUp, Undo } from "lucide-react";
 import { useChunkContext } from "./hooks/ChunkProvider";
+import { useProfileEditContext } from "@/components/profile/hooks/ProfileEditProvider";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -8,9 +9,15 @@ import { useAuthStore } from "@/stores/authStore";
 
 export function ChunkActions() {
   const { reset } = useChunkContext();
+  const { resetDraft } = useProfileEditContext();
   const [resumeOpen, setResumeOpen] = useState(false);
   const profile = useAuthStore((state) => state.profile);
   const showResume = profile?.account_type === "user";
+
+  const handleRevert = () => {
+    reset();
+    resetDraft();
+  };
 
   return (
     <div className="flex gap-4">
@@ -21,9 +28,7 @@ export function ChunkActions() {
         <ActionButton
           icon={Undo}
           label="Revert"
-          onClick={() => {
-            reset();
-          }}
+          onClick={handleRevert}
         />
         {showResume && (
           <ActionButton

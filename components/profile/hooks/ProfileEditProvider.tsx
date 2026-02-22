@@ -210,17 +210,26 @@ export function ProfileEditProvider({
         next.university = detailsForNow.universityKey;
       }
 
-      if (
-        !loadingLinks &&
-        baseline.links.length === 0 &&
-        prev.links.length === 0 &&
-        detailsForNow.links?.length
-      ) {
-        next.links = detailsForNow.links.map((link) => ({
-          id: crypto.randomUUID(),
-          type: link.type,
-          details: link.details,
-        }));
+      // Merge new links from resume: add any that are not already in the draft (by type + details)
+      if (!loadingLinks && detailsForNow.links?.length) {
+        const existingKeys = new Set(
+          prev.links.map((l) => `${l.type}:${l.details.toLowerCase().trim()}`)
+        );
+        const newLinks = detailsForNow.links
+          .filter(
+            (link) =>
+              !existingKeys.has(
+                `${link.type}:${link.details.toLowerCase().trim()}`
+              )
+          )
+          .map((link) => ({
+            id: crypto.randomUUID(),
+            type: link.type,
+            details: link.details,
+          }));
+        if (newLinks.length > 0) {
+          next.links = [...prev.links, ...newLinks];
+        }
       }
 
       return next;

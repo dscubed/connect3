@@ -7,6 +7,7 @@ import {
   Save,
 } from "lucide-react";
 import { useChunkContext } from "../hooks/ChunkProvider";
+import { useProfileEditContext } from "@/components/profile/hooks/ProfileEditProvider";
 import { useAuthStore } from "@/stores/authStore";
 
 export function ChunkActions({
@@ -17,8 +18,16 @@ export function ChunkActions({
   setIsEditing: (editing: boolean) => void;
 }) {
   const { reset, saveChunks, fetchChunks } = useChunkContext();
+  const { resetDraft } = useProfileEditContext();
   const profile = useAuthStore((state) => state.profile);
   const showResume = profile?.account_type === "user";
+
+  const handleCancel = () => {
+    reset();
+    resetDraft();
+    setIsEditing(false);
+  };
+
   return (
     <div className="flex justify-between">
       <div className="flex gap-4">
@@ -29,10 +38,7 @@ export function ChunkActions({
               <ActionButton
                 icon={PencilOff}
                 label="Cancel"
-                onClick={() => {
-                  reset();
-                  setIsEditing(false);
-                }}
+                onClick={handleCancel}
               />
               <ActionButton
                 icon={Save}
