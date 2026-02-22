@@ -67,8 +67,10 @@ export function ActionsButton({
         await saveProfileEdits();
         await saveChunks();
         toast.success("Profile saved!", { id: toastId });
-      } catch {
-        toast.error("Failed to save profile.", { id: toastId });
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Failed to save profile.";
+        toast.error(message, { id: toastId });
       } finally {
         clearInterval(interval);
         isSavingRef.current = false;
@@ -149,12 +151,18 @@ const PendingChangesModal = ({
               Revert All Changes
             </Button>
             <Button
-              onClick={() => {
-                saveProfileEdits();
-                saveAllEdits();
-                saveChunks();
-                exitEdit();
-                onOpenChange(false);
+              onClick={async () => {
+                try {
+                  await saveProfileEdits();
+                  await saveAllEdits();
+                  await saveChunks();
+                  exitEdit();
+                  onOpenChange(false);
+                } catch (err) {
+                  const message =
+                    err instanceof Error ? err.message : "Failed to save profile.";
+                  toast.error(message);
+                }
               }}
               className="animate-fade-in"
             >
