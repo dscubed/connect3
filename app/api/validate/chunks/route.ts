@@ -199,7 +199,7 @@ export async function POST(req: NextRequest) {
     `.trim();
 
     const response = await client.responses.parse({
-      model: "gpt-4o-mini",
+      model: "gpt-5-mini",
       input: [
         { role: "system", content: systemPrompt },
         { role: "user", content: text },

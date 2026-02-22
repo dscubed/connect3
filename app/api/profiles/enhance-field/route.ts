@@ -207,7 +207,7 @@ Do NOT wrap this JSON in backticks and do NOT add any extra commentary.
 
     // 7. Call OpenAI (Responses API)
     const response = await client.responses.create({
-      model: "gpt-4o-mini",
+      model: "gpt-5-mini",
       instructions: systemPrompt,
       input: inputMessages,
       temperature: 0.4,
