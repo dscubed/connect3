@@ -72,8 +72,8 @@ export function ActionsButton({
           })(),
           new Promise<never>((_, reject) =>
             setTimeout(
-              () => reject(new Error("Save timed out after 60 seconds")),
-              60000,
+              () => reject(new Error("Save timed out after 120 seconds")),
+              120000,
             ),
           ),
         ]);
