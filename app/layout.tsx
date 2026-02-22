@@ -1,8 +1,15 @@
 import type { Metadata, Viewport } from "next";
+import { Fredoka } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { AuthInitializer } from "@/components/auth/AuthInitializer";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
+
+const fredoka = Fredoka({
+  subsets: ["latin"],
+  weight: ["600"],
+  variable: "--font-fredoka",
+});
 
 const defaultUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
   ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
@@ -28,7 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="font-sans antialiased">
+      <body className={`font-sans antialiased ${fredoka.variable}`}>
         <AuthInitializer />
         <ThemeProvider
           attribute="class"

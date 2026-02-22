@@ -33,7 +33,7 @@ export default function Home() {
           <div className="flex flex-col items-center w-full gap-4 mb-8 mt-[10dvh] sm:mt-[20dvh]">
             <div className="flex flex-row gap-2 justify-center items-center">
               <Logo className="h-12 w-12 sm:h-14 sm:w-14" />
-              <h1 className="text-4xl font-extrabold tracking-tight leading-[1.1]">
+              <h1 className="font-fredoka text-4xl font-semibold tracking-[0.01em] leading-[1.1]">
                 Connect3
               </h1>
             </div>

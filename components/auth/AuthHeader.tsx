@@ -18,7 +18,7 @@ export function AuthHeader({ className }: AuthHeaderProps) {
       >
         {/* Logo uses currentColor */}
         <Logo width={34} height={34} className="text-black" />
-        <span className="text-xl font-semibold text-black">
+        <span className="font-fredoka text-xl font-semibold tracking-[0.01em] text-black">
           Connect3
         </span>
       </Link>
