@@ -6,23 +6,11 @@ export function validatePassword(password: string): { valid: boolean; error?: st
   const MIN_LENGTH = 6;
 
   if (password.length < MIN_LENGTH) {
-    return { valid: false, error: `Password must be at least ${MIN_LENGTH} characters` };
+    return { valid: false, error: "Password must be at least 6 characters" };
   }
 
-  if (!/[a-z]/.test(password)) {
-    return { valid: false, error: "Password must include a lowercase letter" };
-  }
-
-  if (!/[A-Z]/.test(password)) {
-    return { valid: false, error: "Password must include an uppercase letter" };
-  }
-
-  if (!/\d/.test(password)) {
-    return { valid: false, error: "Password must include a digit" };
-  }
-
-  if (!/[^a-zA-Z0-9]/.test(password)) {
-    return { valid: false, error: "Password must include a symbol" };
+  if (!/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/\d/.test(password) || !/[^a-zA-Z0-9]/.test(password)) {
+    return { valid: false, error: "Password should contain lowercase, uppercase letters, digits and symbols" };
   }
 
   return { valid: true };

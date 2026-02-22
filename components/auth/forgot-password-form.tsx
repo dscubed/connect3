@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { getSiteUrl } from "@/lib/site-url";
@@ -13,6 +14,7 @@ export function ForgotPasswordForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -37,41 +39,45 @@ export function ForgotPasswordForm({
     }
   };
 
+  const inputClass =
+    "focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-violet-400";
+
   return (
-    <div className={cn("w-full", className)} {...props}>
+    <div className={cn("flex flex-col gap-3", className)} {...props}>
       {success ? (
-        <div className="space-y-3">
-          <h1 className="text-4xl font-black tracking-tight text-black">
+        <>
+          <h1 className="text-2xl font-medium tracking-tight text-black">
             Check your email
           </h1>
-          <p className="text-sm text-black/70">
+
+          <p className="text-base text-black/50">
             If you registered using email and password, you’ll receive a reset
             link shortly.
           </p>
 
-          <div className="pt-6 text-sm">
-            <Link
-              href="/auth/login"
-              className="text-foreground hover:underline"
-            >
-              Back to login
-            </Link>
-          </div>
-        </div>
+          <Button
+            onClick={() => router.push("/auth/login")}
+            className={cn(
+              "mt-2 w-full rounded-md text-sm font-semibold text-white",
+              "bg-foreground hover:bg-foreground/80 transition-colors",
+            )}
+          >
+            Back to login
+          </Button>
+        </>
       ) : (
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <h1 className="text-4xl font-black tracking-tight text-black">
-              Reset password
-            </h1>
-            <p className="text-sm text-black/70">
+        <>
+          <h1 className="text-2xl font-medium tracking-tight text-black">
+            Reset password
+          </h1>
+
+          <p className="text-base text-black/50">
               Enter your email and we’ll send you a link to reset your password.
             </p>
-          </div>
 
-          <form onSubmit={handleForgotPassword} className="space-y-5">
+          <form onSubmit={handleForgotPassword} className="space-y-3">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-black font-semibold">
+              <Label htmlFor="email" className="text-sm font-medium text-black">
                 Email
               </Label>
               <Input
@@ -81,11 +87,7 @@ export function ForgotPasswordForm({
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={cn(
-                  "h-12 rounded-full border-2 border-gray-200 bg-white px-5",
-                  "text-black placeholder:text-black/40",
-                  "focus-visible:ring-0 focus-visible:border-foreground",
-                )}
+                className={inputClass}
               />
             </div>
 
@@ -95,30 +97,25 @@ export function ForgotPasswordForm({
               type="submit"
               disabled={isLoading}
               className={cn(
-                "h-12 w-full rounded-full text-white font-semibold",
-                "bg-foreground hover:bg-foreground/80",
-                "disabled:opacity-60",
+                "mt-2 w-full rounded-md text-sm font-semibold text-white",
+                "bg-foreground hover:bg-foreground/80 transition-colors",
               )}
             >
               {isLoading ? "Sending..." : "Send reset email"}
             </Button>
 
-            {/* Divider like your other pages */}
-            <div className="relative my-2 flex items-center">
-              <span className="w-full border-t border-gray-200" />
-            </div>
-
-            <div className="text-center text-sm text-black/70">
-              Remember your password?{" "}
-              <Link
-                href="/auth/login"
-                className="text-foreground hover:underline"
-              >
-                Login
-              </Link>
-            </div>
           </form>
-        </div>
+
+          <p className="text-center text-base text-black/50">
+            Remember your password?{" "}
+            <Link
+              href="/auth/login"
+              className="font-semibold text-foreground hover:underline"
+            >
+              Log in
+            </Link>
+          </p>
+        </>
       )}
     </div>
   );

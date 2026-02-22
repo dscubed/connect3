@@ -9,12 +9,12 @@ export default async function Page({
 
   return (
     <AuthShell>
-      <div className="w-full space-y-6">
-        <div className="space-y-2">
-          <h1 className="text-4xl font-black tracking-tight text-black">
+      <div className="w-full flex flex-col gap-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-medium tracking-tight text-black">
             Sorry, something went wrong.
           </h1>
-          <p className="text-sm text-black/70">
+          <p className="text-base text-black/50">
             {params?.error
               ? `Code error: ${params.error}`
               : "An unspecified error occurred."}

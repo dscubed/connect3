@@ -55,15 +55,16 @@ export default function Page() {
       {loading && user ? (
         <LoadingIndicator />
       ) : (
-        <div className="w-full space-y-6">
-          <div className="space-y-2">
-            <h1 className="text-4xl font-black tracking-tight text-black">
-              Thank you for signing up!
-            </h1>
-            <p className="text-sm text-muted">Check your email to confirm</p>
-          </div>
+        <div className="w-full flex flex-col gap-3">
+          <h1 className="text-2xl font-medium tracking-tight text-black">
+            Thank you for signing up!
+          </h1>
 
-          <p className="text-sm text-muted leading-relaxed">
+          <p className="text-base text-black/50">
+            Check your email to confirm your account before signing in.
+          </p>
+
+          <p className="text-base text-black/50 leading-relaxed">
             You&apos;ve successfully signed up. Please check your email to
             confirm your account before signing in.
           </p>
@@ -72,9 +73,8 @@ export default function Page() {
             onClick={handleResendVerification}
             disabled={isResending || !pendingEmail}
             className={cn(
-              "mt-1 h-12 w-full rounded-full text-sm font-semibold text-white",
-              "bg-foreground hover:bg-foreground/70",
-              (!pendingEmail || isResending) && "opacity-60 cursor-not-allowed",
+              "mt-2 w-full rounded-md text-sm font-semibold text-white",
+              "bg-foreground hover:bg-foreground/80 transition-colors",
             )}
           >
             {isResending
