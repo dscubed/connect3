@@ -65,7 +65,7 @@ export async function generateMatch(
     .join("\n\n");
 
   const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: "gpt-5-mini",
     temperature: 0.7,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },

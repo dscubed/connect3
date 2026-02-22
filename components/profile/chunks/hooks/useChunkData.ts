@@ -3,6 +3,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AllCategories, ProfileChunk } from "../ChunkUtils";
 import { CategoryOrderData } from "../ChunkUtils";
 import { uploadProfileToVectorStore } from "@/lib/vectorStores/profile/client";
+import { fetchProfile } from "@/lib/profiles/fetchProfile";
+import type { ProfileDetailChunkCategory } from "@/components/profile/ProfileProvider";
 
 export interface UseChunkDataExports {
   fetchChunks: () => Promise<void>;
@@ -64,47 +66,44 @@ export function useChunkData({
     setCategoryOrder([]);
   }, [profileId, setChunks, setCategoryOrder]);
 
-  const fetchChunksFromSupabase = useCallback(
+  const fetchChunksFromProfileDetail = useCallback(
     async (profileId: string) => {
       /**
-       * Fetches chunks and category order for a given profile from Supabase.
-       *
-       * @param profile - The profile whose chunks are to be fetched.
-       * @returns An object containing arrays of fetched chunks and category order data.
+       * Fetches chunks and category order via the profile_detail view.
+       * Transforms the nested JSON into flat arrays for state management.
        */
       console.log("Fetching chunks for profileId:", profileId);
 
-      const chunksResponse = await supabase
-        .from("profile_chunks")
-        .select("id, text, category, order")
-        .eq("profile_id", profileId);
-      const { data: chunksData, error: chunksError } = chunksResponse;
+      const data = await fetchProfile<{ chunks: ProfileDetailChunkCategory[] }>(
+        profileId,
+        { table: "profile_detail", select: "chunks" },
+      );
 
-      console.log("Fetched chunks:", chunksResponse);
-
-      if (chunksError) {
-        console.error("Error fetching chunks:", chunksError);
-        throw chunksError;
+      if (!data) {
+        throw new Error("Failed to fetch profile chunks");
       }
 
-      const { data: categoryOrderData, error: categoryError } = await supabase
-        .from("profile_chunk_categories")
-        .select("category, order")
-        .eq("profile_id", profileId)
-        .order("order", { ascending: true });
+      const rawChunks = data.chunks ?? [];
+      console.log("Fetched chunks from profile_detail:", rawChunks);
 
-      if (categoryError) {
-        console.error("Error fetching category order:", categoryError);
-        throw categoryError;
-      }
+      // Transform nested view data into flat arrays
+      const categoryOrderData: CategoryOrderData[] = rawChunks.map((cat) => ({
+        category: cat.category as AllCategories,
+        order: cat.order,
+      }));
 
-      if (!categoryOrderData || !chunksData) {
-        throw new Error("No chunk data found");
-      }
+      const chunksData: ProfileChunk[] = rawChunks.flatMap((cat) =>
+        (cat.chunks ?? []).map((chunk) => ({
+          id: chunk.id,
+          text: chunk.text,
+          category: cat.category as AllCategories,
+          order: chunk.order,
+        })),
+      );
 
       return { chunksData, categoryOrderData };
     },
-    [supabase]
+    [],
   );
 
   const setFetchedChunks = useCallback(
@@ -129,7 +128,7 @@ export function useChunkData({
       setPrevChunks(chunksData as ProfileChunk[]);
       setPrevCategoryOrder(categoryOrderData as CategoryOrderData[]);
     },
-    [setChunks, setCategoryOrder]
+    [setChunks, setCategoryOrder],
   );
 
   // Fetch chunks from Supabase
@@ -153,9 +152,8 @@ export function useChunkData({
     try {
       console.log("Starting to load chunks for:", fetchingForId);
 
-      const { chunksData, categoryOrderData } = await fetchChunksFromSupabase(
-        fetchingForId
-      );
+      const { chunksData, categoryOrderData } =
+        await fetchChunksFromProfileDetail(fetchingForId);
 
       // Only apply results if this is still the current profile
       if (currentProfileIdRef.current === fetchingForId) {
@@ -166,7 +164,7 @@ export function useChunkData({
           "Discarding stale fetch result for:",
           fetchingForId,
           "current is:",
-          currentProfileIdRef.current
+          currentProfileIdRef.current,
         );
       }
     } catch (error) {
@@ -177,7 +175,7 @@ export function useChunkData({
         setLoadingChunks(false);
       }
     }
-  }, [profileId, setFetchedChunks, fetchChunksFromSupabase]);
+  }, [profileId, setFetchedChunks, fetchChunksFromProfileDetail]);
 
   useEffect(() => {
     if (profileId && profileId !== "") {
@@ -206,7 +204,7 @@ export function useChunkData({
       .map((chunk) => chunk.id);
     const deletedCategories = prevCategoryOrder.filter(
       (prevCat) =>
-        !categoryOrder.find((cat) => cat.category === prevCat.category)
+        !categoryOrder.find((cat) => cat.category === prevCat.category),
     );
     return { deletedChunkIds, deletedCategories };
   };
@@ -230,7 +228,7 @@ export function useChunkData({
 
     const editedCategories = categoryOrder.filter((cat) => {
       const prevCat = prevCategoryOrder.find(
-        (pc) => pc.category === cat.category
+        (pc) => pc.category === cat.category,
       );
       if (!prevCat) return false;
       return prevCat.order !== cat.order;
@@ -246,18 +244,18 @@ export function useChunkData({
      * @return An object containing arrays of new chunks and new categories.
      */
     const newChunks = chunks.filter(
-      (chunk) => !prevChunks.find((pc) => pc.id === chunk.id)
+      (chunk) => !prevChunks.find((pc) => pc.id === chunk.id),
     );
 
     const newCategories = categoryOrder.filter(
-      (cat) => !prevCategoryOrder.find((pc) => pc.category === cat.category)
+      (cat) => !prevCategoryOrder.find((pc) => pc.category === cat.category),
     );
     return { newChunks, newCategories };
   };
 
   const deleteChunksFromSupabase = async (
     deletedChunkIds: string[],
-    deletedCategories: AllCategories[]
+    deletedCategories: AllCategories[],
   ) => {
     /**
      * Deletes chunks with the specified IDs from Supabase.
@@ -326,7 +324,7 @@ export function useChunkData({
           category: cat.category,
           order: index,
         })),
-        { onConflict: "profile_id, category" }
+        { onConflict: "profile_id, category" },
       );
     if (categoryError) {
       console.error("Error saving category order:", categoryError);
@@ -342,7 +340,7 @@ export function useChunkData({
         category: chunk.category,
         order: chunk.order,
       })),
-      { onConflict: "id" }
+      { onConflict: "id" },
     );
     if (chunksError) {
       console.error("Error saving chunks:", chunksError);
@@ -392,12 +390,12 @@ export function useChunkData({
     const deletedChunkIds = currentPrevChunks
       .filter(
         (prevChunk) =>
-          !currentChunks.find((chunk) => chunk.id === prevChunk.id)
+          !currentChunks.find((chunk) => chunk.id === prevChunk.id),
       )
       .map((chunk) => chunk.id);
     const deletedCategories = currentPrevCategoryOrder.filter(
       (prevCat) =>
-        !currentCategoryOrder.find((cat) => cat.category === prevCat.category)
+        !currentCategoryOrder.find((cat) => cat.category === prevCat.category),
     );
 
     const editedChunks = currentChunks.filter((chunk) => {
@@ -411,18 +409,18 @@ export function useChunkData({
     });
     const editedCategories = currentCategoryOrder.filter((cat) => {
       const prevCat = currentPrevCategoryOrder.find(
-        (pc) => pc.category === cat.category
+        (pc) => pc.category === cat.category,
       );
       if (!prevCat) return false;
       return prevCat.order !== cat.order;
     });
 
     const newChunks = currentChunks.filter(
-      (chunk) => !currentPrevChunks.find((pc) => pc.id === chunk.id)
+      (chunk) => !currentPrevChunks.find((pc) => pc.id === chunk.id),
     );
     const newCategories = currentCategoryOrder.filter(
       (cat) =>
-        !currentPrevCategoryOrder.find((pc) => pc.category === cat.category)
+        !currentPrevCategoryOrder.find((pc) => pc.category === cat.category),
     );
 
     // If no changes, skip saving
@@ -445,7 +443,7 @@ export function useChunkData({
       // Delete removed chunks and categories
       await deleteChunksFromSupabase(
         deletedChunkIds,
-        deletedCategories.map((cat) => cat.category)
+        deletedCategories.map((cat) => cat.category),
       );
 
       // Upsert edited and new chunks and categories

@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
 
   const agent = new Agent({
     name: "TestAgent",
-    model: "gpt-4o-mini",
+    model: "gpt-5-mini",
     tools: [tool],
     instructions:
       "You search for students. Use file_search to find people matching the query. Describe who you found.",

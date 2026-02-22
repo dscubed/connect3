@@ -4,6 +4,7 @@ import { z } from "zod";
 import { zodTextFormat } from "openai/helpers/zod";
 import { rateLimit } from "@/lib/api/rate-limit";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
+import { validateTokenLimit, Tier } from "@/lib/api/token-guard";
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -49,6 +50,10 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    const tier: Tier = "verified";
+    const tokenCheck = validateTokenLimit(text, tier);
+    if (!tokenCheck.ok) return tokenCheck.response;
 
     // Rate limiting per user
     try {
@@ -98,7 +103,7 @@ export async function POST(req: NextRequest) {
     `.trim();
 
     const response = await client.responses.parse({
-      model: "gpt-4o-mini",
+      model: "gpt-5-mini",
       input: [
         { role: "system", content: systemPrompt },
         { role: "user", content: text },

@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useAuthStore, Profile } from "@/stores/authStore";
 import {
   addLinksToSupabase,
@@ -17,6 +11,8 @@ import {
 } from "@/components/profile/links/LinksUtils";
 import { University } from "@/components/profile/details/univeristies";
 import { uploadProfileToVectorStore } from "@/lib/vectorStores/profile/client";
+import { fetchProfile } from "@/lib/profiles/fetchProfile";
+import type { ProfileDetailLink } from "@/components/profile/ProfileProvider";
 
 export type ResumeProfileDetails = {
   tldr?: string | null;
@@ -96,8 +92,7 @@ export function ProfileEditProvider({
   useEffect(() => {
     if (!profile?.id) return;
 
-    const seedLinks =
-      baseline?.profileId === profile.id ? baseline.links : [];
+    const seedLinks = baseline?.profileId === profile.id ? baseline.links : [];
     const nextBase = buildDraft(profile, seedLinks);
     setBaseline(nextBase);
     setDraft((prev) => {
@@ -114,21 +109,26 @@ export function ProfileEditProvider({
       if (!profile?.id) return;
       setLoadingLinks(true);
       initialLinksLoadedRef.current = false;
-      const { data, error } = await supabase
-        .from("profile_links")
-        .select("id, type, details")
-        .eq("profile_id", profile.id);
+
+      const result = await fetchProfile<{ links: ProfileDetailLink[] }>(
+        profile.id,
+        { table: "profile_detail", select: "links" },
+      );
 
       if (cancelled) return;
 
-      if (error || !data) {
-        console.error("Error fetching links:", error?.message);
+      if (!result) {
+        console.error("Error fetching links from profile_detail");
         setLoadingLinks(false);
         initialLinksLoadedRef.current = true;
         return;
       }
 
-      const links = data as LinkItem[];
+      const links: LinkItem[] = (result.links ?? []).map((l) => ({
+        id: l.id,
+        type: l.type,
+        details: l.details,
+      }));
       const nextBase = buildDraft(profile, links);
       setBaseline(nextBase);
       setDraft((prev) => {
@@ -149,7 +149,7 @@ export function ProfileEditProvider({
     return () => {
       cancelled = true;
     };
-  }, [profile?.id, supabase, editingProfile]);
+  }, [profile?.id, editingProfile]);
 
   useEffect(() => {
     if (!baseline) return;
@@ -213,14 +213,14 @@ export function ProfileEditProvider({
       // Merge new links from resume: add any that are not already in the draft (by type + details)
       if (!loadingLinks && detailsForNow.links?.length) {
         const existingKeys = new Set(
-          prev.links.map((l) => `${l.type}:${l.details.toLowerCase().trim()}`)
+          prev.links.map((l) => `${l.type}:${l.details.toLowerCase().trim()}`),
         );
         const newLinks = detailsForNow.links
           .filter(
             (link) =>
               !existingKeys.has(
-                `${link.type}:${link.details.toLowerCase().trim()}`
-              )
+                `${link.type}:${link.details.toLowerCase().trim()}`,
+              ),
           )
           .map((link) => ({
             id: crypto.randomUUID(),

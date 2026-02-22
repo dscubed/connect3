@@ -172,6 +172,13 @@ export function AiEnhanceDialog({
         }
       );
 
+      if (res.status === 413) {
+        toast.error(
+          "Your message is too long. Please shorten your text or conversation.",
+        );
+        return;
+      }
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to enhance text");
 

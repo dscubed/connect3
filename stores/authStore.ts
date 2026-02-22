@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { createClient } from "@/lib/supabase/client";
+import { fetchProfile as fetchProfileApi } from "@/lib/profiles/fetchProfile";
 import type { User, Session, Subscription } from "@supabase/supabase-js";
 
 export interface Profile {
@@ -41,14 +42,8 @@ async function fetchProfile(
   userId: string,
   set: (state: Partial<AuthState>) => void,
 ) {
-  const supabase = createClient();
-  const { data: profile, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
-    .single();
-  if (!error) set({ profile });
-  else set({ profile: null });
+  const profile = await fetchProfileApi<Profile>(userId);
+  set({ profile: profile ?? null });
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({

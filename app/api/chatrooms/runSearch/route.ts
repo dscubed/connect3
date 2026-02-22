@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 import { runSearch } from "@/lib/search/agent";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
+import { validateTokenLimit, Tier } from "@/lib/api/token-guard";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest) {
   // Check if message exists and is pending
   const { data: messageData, error: messageError } = await supabase
     .from("chatmessages")
-    .select("id, status")
+    .select("id, status, query")
     .eq("id", messageId)
     .eq("status", "pending")
     .eq("user_id", user.id)
@@ -53,6 +54,16 @@ export async function POST(req: NextRequest) {
       },
       { status: 404 },
     );
+  }
+
+  const tier: Tier = user.email_confirmed_at ? "verified" : "anon";
+  const tokenCheck = validateTokenLimit(messageData.query ?? "", tier);
+  if (!tokenCheck.ok) {
+    await supabase
+      .from("chatmessages")
+      .update({ status: "failed" })
+      .eq("id", messageId);
+    return tokenCheck.response;
   }
 
   const channelName = `message:${messageId}`;

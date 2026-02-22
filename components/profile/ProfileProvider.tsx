@@ -1,11 +1,42 @@
 "use client";
 import React, { createContext, useContext, ReactNode } from "react";
-import useSWR from "swr";
 import { Profile, useAuthStore } from "@/stores/authStore";
+import { useProfile } from "@/lib/profiles/fetchProfile";
 import { ProfilePageSkeleton } from "./ProfilePageSkeleton";
+import { LinkType } from "./links/LinksUtils";
+
+// ─── Types matching the profile_detail view ─────────────────────
+
+export interface ProfileDetailLink {
+  id: string;
+  type: LinkType;
+  details: string;
+  created_at: string;
+}
+
+export interface ProfileDetailChunkItem {
+  id: string;
+  text: string;
+  order: number;
+  created_at: string;
+}
+
+export interface ProfileDetailChunkCategory {
+  category: string;
+  order: number;
+  chunks: ProfileDetailChunkItem[] | null;
+}
+
+/** Full profile with embedded links and chunks from the profile_detail view */
+export interface ProfileDetail extends Profile {
+  links?: ProfileDetailLink[];
+  chunks?: ProfileDetailChunkCategory[];
+}
+
+// ─── Context ────────────────────────────────────────────────────
 
 interface ProfileContextType {
-  profile: Profile;
+  profile: ProfileDetail;
   isLoading: boolean;
   isOwnProfile: boolean;
   profileId: string;
@@ -27,36 +58,26 @@ export function ProfileProvider({
 }: ProfileProviderProps) {
   const authUser = useAuthStore((state) => state.user);
   const authProfile = useAuthStore((state) => state.profile);
-  const getSupabaseClient = useAuthStore((state) => state.getSupabaseClient);
 
   const isOwnProfile = authUser?.id === profileId;
 
   // Use initialProfile or authProfile when applicable - skip fetch
   const useInitialData =
-    (initialProfile?.id === profileId) || (isOwnProfile && !!authProfile);
+    initialProfile?.id === profileId || (isOwnProfile && !!authProfile);
 
-  const swrKey = !useInitialData ? `profile_full_${profileId}` : null;
-  const { data: fetchedProfile, isLoading: isFetching, error } = useSWR<Profile>(
-    swrKey,
-    async () => {
-      const supabase = getSupabaseClient();
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", profileId)
-        .single();
-      if (error) throw error;
-      return data;
-    },
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      dedupingInterval: 60000,
-    }
-  );
+  // Fetch from profile_detail view to get links + chunks in a single query
+  const {
+    data: fetchedProfile,
+    isLoading: isFetching,
+    error,
+  } = useProfile<ProfileDetail>(useInitialData ? null : profileId, {
+    table: "profile_detail",
+  });
 
-  const profile = useInitialData
-    ? (initialProfile?.id === profileId ? initialProfile! : authProfile!)
+  const profile: ProfileDetail | null | undefined = useInitialData
+    ? initialProfile?.id === profileId
+      ? initialProfile!
+      : authProfile!
     : fetchedProfile;
   const isLoading = useInitialData ? false : isFetching;
 

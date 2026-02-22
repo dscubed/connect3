@@ -47,6 +47,7 @@
     "cmdk": "^1.1.1",
     "fast-average-color": "^9.5.0",
     "framer-motion": "^12.23.12",
+    "gpt-tokenizer": "^3.4.0",
     "html-react-parser": "^5.2.11",
     "html-to-image": "^1.11.13",
     "install": "^0.13.0",
