@@ -11,11 +11,14 @@ interface TokenUsageData {
 }
 
 export function useTokenUsage() {
-  const user = useAuthStore((s) => s.user);
   const session = useAuthStore((s) => s.session);
+  const loading = useAuthStore((s) => s.loading);
+
+  // Wait for auth store to initialize before fetching so we send the right identity
+  const key = loading ? null : "/api/token-usage";
 
   const { data, isLoading } = useSWR<TokenUsageData>(
-    "/api/token-usage",
+    key,
     async (url: string) => {
       const headers: Record<string, string> = {};
 
@@ -47,6 +50,6 @@ export function useTokenUsage() {
     percentUsed,
     resetsAt: data?.resetsAt ?? null,
     tier: data?.tier ?? null,
-    isLoading,
+    isLoading: isLoading || loading,
   };
 }

@@ -6,6 +6,7 @@ import { useSearchStream } from "./useStreamSearch";
 import { normalizeToMarkdownResponse } from "@/lib/search/markdownParser";
 import type { SearchResponse } from "@/lib/search/types";
 import { toast } from "sonner";
+import { mutate } from "swr";
 
 type PartialSearchResponse = Partial<SearchResponse>;
 
@@ -144,6 +145,7 @@ export function useChatroom(chatroomId: string | null) {
         console.error("[useChatroom] triggerSearch error", err);
       } finally {
         setInFlight(false);
+        mutate("/api/token-usage");
       }
     },
     [connectStream, makeAuthenticatedRequest, inFlight],
