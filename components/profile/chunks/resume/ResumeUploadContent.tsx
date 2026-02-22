@@ -71,10 +71,10 @@ export function ResumeUploadContent({
 
   return (
     <>
-      <DialogTitle className="text-2xl font-semibold text-center text-white drop-shadow-md">
+      <DialogTitle className="text-2xl font-semibold text-center drop-shadow-md">
         Upload Your Resume
       </DialogTitle>
-      <DialogDescription className="text-center mb-16 text-white/80 drop-shadow-md">
+      <DialogDescription className="text-center mb-16 text-muted drop-shadow-md">
         Upload your resume to auto fill your profile information.
       </DialogDescription>
 
