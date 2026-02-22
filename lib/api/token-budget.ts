@@ -3,7 +3,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 
 export type BudgetTier = "anon" | "verified";
 
-const BUDGET_LIMITS: Record<BudgetTier, { maxPerWindow: number; windowMs: number }> = {
+export const BUDGET_LIMITS: Record<BudgetTier, { maxPerWindow: number; windowMs: number }> = {
   anon:     { maxPerWindow: 100_000,   windowMs: 24 * 60 * 60 * 1000 },
   verified: { maxPerWindow: 1_000_000, windowMs: 24 * 60 * 60 * 1000 },
 };
@@ -112,18 +112,24 @@ export async function debitTokens(
       : true;
 
     if (!existing || windowExpired) {
-      await supabase.from("token_usage").upsert({
+      const { error: upsertError } = await supabase.from("token_usage").upsert({
         identity,
         tier,
         tokens_used: actualTokensUsed,
         window_start: now.toISOString(),
         updated_at: now.toISOString(),
       });
+      if (upsertError) {
+        console.error("[token-budget] Upsert failed:", upsertError);
+      }
     } else {
-      await supabase.rpc("increment_token_usage", {
+      const { error: rpcError } = await supabase.rpc("increment_token_usage", {
         p_identity: identity,
         p_amount: actualTokensUsed,
       });
+      if (rpcError) {
+        console.error("[token-budget] increment_token_usage RPC failed:", rpcError);
+      }
     }
   } catch (err) {
     console.error("[token-budget] Failed to debit tokens:", err);

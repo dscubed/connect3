@@ -18,6 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { TokenUsageIndicator } from "@/components/search/TokenUsageIndicator";
 
 const UNIVERSITY_ENTRIES = Object.entries(universities).filter(
   ([key]) => key !== "others",
@@ -128,6 +129,7 @@ export function SearchBarActions({
       </DropdownMenu>
 
       <div className="flex flex-row gap-4 items-center">
+        <TokenUsageIndicator />
         <button
           type="submit"
           disabled={searchDisabled}
