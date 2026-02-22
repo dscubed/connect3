@@ -252,7 +252,7 @@ Return ONLY the JSON object. No extra text.
 `.trim();
 
   const response = await openai.responses.parse({
-    model: "gpt-4o-mini",
+    model: "gpt-5-mini",
     input: [
       { role: "system", content: systemPrompt },
       { role: "user", content: sanitizedText },

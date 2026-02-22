@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
 
     // Use OpenAI responses API for structured output
     const response = await openai.responses.create({
-      model: "gpt-4o-mini",
+      model: "gpt-5-mini",
       input: [
         {
           role: "system",
