@@ -1,19 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
-import { z } from "zod";
-import { zodTextFormat } from "openai/helpers/zod";
 import { rateLimit } from "@/lib/api/rate-limit";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
+import { validateChunkText } from "@/lib/resume/validateChunk";
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-});
-
-// Define schema for validation result
-const ValidationSchema = z.object({
-  safe: z.boolean(),
-  sensitive: z.boolean(),
-  reason: z.string(),
 });
 
 // Rate limiting per user
@@ -63,59 +55,7 @@ export async function POST(req: NextRequest) {
       `Validation request from user: ${user.id}, text length: ${text.length}`
     );
 
-    // Call OpenAI API
-    const systemPrompt = `
-You are a validation engine for a profile-building app.
-
-Your job is to analyse the provided text and classify it into two fields: safe and sensitive.
-
-----------------------
-FIELD DEFINITIONS
-----------------------
-
-1. safe
-- true if the text contains no harmful, hateful, illegal, pornographic, explicit, or disallowed content.
-- false if the content is inappropriate for a professional profile.
-
-2. sensitive
-- true if personal PII is present that should not be stored or displayed, including:
-  - personal phone number
-  - personal email
-  - exact street/home address
-  - other identifying contact or location details that could compromise privacy
-- false if no such PII is present, or only general info (e.g. city/region only, company name, job title) is given.
-- work phone or work email in a professional context may be considered non-sensitive at your discretion.
-
-3. reason
-- One short sentence explaining the main factor behind your safe/sensitive classification.
-
-----------------------
-RESPONSE FORMAT
-----------------------
-
-Respond ONLY as a JSON object:
-
-{
-  "safe": boolean,
-  "sensitive": boolean,
-  "reason": string
-}
-
-"reason" MUST be exactly one sentence.
-`.trim();
-
-    const response = await client.responses.parse({
-      model: "gpt-4o-mini",
-      input: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: text },
-      ],
-      text: {
-        format: zodTextFormat(ValidationSchema, "validation"),
-      },
-    });
-
-    const result = response.output_parsed;
+    const result = await validateChunkText(text, client);
 
     // Log the validation result for monitoring
     console.log(

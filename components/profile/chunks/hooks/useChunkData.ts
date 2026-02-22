@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AllCategories, ProfileChunk } from "../ChunkUtils";
 import { CategoryOrderData } from "../ChunkUtils";
 import { uploadProfileToVectorStore } from "@/lib/vectorStores/profile/client";
+import { validateChunksAction } from "@/app/profile/chunks/actions";
 
 export interface UseChunkDataExports {
   fetchChunks: () => Promise<void>;
@@ -439,6 +440,20 @@ export function useChunkData({
       setSavingChunks(false);
       savingChunksRef.current = false;
       return;
+    }
+
+    // Validate all chunks before saving
+    const validation = await validateChunksAction(
+      currentChunks.map((c) => ({ id: c.id, text: c.text }))
+    );
+    if (!validation.success) {
+      const message =
+        validation.errors.length === 1
+          ? validation.errors[0].reason
+          : `${validation.errors.length} chunks didn't pass validation. ${validation.errors[0].reason}`;
+      setSavingChunks(false);
+      savingChunksRef.current = false;
+      throw new Error(message);
     }
 
     try {
