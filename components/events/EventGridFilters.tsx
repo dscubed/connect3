@@ -17,7 +17,7 @@ export type DateFilter =
   | "today"
   | "this-week"
   | "this-month"
-  | "past events";
+  | "past";
 export type TagFilter = "all" | "free" | "paid" | "online" | "in-person";
 
 interface Club {

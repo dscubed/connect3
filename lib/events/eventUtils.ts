@@ -31,8 +31,11 @@ export const filterEvents = (
       }
 
       // Date filter
-      if (dateFilter !== "all") {
-        const eventStart = new Date(event.start);
+      const eventStart = new Date(event.start);
+      if (dateFilter === "past") {
+        if (eventStart >= now) return accumulator;
+      } else {
+        if (eventStart < now) return accumulator;
         if (dateFilter === "today") {
           if (
             eventStart.getFullYear() !== now.getFullYear() ||
@@ -40,19 +43,15 @@ export const filterEvents = (
             eventStart.getDate() !== now.getDate()
           ) return accumulator;
         } else if (dateFilter === "this-week") {
-          const weekStart = new Date(now);
-          weekStart.setDate(now.getDate() - now.getDay());
-          weekStart.setHours(0, 0, 0, 0);
-          const weekEnd = new Date(weekStart);
-          weekEnd.setDate(weekStart.getDate() + 7);
-          if (eventStart < weekStart || eventStart >= weekEnd) return accumulator;
+          const weekEnd = new Date(now);
+          weekEnd.setDate(now.getDate() - now.getDay() + 7);
+          weekEnd.setHours(0, 0, 0, 0);
+          if (eventStart >= weekEnd) return accumulator;
         } else if (dateFilter === "this-month") {
           if (
             eventStart.getFullYear() !== now.getFullYear() ||
             eventStart.getMonth() !== now.getMonth()
           ) return accumulator;
-        } else if (dateFilter === "past") {
-          if (eventStart >= now) return accumulator;
         }
       }
 
@@ -78,37 +77,31 @@ export const filterEvents = (
       return accumulator;
     }, []);
 
-  // Sort by most recent event first (events with start dates come first, sorted by start date descending,
-  // events without start dates come last in no particular order)
-  return sortEvents(filtered);
+  const isPast = dateFilter === "past";
+  return sortEvents(filtered, !isPast);
 };
 
 export const getFeaturedEvents = (events: Event[]) => {
-  const sorted = sortEvents(events);
+  const sorted = sortEvents(events, true);
   return sorted.slice(0, 8);
 }
 
-const sortEvents = (events: Event[]) => {
+const sortEvents = (events: Event[], ascending: boolean = true) => {
   events.sort((a, b) => {
     const aHasStartDate = !!a.start;
     const bHasStartDate = !!b.start;
 
-    // If one has start date and the other doesn't, the one with start date comes first
-    if (aHasStartDate && !bHasStartDate) {
-      return -1;
-    }
-    if (!aHasStartDate && bHasStartDate) {
-      return 1;
-    }
+    if (aHasStartDate && !bHasStartDate) return -1;
+    if (!aHasStartDate && bHasStartDate) return 1;
 
-    // If both have start dates, sort by start date descending (most recent first)
     if (aHasStartDate && bHasStartDate) {
       const aDate = new Date(a.start);
       const bDate = new Date(b.start);
-      return bDate.getTime() - aDate.getTime(); // Descending order (most recent first)
+      return ascending
+        ? aDate.getTime() - bDate.getTime()
+        : bDate.getTime() - aDate.getTime();
     }
 
-    // If neither has start dates, their order doesn't matter
     return 0;
   });
   return events;
