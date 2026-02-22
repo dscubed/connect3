@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import Image from "next/image";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -9,7 +10,7 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Search, X, Check, Loader2 } from "lucide-react";
+import { ChevronDown, Search, X, Loader2 } from "lucide-react";
 
 export type DateFilter = "all" | "today" | "this-week" | "this-month" | "upcoming";
 export type TagFilter = "all" | "free" | "paid" | "online" | "in-person";
@@ -135,7 +136,7 @@ export default function EventGridFilters({
     return () => clearTimeout(timer);
   }, [clubSearch]);
 
-  const { clubs, isLoading: clubsLoading, hasMore, loadMore, initialLoaded } = useInfiniteClubs(debouncedClubSearch);
+  const { clubs, isLoading: clubsLoading, loadMore, initialLoaded } = useInfiniteClubs(debouncedClubSearch);
 
   const handleClubScroll = useCallback(() => {
     const el = clubListRef.current;
@@ -277,9 +278,11 @@ export default function EventGridFilters({
                   className="flex items-center gap-2 px-3 py-2"
                 >
                   {club.avatar_url ? (
-                    <img
+                    <Image
                       src={club.avatar_url}
                       alt=""
+                      width={20}
+                      height={20}
                       className="h-5 w-5 rounded-full object-cover shrink-0"
                     />
                   ) : (
