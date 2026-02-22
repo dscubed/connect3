@@ -1,6 +1,7 @@
 import { toast } from "sonner";
 import { createClient } from "./client";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { fetchProfile } from "@/lib/profiles/fetchProfile";
 
 /**
  * Deprecated: Use client-side resizing instead
@@ -107,18 +108,19 @@ function getStoragePathFromUrl(url: string | null): string | null {
 }
 
 export async function deleteAvatar(userId: string, supabase: SupabaseClient) {
-  const result = await supabase
-    .from("profiles")
-    .select("avatar_url")
-    .eq("id", userId)
-    .single();
+  const profileData = await fetchProfile<{ avatar_url: string | null }>(
+    userId,
+    {
+      select: "avatar_url",
+    },
+  );
 
-  if (result.error) {
-    console.error("Error fetching profile for deletion:", result.error);
-    return { success: false, error: result.error.message };
+  if (!profileData) {
+    console.error("Error fetching profile for deletion: profile not found");
+    return { success: false, error: "Profile not found" };
   }
 
-  const avatarPath = getStoragePathFromUrl(result.data.avatar_url);
+  const avatarPath = getStoragePathFromUrl(profileData.avatar_url);
 
   if (
     avatarPath ==
@@ -136,7 +138,7 @@ export async function deleteAvatar(userId: string, supabase: SupabaseClient) {
 
     if (error) throw error;
 
-    console.log("Deleted avatars:", result.data.avatar_url);
+    console.log("Deleted avatars:", profileData.avatar_url);
 
     return { success: true };
   } catch (error) {
@@ -150,12 +152,12 @@ export async function deleteAvatar(userId: string, supabase: SupabaseClient) {
 export async function updateAvatar(
   userId: string,
   file: File,
-  supabase: SupabaseClient
+  supabase: SupabaseClient,
 ) {
   const uploadResult = await uploadAvatar(file, userId);
   if (!uploadResult.success || !uploadResult.url) {
     toast.error(
-      `Failed to upload new avatar: ${uploadResult.error || "Unknown error"}`
+      `Failed to upload new avatar: ${uploadResult.error || "Unknown error"}`,
     );
     return { success: false, error: uploadResult.error || "Upload failed" };
   }
@@ -163,7 +165,7 @@ export async function updateAvatar(
   const deleteResult = await deleteAvatar(userId, supabase);
   if (!deleteResult.success) {
     toast.error(
-      `Failed to delete old avatar: ${deleteResult.error || "Unknown error"}`
+      `Failed to delete old avatar: ${deleteResult.error || "Unknown error"}`,
     );
   }
 

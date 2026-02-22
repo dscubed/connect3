@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { fetchProfile as fetchProfileFn } from "@/lib/profiles/fetchProfile";
 import { toast } from "sonner";
 
 export default function AuthCallbackPage() {
@@ -51,11 +52,10 @@ export default function AuthCallbackPage() {
         }
 
         // Got user, check onboarding
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("onboarding_completed")
-          .eq("id", session.user.id)
-          .single();
+        const profile = await fetchProfileFn<{ onboarding_completed: boolean }>(
+          session.user.id,
+          { select: "onboarding_completed" },
+        );
 
         if (profile?.onboarding_completed) {
           router.replace("/");
