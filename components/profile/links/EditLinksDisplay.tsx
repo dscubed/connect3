@@ -34,7 +34,7 @@ export function EditLinksDisplay({
 
   return (
     <div className="flex flex-col gap-1">
-      {links.length === 0 && <p>No links added yet.</p>}
+      {links.length === 0 && <p className="text-muted">No links added yet.</p>}
       {links.map((link) => {
         const LinkIcon = LinkTypes[link.type]?.icon;
         const isEditing = editingId === link.id;
@@ -47,7 +47,7 @@ export function EditLinksDisplay({
               <Input
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
-                className="flex-1 h-8 text-sm"
+                className="flex-1 h-8 text-sm focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-violet-400"
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleEditSave(link);

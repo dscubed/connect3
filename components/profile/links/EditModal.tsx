@@ -1,6 +1,8 @@
 import {
   Dialog,
+  DialogClose,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -112,23 +114,29 @@ export function EditModal({
 
   return (
     <Dialog open={open} onOpenChange={toggleOpen}>
-      <DialogContent className="bg-secondary">
-        <DialogHeader>
-          <DialogTitle>Edit Links</DialogTitle>
+      <DialogContent
+        showCloseButton={true}
+        className="bg-secondary border-none rounded-2xl p-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <DialogHeader className="text-left">
+          <DialogTitle className="font-medium">Edit Links</DialogTitle>
         </DialogHeader>
-        <div className="mt-4 flex flex-col">
+        <span className="w-full border-t border-muted/20 block" />
+        <div className="flex flex-col gap-4">
           {/* Display Existing Links Here */}
           <EditLinksDisplay links={links} editFunctions={editFunctions} />
           {/* Add Links */}
           {!addingLink ? (
             <Button
-              className="w-full h-fit animate-fade-in hover:text-muted border hover:bg-transparent"
+              className="w-full h-fit animate-fade-in hover:text-muted border hover:bg-transparent justify-center"
               variant="ghost"
               onClick={() => {
                 setAddingLink({ typeInput: "", details: "" });
               }}
             >
               <Plus className="size-4" />
+              Add link
             </Button>
           ) : (
             <LinkInput
@@ -139,25 +147,25 @@ export function EditModal({
             />
           )}
 
-          <div className="flex justify-between items-center mt-4">
+          <DialogFooter className="flex gap-2">
+            <DialogClose asChild>
+              <Button
+                variant="ghost"
+                className="rounded-full bg-gray-200 px-4 py-1.5 text-muted hover:bg-gray-300 hover:text-card-foreground"
+                onClick={() => toggleOpen(false)}
+              >
+                Cancel
+              </Button>
+            </DialogClose>
             <Button
-              className="w-fit h-fit animate-fade-in"
-              onClick={() => {
-                toggleOpen(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                saveLinks();
-              }}
+              variant="ghost"
+              className="rounded-full bg-purple-500 px-4 py-1.5 text-white hover:bg-purple-600 hover:text-white"
+              onClick={() => saveLinks()}
               disabled={saving}
-              className="animate-fade-in"
             >
               {saving ? "Saving..." : "Save Changes"}
             </Button>
-          </div>
+          </DialogFooter>
         </div>
       </DialogContent>
     </Dialog>

@@ -11,6 +11,32 @@
 
 [data-slot="dialog-content"] {
   background: rgba(255, 255, 255);
+  /* Use opacity-only animation - tailwindcss-animate's enter/exit keyframes
+     override transform and break the dialog's translate(-50%, -50%) centering,
+     causing it to jump to bottom-right. This preserves the centering transform. */
+  animation: none;
+}
+[data-slot="dialog-content"][data-state="open"] {
+  animation: dialog-fade-in 200ms ease-out;
+}
+[data-slot="dialog-content"][data-state="closed"] {
+  animation: dialog-fade-out 200ms ease-in;
+}
+@keyframes dialog-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes dialog-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 [data-sonner-toast] {

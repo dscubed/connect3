@@ -96,7 +96,7 @@ export function LinkTypeInput({
                 ? "pl-8"
                 : ""
             }`,
-            "w-32",
+            "w-32 focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-violet-400",
           )}
           value={addingState.typeInput}
           onChange={(e) => {

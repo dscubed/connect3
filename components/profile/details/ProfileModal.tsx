@@ -60,46 +60,63 @@ export function ProfileModal({ isOpen, setIsOpen }: ProfileModalProps) {
     setIsOpen(false);
   }
 
+  const inputClass =
+    "focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-violet-400";
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent
         showCloseButton={true}
-        className="bg-secondary"
+        className="bg-secondary border-none rounded-2xl p-4"
         onClick={(e) => e.stopPropagation()}
       >
-        <DialogHeader>
-          <DialogTitle>Edit Profile</DialogTitle>
+        <DialogHeader className="text-left">
+          <DialogTitle className="font-medium">Edit Profile</DialogTitle>
         </DialogHeader>
         <span className="w-full border-t border-muted/20 block" />
-        <h1 className="text-xl font-semibold mb-2">Name</h1>
+        <h1 className="text-base sm:text-xl font-semibold">Display name</h1>
         {/* Name Input */}
         {profile?.account_type == "user" ? (
           <div className="flex flex-row gap-2">
             <Input
-              placeholder={profile.first_name || `First Name`}
+              placeholder="Display name"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              className="mb-2"
+              className={`mb-2 ${inputClass}`}
             />
             <Input
-              placeholder={profile.last_name || `Last Name`}
+              placeholder="Display name"
               value={lastName || ""}
               onChange={(e) => setLastName(e.target.value)}
+              className={inputClass}
             />
           </div>
         ) : (
           <Input
-            placeholder={profile.first_name || `Organisation Name`}
+            placeholder="Display name"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
+            className={inputClass}
           />
         )}
 
-        <DialogFooter className="flex gap-4">
+        <DialogFooter className="flex gap-2">
           <DialogClose asChild>
-            <Button onClick={() => setIsOpen(false)}>Cancel</Button>
+            <Button
+              variant="ghost"
+              className="rounded-full bg-gray-200 px-4 py-1.5 text-muted hover:bg-gray-300 hover:text-card-foreground"
+              onClick={() => setIsOpen(false)}
+            >
+              Cancel
+            </Button>
           </DialogClose>
-          <Button onClick={() => save()}>Save</Button>
+          <Button
+            variant="ghost"
+            className="rounded-full bg-purple-500 px-4 py-1.5 text-white hover:bg-purple-600 hover:text-white"
+            onClick={() => save()}
+          >
+            Save
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -35,6 +35,7 @@ export function LinkInput({
           placeholder="Paste URL or enter username"
           value={addingLink.details}
           autoFocus
+          className="focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-violet-400"
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
