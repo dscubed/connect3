@@ -2,6 +2,7 @@
 import Sidebar from "@/components/sidebar/Sidebar";
 import Logo from "@/components/logo/Logo";
 import { HeroPanels } from "@/components/home/HeroPanels";
+import { QuizBanner } from "@/components/home/QuizBanner";
 import React, { useState } from "react";
 import { SearchBar } from "@/components/home/SearchBar";
 
@@ -20,8 +21,9 @@ export default function Home() {
             scrollbarColor: "rgba(255,255,255,0.3) transparent",
           }}
         >
-          <div className="flex flex-col items-center w-full gap-4 mb-8 mt-[10dvh] sm:mt-[20dvh]">
-            <div className="flex flex-row gap-2 justify-center items-center">
+          <div className="flex flex-col items-center w-full gap-4 mb-8 mt-4 sm:mt-8">
+            <QuizBanner />
+            <div className="mb-6 flex flex-row gap-2 justify-center items-center">
               <Logo className="h-12 w-12 sm:h-14 sm:w-14" />
               <h1 className="font-fredoka text-4xl font-semibold tracking-[0.01em] leading-[1.1]">
                 Connect3

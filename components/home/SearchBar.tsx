@@ -48,15 +48,22 @@ export function SearchBar({ containerClassName }: SearchBarProps) {
   const [query, setQuery] = useState("");
   const [creatingChatroom, setCreatingChatroom] = useState(false);
   const [selectedUniversities, setSelectedUniversities] = useState<string[]>(
-    () => {
-      if (typeof window === "undefined") return ALL_UNIVERSITIES;
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) { const parsed = JSON.parse(raw); if (Array.isArray(parsed)) return parsed; }
-      } catch { /* ignore */ }
-      return ALL_UNIVERSITIES;
-    }
+    () => [],
   );
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) setSelectedUniversities(parsed);
+      } else {
+        setSelectedUniversities(ALL_UNIVERSITIES);
+      }
+    } catch {
+      setSelectedUniversities(ALL_UNIVERSITIES);
+    }
+  }, []);
   const router = useRouter();
   const [suggestions, setSuggestions] = useState<string[]>([]);
 

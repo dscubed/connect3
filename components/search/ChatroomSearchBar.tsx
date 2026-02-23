@@ -22,15 +22,20 @@ export function ChatRoomSearchBar({
 }: ChatRoomSearchBarProps) {
   const [query, setQuery] = useState("");
   const [selectedUniversities, setSelectedUniversities] = useState<string[]>(
-    () => {
-      if (typeof window === "undefined") return [];
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) { const parsed = JSON.parse(raw); if (Array.isArray(parsed)) return parsed; }
-      } catch { /* ignore */ }
-      return [];
-    },
+    () => [],
   );
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) setSelectedUniversities(parsed);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
   const dirty = useRef(false);
   const pendingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const getSupabaseClient = useAuthStore((s) => s.getSupabaseClient);
