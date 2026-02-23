@@ -2,7 +2,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import EventsHeroSection from "@/components/events/EventsHeroSection";
-import EventGridFilters, {
+import MobileEventFilters from "@/components/events/MobileEventFilters";
+import {
   type DateFilter,
   type TagFilter,
 } from "@/components/events/EventGridFilters";
@@ -134,15 +135,15 @@ export default function MobileLayout() {
     <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
       <div
         ref={eventListRef}
-        className="flex-1 overflow-y-auto scrollbar-hide"
+        className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide"
       >
-        <div className="p-4 space-y-8 bg-white">
+        <div className="p-4 space-y-8 bg-white overflow-hidden">
           <EventsHeroSection events={thisMonthEvents} isLoading={isLoadingThisMonth} onEventClick={setSelectedEvent} />
 
           <div className="space-y-5">
             <h2 className="text-2xl font-bold text-black">All Events</h2>
 
-            <EventGridFilters
+            <MobileEventFilters
               search={search}
               setSearch={setSearch}
               selectedCategory={selectedCategory}

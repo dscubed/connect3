@@ -60,7 +60,7 @@ export default function EventsHeroSection({
               router.push(`/events/${event.id}`);
             }
           }}
-          className="flex-shrink-0 w-64 bg-white rounded-2xl overflow-hidden cursor-pointer transition-shadow"
+          className="flex-shrink-0 w-[17rem] bg-white rounded-2xl overflow-hidden cursor-pointer transition-shadow"
         >
           <div className="relative h-36 w-full bg-purple-100">
             {event.thumbnail ? (
@@ -104,7 +104,7 @@ export default function EventsHeroSection({
       ));
 
   return (
-    <div className="relative rounded-3xl overflow-hidden p-6 md:p-10 min-h-[320px]">
+    <div className="relative rounded-3xl overflow-hidden py-6 pl-6 pr-3 md:py-10 md:pl-10 md:pr-5 min-h-[320px]">
       {/* Cover image background */}
       <Image
         src="/cover/cover-purple.png"
@@ -119,24 +119,18 @@ export default function EventsHeroSection({
       <div className="absolute inset-0 bg-gradient-to-r from-background/30 via-transparent to-background/30" />
       <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-transparent to-background/50" />
 
-      <div className="relative z-10 flex gap-8 items-start">
-        {/* Left - Title */}
-        <div className="flex-shrink-0 pt-8">
-          <div className="flex items-center gap-1 mb-1">
+      <div className="relative z-10 flex flex-col gap-4">
+        {/* Title */}
+        <div className="flex-shrink-0">
+          <div className="flex items-center gap-2">
             <span className="text-white/80 text-lg">✦</span>
-          </div>
-          <h2 className="text-white text-3xl md:text-4xl font-bold leading-tight">
-            What&apos;s on
-            <br />
-            this month
-          </h2>
-          <div className="flex items-center gap-1 mt-2">
-            <span className="text-white/80 text-sm">✦</span>
-            <span className="text-white/60 text-xs ml-2">✦</span>
+            <h2 className="text-[#17103B] text-3xl md:text-4xl font-bold leading-tight">
+              What&apos;s on this month
+            </h2>
           </div>
         </div>
 
-        {/* Right - Scrolling Cards */}
+        {/* Scrolling Cards */}
         <div className="flex-1 min-w-0 relative">
           <div
             ref={scrollRef}

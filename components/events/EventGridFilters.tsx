@@ -185,9 +185,9 @@ export default function EventGridFilters({
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className="flex items-center gap-3 w-max">
       {/* Search Inputs */}
-      <div className="flex items-center bg-white border border-gray-200 rounded-full overflow-hidden shadow-sm flex-1 min-w-[300px] max-w-xl">
+      <div className="flex items-center bg-white border border-gray-200 rounded-full overflow-hidden shadow-sm flex-shrink-0 min-w-[200px] md:min-w-[300px] max-w-xl">
         <input
           type="text"
           value={search}
@@ -198,7 +198,7 @@ export default function EventGridFilters({
       </div>
 
       {/* Filter Dropdowns */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-shrink-0">
         {/* Date filter */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
