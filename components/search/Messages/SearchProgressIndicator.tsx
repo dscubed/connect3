@@ -29,7 +29,7 @@ export function SearchProgressIndicator({
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 !mt-1">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="flex items-center gap-2 text-base text-muted"
