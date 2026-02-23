@@ -318,7 +318,7 @@ export default function EventGridFilters({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-64 rounded-xl shadow-xl p-0"
+            className="min-w-[16rem] max-w-[24rem] rounded-xl shadow-xl p-0"
             onCloseAutoFocus={(e) => e.preventDefault()}
           >
             <div className="flex items-center gap-2 border-b px-3 py-2">
