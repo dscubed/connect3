@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { LoginForm } from "@/components/auth/login-form";
-import LoadingIndicator from "@/components/LoadingIndicator";
+import AuthLoadingSpinner from "@/components/ui/AuthLoadingSpinner";
 import { useAuthStore } from "@/stores/authStore";
 
 export default function Page() {
@@ -13,7 +13,7 @@ export default function Page() {
   return (
     <AuthShell>
       {loading ? (
-        <LoadingIndicator />
+        <AuthLoadingSpinner fullPage={false} />
       ) : (
         <LoginForm
           onLoggingInChange={setIsLoggingIn}

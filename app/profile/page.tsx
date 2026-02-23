@@ -3,13 +3,14 @@ import { useEffect, useState } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { ProfilePageContent } from "./ProfilePageContent";
 import { ProfilePageSkeleton } from "@/components/profile/ProfilePageSkeleton";
+import AuthLoadingSpinner from "@/components/ui/AuthLoadingSpinner";
 // import SetupEventsModal from "@/components/profile/SetupEventsModal";
 import Sidebar from "@/components/sidebar/Sidebar";
 
 export default function ProfilePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
-  const { user, profile, loading } = useAuthStore();
+  const { user, profile, loading, profileLoading } = useAuthStore();
   // const [showEventOnboardingModal, setShowEventOnboardingModal] =
   //   useState(false);
 
@@ -93,12 +94,12 @@ export default function ProfilePage() {
     );
   }
 
+  if (profileLoading && user) {
+    return <AuthLoadingSpinner />;
+  }
+
   if (!user || !profile) {
-    return (
-      <div className="min-h-[100dvh] flex items-center justify-center">
-        <p>Please log in to view your profile.</p>
-      </div>
-    );
+    return <AuthLoadingSpinner />;
   }
 
   return (

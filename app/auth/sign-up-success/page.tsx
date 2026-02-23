@@ -1,6 +1,6 @@
 "use client";
 
-import LoadingIndicator from "@/components/ui/LoadingSpinner";
+import AuthLoadingSpinner from "@/components/ui/AuthLoadingSpinner";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
@@ -53,7 +53,7 @@ export default function Page() {
   return (
     <AuthShell>
       {loading && user ? (
-        <LoadingIndicator />
+        <AuthLoadingSpinner fullPage={false} />
       ) : (
         <div className="w-full flex flex-col gap-3">
           <h1 className="text-2xl font-medium tracking-tight text-black">
