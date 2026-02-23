@@ -10,16 +10,6 @@ export default function Home() {
 
   return (
     <div className="min-h-[100dvh] relative overflow-hidden bg-white">
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage: [
-            "radial-gradient(ellipse 60% 50% at 30% 30%, hsla(270, 60%, 88%, 0.6), transparent 70%)",
-            "radial-gradient(ellipse 50% 40% at 70% 50%, hsla(250, 50%, 85%, 0.5), transparent 70%)",
-            "radial-gradient(ellipse 40% 35% at 50% 60%, hsla(290, 40%, 90%, 0.4), transparent 65%)",
-          ].join(", "),
-        }}
-      />
       <div className="flex flex-col md:flex-row relative z-10 h-[100dvh]">
         <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
 
