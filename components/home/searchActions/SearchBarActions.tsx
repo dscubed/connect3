@@ -103,7 +103,7 @@ export function SearchBarActions({
           </div>
 
           {/* Footer actions */}
-          <DropdownMenuSeparator className="m-0" />
+          <DropdownMenuSeparator className="m-0 bg-gray-200" />
           <div className="flex">
             <button
               type="button"
@@ -113,7 +113,7 @@ export function SearchBarActions({
               <X className="h-3.5 w-3.5" />
               Clear
             </button>
-            <div className="w-px self-stretch bg-muted/80" />
+            <div className="w-px self-stretch bg-gray-200" />
             <button
               type="button"
               onClick={() => {
