@@ -124,8 +124,8 @@ export function QueryDisplay({
   return (
     <div className="flex flex-col w-full sm:max-w-[50%] px-2 items-end">
       <Item
-        className="text-base bg-background rounded-xl border-muted p-3 w-fit"
-        variant={"outline"}
+        className="text-base bg-background rounded-xl border-none p-3 w-fit"
+        variant={"default"}
       >
         {editingQuery ? (
           <Textarea

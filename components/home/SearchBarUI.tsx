@@ -17,7 +17,7 @@ interface SearchBarUIProps {
 }
 
 const DEFAULT_CONTAINER_CLASSNAME =
-  "rounded-3xl border border-gray-300 p-2.5 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.08)]";
+  "rounded-3xl border border-gray-200 p-2.5 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.08)]";
 
 const SearchBarUIComponent: React.FC<SearchBarUIProps> = ({
   query,

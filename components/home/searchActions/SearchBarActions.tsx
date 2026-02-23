@@ -70,7 +70,7 @@ export function SearchBarActions({
           onCloseAutoFocus={(e) => e.preventDefault()}
         >
           {/* Search input */}
-          <div className="flex items-center gap-2 border-b px-3 py-2">
+          <div className="flex items-center gap-2 border-b border-gray-200 px-3 py-2">
             <input
               type="text"
               placeholder="Search university..."

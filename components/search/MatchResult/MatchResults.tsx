@@ -19,7 +19,7 @@ const entityColorVariants: Record<EntityType, string> = {
 };
 
 const INTERACTIVE_CARD_STYLES =
-  "cursor-pointer hover:shadow-md transition-shadow transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+  "cursor-pointer shadow-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 function AnimatedCardWrapper({
   children,
@@ -283,7 +283,7 @@ const EventMatchCard = memo(function EventMatchCard({
 function ProfileMatchCardSkeleton({ type }: { type: EntityType }) {
   return (
     <Card
-      className={cn("w-56 md:w-60 lg:w-80 max-h-40", entityColorVariants[type])}
+      className={cn("w-56 md:w-60 lg:w-80 max-h-40 shadow-none", entityColorVariants[type])}
     >
       <CardHeader className="flex flex-row gap-2 justify-center items-center p-4">
         <Skeleton className="w-10 h-10 rounded-full" />
@@ -301,7 +301,7 @@ function EventMatchCardSkeleton() {
   return (
     <Card
       className={cn(
-        "w-56 md:w-60 lg:w-80 max-h-48",
+        "w-56 md:w-60 lg:w-80 max-h-48 shadow-none",
         entityColorVariants.events,
       )}
     >

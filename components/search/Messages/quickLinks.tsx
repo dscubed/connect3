@@ -4,7 +4,7 @@ export function QuickLinks({ links }: { links: ExtractedLink[] }) {
   if (!links.length) return null;
 
   return (
-    <div className="rounded-2xl border p-3">
+    <div className="rounded-2xl border border-gray-200 p-3">
       <div className="text-xs font-medium uppercase tracking-wide opacity-70 mb-2">
         Quick links
       </div>
@@ -15,7 +15,7 @@ export function QuickLinks({ links }: { links: ExtractedLink[] }) {
             href={l.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium hover:bg-muted/20 transition focus:outline-none focus:ring-2 focus:ring-offset-2"
+            className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-3 py-1.5 text-sm font-medium hover:bg-muted/20 transition focus:outline-none focus:ring-2 focus:ring-offset-2"
             title={l.url}
           >
             {l.label}
