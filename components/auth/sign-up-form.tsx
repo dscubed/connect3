@@ -5,27 +5,41 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSignUp } from "./hooks/useSignup";
 import { validatePassword } from "@/lib/auth/validatePassword";
+import { validateUniversityEmail } from "@/lib/auth/validateUniversityEmail";
 
 export function SignUpForm({
   className,
+  initialError,
   ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+}: React.ComponentPropsWithoutRef<"div"> & {
+  initialError?: string;
+}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [formError, setFormError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(initialError ?? null);
   const accountType = "user" as const;
+
+  useEffect(() => {
+    if (initialError) setFormError(initialError);
+  }, [initialError]);
 
   const { isSigningUp, handleEmailSignUp } = useSignUp();
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
+
+    const emailValidation = validateUniversityEmail(email);
+    if (!emailValidation.valid) {
+      setFormError(emailValidation.error ?? "Invalid email");
+      return;
+    }
 
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.valid) {
@@ -101,12 +115,12 @@ export function SignUpForm({
 
         <div className="space-y-2">
           <Label htmlFor="email" className="text-sm font-medium text-black">
-            Email
+            Student email
           </Label>
           <Input
             id="email"
             type="email"
-            placeholder="you@example.com"
+            placeholder="you@student.unimelb.edu.au"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}

@@ -53,8 +53,11 @@ export function useSignUp() {
         Array.isArray(data.user.identities) &&
         data.user.identities.length === 0
       ) {
+        // Account exists but may be unverified - redirect to verification page
+        localStorage.setItem("pendingVerificationEmail", params.email);
+        router.push("/auth/sign-up-success");
         setIsSigningUp(false);
-        return { error: "Account already exists." };
+        return {};
       }
       if (data?.user?.email) {
         localStorage.setItem("pendingVerificationEmail", data.user.email);

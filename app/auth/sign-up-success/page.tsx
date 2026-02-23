@@ -20,7 +20,6 @@ export default function Page() {
 
   useEffect(() => {
     const email = localStorage.getItem("pendingVerificationEmail");
-    console.log("Pending verification email:", email);
     if (email) setPendingEmail(email);
   }, []);
 

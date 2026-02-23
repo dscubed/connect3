@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { createClient } from "@/lib/supabase/client";
 import { fetchProfile as fetchProfileApi } from "@/lib/profiles/fetchProfile";
 import { getFingerprint } from "@/hooks/useFingerprint";
+import { getUniversityFromEmail } from "@/lib/auth/validateUniversityEmail";
 import type { User, Session, Subscription } from "@supabase/supabase-js";
 
 export interface Profile {
@@ -42,6 +43,7 @@ interface AuthState {
 
 async function fetchProfile(
   userId: string,
+  user: User | null,
   set: (state: Partial<AuthState>) => void,
   get: () => AuthState,
 ) {
@@ -50,7 +52,31 @@ async function fetchProfile(
   if (!get().profile) {
     set({ profileLoading: true });
   }
-  const profile = await fetchProfileApi<Profile>(userId);
+  let profile = await fetchProfileApi<Profile>(userId);
+
+  // Auto-assign university for student accounts when not set but email domain is allowed
+  if (
+    profile &&
+    user?.email &&
+    profile.account_type !== "organisation" &&
+    !profile.university
+  ) {
+    const university = getUniversityFromEmail(user.email);
+    if (university) {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          university,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", userId);
+      if (!error) {
+        profile = { ...profile, university };
+      }
+    }
+  }
+
   set({ profile: profile ?? null, profileLoading: false });
 }
 
@@ -77,7 +103,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ user: session?.user ?? null, session, loading: false });
 
     if (session?.user && !isAnon) {
-      fetchProfile(session.user.id, set, get);
+      fetchProfile(session.user.id, session.user, set, get);
     } else {
       set({ profile: null });
     }
@@ -89,7 +115,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const isAnon = session?.user?.is_anonymous ?? false;
       set({ user: session?.user ?? null, session, loading: false });
       if (session?.user && !isAnon) {
-        fetchProfile(session.user.id, set, get);
+        fetchProfile(session.user.id, session.user, set, get);
       } else {
         set({ profile: null });
       }

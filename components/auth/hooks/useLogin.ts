@@ -28,7 +28,20 @@ export function useLogin(onLoggingInChange?: (loggingIn: boolean) => void) {
     setLoggingState(true);
     try {
       const { error } = await loginWithEmail(params);
-      if (error) throw error;
+      if (error) {
+        const msg = error.message?.toLowerCase() ?? "";
+        if (
+          msg.includes("email not confirmed") ||
+          msg.includes("email not verified") ||
+          msg.includes("confirm your email")
+        ) {
+          localStorage.setItem("pendingVerificationEmail", params.email);
+          router.push("/auth/sign-up-success");
+          setLoggingState(false);
+          return;
+        }
+        throw error;
+      }
       router.push("/");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Login failed");
