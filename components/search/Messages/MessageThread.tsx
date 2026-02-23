@@ -124,7 +124,7 @@ export function QueryDisplay({
   return (
     <div className="flex flex-col w-full sm:max-w-[50%] px-2 items-end">
       <Item
-        className="text-base bg-background rounded-xl border-none p-3 w-fit"
+        className="text-base bg-background rounded-xl border-none py-2 px-4 w-fit"
         variant={"default"}
       >
         {editingQuery ? (
