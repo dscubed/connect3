@@ -1,5 +1,9 @@
 "use server";
 
+/**
+ * Quiz is exempt from token usage limits (see BUDGET_EXEMPT_FEATURES in lib/api/token-budget).
+ * No checkTokenBudget or debitTokens — ensures O Week users can always complete the quiz.
+ */
 import OpenAI from "openai";
 import personalities from "@/data/personalities";
 import { Question } from "@/components/quiz/QuestionPage";
@@ -66,7 +70,7 @@ export async function generateMatch(
 
   const response = await openai.chat.completions.create({
     model: "gpt-5-mini",
-    temperature: 0.7,
+    temperature: 1,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       {

@@ -94,6 +94,9 @@ function CharacterCard({ data }: { data?: MatchResult }) {
         <p className="max-w-xs text-lg leading-tight">
           {data?.summary}
         </p>
+        <span className="bg-white/90 text-[#222D56] rounded-xl px-5 py-2 font-medium text-base" data-exclude-from-png>
+          Visit the Data Science Student Society&apos;s O-Week stall to claim your character merch!
+        </span>
       </div>
       <CardFooter />
     </BaseCard>

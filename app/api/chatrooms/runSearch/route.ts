@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
 
   const identity = resolveIdentity(user.id, req);
   const budgetTier: BudgetTier = user.is_anonymous ? "anon" : "verified";
-  const budgetCheck = await checkTokenBudget(supabase, identity, budgetTier, tokenCheck.tokenCount);
+  const budgetCheck = await checkTokenBudget(supabase, identity, budgetTier, tokenCheck.tokenCount, req.nextUrl.pathname);
   if (!budgetCheck.ok) {
     await supabase.from("chatmessages").update({ status: "failed" }).eq("id", messageId);
     return budgetCheck.response;
@@ -135,7 +135,7 @@ export async function POST(req: NextRequest) {
       throw new Error("Failed to update message status");
     }
 
-    await debitTokens(supabase, identity, budgetTier, tokenCheck.tokenCount);
+    await debitTokens(supabase, identity, budgetTier, tokenCheck.tokenCount, req.nextUrl.pathname);
 
     return NextResponse.json({
       success: true,

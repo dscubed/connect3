@@ -67,6 +67,7 @@ export default function StoryViewer() {
         pixelRatio,
         cacheBust: true,
         includeQueryParams: true,
+        filter: (node: HTMLElement) => !node.hasAttribute?.('data-exclude-from-png'),
       };
 
       // Call toPng multiple times to warm up cache for Safari/iOS

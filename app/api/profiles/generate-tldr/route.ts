@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     // Token budget check (cumulative daily limit)
     const identity = resolveIdentity(user.id, request);
     const ESTIMATED_TLDR_TOKENS = 1500;
-    const budgetCheck = await checkTokenBudget(supabase, identity, user.is_anonymous ? "anon" : "verified", ESTIMATED_TLDR_TOKENS);
+    const budgetCheck = await checkTokenBudget(supabase, identity, user.is_anonymous ? "anon" : "verified", ESTIMATED_TLDR_TOKENS, request.nextUrl.pathname);
     if (!budgetCheck.ok) return budgetCheck.response;
 
     // Fetch chunks from DB
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
     });
 
     const actualTokens = response.usage?.total_tokens ?? ESTIMATED_TLDR_TOKENS;
-    await debitTokens(supabase, identity, user.is_anonymous ? "anon" : "verified", actualTokens);
+    await debitTokens(supabase, identity, user.is_anonymous ? "anon" : "verified", actualTokens, request.nextUrl.pathname);
 
     const tldr = response.output_text || "Failed to generate TLDR.";
 

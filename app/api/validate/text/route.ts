@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
     if (!tokenCheck.ok) return tokenCheck.response;
 
     const identity = resolveIdentity(user.id, req);
-    const budgetCheck = await checkTokenBudget(supabase, identity, tier, tokenCheck.tokenCount);
+    const budgetCheck = await checkTokenBudget(supabase, identity, tier, tokenCheck.tokenCount, req.nextUrl.pathname);
     if (!budgetCheck.ok) return budgetCheck.response;
 
     // Rate limiting per user
@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
     const result = response.output_parsed;
 
     const actualTokens = response.usage?.total_tokens ?? tokenCheck.tokenCount;
-    await debitTokens(supabase, identity, tier, actualTokens);
+    await debitTokens(supabase, identity, tier, actualTokens, req.nextUrl.pathname);
 
     // Log the validation result for monitoring
     console.log(

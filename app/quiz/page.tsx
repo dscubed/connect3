@@ -3,8 +3,9 @@
 import QuestionPage from '@/components/quiz/QuestionPage';
 import { getQuestions } from '@/data/quiz-questions';
 import Image from 'next/image';
+import Link from 'next/link';
 import WhiteLogo from '@/public/white-logo.png';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { GlobeIcon } from 'lucide-react';
 import StoryViewer from '@/components/quiz/StoryViewer';
 import { generateMatch, MatchResult } from '@/lib/quiz/generate-match';
@@ -132,7 +133,16 @@ export default function Page() {
   const tapCountRef = useRef(0);
   const tapTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  const handleTitleTap = useCallback(() => {
+  const toggleQR = () => {
+    if (!showQR && buttonRef.current) {
+      setButtonWidth(buttonRef.current.offsetWidth);
+    }
+    setShowQR((prev) => !prev);
+  };
+
+  const handleShareClick = () => {
+    toggleQR();
+
     tapCountRef.current += 1;
     clearTimeout(tapTimerRef.current);
     if (tapCountRef.current >= 3) {
@@ -144,22 +154,17 @@ export default function Page() {
     }
     tapTimerRef.current = setTimeout(() => {
       tapCountRef.current = 0;
-    }, 600);
-  }, []);
-
-  const toggleQR = () => {
-    if (!showQR && buttonRef.current) {
-      setButtonWidth(buttonRef.current.offsetWidth);
-    }
-    setShowQR((prev) => !prev);
+    }, 400);
   };
 
   return (
-    <main className="h-dvh w-screen flex flex-col bg-gradient-to-bl from-[#dfcbff] to-[#5817c1] noise font-sans overflow-clip">
+    <main className="h-dvh w-screen flex flex-col bg-gradient-to-bl from-[#dfcbff] to-[#5817c1] noise font-fredoka overflow-clip">
       <div className="flex flex-col overflow-auto h-full">
         <div className="sticky top-0 flex justify-between items-center gap-4 p-4 h-max w-full bg-transparent backdrop-blur-md z-50">
           <div className="flex gap-3 items-center">
-            <Image onClick={handleTitleTap} src={WhiteLogo} alt="White Logo" className="w-8" />
+            <Link href="/" className="cursor-pointer">
+              <Image src={WhiteLogo} alt="Connect3" className="w-8" />
+            </Link>
             <h1 className="text-white/90 font-medium text-lg mx-auto leading-tight select-none cursor-default">
               Personality Quiz
             </h1>
@@ -179,7 +184,7 @@ export default function Page() {
 
             <button
               ref={buttonRef}
-              onClick={toggleQR}
+              onClick={handleShareClick}
               className="bg-white text-[#8C4AF7] px-2 pr-4 py-2 rounded-full font-medium flex items-center gap-2 hover:bg-white/90 transition-colors shadow-lg"
             >
               <GlobeIcon size={24} />

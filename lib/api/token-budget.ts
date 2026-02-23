@@ -3,6 +3,13 @@ import { SupabaseClient } from "@supabase/supabase-js";
 
 export type BudgetTier = "anon" | "verified";
 
+/** Features that bypass token budget (no check, no debit). Quiz is exempt for O Week / first-run experience. */
+export const BUDGET_EXEMPT_FEATURES = ["quiz", "/api/quiz"] as const;
+
+export function isExemptFromTokenBudget(pathnameOrFeature: string): boolean {
+  return BUDGET_EXEMPT_FEATURES.some((f) => pathnameOrFeature.includes(f));
+}
+
 export const BUDGET_LIMITS: Record<BudgetTier, { maxPerWindow: number; windowMs: number }> = {
   anon:     { maxPerWindow: 100_000,   windowMs: 24 * 60 * 60 * 1000 },
   verified: { maxPerWindow: 1_000_000, windowMs: 24 * 60 * 60 * 1000 },
@@ -28,13 +35,19 @@ export type BudgetCheckResult = BudgetCheckSuccess | BudgetCheckFailure;
 /**
  * Check if the user has enough budget for an estimated token count.
  * Call this BEFORE the OpenAI API call.
+ * Pass requestPath to exempt quiz and other BUDGET_EXEMPT_FEATURES.
  */
 export async function checkTokenBudget(
   supabase: SupabaseClient,
   identity: string,
   tier: BudgetTier,
-  estimatedTokens: number
+  estimatedTokens: number,
+  requestPath?: string
 ): Promise<BudgetCheckResult> {
+  if (requestPath && isExemptFromTokenBudget(requestPath)) {
+    return { ok: true, remaining: Number.MAX_SAFE_INTEGER, resetsAt: new Date() };
+  }
+
   const limits = BUDGET_LIMITS[tier];
   const now = new Date();
 
@@ -90,13 +103,17 @@ export async function checkTokenBudget(
 /**
  * Debit actual token usage after a successful OpenAI call.
  * Call this AFTER getting the API response.
+ * Pass requestPath to exempt quiz and other BUDGET_EXEMPT_FEATURES (no debit).
  */
 export async function debitTokens(
   supabase: SupabaseClient,
   identity: string,
   tier: BudgetTier,
-  actualTokensUsed: number
+  actualTokensUsed: number,
+  requestPath?: string
 ): Promise<void> {
+  if (requestPath && isExemptFromTokenBudget(requestPath)) return;
+
   try {
     const limits = BUDGET_LIMITS[tier];
     const now = new Date();

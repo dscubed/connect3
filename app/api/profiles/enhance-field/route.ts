@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     if (!tokenCheck.ok) return tokenCheck.response;
 
     const identity = resolveIdentity(user.id, request);
-    const budgetCheck = await checkTokenBudget(supabase, identity, tier, tokenCheck.tokenCount);
+    const budgetCheck = await checkTokenBudget(supabase, identity, tier, tokenCheck.tokenCount, request.nextUrl.pathname);
     if (!budgetCheck.ok) return budgetCheck.response;
 
     const isEventDescription = fieldType === "event_description";
@@ -219,7 +219,7 @@ Do NOT wrap this JSON in backticks and do NOT add any extra commentary.
     });
 
     const actualTokens = response.usage?.total_tokens ?? tokenCheck.tokenCount;
-    await debitTokens(supabase, identity, tier, actualTokens);
+    await debitTokens(supabase, identity, tier, actualTokens, request.nextUrl.pathname);
 
     const raw = response.output_text ?? "{}";
 
