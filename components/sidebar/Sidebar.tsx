@@ -119,10 +119,10 @@ const Sidebar: React.FC<SidebarProps> = ({
         </button>
       </nav>
 
-      {/* Sidebar container - z-[100] above navbar (z-40) and chat popups (z-50) */}
+      {/* Sidebar container - z-[100] above navbar (z-40) and chat popups (z-50). When hidden on mobile, pointer-events-none so touches pass through to page content. */}
       <div
         ref={sidebarRef}
-        className={`${isDesktop ? "relative" : "fixed top-0 left-0 z-[100]"}`}
+        className={`${isDesktop ? "relative" : "fixed top-0 left-0 z-[100]"} ${!isDesktop && !sidebarOpen ? "pointer-events-none" : ""}`}
       >
         {/* Chatrooms panel - behind main sidebar. On mobile, delayed until sidebar finishes sliding in */}
         <AnimatePresence>
