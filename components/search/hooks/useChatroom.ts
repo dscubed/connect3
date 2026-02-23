@@ -6,6 +6,7 @@ import { useSearchStream } from "./useStreamSearch";
 import { normalizeToMarkdownResponse } from "@/lib/search/markdownParser";
 import type { SearchResponse } from "@/lib/search/types";
 import { toast } from "sonner";
+import { mutate } from "swr";
 
 type PartialSearchResponse = Partial<SearchResponse>;
 
@@ -101,6 +102,23 @@ export function useChatroom(chatroomId: string | null) {
           return;
         }
 
+        if (response.status === 429) {
+          const data = await response.json().catch(() => ({}));
+          toast.error(
+            data.resetsAt
+              ? `You've reached your daily limit. Try again at ${new Date(data.resetsAt).toLocaleTimeString()}.`
+              : "You've reached your daily limit. Please try again later.",
+          );
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === messageId
+                ? { ...m, status: "failed" as const }
+                : m,
+            ),
+          );
+          return;
+        }
+
         // HTTP fallback in case realtime missed the "done" event
         if (response.ok) {
           const data = await response.json();
@@ -127,6 +145,7 @@ export function useChatroom(chatroomId: string | null) {
         console.error("[useChatroom] triggerSearch error", err);
       } finally {
         setInFlight(false);
+        mutate("/api/token-usage");
       }
     },
     [connectStream, makeAuthenticatedRequest, inFlight],

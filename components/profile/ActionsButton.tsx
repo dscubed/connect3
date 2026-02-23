@@ -45,6 +45,15 @@ export function ActionsButton({
         return;
       }
 
+      const hasProfileChanges = hasPendingProfileEdits();
+      const hasChunkChanges = hasPendingEdits();
+
+      if (!hasProfileChanges && !hasChunkChanges) {
+        // Nothing to save, just exit edit mode
+        setEditingProfile(false);
+        return;
+      }
+
       isSavingRef.current = true;
       setIsSaving(true);
 

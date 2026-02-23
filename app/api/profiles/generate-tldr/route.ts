@@ -3,6 +3,7 @@ import OpenAI from "openai";
 import { createClient } from "@supabase/supabase-js";
 import { authenticateRequest } from "@/lib/api/auth-middleware";
 import { validateTokenLimit } from "@/lib/api/token-guard";
+import { checkTokenBudget, debitTokens, resolveIdentity } from "@/lib/api/token-budget";
 
 export const config = {
   runtime: "edge",
@@ -38,17 +39,23 @@ export async function POST(request: NextRequest) {
     const userPrompt = body.userPrompt;
     const currentTldr = body.currentTldr || "";
 
-    if (userPrompt) {
-      const tokenCheck = validateTokenLimit(userPrompt, "verified");
-      if (!tokenCheck.ok) return tokenCheck.response;
-    }
-
     if (!userId || !user.id) {
       return NextResponse.json({ error: "User ID required" }, { status: 400 });
     }
     if (userId !== user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
+
+    if (userPrompt) {
+      const tokenCheck = validateTokenLimit(userPrompt, user.is_anonymous ? "anon" : "verified");
+      if (!tokenCheck.ok) return tokenCheck.response;
+    }
+
+    // Token budget check (cumulative daily limit)
+    const identity = resolveIdentity(user.id, request);
+    const ESTIMATED_TLDR_TOKENS = 1500;
+    const budgetCheck = await checkTokenBudget(supabase, identity, user.is_anonymous ? "anon" : "verified", ESTIMATED_TLDR_TOKENS);
+    if (!budgetCheck.ok) return budgetCheck.response;
 
     // Fetch chunks from DB
     const { data: chunks, error } = await supabase
@@ -96,6 +103,9 @@ export async function POST(request: NextRequest) {
         },
       ],
     });
+
+    const actualTokens = response.usage?.total_tokens ?? ESTIMATED_TLDR_TOKENS;
+    await debitTokens(supabase, identity, user.is_anonymous ? "anon" : "verified", actualTokens);
 
     const tldr = response.output_text || "Failed to generate TLDR.";
 

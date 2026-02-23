@@ -8,7 +8,6 @@ import {
 import { type Event } from "@/lib/schemas/events/event";
 import Image from "next/image";
 import useSWR from "swr";
-import parse from "html-react-parser";
 import Markdown from "../ui/Markdown";
 
 interface EventDetailPanelProps {

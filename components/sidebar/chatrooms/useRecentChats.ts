@@ -72,9 +72,9 @@ export function useRecentChats(options: UseRecentChatsOptions = {}) {
       mutate(
         (prev) =>
           prev?.map((c) =>
-            c.id === chatroomId ? { ...c, title: trimmed } : c
+            c.id === chatroomId ? { ...c, title: trimmed } : c,
           ),
-        { revalidate: false }
+        { revalidate: false },
       );
 
       const { error } = await supabase
@@ -90,7 +90,7 @@ export function useRecentChats(options: UseRecentChatsOptions = {}) {
 
       return { ok: true as const };
     },
-    [mutate, supabase, user?.id]
+    [mutate, supabase, user?.id],
   );
 
   const deleteChatroom = useCallback(
@@ -102,11 +102,15 @@ export function useRecentChats(options: UseRecentChatsOptions = {}) {
         revalidate: false,
       });
 
-      const { error } = await supabase
+      const response = await supabase
         .from("chatrooms")
         .delete()
         .eq("id", chatroomId)
         .eq("created_by", user.id);
+
+      console.log(response);
+
+      const { error } = response;
 
       if (error) {
         mutate(); // rollback
@@ -115,7 +119,7 @@ export function useRecentChats(options: UseRecentChatsOptions = {}) {
 
       return { ok: true as const };
     },
-    [mutate, supabase, user?.id]
+    [mutate, supabase, user?.id],
   );
 
   return {

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Fredoka } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { AuthInitializer } from "@/components/auth/AuthInitializer";
+import { FingerprintInitializer } from "@/components/auth/FingerprintInitializer";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -37,6 +38,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`font-sans antialiased ${fredoka.variable}`}>
         <AuthInitializer />
+        <FingerprintInitializer />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

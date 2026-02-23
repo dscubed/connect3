@@ -149,7 +149,9 @@ export function ProfileEditProvider({
     return () => {
       cancelled = true;
     };
-  }, [profile?.id, editingProfile]);
+    // Only re-fetch when profile changes, NOT when editingProfile toggles
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.id]);
 
   useEffect(() => {
     if (!baseline) return;

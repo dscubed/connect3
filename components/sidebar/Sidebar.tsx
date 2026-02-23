@@ -48,12 +48,16 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
       if (
         !isDesktop &&
         sidebarOpen &&
         sidebarRef.current &&
-        !sidebarRef.current.contains(event.target as Node) &&
-        !(event.target as HTMLElement).closest("[data-menu-button]")
+        !sidebarRef.current.contains(target) &&
+        !target.closest("[data-menu-button]") &&
+        // Radix portals (dropdown menus) render outside the sidebar DOM tree;
+        // don't close the sidebar when interacting with them.
+        !target.closest("[data-radix-popper-content-wrapper]")
       ) {
         setSidebarOpen(false);
         setChatroomsOpen(false);
@@ -71,6 +75,17 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   }, [isDesktop, setSidebarOpen]);
 
+  // On mobile, delay showing chatrooms until the sidebar has mostly slid in
+  const [showChatrooms, setShowChatrooms] = useState(false);
+
+  useEffect(() => {
+    if (!isDesktop && sidebarOpen) {
+      const timer = setTimeout(() => setShowChatrooms(true), 250);
+      return () => clearTimeout(timer);
+    }
+    setShowChatrooms(false);
+  }, [sidebarOpen, isDesktop]);
+
   return (
     <>
       {/* Mobile sticky navbar - logo left, collapse button right */}
@@ -79,7 +94,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         className="sticky top-0 z-40 w-full md:hidden flex items-center justify-between px-4 py-3 safe-area-inset-top bg-white border-b border-neutral-200 shrink-0"
       >
         <Link href="/" className="flex items-center p-1">
-          <LogoAnimated width={20} height={20} onHover={false} />
+          <LogoAnimated width={20} height={20} onHover={true} />
         </Link>
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -109,9 +124,9 @@ const Sidebar: React.FC<SidebarProps> = ({
         ref={sidebarRef}
         className={`${isDesktop ? "relative" : "fixed top-0 left-0 z-[100]"}`}
       >
-        {/* Chatrooms panel - behind main sidebar. On mobile, show with sidebar (no extra click) */}
+        {/* Chatrooms panel - behind main sidebar. On mobile, delayed until sidebar finishes sliding in */}
         <AnimatePresence>
-          {(isDesktop ? chatroomsOpen : sidebarOpen) && (
+          {(isDesktop ? chatroomsOpen : showChatrooms) && (
             <motion.div
               initial={{ x: -200, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
@@ -149,9 +164,11 @@ const Sidebar: React.FC<SidebarProps> = ({
         <motion.aside
           initial={false}
           animate={{ x: isDesktop ? "0%" : sidebarOpen ? "0%" : "-100%" }}
-          transition={hasMounted ? { duration: 0.3, ease: "easeInOut" } : { duration: 0 }}
-          className={`relative z-50 flex flex-col px-3 gap-2 h-[100dvh] bg-white backdrop-blur-xl pt-4 pb-4 safe-area-inset-top justify-between
-            ${isDesktop ? "w-fit relative" : "w-fit"}`}
+          transition={
+            hasMounted ? { duration: 0.3, ease: "easeInOut" } : { duration: 0 }
+          }
+          className={`relative z-50 flex flex-col px-3 gap-2 h-[100dvh] backdrop-blur-xl pt-4 pb-4 safe-area-inset-top justify-between transition-all
+            ${isDesktop ? "w-fit relative" : "w-fit bg-white"} ${isDesktop && chatroomsOpen && "bg-white"}`}
         >
           <div className="flex flex-col gap-4 items-center">
             <SidebarHeader />
@@ -173,7 +190,9 @@ const Sidebar: React.FC<SidebarProps> = ({
               <button
                 onClick={() => setChatroomsOpen(!chatroomsOpen)}
                 className="flex items-center justify-center w-10 h-10 rounded-lg text-muted hover:text-black hover:bg-muted/15 transition-colors"
-                aria-label={chatroomsOpen ? "Close chatrooms" : "Open chatrooms"}
+                aria-label={
+                  chatroomsOpen ? "Close chatrooms" : "Open chatrooms"
+                }
               >
                 <SidebarIcon className="h-5 w-5" />
               </button>
