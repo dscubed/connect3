@@ -155,6 +155,16 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
         <div className="text-sm text-muted leading-relaxed">
           <Markdown rawText={event.description || "No description provided."} />
         </div>
+        {event.source === "instagram" && (
+          <a
+            href={`https://www.instagram.com/p/${event.id}/`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 mt-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-sm font-medium px-4 py-2 rounded-full transition-colors"
+          >
+            View on Instagram <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+        )}
       </div>
 
       {/* Duration */}

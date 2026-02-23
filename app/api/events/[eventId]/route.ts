@@ -73,6 +73,7 @@ function transformDbEventToEventSchema(dbEvent: any): Event {
       min: dbEvent.event_pricings?.min ?? 0,
       max: dbEvent.event_pricings?.max ?? 0,
     },
+    source: dbEvent.source ?? undefined,
   };
 }
 

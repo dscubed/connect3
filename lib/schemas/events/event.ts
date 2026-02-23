@@ -41,6 +41,7 @@ const eventSchema = z.object({
   location: locationSchema,
   pricing: pricingSchema,
   openaiFileId: z.string().optional(), // id in vector database
+  source: z.string().optional(), // e.g. "instagram"
 });
 
 export { eventSchema, locationSchema };
