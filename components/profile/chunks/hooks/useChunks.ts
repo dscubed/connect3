@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { CategoryChunks, ProfileChunk } from "../ChunkUtils";
 import { AllCategories, CategoryOrderData, ChunkInput } from "../ChunkUtils";
-import { useAuthStore } from "@/stores/authStore";
+import { useProfileContext } from "@/components/profile/ProfileProvider";
 
 export interface UseChunkExports {
   orderedCategoryChunks: CategoryChunks[];
@@ -23,7 +23,7 @@ export function useChunks({
   setChunks: React.Dispatch<React.SetStateAction<ProfileChunk[]>>;
   setCategoryOrder: React.Dispatch<React.SetStateAction<CategoryOrderData[]>>;
 }): UseChunkExports {
-  const { profile } = useAuthStore();
+  const { profile } = useProfileContext();
 
   const orderedCategoryChunks = useMemo(() => {
     /**
