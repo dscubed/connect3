@@ -213,7 +213,52 @@ export default function MobileEventFilters({
           </button>
         </SheetTrigger>
         <SheetContent side="bottom" showCloseButton={false} className="rounded-t-2xl max-h-[80dvh] overflow-hidden flex flex-col p-0 bg-white">
-          <SheetHeader className="px-5 pt-5 pb-3 border-b">
+          {/* Drag handle for swipe-to-dismiss */}
+          <div
+            className="flex justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing touch-none"
+            onPointerDown={(e) => {
+              const el = e.currentTarget.closest("[data-slot='sheet-content']") as HTMLElement | null;
+              if (!el) return;
+              const startY = e.clientY;
+              const height = el.getBoundingClientRect().height;
+              el.style.transition = "none";
+
+              const onMove = (ev: PointerEvent) => {
+                const dy = Math.max(0, ev.clientY - startY);
+                el.style.transform = `translateY(${dy}px)`;
+              };
+
+              const onUp = (ev: PointerEvent) => {
+                const dy = ev.clientY - startY;
+                if (dy > height * 0.3) {
+                  el.style.transition = "transform 0.25s ease";
+                  el.style.transform = `translateY(100%)`;
+                  setTimeout(() => {
+                    el.style.animation = "none";
+                    setOpen(false);
+                    requestAnimationFrame(() => {
+                      el.style.transform = "";
+                      el.style.transition = "";
+                      el.style.animation = "";
+                    });
+                  }, 250);
+                } else {
+                  el.style.transition = "transform 0.25s ease";
+                  el.style.transform = "";
+                  setTimeout(() => { el.style.transition = ""; }, 250);
+                }
+                document.removeEventListener("pointermove", onMove);
+                document.removeEventListener("pointerup", onUp);
+              };
+
+              document.addEventListener("pointermove", onMove);
+              document.addEventListener("pointerup", onUp);
+            }}
+          >
+            <div className="w-10 h-1 rounded-full bg-gray-300" />
+          </div>
+
+          <SheetHeader className="px-5 pb-3 border-b">
             <div className="flex items-center justify-between">
               <SheetTitle className="text-lg">Filters</SheetTitle>
               {activeFilterCount > 0 && (
