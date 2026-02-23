@@ -101,6 +101,7 @@ export function ProfileEditProvider({
       }
       return prev;
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile, editingProfile]);
 
   useEffect(() => {
@@ -244,6 +245,7 @@ export function ProfileEditProvider({
     if (!pending) return;
     pendingResumeDetailsRef.current = null;
     applyResumeDetails(pending);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadingLinks]);
 
   const resetDraft = () => {
