@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Avvvatars from "avvvatars-react";
-import { Edit3, Upload, RotateCcw } from "lucide-react";
+import { Upload, RotateCcw } from "lucide-react";
 import EditAvatarModal from "./edit-modals/EditAvatarModal";
 import { cn } from "@/lib/utils";
 import {
@@ -66,11 +66,11 @@ export default function ProfilePicture({
           "relative w-32 h-32 md:w-40 md:h-40 overflow-hidden border-4",
           "border-white bg-white",
           isOrganisation ? "rounded-[10%]" : "rounded-full",
-          editingProfile && "hover:scale-105 transition-all"
         )}
       >
         {avatar && !showGeneratedAvatar ? (
           <Image
+            key={avatar}
             src={avatar}
             alt={`User Avatar`}
             fill
@@ -89,22 +89,23 @@ export default function ProfilePicture({
             />
           </div>
         )}
-      </div>
-      {/* Edit Avatar Dropdown */}
-      {editingProfile && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <motion.button
-              className="absolute bottom-2 right-2 p-2 rounded-full bg-white text-black hover:bg-white/90 transition-colors shadow-lg"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <Edit3 className="h-3 w-3" />
-            </motion.button>
-          </DropdownMenuTrigger>
+        {/* Edit Avatar Dropdown - pill button centered on image */}
+        {editingProfile && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <motion.button
+                  className="rounded-full px-4 py-1.5 text-sm font-medium bg-white text-black opacity-50 hover:opacity-100 hover:bg-white/90 transition-colors shadow-lg"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Edit Image
+                </motion.button>
+              </DropdownMenuTrigger>
           <DropdownMenuContent 
-            align="end" 
+            align="center" 
             sideOffset={4}
+            side="bottom"
             className="w-44 rounded-xl border border-gray-200 bg-white shadow-lg p-1"
           >
             <DropdownMenuItem 
@@ -122,9 +123,10 @@ export default function ProfilePicture({
               <span className="text-sm font-medium">Reset</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
-      )}
-
+            </DropdownMenu>
+          </div>
+        )}
+      </div>
       <EditAvatarModal open={modalOpen} onOpenChange={setModalOpen} />
     </div>
   );

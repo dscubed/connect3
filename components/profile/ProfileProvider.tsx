@@ -74,10 +74,11 @@ export function ProfileProvider({
     table: "profile_detail",
   });
 
+  // For own profile, always use authProfile so avatar/uploads update immediately without refresh
   const profile: ProfileDetail | null | undefined = useInitialData
-    ? initialProfile?.id === profileId
-      ? initialProfile!
-      : authProfile!
+    ? isOwnProfile
+      ? authProfile!
+      : initialProfile!
     : fetchedProfile;
   const isLoading = useInitialData ? false : isFetching;
 

@@ -97,7 +97,7 @@ export default function EditAvatarModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showCloseButton={true} className="max-w-md">
+      <DialogContent showCloseButton={true} className="max-w-md border-none rounded-2xl">
         <DialogHeader>
           <DialogTitle>Upload New Avatar</DialogTitle>
         </DialogHeader>
@@ -144,7 +144,7 @@ export default function EditAvatarModal({
               <Button
                 variant="outline"
                 onClick={handleSelectNewImage}
-                className="w-full"
+                className="w-full shadow-none"
                 disabled={isUploading}
               >
                 Select Different Image
@@ -153,10 +153,18 @@ export default function EditAvatarModal({
           )}
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="flex gap-2">
           <Button
-            className="px-4 py-2 font-medium flex items-center justify-center transition-all duration-150"
-            variant="default"
+            variant="ghost"
+            className="rounded-full bg-gray-200 px-4 py-1.5 text-muted hover:bg-gray-300 hover:text-card-foreground"
+            onClick={handleCancel}
+            disabled={isUploading}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="ghost"
+            className="rounded-full bg-purple-500 px-4 py-1.5 text-white hover:bg-purple-600 hover:text-white flex items-center justify-center"
             onClick={handleConfirm}
             disabled={isUploading || !croppedFile}
           >
@@ -165,14 +173,6 @@ export default function EditAvatarModal({
             ) : (
               "Confirm"
             )}
-          </Button>
-          <Button
-            className="px-4 py-2 font-medium"
-            variant="secondary"
-            onClick={handleCancel}
-            disabled={isUploading}
-          >
-            Cancel
           </Button>
         </DialogFooter>
       </DialogContent>
