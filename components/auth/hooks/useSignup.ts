@@ -13,7 +13,7 @@ export function useSignUp() {
     toast.error("Already signed in!");
     return {
       isSigningUp: false,
-      handleEmailSignUp: async () => ({}),
+      handleEmailSignUp: async (): Promise<{ error?: string }> => ({}),
       handleGoogleSignUp: async () => {},
     };
   }

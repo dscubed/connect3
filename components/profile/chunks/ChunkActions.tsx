@@ -9,6 +9,7 @@ import { parseDocument } from "@/lib/resume/parsers/documentParser";
 import { toast } from "sonner";
 import { validateFile } from "../cube/utils/cubeUtils";
 import type { ResumeProfileDetails } from "@/components/profile/hooks/ProfileEditProvider";
+import type { AllCategories } from "./ChunkUtils";
 
 const RESUME_ACCEPT = ".pdf,.doc,.docx,.txt";
 
@@ -35,10 +36,14 @@ export function ChunkActions({
 
   const applyResumeResult = (result: ResumeChunkResult) => {
     result.updatedChunks?.forEach((chunk) => {
-      updateChunk({ id: chunk.id, category: chunk.category, text: chunk.text });
+      updateChunk({
+        id: chunk.id,
+        category: chunk.category as AllCategories,
+        text: chunk.text,
+      });
     });
     result.newChunks?.forEach((chunk) => {
-      addChunk(chunk.category, chunk.text);
+      addChunk(chunk.category as AllCategories, chunk.text);
     });
     if (result.profileDetails) {
       applyResumeDetails(result.profileDetails);
@@ -102,7 +107,7 @@ export function ChunkActions({
       toast.error("Failed to process resume. Please try again.");
     } finally {
       setResumeProcessing(false);
-      fileInputRef.current && (fileInputRef.current.value = "");
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 

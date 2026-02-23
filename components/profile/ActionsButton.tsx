@@ -31,8 +31,13 @@ export function ActionsButton({
     exitEdit,
     savingChunks,
     resumeProcessing,
+    hasPendingEdits,
   } = useChunkContext();
-  const { saveProfileEdits, savingProfileEdits } = useProfileEditContext();
+  const {
+    saveProfileEdits,
+    savingProfileEdits,
+    hasPendingProfileEdits,
+  } = useProfileEditContext();
   const [isSaving, setIsSaving] = useState(false);
   const isSavingRef = useRef(false);
 
