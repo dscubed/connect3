@@ -17,12 +17,18 @@ export const Suggestions = ({
   children,
   ...props
 }: SuggestionsProps) => (
-  <ScrollArea className={cn("w-full overflow-x-auto whitespace-nowrap", className)} {...props}>
-    <div className="flex w-max flex-nowrap items-center gap-2 py-1">
-      {children}
-    </div>
-    <ScrollBar className="hidden" orientation="horizontal" />
-  </ScrollArea>
+  <div className={cn("relative w-full", className)}>
+    <ScrollArea
+      className="w-full overflow-x-auto whitespace-nowrap"
+      viewportClassName="[mask-image:linear-gradient(to_right,transparent_0%,black_15%,black_85%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_right,transparent_0%,black_15%,black_85%,transparent_100%)]"
+      {...props}
+    >
+      <div className="flex w-max flex-nowrap items-center gap-2 py-1">
+        {children}
+      </div>
+      <ScrollBar className="hidden" orientation="horizontal" />
+    </ScrollArea>
+  </div>
 );
 
 export type SuggestionProps = Omit<ComponentProps<typeof Button>, "onClick"> & {

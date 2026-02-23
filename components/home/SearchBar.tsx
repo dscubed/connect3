@@ -126,7 +126,7 @@ export function SearchBar({ containerClassName }: SearchBarProps) {
 
   return (
     <div className="flex flex-col gap-3 w-full">
-      {query.trim() === "" && suggestions.length > 0 && (
+      {suggestions.length > 0 && (
         <Suggestions className="mx-auto max-w-3xl">
           {suggestions.map((s) => (
             <Suggestion
