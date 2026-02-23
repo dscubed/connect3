@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Fredoka } from "next/font/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import { ThemeProvider } from "next-themes";
 import { AuthInitializer } from "@/components/auth/AuthInitializer";
 import { FingerprintInitializer } from "@/components/auth/FingerprintInitializer";
@@ -48,6 +49,7 @@ export default function RootLayout({
           {children}
           <Toaster />
         </ThemeProvider>
+        <GoogleAnalytics gaId="G-CW6YV4C99C" />
       </body>
     </html>
   );
