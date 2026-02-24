@@ -1,5 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
 import { JSDOM } from "jsdom";
 import { Readability } from "@mozilla/readability";
 import TurndownService from "turndown";
@@ -83,11 +81,11 @@ export function extractToMarkdown(
 
   // Remove obvious junk nodes
   for (const selector of JUNK_SELECTORS) {
-    doc.querySelectorAll(selector).forEach((el) => el.remove());
+    doc.querySelectorAll(selector).forEach((el: Element) => el.remove());
   }
 
   // Remove empty elements
-  doc.querySelectorAll("*").forEach((el) => {
+  doc.querySelectorAll("*").forEach((el: Element) => {
     if (
       el.textContent?.trim() === "" &&
       el.children.length === 0
@@ -106,7 +104,7 @@ export function extractToMarkdown(
   // Keep links clean (important for KB)
   turndown.addRule("cleanLinks", {
     filter: "a",
-    replacement(content, node) {
+    replacement(content: string, node: HTMLElement): string {
       const href = (node as HTMLAnchorElement).getAttribute("href");
       if (!href) return content;
       return `[${content}](${href})`;
