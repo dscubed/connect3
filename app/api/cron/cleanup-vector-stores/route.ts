@@ -73,7 +73,7 @@ async function cleanupVectorStore(
   try {
     // Collect all unreferenced files first
     const filesToDelete: string[] = [];
-    
+
     for await (const file of openai.vectorStores.files.list(vectorStoreId, {
       limit: 100,
     })) {
@@ -87,7 +87,9 @@ async function cleanupVectorStore(
       return 0;
     }
 
-    console.log(`  Found ${filesToDelete.length} unreferenced files in ${storeName}`);
+    console.log(
+      `  Found ${filesToDelete.length} unreferenced files in ${storeName}`,
+    );
 
     // Delete files in parallel batches to avoid rate limits
     const BATCH_SIZE = 10;
@@ -95,7 +97,7 @@ async function cleanupVectorStore(
 
     for (let i = 0; i < filesToDelete.length; i += BATCH_SIZE) {
       const batch = filesToDelete.slice(i, i + BATCH_SIZE);
-      
+
       await Promise.all(
         batch.map(async (fileId) => {
           try {
@@ -117,7 +119,9 @@ async function cleanupVectorStore(
       );
     }
 
-    console.log(`✅ Cleaned up ${deletedCount}/${filesToDelete.length} files from ${storeName}`);
+    console.log(
+      `✅ Cleaned up ${deletedCount}/${filesToDelete.length} files from ${storeName}`,
+    );
     return deletedCount;
   } catch (error) {
     console.error(`Error cleaning up ${storeName}:`, error);
@@ -153,11 +157,16 @@ export async function GET(req: Request) {
     }
 
     // Clean up all three vector stores in parallel
-    const [deletedFromUser, deletedFromOrg, deletedFromEvents] = await Promise.all([
-      cleanupVectorStore(userVectorStoreId, profileFileIds, "User Profiles"),
-      cleanupVectorStore(orgVectorStoreId, profileFileIds, "Organization Profiles"),
-      cleanupVectorStore(eventsVectorStoreId, eventFileIds, "Events"),
-    ]);
+    const [deletedFromUser, deletedFromOrg, deletedFromEvents] =
+      await Promise.all([
+        cleanupVectorStore(userVectorStoreId, profileFileIds, "User Profiles"),
+        cleanupVectorStore(
+          orgVectorStoreId,
+          profileFileIds,
+          "Organization Profiles",
+        ),
+        cleanupVectorStore(eventsVectorStoreId, eventFileIds, "Events"),
+      ]);
 
     const totalDeleted = deletedFromUser + deletedFromOrg + deletedFromEvents;
 
