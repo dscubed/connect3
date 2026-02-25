@@ -4,7 +4,7 @@
 export function rgbToHsl(
   r: number,
   g: number,
-  b: number
+  b: number,
 ): [number, number, number] {
   r /= 255;
   g /= 255;
@@ -47,8 +47,12 @@ export function hslToHsla(h: number, s: number, l: number, a: number): string {
 export function getMeshGradientStyle(
   r: number,
   g: number,
-  b: number
-): { backgroundImage: string; backgroundBlendMode: string; backgroundSize: string } {
+  b: number,
+): {
+  backgroundImage: string;
+  backgroundBlendMode: string;
+  backgroundSize: string;
+} {
   const [h, s, l] = rgbToHsl(r, g, b);
 
   // Color variations from input: subtle tint, main orb, lighter orb
@@ -76,9 +80,7 @@ export function getMeshGradientStyle(
  * Deterministically generate RGB from userId (for fallback when no avatar)
  */
 export function getRgbFromUserId(userId: string): [number, number, number] {
-  const hash = userId
-    .split("")
-    .reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const hash = userId.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
   // Map to a pleasant hue range (avoid grays): 200-320° typically gives nice purples/blues/pinks
   const hue = 200 + (Math.abs(hash) % 240);
   const sat = 55 + (Math.abs(hash >> 4) % 35);
