@@ -21,12 +21,14 @@ export function useChunkData({
   chunks,
   categoryOrder,
   visitingProfileId,
+  initialChunks,
 }: {
   setChunks: React.Dispatch<React.SetStateAction<ProfileChunk[]>>;
   setCategoryOrder: React.Dispatch<React.SetStateAction<CategoryOrderData[]>>;
   chunks: ProfileChunk[];
   categoryOrder: CategoryOrderData[];
   visitingProfileId: string | undefined;
+  initialChunks?: ProfileDetailChunkCategory[];
 }) {
   const user = useAuthStore((s) => s.user);
   const profile = useAuthStore((s) => s.profile);
@@ -39,7 +41,7 @@ export function useChunkData({
   const [prevCategoryOrder, setPrevCategoryOrder] = useState<
     CategoryOrderData[]
   >([]);
-  const [loadingChunks, setLoadingChunks] = useState<boolean>(true);
+  const [loadingChunks, setLoadingChunks] = useState<boolean>(!initialChunks);
   const [savingChunks, setSavingChunks] = useState<boolean>(false);
 
   // Refs to always provide the latest values inside async callbacks,
@@ -57,6 +59,32 @@ export function useChunkData({
 
   // Track current profileId to handle race conditions
   const currentProfileIdRef = useRef<string>(profileId);
+  const initializedFromCacheRef = useRef<boolean>(false);
+
+  // Hydrate from initialChunks on first mount (data already fetched by ProfileProvider)
+  useEffect(() => {
+    if (initialChunks && !initializedFromCacheRef.current) {
+      initializedFromCacheRef.current = true;
+      const categoryOrderData: CategoryOrderData[] = initialChunks.map(
+        (cat) => ({
+          category: cat.category as AllCategories,
+          order: cat.order,
+        }),
+      );
+      const chunksData: ProfileChunk[] = initialChunks.flatMap((cat) =>
+        (cat.chunks ?? []).map((chunk) => ({
+          id: chunk.id,
+          text: chunk.text,
+          category: cat.category as AllCategories,
+          order: chunk.order,
+        })),
+      );
+      setFetchedChunks({ chunksData, categoryOrderData });
+      setLoadingChunks(false);
+    }
+    // Only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Update ref whenever profileId changes
   useEffect(() => {
@@ -178,9 +206,10 @@ export function useChunkData({
   }, [profileId, setFetchedChunks, fetchChunksFromProfileDetail]);
 
   useEffect(() => {
-    if (profileId && profileId !== "") {
+    if (profileId && profileId !== "" && !initializedFromCacheRef.current) {
       fetchChunks();
     }
+    initializedFromCacheRef.current = false;
   }, [profileId, fetchChunks]);
 
   const reset = () => {

@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Sidebar from "@/components/sidebar/Sidebar";
 import { ClubDetailPanel } from "@/components/clubs/ClubDetailPanel";
@@ -14,20 +15,45 @@ import ClubFilters from "@/components/clubs/ClubFilters";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 
 export default function ClubsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedClub, setSelectedClub] = useState<Club | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [loaded, setLoaded] = useState(false);
-  const [search, setSearch] = useState("");
-  const [selectedUniversity, setSelectedUniversity] = useState<string>("All");
+  const [search, setSearch] = useState(searchParams.get("search") ?? "");
+  const [selectedUniversity, setSelectedUniversity] = useState<string>(
+    searchParams.get("university") ?? "All",
+  );
 
-  // Debounce search to avoid too many API calls
   const debouncedSearch = useDebouncedValue(search, 300);
 
   const clubListRef = useRef<HTMLDivElement>(null);
   const isDesktop = useBreakpointLarge();
 
-  // Memoize query params to prevent unnecessary re-fetches
+  const buildQueryString = useCallback(
+    (overrides: Record<string, string | null> = {}) => {
+      const params = new URLSearchParams();
+      const s =
+        overrides.search !== undefined ? overrides.search : debouncedSearch;
+      const u =
+        overrides.university !== undefined
+          ? overrides.university
+          : selectedUniversity;
+      const c =
+        overrides.club !== undefined
+          ? overrides.club
+          : (selectedClub?.id ?? null);
+      if (s) params.set("search", s);
+      if (u && u !== "All") params.set("university", u);
+      if (c) params.set("club", c);
+      const qs = params.toString();
+      return qs ? `?${qs}` : "";
+    },
+    [debouncedSearch, selectedUniversity, selectedClub],
+  );
+
   const queryParams = useMemo(() => {
     const params: Record<string, string> = {};
     if (debouncedSearch) params.search = debouncedSearch;
@@ -45,13 +71,24 @@ export default function ClubsPage() {
     sentinelRef,
   } = useInfiniteScroll<Club>(clubListRef, "/api/clubs", { queryParams });
 
-  // Set initial selected club once data loads
+  // Sync search & university to URL (replace so filter changes don't spam history)
+  useEffect(() => {
+    const qs = buildQueryString();
+    router.replace(`/clubs${qs}`, { scroll: false });
+  }, [debouncedSearch, selectedUniversity, buildQueryString, router]);
+
+  // Restore selected club from URL param once clubs load
   useEffect(() => {
     if (!loaded && !isLoading && clubs.length > 0) {
-      setSelectedClub(clubs[0]);
+      const clubIdFromUrl = searchParams.get("club");
+      const match = clubIdFromUrl
+        ? clubs.find((c) => c.id === clubIdFromUrl)
+        : null;
+      setSelectedClub(match ?? clubs[0]);
+      setShowDetails(!!match);
       setLoaded(true);
     }
-  }, [isLoading, clubs, loaded]);
+  }, [isLoading, clubs, loaded, searchParams]);
 
   // Reset selection when current selection is no longer in the filtered list
   useEffect(() => {
@@ -63,16 +100,80 @@ export default function ClubsPage() {
     }
   }, [clubs, isValidating, selectedClub]);
 
-  const handleClubSelect = (club: Club) => {
-    setSelectedClub(club);
-    setShowDetails(true);
-  };
+  const handleClubSelect = useCallback(
+    (club: Club) => {
+      setSelectedClub(club);
+      setShowDetails(true);
+      const qs = buildQueryString({ club: club.id });
+      router.push(`/clubs${qs}`, { scroll: false });
+    },
+    [buildQueryString, router],
+  );
 
-  const handleBackToList = () => {
+  const handleBackToList = useCallback(() => {
     setShowDetails(false);
-  };
+    const qs = buildQueryString({ club: null });
+    router.push(`/clubs${qs}`, { scroll: false });
+  }, [buildQueryString, router]);
 
-  // Handle error with useEffect to avoid calling toast during render
+  // Re-sync state only on browser back/forward (popstate), not on our own URL updates
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const urlSearch = params.get("search") ?? "";
+      const urlUni = params.get("university") ?? "All";
+      const clubId = params.get("club");
+
+      setSearch(urlSearch);
+      setSelectedUniversity(urlUni);
+
+      if (clubs.length > 0) {
+        const match = clubId ? clubs.find((c) => c.id === clubId) : null;
+        if (match) {
+          setSelectedClub(match);
+          setShowDetails(true);
+        } else {
+          setSelectedClub(clubs[0] ?? null);
+          setShowDetails(false);
+        }
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [clubs]);
+
+  // Arrow key navigation through clubs
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+      if (clubs.length === 0) return;
+
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+
+      e.preventDefault();
+      const currentIndex = selectedClub
+        ? clubs.findIndex((c) => c.id === selectedClub.id)
+        : -1;
+
+      let nextIndex: number;
+      if (e.key === "ArrowDown") {
+        nextIndex =
+          currentIndex < clubs.length - 1 ? currentIndex + 1 : currentIndex;
+      } else {
+        nextIndex = currentIndex > 0 ? currentIndex - 1 : 0;
+      }
+
+      if (nextIndex !== currentIndex) {
+        handleClubSelect(clubs[nextIndex]);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [clubs, selectedClub, handleClubSelect]);
+
   useEffect(() => {
     if (error) {
       toast.error("Could not get clubs");

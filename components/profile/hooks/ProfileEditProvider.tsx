@@ -12,7 +12,10 @@ import {
 import { University } from "@/components/profile/details/univeristies";
 import { uploadProfileToVectorStore } from "@/lib/vectorStores/profile/client";
 import { fetchProfile } from "@/lib/profiles/fetchProfile";
-import type { ProfileDetailLink } from "@/components/profile/ProfileProvider";
+import type {
+  ProfileDetailLink,
+  ProfileDetail,
+} from "@/components/profile/ProfileProvider";
 
 export type ResumeProfileDetails = {
   tldr?: string | null;
@@ -82,17 +85,31 @@ export function ProfileEditProvider({
   const { user, updateProfile, getSupabaseClient } = useAuthStore();
   const supabase = getSupabaseClient();
 
+  // Check if links are already available from ProfileDetail (pre-fetched by ProfileProvider)
+  const embeddedLinks: LinkItem[] | undefined = (
+    profile as ProfileDetail
+  ).links?.map((l) => ({
+    id: l.id,
+    type: l.type,
+    details: l.details,
+  }));
+  const hasEmbeddedLinks = !!embeddedLinks;
+
   const [baseline, setBaseline] = useState<ProfileDraft | null>(null);
   const [draft, setDraft] = useState<ProfileDraft | null>(null);
-  const [loadingLinks, setLoadingLinks] = useState<boolean>(true);
-  const initialLinksLoadedRef = useRef(false);
+  const [loadingLinks, setLoadingLinks] = useState<boolean>(!hasEmbeddedLinks);
+  const initialLinksLoadedRef = useRef(hasEmbeddedLinks);
   const pendingResumeDetailsRef = useRef<ResumeProfileDetails | null>(null);
   const [savingProfileEdits, setSavingProfileEdits] = useState(false);
 
   useEffect(() => {
     if (!profile?.id) return;
 
-    const seedLinks = baseline?.profileId === profile.id ? baseline.links : [];
+    const seedLinks = hasEmbeddedLinks
+      ? embeddedLinks!
+      : baseline?.profileId === profile.id
+        ? baseline.links
+        : [];
     const nextBase = buildDraft(profile, seedLinks);
     setBaseline(nextBase);
     setDraft((prev) => {
@@ -101,10 +118,17 @@ export function ProfileEditProvider({
       }
       return prev;
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile, editingProfile]);
 
   useEffect(() => {
+    // Skip fetch if links were already embedded in the profile from ProfileProvider
+    if (hasEmbeddedLinks) {
+      setLoadingLinks(false);
+      initialLinksLoadedRef.current = true;
+      return;
+    }
+
     let cancelled = false;
     const fetchLinks = async () => {
       if (!profile?.id) return;
@@ -245,7 +269,7 @@ export function ProfileEditProvider({
     if (!pending) return;
     pendingResumeDetailsRef.current = null;
     applyResumeDetails(pending);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadingLinks]);
 
   const resetDraft = () => {

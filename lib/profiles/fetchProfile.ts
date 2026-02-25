@@ -157,6 +157,7 @@ export function useProfile<T = Record<string, unknown>>(
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
+      revalidateIfStale: false,
       dedupingInterval: 60_000, // 1 minute dedup window
     },
   );

@@ -5,6 +5,7 @@ import { FastAverageColor } from "fast-average-color";
 import { getMeshGradientStyle, getRgbFromUserId } from "@/lib/gradientUtils";
 
 const PLACEHOLDER_RGB: [number, number, number] = [220, 218, 225];
+const colorCache = new Map<string, [number, number, number]>();
 
 interface CoverImageProps {
   userId: string;
@@ -23,6 +24,12 @@ export default function CoverImage({ userId, avatarUrl }: CoverImageProps) {
       return;
     }
 
+    const cached = colorCache.get(avatarUrl);
+    if (cached) {
+      setResolvedRgb(cached);
+      return;
+    }
+
     setResolvedRgb(null);
     let cancelled = false;
     const fac = new FastAverageColor();
@@ -35,7 +42,9 @@ export default function CoverImage({ userId, avatarUrl }: CoverImageProps) {
       .then((result) => {
         if (cancelled) return;
         const [r, g, b] = result.value;
-        setResolvedRgb([r, g, b]);
+        const rgb: [number, number, number] = [r, g, b];
+        colorCache.set(avatarUrl, rgb);
+        setResolvedRgb(rgb);
       })
       .catch(() => {
         if (cancelled) return;

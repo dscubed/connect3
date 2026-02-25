@@ -64,7 +64,11 @@ function ProfilePageContentInner({
 
   return (
     <ProfileEditProvider profile={profile} editingProfile={editingProfile}>
-      <ChunkProvider isEditing={editingProfile} visitingProfileId={profile.id}>
+      <ChunkProvider
+        isEditing={editingProfile}
+        visitingProfileId={profile.id}
+        initialChunks={profile.chunks}
+      >
         <ProfilePageContentBody
           editingProfile={editingProfile}
           setEditingProfile={setEditingProfile}

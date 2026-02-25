@@ -13,6 +13,7 @@ import {
   useEditChunks,
   UseEditChunksExports as ChunkEditHelpers,
 } from "./useEditChunks";
+import type { ProfileDetailChunkCategory } from "@/components/profile/ProfileProvider";
 
 type ChunkContextType = ChunkHelpers &
   ChunkDataHelpers &
@@ -31,10 +32,12 @@ export function ChunkProvider({
   children,
   isEditing,
   visitingProfileId,
+  initialChunks,
 }: {
   children: ReactNode;
   isEditing: boolean;
   visitingProfileId: string;
+  initialChunks?: ProfileDetailChunkCategory[];
 }) {
   // Core chunk states
   const [chunks, setChunks] = useState<ProfileChunk[]>([]);
@@ -62,6 +65,7 @@ export function ChunkProvider({
     chunks,
     categoryOrder,
     visitingProfileId,
+    initialChunks,
   });
 
   // Edit Operations
