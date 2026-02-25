@@ -21,7 +21,10 @@ function getEventTags(event: Event): { label: string; color: string }[] {
 
   if (event.category) {
     tags.push({
-      label: event.category.split(/[_\s]+/).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" "),
+      label: event.category
+        .split(/[_\s]+/)
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" "),
       color: "bg-purple-400 text-white",
     });
   }
@@ -92,11 +95,15 @@ export function EventGridCard({ event, onClick }: EventGridCardProps) {
         <h3 className="font-semibold text-black text-sm leading-tight truncate group-hover:text-purple-600 transition-colors">
           {event.name}
         </h3>
-        <p className="text-purple-500 text-xs mt-1">{event.category?.split(/[_\s]+/).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}</p>
+        <p className="text-purple-500 text-xs mt-1">
+          {event.category
+            ?.split(/[_\s]+/)
+            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+            .join(" ")}
+        </p>
         <p className="text-gray-400 text-xs mt-0.5">
-          {
-            event.start && `${new Date(event.start).toLocaleDateString("en-US", { weekday: "short", year: "numeric", month: "short", day: "numeric", })}, ${new Date(event.start).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", })}`
-          }
+          {event.start &&
+            `${new Date(event.start).toLocaleDateString("en-US", { weekday: "short", year: "numeric", month: "short", day: "numeric" })}, ${new Date(event.start).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`}
         </p>
 
         {/* Tags */}

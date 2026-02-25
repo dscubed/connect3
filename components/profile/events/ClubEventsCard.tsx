@@ -44,7 +44,14 @@ function rawEventToEvent(raw: RawEvent, creatorProfileId: string): Event {
     currency: "",
     thumbnail: raw.thumbnail || "",
     category: "",
-    location: { venue: "TBA", address: "TBA", latitude: 0, longitude: 0, city: "TBA", country: "TBA" },
+    location: {
+      venue: "TBA",
+      address: "TBA",
+      latitude: 0,
+      longitude: 0,
+      city: "TBA",
+      country: "TBA",
+    },
     pricing: { min: 0, max: 0 },
   } as Event;
 }
@@ -59,7 +66,7 @@ const sortEvents = (events: RawEvent[]) => {
     })
     .sort(
       (a, b) =>
-        new Date(a.start ?? 0).getTime() - new Date(b.start ?? 0).getTime()
+        new Date(a.start ?? 0).getTime() - new Date(b.start ?? 0).getTime(),
     );
 
   const past = events
@@ -70,17 +77,13 @@ const sortEvents = (events: RawEvent[]) => {
     })
     .sort(
       (a, b) =>
-        new Date(b.start ?? 0).getTime() - new Date(a.start ?? 0).getTime()
+        new Date(b.start ?? 0).getTime() - new Date(a.start ?? 0).getTime(),
     );
 
   return [...upcoming, ...past];
 };
 
-export default function ClubEventsCard({
-  profileId,
-}: {
-  profileId: string;
-}) {
+export default function ClubEventsCard({ profileId }: { profileId: string }) {
   const { profile, isOwnProfile } = useProfileContext();
   const canManageEvents =
     isOwnProfile && profile?.account_type === "organisation";
@@ -92,7 +95,7 @@ export default function ClubEventsCard({
   const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
   const { data, isLoading } = useSWR(
     profileId ? `/api/users/${profileId}/events?limit=24` : null,
-    fetcher
+    fetcher,
   );
   const { data: eventDetailData } = useSWR(
     editingEventId
@@ -100,7 +103,7 @@ export default function ClubEventsCard({
       : viewingEvent
         ? `/api/events/${viewingEvent.id}`
         : null,
-    fetcher
+    fetcher,
   );
 
   const events = useMemo<RawEvent[]>(() => data?.items ?? [], [data?.items]);
@@ -116,7 +119,9 @@ export default function ClubEventsCard({
     return viewingEvent;
   }, [viewingEvent, selectedEventDetail]);
 
-  const detail = selectedEventDetail ?? (editingEventId ? events.find((e) => e.id === editingEventId) : null);
+  const detail =
+    selectedEventDetail ??
+    (editingEventId ? events.find((e) => e.id === editingEventId) : null);
   const detailCategory = selectedEventDetail?.category ?? null;
   const detailLocation = selectedEventDetail?.location ?? null;
   const detailPricing = selectedEventDetail?.pricing ?? null;
@@ -124,21 +129,27 @@ export default function ClubEventsCard({
   const detailIsOnline = selectedEventDetail?.isOnline ?? null;
   const detailPoster = selectedEventDetail?.thumbnail ?? null;
 
-  const editingEventSummary = editingEventId ? events.find((e) => e.id === editingEventId) : null;
+  const editingEventSummary = editingEventId
+    ? events.find((e) => e.id === editingEventId)
+    : null;
 
   const editInitialValues = useMemo(() => {
     if (!detail) return undefined;
     const bookingUrl =
-      selectedEventDetail?.bookingUrl ||
-      editingEventSummary?.booking_url ||
-      "";
+      selectedEventDetail?.bookingUrl || editingEventSummary?.booking_url || "";
     const rawCategory =
       typeof detailCategory === "string"
         ? detailCategory
-        : detailCategory?.category ?? detailCategory?.type ?? editingEventSummary?.category ?? (detail && "category" in detail ? (detail as { category?: string | null }).category : null) ?? "";
+        : (detailCategory?.category ??
+          detailCategory?.type ??
+          editingEventSummary?.category ??
+          (detail && "category" in detail
+            ? (detail as { category?: string | null }).category
+            : null) ??
+          "");
     const rawCategoryStr = String(rawCategory || "").trim();
     const matchedCategory = EVENT_CATEGORIES.find(
-      (c) => c.toLowerCase() === rawCategoryStr.toLowerCase()
+      (c) => c.toLowerCase() === rawCategoryStr.toLowerCase(),
     );
     const mappedCategories: EventCategory[] =
       matchedCategory != null ? [matchedCategory] : [];
@@ -180,9 +191,7 @@ export default function ClubEventsCard({
     detailPoster,
   ]);
 
-  const handleEditSubmit = async (
-    eventData: Omit<CreateEventBody, "id">
-  ) => {
+  const handleEditSubmit = async (eventData: Omit<CreateEventBody, "id">) => {
     if (!editingEventId) return;
     const response = await makeAuthenticatedRequest(
       `/api/events/${editingEventId}`,
@@ -192,7 +201,7 @@ export default function ClubEventsCard({
           "Content-Type": "application/json",
         },
         body: JSON.stringify(eventData),
-      }
+      },
     );
 
     if (!response.ok) {
@@ -208,7 +217,7 @@ export default function ClubEventsCard({
           "Content-Type": "application/json",
         },
         body: JSON.stringify(eventData),
-      }
+      },
     );
 
     if (!vectorResponse.ok) {
@@ -223,15 +232,18 @@ export default function ClubEventsCard({
 
   const handleDeleteEvent = async (eventId: string) => {
     const confirmed = window.confirm(
-      "Delete this event? This action cannot be undone."
+      "Delete this event? This action cannot be undone.",
     );
     if (!confirmed) return;
 
     setDeletingEventId(eventId);
     try {
-      const response = await makeAuthenticatedRequest(`/api/events/${eventId}`, {
-        method: "DELETE",
-      });
+      const response = await makeAuthenticatedRequest(
+        `/api/events/${eventId}`,
+        {
+          method: "DELETE",
+        },
+      );
 
       if (!response.ok) {
         toast.error("Failed to delete event");
@@ -252,13 +264,17 @@ export default function ClubEventsCard({
 
   if (isLoading) {
     return (
-      <div className="text-base leading-relaxed text-muted/80">Loading events...</div>
+      <div className="text-base leading-relaxed text-muted/80">
+        Loading events...
+      </div>
     );
   }
 
   if (displayEvents.length === 0) {
     return (
-      <div className="text-base leading-relaxed text-muted/80">No events yet.</div>
+      <div className="text-base leading-relaxed text-muted/80">
+        No events yet.
+      </div>
     );
   }
 
@@ -304,7 +320,7 @@ export default function ClubEventsCard({
                     }}
                     disabled={isDeleting}
                     aria-label={`Delete ${mapped.name}`}
-                    className="absolute right-1 top-2 inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="absolute bottom-2 right-1 inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>

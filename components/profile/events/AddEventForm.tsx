@@ -13,13 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Check,
-  Globe,
-  ImagePlus,
-  Layers,
-  PencilLine,
-} from "lucide-react";
+import { Globe, ImagePlus, Layers, PencilLine } from "lucide-react";
 import {
   EVENT_CATEGORIES,
   EventCategory,
@@ -40,23 +34,13 @@ interface AddEventFormProps {
 }
 
 const SECTION_CARD =
-  "w-full rounded-[22px] border-2 bg-white p-5 shadow-sm border-[color:var(--theme-border)]";
+  "w-full rounded-[22px] border-2 bg-white p-5 shadow-sm border-purple-200";
 const SECTION_LABEL =
-  "inline-flex items-center rounded-full bg-[color:var(--theme-200)] px-4 py-1.5 text-base font-semibold text-slate-700";
+  "inline-flex items-center rounded-full bg-purple-100 px-4 py-1.5 text-base font-semibold text-slate-700";
 const ICON_BUTTON =
   "inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200/70 text-slate-400 transition-colors hover:text-slate-600";
 const CHIP_BASE =
   "inline-flex items-center rounded-full border px-4 py-1.5 text-base font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50";
-
-type ThemePreset = {
-  id: string;
-  name: string;
-  swatch: string;
-  main: string;
-  tint100: string;
-  tint200: string;
-  border: string;
-};
 
 const TIMEZONE_OPTIONS = [
   { offset: "GMT+08:00", city: "Perth" },
@@ -98,10 +82,9 @@ export default function AddEventForm({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-  const [accentColor, setAccentColor] = useState<string>("#6F63FF");
   const [timezone, setTimezone] = useState(
     TIMEZONE_OPTIONS.find((option) => option.city === "Melbourne") ??
-      TIMEZONE_OPTIONS[0]
+      TIMEZONE_OPTIONS[0],
   );
   const previewUrlRef = useRef<string | null>(null);
 
@@ -157,25 +140,23 @@ export default function AddEventForm({
     setStartTime(toTimeInputValue(initialValues.start));
     setEndTime(toTimeInputValue(initialValues.end));
     setType(initialValues.type ?? []);
-    setBookingLink(
-      initialValues.booking_link?.[0] ?? ""
-    );
+    setBookingLink(initialValues.booking_link?.[0] ?? "");
     setLocationType(initialValues.location_type ?? "physical");
     setLocationVenue(initialValues.location?.venue ?? "");
     setLocationAddress(initialValues.location?.address ?? "");
     setLocationCity(
-      initialValues.location?.city ?? initialValues.city?.[0] ?? ""
+      initialValues.location?.city ?? initialValues.city?.[0] ?? "",
     );
     setLocationCountry(initialValues.location?.country ?? "");
     setPricingMin(
       initialValues.pricing_min != null
         ? String(initialValues.pricing_min)
-        : ""
+        : "",
     );
     setPricingMax(
       initialValues.pricing_max != null
         ? String(initialValues.pricing_max)
-        : ""
+        : "",
     );
     setPricingCurrency(initialValues.currency ?? "");
     if (initialValues.thumbnailUrl) {
@@ -184,67 +165,6 @@ export default function AddEventForm({
   }, [initialValues]);
 
   const categories = EVENT_CATEGORIES;
-
-  const themePresets: ThemePreset[] = [
-    {
-      id: "teal",
-      name: "Teal",
-      swatch: "#73DFC7",
-      main: "#73DFC7",
-      tint100: "#DDF6F0",
-      tint200: "#C9F0E7",
-      border: "#B4E9DD",
-    },
-    {
-      id: "purple",
-      name: "Purple",
-      swatch: "#7878FF",
-      main: "#7878FF",
-      tint100: "#EEE9FF",
-      tint200: "#E0D7FF",
-      border: "#C9BCFF",
-    },
-    {
-      id: "pink",
-      name: "Pink",
-      swatch: "#F090AA",
-      main: "#F090AA",
-      tint100: "#FDE3EE",
-      tint200: "#F7C2D9",
-      border: "#EFB0CC",
-    },
-    {
-      id: "yellow",
-      name: "Yellow",
-      swatch: "#EEC869",
-      main: "#EEC869",
-      tint100: "#FFE7BF",
-      tint200: "#FFDCA1",
-      border: "#F5D08A",
-    },
-    {
-      id: "blue",
-      name: "Blue",
-      swatch: "#6AB6ED",
-      main: "#6AB6ED",
-      tint100: "#DCEEFF",
-      tint200: "#C6E2FF",
-      border: "#AED6FF",
-    },
-    {
-      id: "lilac",
-      name: "Lilac",
-      swatch: "#C0C0E0",
-      main: "#C0C0E0",
-      tint100: "#E7E8FF",
-      tint200: "#D7D9FF",
-      border: "#C7C8FF",
-    },
-  ];
-
-  const currentTheme =
-    themePresets.find((theme) => theme.swatch === accentColor) ??
-    themePresets[1];
 
   const isOrganisation = profile?.account_type === "organisation";
 
@@ -294,9 +214,7 @@ export default function AddEventForm({
       const pricingMaxValue = Number(pricingMax || 0);
       const derivedPricing: EventPricing =
         pricingMinValue > 0 || pricingMaxValue > 0 ? "paid" : "free";
-      const bookingLinkValues = bookingLink.trim()
-        ? [bookingLink.trim()]
-        : [];
+      const bookingLinkValues = bookingLink.trim() ? [bookingLink.trim()] : [];
       const trimmedCurrency = pricingCurrency.trim().toUpperCase();
       const locationPayload = {
         venue: locationVenue.trim() || null,
@@ -336,9 +254,7 @@ export default function AddEventForm({
         location: locationPayload,
         thumbnailUrl: uploadedThumbnailUrl,
         source: source ?? undefined,
-        university: profile?.university
-          ? [profile.university]
-          : undefined,
+        university: profile?.university ? [profile.university] : undefined,
       };
       await onSubmit(eventData);
     } catch (error) {
@@ -352,14 +268,6 @@ export default function AddEventForm({
     <form
       onSubmit={handleSubmit}
       className="mx-auto w-full max-w-6xl px-8 py-6"
-      style={
-        {
-          "--theme": currentTheme.main,
-          "--theme-100": currentTheme.tint100,
-          "--theme-200": currentTheme.tint200,
-          "--theme-border": currentTheme.border,
-        } as React.CSSProperties
-      }
     >
       <div className="grid w-full gap-8 lg:grid-cols-[360px_minmax(0,1fr)]">
         <div className="flex flex-col items-center gap-4 lg:items-start">
@@ -390,30 +298,6 @@ export default function AddEventForm({
                 disabled={isSubmitting}
               />
             </label>
-          </div>
-          <div className="mt-4 flex w-full max-w-[320px] items-center justify-center gap-3">
-            {themePresets.map((theme) => {
-              const isSelected = accentColor === theme.swatch;
-              return (
-                <button
-                  key={theme.id}
-                  type="button"
-                  onClick={() => setAccentColor(theme.swatch)}
-                  className={`relative aspect-square rounded-full border-[4px] border-white shadow-[0_4px_12px_rgba(0,0,0,0.12)] transition ${
-                    isSelected ? "h-12 w-12" : "h-11 w-11"
-                  }`}
-                  style={{ backgroundColor: theme.swatch }}
-                  aria-label={`Select ${theme.name} theme`}
-                  aria-pressed={isSelected}
-                >
-                  {isSelected && (
-                    <span className="absolute inset-0 flex items-center justify-center">
-                      <Check className="h-5 w-5 text-white" />
-                    </span>
-                  )}
-                </button>
-              );
-            })}
           </div>
         </div>
 
@@ -471,16 +355,20 @@ export default function AddEventForm({
               {/* Adjust the first column width to move the dotted line left/right (e.g. 22px -> 20px). */}
               <div className="grid w-full max-w-none grid-cols-[19px_1fr] grid-rows-[20px_32px_20px] items-center text-base text-slate-600 md:max-w-[200px]">
                 <span className="col-start-1 row-start-1 flex h-5 w-full items-center justify-center">
-                  <span className="h-3 w-3 rounded-full bg-[color:var(--theme)]" />
+                  <span className="h-3 w-3 rounded-full bg-purple-500" />
                 </span>
-                <span className="col-start-2 row-start-1 text-slate-900">Start</span>
+                <span className="col-start-2 row-start-1 text-slate-900">
+                  Start
+                </span>
                 <span className="col-start-1 row-start-2 flex h-full items-center justify-center">
-                  <span className="h-full w-0 border-l-2 border-dotted border-[color:var(--theme)]" />
+                  <span className="h-full w-0 border-l-2 border-dotted border-purple-500" />
                 </span>
                 <span className="col-start-1 row-start-3 flex h-5 w-full items-center justify-center">
-                  <span className="h-3 w-3 rounded-full border-2 border-[color:var(--theme)] bg-white" />
+                  <span className="h-3 w-3 rounded-full border-2 border-purple-500 bg-white" />
                 </span>
-                <span className="col-start-2 row-start-3 text-slate-900">End</span>
+                <span className="col-start-2 row-start-3 text-slate-900">
+                  End
+                </span>
               </div>
               <div className="flex w-full max-w-none flex-col gap-4 md:max-w-[560px]">
                 <div className="flex flex-wrap items-center gap-3 md:flex-nowrap">
@@ -492,7 +380,7 @@ export default function AddEventForm({
                     onChange={(e) => setStart(e.target.value)}
                     required
                     disabled={isSubmitting}
-                    className="h-11 flex-[0_1_190px] rounded-[14px] border-2 border-[color:var(--theme)] bg-[color:var(--theme-100)] px-4 text-base text-slate-600 shadow-none focus-visible:ring-0"
+                    className="h-11 flex-[0_1_190px] rounded-[14px] border-2 border-purple-300 bg-purple-50 px-4 text-base text-slate-600 shadow-none focus-visible:ring-0"
                   />
                   <Input
                     id="startTime"
@@ -502,7 +390,7 @@ export default function AddEventForm({
                     onChange={(e) => setStartTime(e.target.value)}
                     required
                     disabled={isSubmitting}
-                    className="h-11 flex-[0_1_140px] rounded-[14px] border-2 border-[color:var(--theme)] bg-[color:var(--theme-100)] px-4 text-base text-slate-600 shadow-none focus-visible:ring-0"
+                    className="h-11 flex-[0_1_140px] rounded-[14px] border-2 border-purple-300 bg-purple-50 px-4 text-base text-slate-600 shadow-none focus-visible:ring-0"
                   />
                 </div>
                 <div className="flex flex-wrap items-center gap-3 md:flex-nowrap">
@@ -514,7 +402,7 @@ export default function AddEventForm({
                     onChange={(e) => setEnd(e.target.value)}
                     required
                     disabled={isSubmitting}
-                    className="h-11 flex-[0_1_190px] rounded-[14px] border-2 border-[color:var(--theme)] bg-[color:var(--theme-100)] px-4 text-base text-slate-600 shadow-none focus-visible:ring-0"
+                    className="h-11 flex-[0_1_190px] rounded-[14px] border-2 border-purple-300 bg-purple-50 px-4 text-base text-slate-600 shadow-none focus-visible:ring-0"
                   />
                   <Input
                     id="endTime"
@@ -524,7 +412,7 @@ export default function AddEventForm({
                     onChange={(e) => setEndTime(e.target.value)}
                     required
                     disabled={isSubmitting}
-                    className="h-11 flex-[0_1_140px] rounded-[14px] border-2 border-[color:var(--theme)] bg-[color:var(--theme-100)] px-4 text-base text-slate-600 shadow-none focus-visible:ring-0"
+                    className="h-11 flex-[0_1_140px] rounded-[14px] border-2 border-purple-300 bg-purple-50 px-4 text-base text-slate-600 shadow-none focus-visible:ring-0"
                   />
                 </div>
               </div>
@@ -533,7 +421,7 @@ export default function AddEventForm({
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      className="flex w-full flex-col items-center justify-center gap-2 rounded-[24px] border-2 border-[color:var(--theme)] bg-[color:var(--theme-100)] p-5 text-center text-base text-slate-500 transition-colors hover:bg-[color:var(--theme-200)]/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--theme)]"
+                      className="flex w-full flex-col items-center justify-center gap-2 rounded-[24px] border-2 border-purple-300 bg-purple-50 p-5 text-center text-base text-slate-500 transition-colors hover:bg-purple-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400"
                       aria-label="Select GMT offset"
                     >
                       <Globe className="h-5 w-5 text-slate-500" />
@@ -689,11 +577,13 @@ export default function AddEventForm({
             {isCategoriesEmpty ? (
               <button
                 type="button"
-                className="mt-3 flex items-center gap-3 rounded-lg px-2 py-1 text-base font-normal text-slate-400 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--theme-200)]"
+                className="mt-3 flex items-center gap-3 rounded-lg px-2 py-1 text-base font-normal text-slate-400 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-200"
               >
                 <Layers className="h-5 w-5 text-slate-400" />
                 <span>
-                  {isOrganisation ? "Select category ..." : "Add a category ..."}
+                  {isOrganisation
+                    ? "Select category ..."
+                    : "Add a category ..."}
                 </span>
               </button>
             ) : (
@@ -701,7 +591,7 @@ export default function AddEventForm({
                 {type.map((category) => (
                   <span
                     key={category}
-                    className={`${CHIP_BASE} border-[color:var(--theme-200)] bg-[color:var(--theme-100)] text-slate-700`}
+                    className={`${CHIP_BASE} border-purple-200 bg-purple-50 text-slate-700`}
                   >
                     {category.replace("-", " ")}
                   </span>
@@ -718,8 +608,8 @@ export default function AddEventForm({
                     onClick={() => handleTypeChange(category, !isSelected)}
                     className={`${CHIP_BASE} ${
                       isSelected
-                        ? "border-[color:var(--theme-200)] bg-[color:var(--theme-100)] text-slate-700"
-                        : "border-slate-200/70 text-slate-400 hover:border-[color:var(--theme-200)] hover:text-slate-600"
+                        ? "border-purple-200 bg-purple-50 text-slate-700"
+                        : "border-slate-200/70 text-slate-400 hover:border-purple-200 hover:text-slate-600"
                     }`}
                     disabled={isSubmitting}
                     aria-pressed={isSelected}
@@ -735,7 +625,7 @@ export default function AddEventForm({
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="h-11 border border-[color:var(--theme)] bg-[color:var(--theme)] px-5 text-white hover:bg-[color:var(--theme)]/90"
+              className="h-11 border border-purple-500 bg-purple-500 px-5 text-white hover:bg-purple-500/90"
             >
               {isSubmitting ? "Saving..." : submitLabel}
             </Button>
@@ -743,7 +633,7 @@ export default function AddEventForm({
               variant="outline"
               onClick={onCancel}
               disabled={isSubmitting}
-              className="h-11 border-[color:var(--theme-200)] bg-white px-5 text-slate-500 hover:bg-[color:var(--theme-100)]"
+              className="h-11 border-purple-200 bg-white px-5 text-slate-500 hover:bg-purple-50"
             >
               Cancel
             </Button>

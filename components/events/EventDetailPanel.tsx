@@ -1,10 +1,5 @@
 import { motion } from "framer-motion";
-import {
-  ChevronLeft,
-  MapPin,
-  Globe,
-  ExternalLink,
-} from "lucide-react";
+import { ChevronLeft, MapPin, Globe, ExternalLink } from "lucide-react";
 import { type Event } from "@/lib/schemas/events/event";
 import Image from "next/image";
 import useSWR from "swr";
@@ -25,7 +20,9 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 function TagBadge({ label, color }: { label: string; color: string }) {
   return (
-    <span className={`px-3 py-1 rounded-full text-xs font-medium text-white ${color}`}>
+    <span
+      className={`px-3 py-1 rounded-full text-xs font-medium text-white ${color}`}
+    >
       {label}
     </span>
   );
@@ -55,7 +52,7 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
     fetch(url).then((res) => res.json()),
   );
 
-  console.log("Event  ", event)
+  console.log("Event  ", event);
 
   const organiserString =
     !isLoadingCreator && !creatorError && creator
@@ -67,7 +64,11 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
   const tags = getEventTags(event);
 
   const formatDate = (d: Date) =>
-    d.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" });
+    d.toLocaleDateString("en-US", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+    });
   const formatTime = (d: Date) =>
     d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -170,34 +171,34 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
       {/* Duration */}
       <div className="mx-5 border border-purple-100 rounded-2xl p-4 mb-4">
         <SectionLabel>Duration</SectionLabel>
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <span className="flex items-center gap-1.5 text-xs text-muted w-12">
-                <span className="w-2 h-2 bg-purple-500 rounded-full" />
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="space-y-2 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="flex items-center gap-1.5 text-xs text-muted w-10 shrink-0">
+                <span className="w-2 h-2 bg-purple-500 rounded-full shrink-0" />
                 Start
               </span>
-              <span className="bg-purple-100 text-purple-700 text-xs font-medium px-2.5 py-1 rounded-md w-24 text-center">
+              <span className="bg-purple-100 text-purple-700 text-xs font-medium px-2.5 py-1 rounded-md text-center">
                 {formatDate(startDate)}
               </span>
-              <span className="bg-purple-100 text-purple-700 text-xs font-medium px-2.5 py-1 rounded-md w-20 text-center">
+              <span className="bg-purple-100 text-purple-700 text-xs font-medium px-2.5 py-1 rounded-md text-center">
                 {formatTime(startDate)}
               </span>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="flex items-center gap-1.5 text-xs text-muted w-12">
-                <span className="w-2 h-2 border border-muted rounded-full" />
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="flex items-center gap-1.5 text-xs text-muted w-10 shrink-0">
+                <span className="w-2 h-2 border border-muted rounded-full shrink-0" />
                 End
               </span>
-              <span className="bg-purple-100 text-purple-700 text-xs font-medium px-2.5 py-1 rounded-md w-24 text-center">
+              <span className="bg-purple-100 text-purple-700 text-xs font-medium px-2.5 py-1 rounded-md text-center">
                 {formatDate(endDate)}
               </span>
-              <span className="bg-purple-100 text-purple-700 text-xs font-medium px-2.5 py-1 rounded-md w-20 text-center">
+              <span className="bg-purple-100 text-purple-700 text-xs font-medium px-2.5 py-1 rounded-md text-center">
                 {formatTime(endDate)}
               </span>
             </div>
           </div>
-          <div className="flex-shrink-0 ml-3 bg-purple-50 border border-purple-100 rounded-xl px-4 py-3 text-center">
+          <div className="shrink-0 bg-purple-50 border border-purple-100 rounded-xl px-4 py-3 text-center">
             <Globe className="w-5 h-5 text-muted mx-auto mb-1" />
             <p className="text-xs font-medium">{gmtLabel}</p>
             <p className="text-[10px] text-muted">{tz.split("/").pop()}</p>
@@ -215,7 +216,9 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
         ) : (
           <p className="text-sm text-muted flex items-center gap-2">
             <MapPin className="w-4 h-4 flex-shrink-0" />
-            {[event.location.venue, event.location.city].filter(Boolean).join(", ")}
+            {[event.location.venue, event.location.city]
+              .filter(Boolean)
+              .join(", ")}
           </p>
         )}
       </div>
@@ -243,7 +246,13 @@ export function EventDetailPanel({ event, onBack }: EventDetailPanelProps) {
         <div className="mx-5 border border-purple-100 rounded-2xl p-4 mb-4">
           <SectionLabel>Categories</SectionLabel>
           <div className="flex flex-wrap gap-2">
-            <TagBadge label={event.category.split(/[_\s]+/).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")} color="bg-purple-500" />
+            <TagBadge
+              label={event.category
+                .split(/[_\s]+/)
+                .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                .join(" ")}
+              color="bg-purple-500"
+            />
           </div>
         </div>
       )}
