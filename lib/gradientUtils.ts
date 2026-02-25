@@ -48,7 +48,7 @@ export function getMeshGradientStyle(
   r: number,
   g: number,
   b: number
-): { backgroundImage: string; backgroundBlendMode: string } {
+): { backgroundImage: string; backgroundBlendMode: string; backgroundSize: string } {
   const [h, s, l] = rgbToHsl(r, g, b);
 
   // Color variations from input: subtle tint, main orb, lighter orb
@@ -68,6 +68,7 @@ export function getMeshGradientStyle(
   return {
     backgroundImage: [noiseSvg, ...gradients].join(", "),
     backgroundBlendMode: "overlay, normal, normal, normal, normal, normal",
+    backgroundSize: "150px 150px, auto, auto, auto, auto, auto",
   };
 }
 
