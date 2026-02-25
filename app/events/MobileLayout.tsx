@@ -7,7 +7,10 @@ import {
   type DateFilter,
   type TagFilter,
 } from "@/components/events/EventGridFilters";
-import { EventGridCard, EventGridCardSkeleton } from "@/components/events/EventGridCard";
+import {
+  EventGridCard,
+  EventGridCardSkeleton,
+} from "@/components/events/EventGridCard";
 import { type Event } from "@/lib/schemas/events/event";
 import { EventDetailPanel } from "@/components/events/EventDetailPanel";
 import { toast } from "sonner";
@@ -33,7 +36,10 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 const CATEGORY_OPTIONS = ["All", ...EVENT_CATEGORIES];
 
-function getPageNumbers(current: number, total: number): (number | "ellipsis")[] {
+function getPageNumbers(
+  current: number,
+  total: number,
+): (number | "ellipsis")[] {
   if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1);
 
   const pages: (number | "ellipsis")[] = [1];
@@ -100,19 +106,14 @@ export default function MobileLayout() {
     setPageParam(1);
   }, [filterKey]);
 
-  const {
-    events,
-    totalCount,
-    totalPages,
-    error,
-    isLoading,
-  } = usePaginatedEvents({ page: currentPage, queryParams });
+  const { events, totalCount, totalPages, error, isLoading } =
+    usePaginatedEvents({ page: currentPage, queryParams });
 
-  const { data: thisMonthData, isLoading: isLoadingThisMonth } = useSWR<{ items: Event[] }>(
-    `${baseUrl}/api/events?dateFilter=this-month&limit=10`,
-    fetcher,
-    { revalidateOnFocus: false },
-  );
+  const { data: thisMonthData, isLoading: isLoadingThisMonth } = useSWR<{
+    items: Event[];
+  }>(`${baseUrl}/api/events?dateFilter=this-month&limit=10`, fetcher, {
+    revalidateOnFocus: false,
+  });
   const thisMonthEvents = thisMonthData?.items ?? [];
 
   const handleEventSelect = (event: Event) => {
@@ -138,11 +139,14 @@ export default function MobileLayout() {
         className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide"
       >
         <div className="p-4 space-y-8 bg-white overflow-hidden">
-          <EventsHeroSection events={thisMonthEvents} isLoading={isLoadingThisMonth} onEventClick={setSelectedEvent} />
+          <EventsHeroSection
+            events={thisMonthEvents}
+            isLoading={isLoadingThisMonth}
+            onEventClick={setSelectedEvent}
+          />
 
           <div className="space-y-5">
             <h2 className="text-2xl font-bold text-black">All Events</h2>
-
             <MobileEventFilters
               search={search}
               setSearch={setSearch}
@@ -163,7 +167,9 @@ export default function MobileLayout() {
 
             <div className="space-y-6">
               {isLoading
-                ? Array.from({ length: 6 }).map((_, i) => <EventGridCardSkeleton key={i} />)
+                ? Array.from({ length: 6 }).map((_, i) => (
+                    <EventGridCardSkeleton key={i} />
+                  ))
                 : events.map((event: Event, index) => (
                     <EventGridCard
                       key={`${event.id}-${index}`}
@@ -186,7 +192,9 @@ export default function MobileLayout() {
                     <PaginationPrevious
                       onClick={() => handlePageChange(currentPage - 1)}
                       aria-disabled={currentPage <= 1}
-                      className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
+                      className={
+                        currentPage <= 1 ? "pointer-events-none opacity-50" : ""
+                      }
                     />
                   </PaginationItem>
 
@@ -211,7 +219,11 @@ export default function MobileLayout() {
                     <PaginationNext
                       onClick={() => handlePageChange(currentPage + 1)}
                       aria-disabled={currentPage >= totalPages}
-                      className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
+                      className={
+                        currentPage >= totalPages
+                          ? "pointer-events-none opacity-50"
+                          : ""
+                      }
                     />
                   </PaginationItem>
                 </PaginationContent>

@@ -4,7 +4,10 @@ import EventGridFilters, {
   type DateFilter,
   type TagFilter,
 } from "@/components/events/EventGridFilters";
-import { EventGridCard, EventGridCardSkeleton } from "@/components/events/EventGridCard";
+import {
+  EventGridCard,
+  EventGridCardSkeleton,
+} from "@/components/events/EventGridCard";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
@@ -23,6 +26,7 @@ import {
   PaginationNext,
   PaginationEllipsis,
 } from "@/components/ui/pagination";
+import { X } from "lucide-react";
 
 import { EVENT_CATEGORIES } from "@/types/events/event";
 
@@ -35,7 +39,10 @@ const baseUrl =
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-function getPageNumbers(current: number, total: number): (number | "ellipsis")[] {
+function getPageNumbers(
+  current: number,
+  total: number,
+): (number | "ellipsis")[] {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
 
   const pages: (number | "ellipsis")[] = [1];
@@ -72,6 +79,7 @@ export default function DesktopLayout() {
   const [tagFilter, setTagFilter] = useState<TagFilter>("all");
   const [selectedClubs, setSelectedClubs] = useState<string[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
   const [currentPage, setCurrentPage] = useState(() => {
     const p = searchParams.get("page");
     return p ? Math.max(1, parseInt(p)) : 1;
@@ -102,19 +110,14 @@ export default function DesktopLayout() {
     setPageParam(1);
   }, [filterKey]);
 
-  const {
-    events,
-    totalCount,
-    totalPages,
-    error,
-    isLoading,
-  } = usePaginatedEvents({ page: currentPage, queryParams });
+  const { events, totalCount, totalPages, error, isLoading } =
+    usePaginatedEvents({ page: currentPage, queryParams });
 
-  const { data: thisWeekData, isLoading: isLoadingThisWeek } = useSWR<{ items: Event[] }>(
-    `${baseUrl}/api/events?dateFilter=this-month&limit=10`,
-    fetcher,
-    { revalidateOnFocus: false },
-  );
+  const { data: thisWeekData, isLoading: isLoadingThisWeek } = useSWR<{
+    items: Event[];
+  }>(`${baseUrl}/api/events?dateFilter=this-month&limit=10`, fetcher, {
+    revalidateOnFocus: false,
+  });
   const thisWeekEvents = thisWeekData?.items ?? [];
 
   useEffect(() => {
@@ -122,11 +125,11 @@ export default function DesktopLayout() {
       if (event.key === "Escape") {
         setSelectedEvent(null);
       }
-    }
-    window.addEventListener('keydown', handleKeyDown);
+    };
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    }
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
   if (error) {
@@ -148,7 +151,11 @@ export default function DesktopLayout() {
         className="overflow-y-auto scrollbar-hide transition-all duration-300 flex-1"
       >
         <div className="max-w-7xl mx-auto p-4 space-y-8 bg-white z-30">
-          <EventsHeroSection events={thisWeekEvents} isLoading={isLoadingThisWeek} onEventClick={setSelectedEvent} />
+          <EventsHeroSection
+            events={thisWeekEvents}
+            isLoading={isLoadingThisWeek}
+            onEventClick={setSelectedEvent}
+          />
 
           <div className="space-y-5">
             <h2 className="text-2xl font-bold text-black">All Events</h2>
@@ -167,13 +174,39 @@ export default function DesktopLayout() {
               setSelectedClubs={setSelectedClubs}
             />
 
+            {!bannerDismissed &&
+              dateFilter !== "past" &&
+              events.length < 18 &&
+              !isLoading && (
+                <div className="flex w-full max-w-3xl items-center justify-between gap-4 rounded-lg bg-purple-100 py-2 pl-3 pr-2 text-purple-600">
+                  <button
+                    type="button"
+                    onClick={() => setDateFilter("past")}
+                    className="flex flex-1 cursor-pointer items-center gap-2 font-medium leading-snug text-left hover:opacity-80 transition-opacity"
+                  >
+                    Not many upcoming events? Check out
+                    <span className="font-semibold underline">past events</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBannerDismissed(true)}
+                    aria-label="Dismiss banner"
+                    className="shrink-0 rounded p-1 hover:bg-purple-200 transition-colors"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+              )}
+
             <p className="text-sm text-gray-400">
               Viewing {events.length} of {totalCount} results
             </p>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               {isLoading
-                ? Array.from({ length: 6 }).map((_, i) => <EventGridCardSkeleton key={i} />)
+                ? Array.from({ length: 6 }).map((_, i) => (
+                    <EventGridCardSkeleton key={i} />
+                  ))
                 : events.map((event, index) => (
                     <EventGridCard
                       key={`${event.id}-${index}`}
@@ -196,7 +229,9 @@ export default function DesktopLayout() {
                     <PaginationPrevious
                       onClick={() => handlePageChange(currentPage - 1)}
                       aria-disabled={currentPage <= 1}
-                      className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
+                      className={
+                        currentPage <= 1 ? "pointer-events-none opacity-50" : ""
+                      }
                     />
                   </PaginationItem>
 
@@ -221,7 +256,11 @@ export default function DesktopLayout() {
                     <PaginationNext
                       onClick={() => handlePageChange(currentPage + 1)}
                       aria-disabled={currentPage >= totalPages}
-                      className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
+                      className={
+                        currentPage >= totalPages
+                          ? "pointer-events-none opacity-50"
+                          : ""
+                      }
                     />
                   </PaginationItem>
                 </PaginationContent>
