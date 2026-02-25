@@ -1,5 +1,12 @@
 "use client";
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+  Suspense,
+} from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Sidebar from "@/components/sidebar/Sidebar";
@@ -14,7 +21,7 @@ import { ClubListCard } from "@/components/clubs/ClubListCard";
 import ClubFilters from "@/components/clubs/ClubFilters";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 
-export default function ClubsPage() {
+function ClubsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -316,5 +323,13 @@ export default function ClubsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ClubsPage() {
+  return (
+    <Suspense>
+      <ClubsPageContent />
+    </Suspense>
   );
 }
