@@ -12,7 +12,9 @@ const MOCK_EVENT: Event = {
     "## Welcome!\n\nJoin us for an evening of networking with industry professionals and fellow students. Spots are limited so don't miss out on this chance and sign up in our bio asap!\n\n**Cost:** $10 (member) | $12 (non-member)\n\n📍 Freshwater Pl, Southbank VIC 3006",
   bookingUrl: "https://example.com/tickets",
   start: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3).toISOString(),
-  end: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3 + 1000 * 60 * 150).toISOString(),
+  end: new Date(
+    Date.now() + 1000 * 60 * 60 * 24 * 3 + 1000 * 60 * 150,
+  ).toISOString(),
   publishedAt: new Date().toISOString(),
   capacity: 100,
   thumbnail: undefined,
@@ -68,7 +70,9 @@ export default function TestPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-2xl px-4 py-8">
         <h1 className="mb-1 text-2xl font-bold text-gray-900">Dev Tools</h1>
-        <p className="mb-6 text-sm text-gray-400">Internal test page — not for production use.</p>
+        <p className="mb-6 text-sm text-gray-400">
+          Internal test page — not for production use.
+        </p>
 
         <div className="mb-6 flex gap-2 border-b border-gray-200">
           {(["event", "impersonate"] as const).map((t) => (
@@ -97,7 +101,9 @@ export default function TestPage() {
             <div>
               <p className="text-sm text-gray-500 mb-4">
                 Generates an impersonation magic link for any user. Requires the{" "}
-                <code className="rounded bg-gray-100 px-1 py-0.5 text-xs">IMPERSONATE_SECRET_KEY</code>{" "}
+                <code className="rounded bg-gray-100 px-1 py-0.5 text-xs">
+                  IMPERSONATE_SECRET_KEY
+                </code>{" "}
                 env var set server-side.
               </p>
             </div>
@@ -145,8 +151,12 @@ export default function TestPage() {
             {magicLink && (
               <div className="space-y-2">
                 <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3">
-                  <p className="mb-2 text-xs font-medium text-green-700">Magic link generated</p>
-                  <p className="break-all text-xs text-green-600">{magicLink}</p>
+                  <p className="mb-2 text-xs font-medium text-green-700">
+                    Magic link generated
+                  </p>
+                  <p className="break-all text-xs text-green-600">
+                    {magicLink}
+                  </p>
                 </div>
                 <div className="flex gap-2">
                   <button

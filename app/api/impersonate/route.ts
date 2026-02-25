@@ -26,7 +26,10 @@ export async function POST(req: NextRequest) {
   });
 
   if (error || !data) {
-    return NextResponse.json({ error: error?.message ?? "Failed to generate link" }, { status: 500 });
+    return NextResponse.json(
+      { error: error?.message ?? "Failed to generate link" },
+      { status: 500 },
+    );
   }
 
   const token_hash = data.properties?.hashed_token;
