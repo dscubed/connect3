@@ -65,7 +65,7 @@ export default function ContactPage() {
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to send message",
-        { id: loadingToast }
+        { id: loadingToast },
       );
     } finally {
       setIsSubmitting(false);
@@ -89,9 +89,7 @@ export default function ContactPage() {
             type="text"
             required
             value={formData.name}
-            onChange={(e) =>
-              setFormData({ ...formData, name: e.target.value })
-            }
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             className="h-12 rounded-2xl border-2 border-muted/20 px-4 text-sm placeholder:text-muted focus-visible:ring-foreground"
             placeholder="Your name"
           />
@@ -115,12 +113,13 @@ export default function ContactPage() {
         </div>
 
         <div className="grid gap-1">
-          <Label htmlFor="description" className="text-sm font-medium text-black">
+          <Label
+            htmlFor="description"
+            className="text-sm font-medium text-black"
+          >
             Error Description
           </Label>
-          <p className="text-xs text-muted mb-1">
-            Minimum 20 characters
-          </p>
+          <p className="text-xs text-muted mb-1">Minimum 20 characters</p>
           <Textarea
             id="description"
             required
@@ -138,18 +137,21 @@ export default function ContactPage() {
         </div>
 
         <div className="grid gap-1">
-          <Label htmlFor="screenshot" className="text-sm font-medium text-black">
+          <Label
+            htmlFor="screenshot"
+            className="text-sm font-medium text-black"
+          >
             Screenshot (Optional)
           </Label>
           <p className="text-xs text-muted mb-1">Maximum 10MB</p>
-          
+
           {!screenshot ? (
             <label
               htmlFor="screenshot"
               className={cn(
                 "h-12 rounded-2xl border-2 border-muted/20 bg-white",
                 "flex items-center justify-center gap-2 cursor-pointer",
-                "hover:bg-muted/5 transition-colors text-sm text-muted"
+                "hover:bg-muted/5 transition-colors text-sm text-muted",
               )}
             >
               <Upload size={18} />
@@ -189,7 +191,7 @@ export default function ContactPage() {
           disabled={isSubmitting}
           className={cn(
             "mt-1 h-12 w-2xl rounded-2xl text-sm font-semibold text-white",
-            "bg-foreground hover:bg-foreground/70"
+            "bg-foreground hover:bg-foreground/70",
           )}
         >
           {isSubmitting ? "Sending..." : "Send Message"}

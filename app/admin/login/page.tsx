@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
 
 type Step = "email" | "otp";
 
@@ -74,7 +75,7 @@ export default function AdminLoginPage() {
               <label className="mb-1 block text-xs font-medium text-gray-600">
                 Email
               </label>
-              <input
+              <Input
                 type="email"
                 placeholder="you@example.com"
                 value={email}
@@ -97,7 +98,7 @@ export default function AdminLoginPage() {
               <label className="mb-1 block text-xs font-medium text-gray-600">
                 One-time code
               </label>
-              <input
+              <Input
                 type="text"
                 inputMode="numeric"
                 placeholder="000000"

@@ -1,5 +1,6 @@
 "use client";
 
+import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
 export default function AdminImpersonatePanel() {
@@ -54,7 +55,7 @@ export default function AdminImpersonatePanel() {
           <label className="mb-1 block text-xs font-medium text-gray-600">
             User Email
           </label>
-          <input
+          <Input
             type="email"
             placeholder="user@example.com"
             value={email}

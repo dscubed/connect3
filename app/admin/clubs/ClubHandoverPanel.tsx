@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Dice6 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 function generatePassword(length: number = 12): string {
   const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const lowercase = "abcdefghijklmnopqrstuvwxyz";
@@ -188,7 +189,7 @@ export default function ClubHandoverPanel() {
               <label className="mb-1 block text-xs font-medium text-gray-600">
                 New Email
               </label>
-              <input
+              <Input
                 type="email"
                 placeholder="newholder@example.com"
                 value={newEmail}
@@ -201,7 +202,7 @@ export default function ClubHandoverPanel() {
                 Temporary Password
               </label>
               <div className="flex gap-2">
-                <input
+                <Input
                   type="text"
                   placeholder="min 6 characters"
                   value={newPassword}
