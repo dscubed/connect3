@@ -81,22 +81,24 @@ const STATUS_CONFIG: Record<
   queued: { label: "Queued", bg: "bg-gray-100", text: "text-gray-600" },
   in_progress: {
     label: "In Progress",
-    bg: "bg-gray-100",
-    text: "text-gray-700",
+    bg: "bg-purple-100",
+    text: "text-purple-700",
   },
   completed: {
     label: "Completed",
-    bg: "bg-gray-100",
-    text: "text-gray-700",
+    bg: "bg-green-100",
+    text: "text-green-700",
   },
-  failed: { label: "Failed", bg: "bg-gray-100", text: "text-gray-700" },
-  paused: { label: "Paused", bg: "bg-gray-100", text: "text-gray-700" },
+  failed: { label: "Failed", bg: "bg-red-100", text: "text-red-700" },
+  paused: { label: "Paused", bg: "bg-yellow-100", text: "text-yellow-700" },
 };
 
 function StatusBadge({ status }: { status: string }) {
-  const config = STATUS_CONFIG[status] ?? STATUS_CONFIG.queued;
+  const config = STATUS_CONFIG[status] ?? STATUS_CONFIG[status];
   return (
-    <span className="inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold bg-gray-100 text-gray-700">
+    <span
+      className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${config.bg} ${config.text}`}
+    >
       {config.label}
     </span>
   );
