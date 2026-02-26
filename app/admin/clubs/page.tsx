@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ADMIN_COOKIE_NAME, verifyAdminToken } from "@/lib/admin/session";
+import ClubHandoverPanel from "./ClubHandoverPanel";
 
 export default async function AdminClubsPage() {
   const cookieStore = await cookies();
@@ -16,8 +17,10 @@ export default async function AdminClubsPage() {
       <div className="mx-auto max-w-4xl px-4 py-8">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Clubs</h1>
-            <p className="text-sm text-gray-400">Signed in as {session.email}</p>
+            <h1 className="text-2xl font-bold text-gray-900">Club Handover</h1>
+            <p className="text-sm text-gray-400">
+              Signed in as {session.email}
+            </p>
           </div>
           <div className="flex items-center gap-3">
             <a
@@ -37,9 +40,7 @@ export default async function AdminClubsPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-400 shadow-sm">
-          <p className="text-sm">Clubs management coming soon.</p>
-        </div>
+        <ClubHandoverPanel />
       </div>
     </div>
   );
