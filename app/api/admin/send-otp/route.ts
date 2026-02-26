@@ -42,9 +42,11 @@ export async function POST(req: NextRequest) {
   const otpHash = hashOtp(otp);
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 min
 
-  const { error: upsertError } = await supabaseAdmin
-    .from("admin_otps")
-    .upsert({ email: email.toLowerCase().trim(), otp_hash: otpHash, expires_at: expiresAt });
+  const { error: upsertError } = await supabaseAdmin.from("admin_otps").upsert({
+    email: email.toLowerCase().trim(),
+    otp_hash: otpHash,
+    expires_at: expiresAt,
+  });
 
   if (upsertError) {
     console.error("admin_otps upsert error:", upsertError);
@@ -52,7 +54,7 @@ export async function POST(req: NextRequest) {
   }
 
   const resend = new Resend(process.env.RESEND_API_KEY);
-  const supportSendEmail = process.env.SUPPORT_EMAIL ?? "noreply@connect3.app";
+  const supportSendEmail = process.env.NOREPLY_EMAIL ?? "noreply@connect3.app";
 
   try {
     await resend.emails.send({
