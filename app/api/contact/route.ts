@@ -6,7 +6,7 @@ import { checkBotId } from "botid/server";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SECRET_KEY!
+  process.env.SUPABASE_SECRET_KEY!,
 );
 
 export async function POST(req: NextRequest) {
@@ -26,14 +26,14 @@ export async function POST(req: NextRequest) {
     if (!name || !email || !description) {
       return NextResponse.json(
         { error: "Name, email, and description are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (description.length < 20) {
       return NextResponse.json(
         { error: "Description must be at least 20 characters" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     if (!emailRegex.test(email)) {
       return NextResponse.json(
         { error: "Invalid email format" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
       if (screenshot.size > 10 * 1024 * 1024) {
         return NextResponse.json(
           { error: "Screenshot must be less than 10MB" },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
         console.error("Error uploading screenshot:", uploadError);
         return NextResponse.json(
           { error: "Failed to upload screenshot" },
-          { status: 500 }
+          { status: 500 },
         );
       }
 
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
     // Send email notifications via Resend
     const supportSendEmail = process.env.SUPPORT_EMAIL;
     const supportReceiveEmail = process.env.SUPPORT_EMAIL;
-    
+
     if (supportSendEmail && supportReceiveEmail) {
       try {
         const resend = new Resend(process.env.RESEND_API_KEY);
@@ -104,7 +104,10 @@ export async function POST(req: NextRequest) {
         // Send to both user and support team
         await resend.emails.send({
           from: `Connect3 Support <${supportSendEmail}>`,
-          to: [`${name} <${email}>`, `Connect3 Support <${supportReceiveEmail}>`], // Send to both user and support
+          to: [
+            `${name} <${email}>`,
+            `Connect3 Support <${supportReceiveEmail}>`,
+          ], // Send to both user and support
           subject: `[${ticketId}] Support Request - ${name}`,
           html: EmailTemplate({
             name,
@@ -115,7 +118,9 @@ export async function POST(req: NextRequest) {
           }),
         });
 
-        console.log(`✅ Contact form emails sent to ${email} and ${supportReceiveEmail} (Ticket: ${ticketId})`);
+        console.log(
+          `✅ Contact form emails sent to ${email} and ${supportReceiveEmail} (Ticket: ${ticketId})`,
+        );
       } catch (emailError) {
         console.error("Failed to send email:", emailError);
         // Don't fail the request if email fails - submission is still stored in DB
@@ -130,7 +135,7 @@ export async function POST(req: NextRequest) {
     console.error("Contact form error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

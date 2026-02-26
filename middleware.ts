@@ -1,8 +1,24 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { updateSession } from "@/lib/supabase/middleware";
 import { NextResponse, type NextRequest } from "next/server";
+import { ADMIN_COOKIE_NAME, verifyAdminToken } from "@/lib/admin/session";
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  if (pathname.startsWith("/admin")) {
+    if (!pathname.startsWith("/admin/login")) {
+      const token = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
+      const session = token ? await verifyAdminToken(token) : null;
+      if (!session) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/admin/login";
+        return NextResponse.redirect(url);
+      }
+    }
+    return NextResponse.next();
+  }
+
   return await updateSession(request);
 }
 
