@@ -11,28 +11,16 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  RefreshCw,
-  Plus,
-  RotateCcw,
-  Trash2,
-  X,
-  Pause,
-  Upload,
-  CalendarClock,
-} from "lucide-react";
-import ClubPickerDropdown from "@/components/admin/ClubPickerDropdown";
 import type {
   AdminClub,
   InstagramFetchRow,
   InstagramPost,
 } from "@/lib/admin/types";
-import { buildColumns } from "./columns";
-import EditPanel from "./EditPanel";
-import QueueTable from "./QueueTable";
-import PostsDialog from "./PostsDialog";
+import { buildColumns } from "@/components/admin/instagram/columns";
+import EditPanel from "@/components/admin/instagram/EditPanel";
+import ActionsPanel from "@/components/admin/instagram/ActionsPanel";
+import QueueTable from "@/components/admin/instagram/QueueTable";
+import PostsDialog from "@/components/admin/instagram/PostsDialog";
 
 /* ------------------------------------------------------------------ */
 /*  Main Component                                                     */
@@ -394,241 +382,38 @@ export default function InstagramQueuePanel() {
 
   return (
     <div className="space-y-5">
-      {/* ===== Add slug form ===== */}
-      <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-gray-900">
-            Add Instagram Slug
-          </h2>
-          <button
-            type="button"
-            onClick={() => setShowImport((v) => !v)}
-            className="flex items-center gap-1.5 text-xs font-medium text-gray-600 transition hover:text-gray-900 hover:bg-gray-100 px-2 py-1 rounded"
-          >
-            <Upload className="h-3.5 w-3.5" />
-            {showImport ? "Hide" : "Bulk Import JSON"}
-          </button>
-        </div>
-
-        <form onSubmit={handleAdd} className="flex flex-wrap items-end gap-3">
-          <div className="min-w-[200px] flex-1">
-            <label className="mb-1 block text-xs text-gray-500">
-              Instagram Slug
-            </label>
-            <Input
-              placeholder="e.g. dscubed.unimelb"
-              value={slug}
-              onChange={(e) => setSlug(e.target.value)}
-              disabled={submitting}
-            />
-          </div>
-          <div className="min-w-[200px] flex-1">
-            <label className="mb-1 block text-xs text-gray-500">
-              Link to Club Profile (leave blank for new)
-            </label>
-            <ClubPickerDropdown
-              value={selectedProfileId}
-              onChange={setSelectedProfileId}
-              clubs={clubs}
-              linkedProfileIds={linkedProfileIds}
-              disabled={submitting}
-            />
-          </div>
-          <Button
-            type="submit"
-            disabled={submitting || !slug.trim()}
-            className="h-9 gap-1.5 bg-muted/10 hover:bg-muted/25 text-black"
-          >
-            <Plus className="h-4 w-4" />
-            {submitting ? "Adding\u2026" : "Add to Table"}
-          </Button>
-        </form>
-
-        {/* Bulk JSON import panel */}
-        {showImport && (
-          <div className="mt-4 space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
-            <p className="text-xs text-gray-500">
-              Paste a JSON object mapping{" "}
-              <code className="rounded bg-gray-200 px-1">profile_id</code> to{" "}
-              <code className="rounded bg-gray-200 px-1">instagram_slug</code>:
-            </p>
-            <textarea
-              rows={5}
-              className="w-full rounded-md border border-gray-200 bg-white p-3 font-mono text-xs text-gray focus:border-gray-400 focus:ring-1 focus:ring-gray-200 focus:outline-none"
-              placeholder={`{\n  "uuid-1": "club.instagram",\n  "uuid-2": "another.club"\n}`}
-              value={importJson}
-              onChange={(e) => setImportJson(e.target.value)}
-            />
-            <div className="flex justify-end">
-              <Button
-                size="sm"
-                disabled={importing || !importJson.trim()}
-                onClick={handleImport}
-                className="gap-1.5 bg-muted/10 hover:bg-muted/25 text-black"
-              >
-                <Upload className="h-3.5 w-3.5" />
-                {importing ? "Importing\u2026" : "Import"}
-              </Button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* ===== Error alert ===== */}
-      {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 shadow-sm">
-          {error}
-          <button
-            className="ml-2 font-medium underline"
-            onClick={() => setError(null)}
-          >
-            dismiss
-          </button>
-        </div>
-      )}
-
-      {/* ===== Requeue All + Refresh ===== */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Button
-            disabled={rows.length === 0}
-            onClick={() => {
-              if (table.getIsAllRowsSelected()) {
-                table.toggleAllRowsSelected(false);
-              } else {
-                table.toggleAllRowsSelected(true);
-              }
-            }}
-            className="gap-1.5 bg-muted/10 hover:bg-muted/25 text-black px-3 py-1.5 text-xs font-medium"
-          >
-            {table.getIsAllRowsSelected() ? "Clear Selection" : "Select All"}
-          </Button>
-          <Button
-            disabled={rows.length === 0 || isBulkLoading}
-            onClick={requeueAll}
-            className="gap-1.5 bg-muted/10 hover:bg-muted/25 text-black px-3 py-1.5 text-xs font-medium"
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-            Requeue All ({rows.length})
-          </Button>
-        </div>
-        <button
-          onClick={() => {
-            setRowSelection({});
-            fetchRows();
-          }}
-          disabled={loading}
-          className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
-        >
-          <RefreshCw
-            className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`}
-          />
-          Refresh
-        </button>
-      </div>
-
-      {/* ===== Bulk action toolbar ===== */}
-      {selectedCount > 0 && (
-        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm">
-          <span className="text-sm font-semibold text-gray-900">
-            {selectedCount} selected
-          </span>
-          <Button
-            size="sm"
-            disabled={isBulkLoading}
-            onClick={() => bulkPatch({ status: "queued" })}
-            className="gap-1.5 text-xs bg-muted/10 hover:bg-muted/25 text-black"
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-            Re-queue
-          </Button>
-          <Button
-            size="sm"
-            disabled={isBulkLoading}
-            onClick={() => bulkPatch({ status: "paused" })}
-            className="gap-1.5 text-xs bg-muted/10 hover:bg-muted/25 text-black"
-          >
-            <Pause className="h-3.5 w-3.5" />
-            Pause
-          </Button>
-          <Button
-            size="sm"
-            disabled={isBulkLoading}
-            onClick={() => setShowDatePicker((v) => !v)}
-            className="gap-1.5 text-xs bg-muted/10 hover:bg-muted/25 text-black"
-          >
-            <CalendarClock className="h-3.5 w-3.5" />
-            Set Last Fetched
-          </Button>
-          <Button
-            size="sm"
-            disabled={isBulkLoading}
-            onClick={bulkDelete}
-            className="gap-1.5 text-xs bg-red-50 hover:bg-red-100 text-red-600"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-            Delete
-          </Button>
-          <button
-            onClick={() => setRowSelection({})}
-            className="ml-auto text-xs font-medium text-gray-500 hover:text-gray-700 transition"
-          >
-            Clear
-          </button>
-        </div>
-      )}
-
-      {/* ===== Mass last_fetched date picker ===== */}
-      {showDatePicker && selectedCount > 0 && (
-        <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3">
-          <label className="text-sm text-gray-600">
-            Set{" "}
-            <code className="rounded bg-gray-100 px-1 text-xs">
-              last_fetched
-            </code>{" "}
-            to:
-          </label>
-          <Input
-            type="datetime-local"
-            value={massDate}
-            onChange={(e) => setMassDate(e.target.value)}
-            className="max-w-[240px]"
-          />
-          <Button
-            size="sm"
-            disabled={!massDate || isBulkLoading}
-            onClick={() => {
-              bulkPatch({ last_fetched: new Date(massDate).toISOString() });
-              setShowDatePicker(false);
-              setMassDate("");
-            }}
-            className="h-8 bg-muted/10 hover:bg-muted/25 text-black"
-          >
-            Apply
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            disabled={isBulkLoading}
-            onClick={() => {
-              bulkPatch({ last_fetched: null });
-              setShowDatePicker(false);
-              setMassDate("");
-            }}
-          >
-            Clear dates
-          </Button>
-          <button
-            onClick={() => {
-              setShowDatePicker(false);
-              setMassDate("");
-            }}
-            className="ml-auto text-gray-400 hover:text-gray-600"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-      )}
+      <ActionsPanel
+        table={table}
+        rows={rows}
+        clubs={clubs}
+        linkedProfileIds={linkedProfileIds}
+        slug={slug}
+        selectedProfileId={selectedProfileId}
+        submitting={submitting}
+        error={error}
+        showImport={showImport}
+        importJson={importJson}
+        importing={importing}
+        showDatePicker={showDatePicker}
+        massDate={massDate}
+        selectedCount={selectedCount}
+        isBulkLoading={isBulkLoading}
+        loading={loading}
+        onSetSlug={setSlug}
+        onSetSelectedProfileId={setSelectedProfileId}
+        onSetError={setError}
+        onSetShowImport={setShowImport}
+        onSetImportJson={setImportJson}
+        onSetShowDatePicker={setShowDatePicker}
+        onSetMassDate={setMassDate}
+        onSetRowSelection={setRowSelection}
+        onHandleAdd={handleAdd}
+        onHandleImport={handleImport}
+        onRequeueAll={requeueAll}
+        onFetchRows={fetchRows}
+        onBulkPatch={bulkPatch}
+        onBulkDelete={bulkDelete}
+      />
 
       {/* ===== Edit Row Panel ===== */}
       {editingSlug && (
