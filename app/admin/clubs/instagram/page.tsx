@@ -18,7 +18,7 @@ export default async function AdminInstagramPage() {
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              Instagram Fetch Queue
+              Instagram Fetch Table
             </h1>
             <p className="text-sm text-gray-400">
               Signed in as {session.email}
