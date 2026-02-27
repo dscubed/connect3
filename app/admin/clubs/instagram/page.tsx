@@ -1,6 +1,6 @@
 import { requireAdminSession } from "@/lib/admin/requireAdminSession";
 import AdminPageLayout from "@/components/admin/AdminPageLayout";
-import InstagramQueuePanel from "./InstagramQueuePanel";
+import InstagramQueuePanel from "@/components/admin/instagram/InstagramQueuePanel";
 
 export default async function AdminInstagramPage() {
   const session = await requireAdminSession();
