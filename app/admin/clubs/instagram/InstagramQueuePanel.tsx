@@ -933,14 +933,29 @@ export default function InstagramQueuePanel() {
 
       {/* ===== Requeue All + Refresh ===== */}
       <div className="flex items-center justify-between gap-3">
-        <Button
-          disabled={rows.length === 0 || isBulkLoading}
-          onClick={requeueAll}
-          className="gap-1.5 bg-muted/10 hover:bg-muted/25 text-black px-3 py-1.5 text-xs font-medium"
-        >
-          <RotateCcw className="h-3.5 w-3.5" />
-          Requeue All ({rows.length})
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            disabled={rows.length === 0}
+            onClick={() => {
+              if (table.getIsAllRowsSelected()) {
+                table.toggleAllRowsSelected(false);
+              } else {
+                table.toggleAllRowsSelected(true);
+              }
+            }}
+            className="gap-1.5 bg-muted/10 hover:bg-muted/25 text-black px-3 py-1.5 text-xs font-medium"
+          >
+            {table.getIsAllRowsSelected() ? "Clear Selection" : "Select All"}
+          </Button>
+          <Button
+            disabled={rows.length === 0 || isBulkLoading}
+            onClick={requeueAll}
+            className="gap-1.5 bg-muted/10 hover:bg-muted/25 text-black px-3 py-1.5 text-xs font-medium"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            Requeue All ({rows.length})
+          </Button>
+        </div>
         <button
           onClick={() => {
             setRowSelection({});
@@ -1483,7 +1498,7 @@ export default function InstagramQueuePanel() {
         </Table>
 
         {/* Pagination footer */}
-        <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3">
+        <div className="sticky bottom-0 z-10 flex items-center justify-between border-t border-gray-100 bg-white px-4 py-3">
           <div className="flex items-center gap-2 text-xs text-gray-500">
             <span>Rows per page</span>
             <select
