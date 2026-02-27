@@ -17,6 +17,15 @@ export default async function AdminInstagramPage() {
       <div className="mx-auto max-w-5xl px-4 py-8">
         <div className="mb-6 flex items-center justify-between">
           <div>
+            <nav className="mb-1 flex items-center gap-1 text-xs text-gray-400">
+              <a href="/admin" className="hover:text-gray-600 transition">
+                Admin
+              </a>
+              <span>›</span>
+              <span>Clubs</span>
+              <span>›</span>
+              <span className="text-gray-600">Instagram</span>
+            </nav>
             <h1 className="text-2xl font-bold text-gray-900">
               Instagram Fetch Table
             </h1>
@@ -29,7 +38,7 @@ export default async function AdminInstagramPage() {
               href="/admin"
               className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50"
             >
-              ← Back
+              ← Dashboard
             </a>
             <form action="/api/admin/logout" method="POST">
               <button
