@@ -14,6 +14,7 @@ interface LinkTypeInputProps {
 }
 
 const ORG_EXCLUDED_LINKS: LinkType[] = ["discord", "linkedin-user"];
+const UNIMELB_ONLY_LINKS: LinkType[] = ["umsu"];
 const USER_EXCLUDED_LINKS: LinkType[] = [
   "website",
   "discord-server",
@@ -47,6 +48,12 @@ export function LinkTypeInput({
   } else {
     filteredOptions = filteredOptions.filter(
       ([key]) => !USER_EXCLUDED_LINKS.includes(key as LinkType),
+    );
+  }
+
+  if (profile?.university !== "unimelb") {
+    filteredOptions = filteredOptions.filter(
+      ([key]) => !UNIMELB_ONLY_LINKS.includes(key as LinkType),
     );
   }
 
