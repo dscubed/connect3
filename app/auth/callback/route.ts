@@ -5,11 +5,13 @@ import {
   getUniversityFromEmail,
   validateUniversityEmail,
 } from "@/lib/auth/validateUniversityEmail";
+import { isAllowedRedirect } from "@/lib/auth/sso";
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const next = searchParams.get("next");
+  const redirectTo = searchParams.get("redirect_to");
 
   if (code) {
     const supabase = await createClient();
@@ -31,7 +33,7 @@ export async function GET(request: NextRequest) {
           if (!emailValidation.valid) {
             await supabase.auth.signOut();
             return NextResponse.redirect(
-              `${origin}/auth/sign-up?error=university_email_required`
+              `${origin}/auth/sign-up?error=university_email_required`,
             );
           }
         }
@@ -52,10 +54,7 @@ export async function GET(request: NextRequest) {
 
         // Auto-assign university for student sign-ups based on email domain
         const accountType = user.user_metadata?.account_type;
-        if (
-          accountType !== "organisation" &&
-          user.email
-        ) {
+        if (accountType !== "organisation" && user.email) {
           const university = getUniversityFromEmail(user.email);
           if (university) {
             await supabase
@@ -65,6 +64,22 @@ export async function GET(request: NextRequest) {
                 updated_at: new Date().toISOString(),
               })
               .eq("id", user.id);
+          }
+        }
+
+        if (redirectTo && isAllowedRedirect(redirectTo)) {
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
+
+          if (session) {
+            const target = new URL(redirectTo);
+            target.searchParams.set("access_token", session.access_token);
+            target.searchParams.set("refresh_token", session.refresh_token);
+
+            const ssoRedirectUrl = new URL("/auth/sso/redirect", origin);
+            ssoRedirectUrl.searchParams.set("target", target.toString());
+            return NextResponse.redirect(ssoRedirectUrl.toString());
           }
         }
 

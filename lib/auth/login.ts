@@ -15,12 +15,18 @@ export async function loginWithEmail({
   });
 }
 
-export async function loginWithGoogle() {
+export async function loginWithGoogle(redirectTo?: string) {
   const supabase = createClient();
+
+  const callbackUrl = new URL("/auth/callback", getSiteUrl());
+  if (redirectTo) {
+    callbackUrl.searchParams.set("redirect_to", redirectTo);
+  }
+
   return supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${getSiteUrl()}/auth/callback`,
+      redirectTo: callbackUrl.toString(),
       queryParams: {
         access_type: "offline",
         prompt: "consent",
