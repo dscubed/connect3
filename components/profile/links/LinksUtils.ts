@@ -16,6 +16,7 @@ import { MdGroups } from "react-icons/md";
 import { IconType } from "react-icons/lib";
 import { toast } from "sonner";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { University } from "lucide-react";
 
 export type LinkType =
   | "linkedin-user"
@@ -31,7 +32,8 @@ export type LinkType =
   | "tiktok"
   | "reddit"
   | "wechat"
-  | "xiaohongshu";
+  | "xiaohongshu"
+  | "umsu";
 
 export type LinkItem = {
   id: string;
@@ -147,6 +149,7 @@ export const LinkTypes: { [key in LinkType]: LinkDetails } = {
   },
   wechat: { icon: FaWeixin, label: "WeChat" },
   xiaohongshu: { icon: SiXiaohongshu, label: "Xiaohongshu" },
+  umsu: { icon: University, label: "UMSU" },
 };
 
 export const UrlToLinkDetails = (
