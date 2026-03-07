@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isAllowedRedirect } from "@/lib/auth/sso";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -18,17 +19,17 @@ export async function updateSession(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
+            request.cookies.set(name, value),
           );
           supabaseResponse = NextResponse.next({
             request,
           });
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, options),
           );
         },
       },
-    }
+    },
   );
 
   // Do not run code between createServerClient and
@@ -42,7 +43,7 @@ export async function updateSession(request: NextRequest) {
 
   const protectedRoutes = ["/dashboard", "/profile", "/settings"];
   const isProtectedRoute = protectedRoutes.some((route) =>
-    request.nextUrl.pathname.startsWith(route)
+    request.nextUrl.pathname.startsWith(route),
   );
 
   if (!user && isProtectedRoute) {
@@ -53,10 +54,18 @@ export async function updateSession(request: NextRequest) {
 
   const isAuthenticatedUser = user && user.is_anonymous !== true;
   const authRoutes = ["/auth/login", "/auth/sign-up", "/auth/org/sign-up"];
-  const isAuthRoute = authRoutes.some((route) =>
-    request.nextUrl.pathname === route
+  const isAuthRoute = authRoutes.some(
+    (route) => request.nextUrl.pathname === route,
   );
   if (isAuthenticatedUser && isAuthRoute) {
+    const redirectTo = request.nextUrl.searchParams.get("redirect_to");
+    if (redirectTo && isAllowedRedirect(redirectTo)) {
+      const ssoUrl = new URL("/auth/sso", request.url);
+      ssoUrl.searchParams.set("redirect_to", redirectTo);
+      const next = request.nextUrl.searchParams.get("next");
+      if (next) ssoUrl.searchParams.set("next", next);
+      return NextResponse.redirect(ssoUrl);
+    }
     return NextResponse.redirect(new URL("/", request.url));
   }
 

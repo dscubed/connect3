@@ -12,14 +12,19 @@ export function LoginForm({
   className,
   onLoggingInChange,
   isLoading = false,
+  redirectTo,
   ...props
 }: React.ComponentPropsWithoutRef<"div"> & {
   onLoggingInChange?: (loggingIn: boolean) => void;
   isLoading?: boolean;
+  redirectTo?: string;
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { isLoggingIn, handleEmailLogin } = useLogin(onLoggingInChange);
+  const { isLoggingIn, handleEmailLogin } = useLogin(
+    onLoggingInChange,
+    redirectTo,
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

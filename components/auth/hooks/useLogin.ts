@@ -1,10 +1,15 @@
 import { useState } from "react";
 import { loginWithEmail, loginWithGoogle } from "@/lib/auth/login";
+import { isAllowedRedirect } from "@/lib/auth/sso";
+import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 
-export function useLogin(onLoggingInChange?: (loggingIn: boolean) => void) {
+export function useLogin(
+  onLoggingInChange?: (loggingIn: boolean) => void,
+  redirectTo?: string,
+) {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
@@ -42,7 +47,22 @@ export function useLogin(onLoggingInChange?: (loggingIn: boolean) => void) {
         }
         throw error;
       }
-      router.push("/");
+      if (redirectTo && isAllowedRedirect(redirectTo)) {
+        const supabase = createClient();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (session) {
+          const target = new URL(redirectTo);
+          target.searchParams.set("access_token", session.access_token);
+          target.searchParams.set("refresh_token", session.refresh_token);
+          window.location.href = `/auth/sso/redirect?target=${encodeURIComponent(target.toString())}`;
+        } else {
+          router.push("/");
+        }
+      } else {
+        router.push("/");
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Login failed");
       setLoggingState(false);
@@ -57,7 +77,7 @@ export function useLogin(onLoggingInChange?: (loggingIn: boolean) => void) {
 
     setLoggingState(true);
     try {
-      const { error } = await loginWithGoogle();
+      const { error } = await loginWithGoogle(redirectTo);
       if (error) throw error;
     } catch (error) {
       toast.error(
