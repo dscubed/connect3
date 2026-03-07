@@ -151,7 +151,7 @@ export const LinkTypes: { [key in LinkType]: LinkDetails } = {
   xiaohongshu: { icon: SiXiaohongshu, label: "Xiaohongshu" },
   umsu: {
     icon: UmsuIcon as unknown as IconType,
-    label: "UMSU",
+    label: "Student Union",
     pattern: {
       regex: [
         /^(?:https?:\/\/)?(?:www\.)?umsu\.unimelb\.edu\.au\/buddy-up\/clubs\/clubs-listing\/join\/([^/?#]+)/i,

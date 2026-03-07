@@ -9,6 +9,7 @@ import { LinksSection } from "@/components/profile/LinksSection";
 import { ActionsButton } from "@/components/profile/ActionsButton";
 import { Profile } from "@/stores/authStore";
 import { SummaryCard } from "@/components/profile/SummaryCard";
+import { ClubLinksCard } from "@/components/profile/ClubLinksCard";
 import { ProfileEditProvider } from "@/components/profile/hooks/ProfileEditProvider";
 import {
   ProfileProvider,
@@ -143,6 +144,10 @@ function ProfilePageContentBody({
           </div>
         ) : (
           <SummaryCard editingProfile={editingProfile} profile={profile} />
+        )}
+
+        {profile.account_type === "organisation" && (
+          <ClubLinksCard profile={profile} />
         )}
 
         {/* Chunks Section - ChunksDisplay replaces content with ChunksSkeleton when loading */}

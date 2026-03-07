@@ -135,9 +135,10 @@ export async function GET(request: NextRequest) {
       { status: 400 },
     );
   } catch (error) {
-    console.error("Profile fetch route error:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("Profile fetch route error:", errorMessage, error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: errorMessage },
       { status: 500 },
     );
   }
