@@ -16,7 +16,7 @@ import { MdGroups } from "react-icons/md";
 import { IconType } from "react-icons/lib";
 import { toast } from "sonner";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { University } from "lucide-react";
+import { UmsuIcon } from "./UmsuIcon";
 
 export type LinkType =
   | "linkedin-user"
@@ -149,7 +149,16 @@ export const LinkTypes: { [key in LinkType]: LinkDetails } = {
   },
   wechat: { icon: FaWeixin, label: "WeChat" },
   xiaohongshu: { icon: SiXiaohongshu, label: "Xiaohongshu" },
-  umsu: { icon: University, label: "UMSU" },
+  umsu: {
+    icon: UmsuIcon as unknown as IconType,
+    label: "Student Union",
+    pattern: {
+      regex: [
+        /^(?:https?:\/\/)?(?:www\.)?umsu\.unimelb\.edu\.au\/buddy-up\/clubs\/clubs-listing\/join\/([^/?#]+)/i,
+      ],
+      prefix: "https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/",
+    },
+  },
 };
 
 export const UrlToLinkDetails = (

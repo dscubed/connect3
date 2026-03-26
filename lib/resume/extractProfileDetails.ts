@@ -22,6 +22,7 @@ const LINK_TYPES = [
   "reddit",
   "wechat",
   "xiaohongshu",
+  "umsu",
 ] as const;
 
 export type LinkType = (typeof LINK_TYPES)[number];
@@ -99,6 +100,12 @@ const linkPatterns: Array<{ type: LinkType; regexes: RegExp[] }> = [
       /reddit\.com\/u\/([^/?#]+)/i,
     ],
   },
+  {
+    type: "umsu",
+    regexes: [
+      /umsu\.unimelb\.edu\.au\/buddy-up\/clubs\/clubs-listing\/join\/([^/?#]+)/i,
+    ],
+  },
 ];
 
 const placeholderValues = new Set([
@@ -125,6 +132,7 @@ const platformNameOnly = new Set([
   "reddit",
   "wechat",
   "xiaohongshu",
+  "umsu",
 ]);
 
 const trailingPunctuation = /[).,;!?]+$/g;
