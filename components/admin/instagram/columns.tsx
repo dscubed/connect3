@@ -68,7 +68,7 @@ export function buildColumns(
       cell: ({ row }) => (
         <Checkbox
           checked={row.getIsSelected()}
-          onCheckedChange={(v) => row.toggleSelected(!!v)}
+          className="pointer-events-none"
           aria-label="Select row"
         />
       ),

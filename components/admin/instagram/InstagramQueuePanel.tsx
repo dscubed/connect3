@@ -17,6 +17,8 @@ import type {
   InstagramPost,
 } from "@/lib/admin/types";
 import { buildColumns } from "./columns";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 import AddSlugForm from "./AddSlugForm";
 import QuickActionsBar from "./QuickActionsBar";
 import BulkToolbar from "./BulkToolbar";
@@ -273,6 +275,20 @@ export default function InstagramQueuePanel() {
           fetchRows={fetchRows}
         />
       )}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+        <Input
+          placeholder="Search by slug or name..."
+          value={
+            (table.getColumn("instagram_slug")?.getFilterValue() as string) ??
+            ""
+          }
+          onChange={(e) =>
+            table.getColumn("instagram_slug")?.setFilterValue(e.target.value)
+          }
+          className="pl-9"
+        />
+      </div>
 
       <QueueTable
         table={table}

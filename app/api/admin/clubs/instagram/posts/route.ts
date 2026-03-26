@@ -31,31 +31,24 @@ export async function GET(req: NextRequest) {
   const supabase = getSupabaseAdmin();
 
   const { data, error } = await supabase
-    .from("instagram_club_posts")
+    .from("instagram_posts")
     .select(
-      `post_id,
-       instagram_posts (
-         id,
-         posted_by,
-         caption,
-         timestamp,
-         location,
-         images,
-         collaborators,
-         fetched_at
-       )`,
+      `id,
+       posted_by,
+       caption,
+       timestamp,
+       location,
+       images,
+       collaborators,
+       fetched_at`,
     )
-    .eq("instagram_slug", slug)
-    .order("post_id");
+    .or(`posted_by.eq.${slug},collaborators.cs.{"${slug}"}`)
+    .order("timestamp", { ascending: false });
 
   if (error) {
+    console.error("[instagram/posts] Supabase error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // Flatten the join result
-  const posts = (data ?? [])
-    .map((row) => row.instagram_posts)
-    .filter(Boolean);
-
-  return NextResponse.json({ data: posts });
+  return NextResponse.json({ data: data ?? [] });
 }

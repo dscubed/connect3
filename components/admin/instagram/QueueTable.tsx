@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useCallback, useRef } from "react";
 import { Table as TanTable, ColumnDef } from "@tanstack/react-table";
 import {
   Table,
@@ -51,6 +51,29 @@ export default function QueueTable({
   onViewPosts,
   onEditRow,
 }: QueueTableProps) {
+  const lastClickedIdx = useRef<number | null>(null);
+
+  const handleRowClick = useCallback(
+
+    (e: React.MouseEvent, clickedIdx: number) => {
+      const rows = table.getRowModel().rows;
+      if (e.shiftKey && lastClickedIdx.current !== null) {
+        const target = !rows[lastClickedIdx.current].getIsSelected()
+          ? false
+          : !rows[clickedIdx].getIsSelected();
+        const start = Math.min(lastClickedIdx.current, clickedIdx);
+        const end = Math.max(lastClickedIdx.current, clickedIdx);
+        for (let i = start; i <= end; i++) {
+          rows[i].toggleSelected(target);
+        }
+      } else {
+        rows[clickedIdx].toggleSelected();
+      }
+      lastClickedIdx.current = clickedIdx;
+    },
+    [table],
+  );
+
   return (
     <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
       <Table>
@@ -90,7 +113,7 @@ export default function QueueTable({
               </TableCell>
             </TableRow>
           ) : (
-            table.getRowModel().rows.map((row) => (
+            table.getRowModel().rows.map((row, rowIdx) => (
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
@@ -101,7 +124,18 @@ export default function QueueTable({
                 }
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell
+                    key={cell.id}
+                    {...(cell.column.id === "select"
+                      ? {
+                          className: "select-none cursor-pointer",
+                          onClick: (e: React.MouseEvent) => {
+                            e.preventDefault();
+                            handleRowClick(e, rowIdx);
+                          },
+                        }
+                      : {})}
+                  >
                     {cell.id === `${row.id}_actions` ? (
                       <div className="flex items-center gap-1">
                         <button
