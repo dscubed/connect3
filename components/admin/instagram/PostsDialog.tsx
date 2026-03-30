@@ -13,11 +13,27 @@ import type { InstagramPost } from "@/lib/admin/types";
 import { cn } from "@/lib/utils";
 
 function PostCard({ post, isNew }: { post: InstagramPost; isNew: boolean }) {
+  const { length } = post.collaborators;
+  let collaboratorsLabel = "";
+
+  if (length > 2) {
+    const names = post.collaborators
+      .slice(0, 2)
+      .map((c) => `@${c}`)
+      .join(", ");
+    const remaining = length - 2;
+    collaboratorsLabel = `with ${names} + ${remaining} other${remaining > 1 ? "s" : ""}`;
+  } else if (length > 0) {
+    collaboratorsLabel = `with ${post.collaborators.map((c) => `@${c}`).join(", ")}`;
+  }
+
+  const postLimit = 4;
+
   return (
-    <div className="flex gap-4 px-6 py-4">
+    <div className="flex flex-col gap-4 px-6 py-4">
       {post.images.length > 0 && (
         <div className={cn("flex shrink-0 gap-1.5", !isNew && "opacity-70")}>
-          {post.images.slice(0, 2).map((imgUrl, i) => (
+          {post.images.slice(0, postLimit).map((imgUrl, i) => (
             <div
               key={i}
               className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-gray-100"
@@ -29,9 +45,9 @@ function PostCard({ post, isNew }: { post: InstagramPost; isNew: boolean }) {
                 className="object-cover"
                 unoptimized
               />
-              {i === 1 && post.images.length > 2 && (
+              {i === postLimit - 1 && post.images.length > postLimit && (
                 <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50 text-sm font-semibold text-white">
-                  +{post.images.length - 2}
+                  +{post.images.length - postLimit}
                 </div>
               )}
             </div>
@@ -39,15 +55,25 @@ function PostCard({ post, isNew }: { post: InstagramPost; isNew: boolean }) {
         </div>
       )}
       <div className="min-w-0 flex-1 space-y-1.5">
-        {post.posted_by && (
-          <p className="text-xs font-medium text-gray-500">@{post.posted_by}</p>
-        )}
+        <div className="flex items-center gap-1">
+          {post.posted_by && (
+            <p className="text-xs font-medium text-gray-500">
+              @{post.posted_by}
+            </p>
+          )}
+          {collaboratorsLabel && (
+            <p className="text-xs font-medium text-gray-500">
+              {collaboratorsLabel}
+            </p>
+          )}
+        </div>
         <p className="line-clamp-3 text-sm text-gray-800">
           {post.caption || (
             <span className="italic text-gray-300">No caption</span>
           )}
         </p>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-400">
+          <span className="font-mono opacity-50">{post.id}</span>
           {post.timestamp && (
             <span>
               {new Date(post.timestamp * 1000).toLocaleDateString("en-AU", {
@@ -58,12 +84,6 @@ function PostCard({ post, isNew }: { post: InstagramPost; isNew: boolean }) {
             </span>
           )}
           {post.location && <span className="truncate">{post.location}</span>}
-          {post.collaborators.length > 0 && (
-            <span>
-              with {post.collaborators.map((c) => `@${c}`).join(", ")}
-            </span>
-          )}
-          <span className="font-mono opacity-50">{post.id}</span>
         </div>
       </div>
     </div>
