@@ -1,14 +1,13 @@
 import { z } from "zod";
 
-// KEEP THIS UP TO DATE WITH THE EVENT SCHEMA IN THE EDGE FUNCTION
+// Kept in sync with connect3-ticketing schema.
+// Legacy fields (booking_url, capacity, currency, city, country) removed.
 
 const locationSchema = z.object({
   venue: z.string(),
-  address: z.string(),
-  latitude: z.number(),
-  longitude: z.number(),
-  city: z.string(),
-  country: z.string(),
+  address: z.string().optional().default(""),
+  latitude: z.number().optional().default(0),
+  longitude: z.number().optional().default(0),
 });
 
 const pricingSchema = z
@@ -26,21 +25,14 @@ const eventSchema = z.object({
   name: z.string(),
   creatorProfileId: z.string().uuid(),
   description: z.string().optional(),
-  bookingUrl: z.string().url(),
   start: z.string().datetime(),
-  end: z.string().datetime(),
+  end: z.string().datetime().optional(),
   publishedAt: z.string().datetime(),
-  capacity: z.number().int().positive(),
   thumbnail: z.string().url().optional(),
-  currency: z
-    .string()
-    .length(3)
-    .transform((s) => s.toUpperCase()),
-  category: z.string(),
+  category: z.string().optional(),
   isOnline: z.boolean(),
   location: locationSchema,
   pricing: pricingSchema,
-  openaiFileId: z.string().optional(), // id in vector database
   source: z.string().optional(), // e.g. "instagram"
 });
 

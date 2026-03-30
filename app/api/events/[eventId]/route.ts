@@ -42,36 +42,31 @@ const deleteVectorStoreFile = async (fileId: string) => {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function transformDbEventToEventSchema(dbEvent: any): Event {
-  // events table has category text null; single category per event
-  const category = dbEvent.category ?? "general";
+  const tiers: { price: number }[] = dbEvent.event_ticket_tiers ?? [];
+  const prices = tiers.map((t) => t.price);
   return {
     id: dbEvent.id,
     name: dbEvent.name,
     creatorProfileId: dbEvent.creator_profile_id,
-    description: dbEvent.description,
-    bookingUrl: dbEvent.booking_url,
+    description: dbEvent.description ?? undefined,
     start: dbEvent.start,
-    end: dbEvent.end,
-    publishedAt: dbEvent.created_at || new Date().toISOString(),
+    end: dbEvent.end ?? undefined,
+    publishedAt: dbEvent.published_at ?? dbEvent.created_at ?? new Date().toISOString(),
     isOnline:
       typeof dbEvent.is_online === "boolean"
         ? dbEvent.is_online
         : dbEvent.location_type === "online",
-    capacity: dbEvent.capacity || 50,
-    currency: dbEvent.currency || "USD",
-    thumbnail: dbEvent.thumbnail,
-    category,
+    thumbnail: dbEvent.thumbnail ?? undefined,
+    category: dbEvent.category ?? undefined,
     location: {
-      venue: dbEvent.event_locations?.venue || "TBA",
-      address: dbEvent.event_locations?.address || "TBA",
-      latitude: dbEvent.event_locations?.latitude || 0,
-      longitude: dbEvent.event_locations?.longitude || 0,
-      city: dbEvent.event_locations?.city || "TBA",
-      country: dbEvent.event_locations?.country || "TBA",
+      venue: dbEvent.event_locations?.venue ?? "TBA",
+      address: dbEvent.event_locations?.address ?? "",
+      latitude: dbEvent.event_locations?.latitude ?? 0,
+      longitude: dbEvent.event_locations?.longitude ?? 0,
     },
     pricing: {
-      min: dbEvent.event_pricings?.min ?? 0,
-      max: dbEvent.event_pricings?.max ?? 0,
+      min: prices.length > 0 ? Math.min(...prices) : 0,
+      max: prices.length > 0 ? Math.max(...prices) : 0,
     },
     source: dbEvent.source ?? undefined,
   };

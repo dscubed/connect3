@@ -78,11 +78,11 @@ export function EventListCard({
                 year: "numeric",
               })}{" "}
               -{" "}
-              {new Date(event.end).toLocaleDateString("en-US", {
+              {event.end ? new Date(event.end).toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",
                 year: "numeric",
-              })}
+              }) : "TBA"}
             </p>
             
             {/* <p className="text-white/50 text-xs sm:text-sm line-clamp-1 leading-relaxed flex items-center gap-1">

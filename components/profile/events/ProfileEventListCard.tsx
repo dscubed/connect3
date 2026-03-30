@@ -38,7 +38,7 @@ export default function ProfileEventListCard({
           </h3>
           <p className="text-white/50 text-xs sm:text-sm line-clamp-2 leading-relaxed">
             {new Date(event.start).toLocaleDateString()} -{" "}
-            {new Date(event.end).toLocaleDateString()}
+            {event.end ? new Date(event.end).toLocaleDateString() : "TBA"}
           </p>
         </div>
       </div>

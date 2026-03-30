@@ -8,44 +8,42 @@ const supabase = createClient(
 );
 
 /**
- * Transform database event record to match our event schema
- * This should match the database schema but double check
+ * Transform database event row (with event_ticket_tiers + event_locations)
+ * to the Event type used by the frontend.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function transformDbEventToEventSchema(dbEvent: any): Event {
-  // Map the database fields to the schema fields
+function transformDbEvent(dbEvent: any): Event {
+  // Derive min/max from ticket tiers (empty tiers = free)
+  const tiers: { price: number }[] = dbEvent.event_ticket_tiers ?? [];
+  const prices = tiers.map((t) => t.price);
+  const pricingMin = prices.length > 0 ? Math.min(...prices) : 0;
+  const pricingMax = prices.length > 0 ? Math.max(...prices) : 0;
+
   return {
     id: dbEvent.id,
     name: dbEvent.name,
     creatorProfileId: dbEvent.creator_profile_id,
-    description: dbEvent.description,
-    bookingUrl: dbEvent.booking_url,
+    description: dbEvent.description ?? undefined,
     start: dbEvent.start,
-    end: dbEvent.end,
-    publishedAt: dbEvent.created_at || new Date().toISOString(),
+    end: dbEvent.end ?? undefined,
+    publishedAt: dbEvent.published_at ?? dbEvent.created_at ?? new Date().toISOString(),
     isOnline: dbEvent.is_online,
-    capacity: dbEvent.capacity,
-    currency: dbEvent.currency,
-    thumbnail: dbEvent.thumbnail,
-    category: dbEvent.category,
+    thumbnail: dbEvent.thumbnail ?? undefined,
+    category: dbEvent.category ?? undefined,
     location: {
-      venue: dbEvent.event_locations?.venue || "TBA",
-      address: dbEvent.event_locations?.address || "TBA",
-      latitude: dbEvent.event_locations?.latitude || 0,
-      longitude: dbEvent.event_locations?.longitude || 0,
-      city: dbEvent.event_locations?.city || "TBA",
-      country: dbEvent.event_locations?.country || "TBA",
+      venue: dbEvent.event_locations?.venue ?? "TBA",
+      address: dbEvent.event_locations?.address ?? "",
+      latitude: dbEvent.event_locations?.latitude ?? 0,
+      longitude: dbEvent.event_locations?.longitude ?? 0,
     },
-    pricing: {
-      min: dbEvent.event_pricings?.min ?? 0,
-      max: dbEvent.event_pricings?.max ?? 0,
-    },
+    pricing: { min: pricingMin, max: pricingMax },
     source: dbEvent.source ?? undefined,
   };
 }
 
 /**
  * Build common filters for event queries.
+ * Only published events are ever returned.
  */
 function applyFilters(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -58,7 +56,10 @@ function applyFilters(
     clubs: string | null;
   },
 ) {
-  if (params.search && params.search.trim()) {
+  // Always restrict to published events
+  query = query.eq("status", "published");
+
+  if (params.search?.trim()) {
     query = query.ilike("name", `%${params.search.trim()}%`);
   }
 
@@ -72,8 +73,7 @@ function applyFilters(
   } else {
     query = query.gte("start", now.toISOString());
     if (params.dateFilter === "today") {
-      const dayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      dayEnd.setDate(dayEnd.getDate() + 1);
+      const dayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
       query = query.lt("start", dayEnd.toISOString());
     } else if (params.dateFilter === "this-week") {
       const weekEnd = new Date(now);
@@ -102,8 +102,22 @@ function applyFilters(
   return query;
 }
 
+/** True if any ticket tier has a non-zero price. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isPaidEvent(dbEvent: any): boolean {
+  const tiers: { price: number }[] = dbEvent.event_ticket_tiers ?? [];
+  return tiers.some((t) => t.price > 0);
+}
+
+const EVENT_SELECT = `
+  id, name, creator_profile_id, description, start, end,
+  published_at, created_at, is_online, thumbnail, category, source, status,
+  event_ticket_tiers (price),
+  event_locations (venue, address, latitude, longitude)
+`;
+
 /**
- * Paginated retrieval of events. Supports both:
+ * Paginated retrieval of published events. Supports both:
  * - Offset pagination: ?page=1&limit=18 (returns items + totalCount)
  * - Cursor pagination: ?cursor=xxx&limit=18 (returns items + cursor)
  */
@@ -129,57 +143,35 @@ export async function GET(request: NextRequest) {
       const from = (pageNum - 1) * limit;
 
       if (needsPostFilter) {
-
         let allQuery = supabase
           .from("events")
-          .select(
-            `*, event_pricings (min, max), event_locations (venue, address, latitude, longitude, city, country)`,
-          )
+          .select(EVENT_SELECT)
           .order("start", { ascending: sortAscending, nullsFirst: false })
           .order("created_at", { ascending: sortAscending });
 
         allQuery = applyFilters(allQuery, filterParams);
         const { data, error } = await allQuery;
 
-        if (error) {
-          return NextResponse.json({ error: error.message }, { status: 500 });
-        }
+        if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let filtered: any[] = data;
-        if (tagFilter === "free") {
-          filtered = data.filter((e) => {
-            const min = e.event_pricings?.min ?? 0;
-            const max = e.event_pricings?.max ?? 0;
-            return min <= 0 && max <= 0;
-          });
-        } else if (tagFilter === "paid") {
-          filtered = data.filter((e) => {
-            const min = e.event_pricings?.min ?? 0;
-            const max = e.event_pricings?.max ?? 0;
-            return min > 0 || max > 0;
-          });
-        }
+        let filtered: any[] = data ?? [];
+        if (tagFilter === "free") filtered = filtered.filter((e) => !isPaidEvent(e));
+        else if (tagFilter === "paid") filtered = filtered.filter(isPaidEvent);
 
         const totalCount = filtered.length;
         const pageItems = filtered.slice(from, from + limit);
-        const typedEvents: Event[] = pageItems.map(transformDbEventToEventSchema);
-
         return NextResponse.json({
-          items: typedEvents,
+          items: pageItems.map(transformDbEvent),
           totalCount,
           page: pageNum,
           totalPages: Math.ceil(totalCount / limit),
         });
       }
 
-      // Standard offset pagination with exact count
       let query = supabase
         .from("events")
-        .select(
-          `*, event_pricings (min, max), event_locations (venue, address, latitude, longitude, city, country)`,
-          { count: "exact" },
-        )
+        .select(EVENT_SELECT, { count: "exact" })
         .order("start", { ascending: sortAscending, nullsFirst: false })
         .order("created_at", { ascending: sortAscending })
         .range(from, from + limit - 1);
@@ -187,41 +179,20 @@ export async function GET(request: NextRequest) {
       query = applyFilters(query, filterParams);
       const { data, error, count } = await query;
 
-      if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-      }
-
-      const typedEvents: Event[] = (data ?? []).map(transformDbEventToEventSchema);
-      const totalCount = count ?? 0;
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
       return NextResponse.json({
-        items: typedEvents,
-        totalCount,
+        items: (data ?? []).map(transformDbEvent),
+        totalCount: count ?? 0,
         page: pageNum,
-        totalPages: Math.ceil(totalCount / limit),
+        totalPages: Math.ceil((count ?? 0) / limit),
       });
     }
 
-    // ── Cursor-based pagination (legacy / infinite scroll) ──
+    // ── Cursor-based pagination ──
     let query = supabase
       .from("events")
-      .select(
-        `
-        *,
-        event_pricings (
-          min,
-          max
-        ),
-        event_locations (
-          venue,
-          address,
-          latitude,
-          longitude,
-          city,
-          country
-        )
-      `,
-      )
+      .select(EVENT_SELECT)
       .order("start", { ascending: sortAscending, nullsFirst: false })
       .order("created_at", { ascending: sortAscending });
 
@@ -244,49 +215,32 @@ export async function GET(request: NextRequest) {
     query = query.limit(fetchSize + 1);
 
     const { data, error } = await query;
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    const dbHasMore = data.length > fetchSize;
-    const batch = data.slice(0, fetchSize);
+    const dbHasMore = (data?.length ?? 0) > fetchSize;
+    const batch = (data ?? []).slice(0, fetchSize);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let filtered: any[] = batch;
-    if (tagFilter === "free") {
-      filtered = batch.filter((e) => {
-        const min = e.event_pricings?.min ?? 0;
-        const max = e.event_pricings?.max ?? 0;
-        return min <= 0 && max <= 0;
-      });
-    } else if (tagFilter === "paid") {
-      filtered = batch.filter((e) => {
-        const min = e.event_pricings?.min ?? 0;
-        const max = e.event_pricings?.max ?? 0;
-        return min > 0 || max > 0;
-      });
-    }
+    if (tagFilter === "free") filtered = batch.filter((e) => !isPaidEvent(e));
+    else if (tagFilter === "paid") filtered = batch.filter(isPaidEvent);
 
     const morePagesExist = needsPostFilter
       ? filtered.length > limit || dbHasMore
-      : data.length > limit;
+      : (data?.length ?? 0) > limit;
 
     const events = filtered.slice(0, limit);
-    const typedEvents: Event[] = events.map(transformDbEventToEventSchema);
 
     let newCursor: string | null = null;
     if (morePagesExist) {
       const cursorRow = needsPostFilter
         ? (filtered.length > limit ? filtered[limit - 1] : batch[batch.length - 1])
-        : data[limit - 1];
-      newCursor = cursorRow.start
-        ? cursorRow.start
-        : `null:${cursorRow.created_at}`;
+        : data![limit - 1];
+      newCursor = cursorRow.start ? cursorRow.start : `null:${cursorRow.created_at}`;
     }
 
-    return NextResponse.json({ items: typedEvents, cursor: newCursor });
+    return NextResponse.json({ items: events.map(transformDbEvent), cursor: newCursor });
   } catch (error) {
-    return NextResponse.json({ error: error }, { status: 500 });
+    return NextResponse.json({ error: String(error) }, { status: 500 });
   }
 }
