@@ -13,11 +13,15 @@ const supabase = createClient(
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function transformDbEvent(dbEvent: any): Event {
-  // Derive min/max from ticket tiers (empty tiers = free)
   const tiers: { price: number }[] = dbEvent.event_ticket_tiers ?? [];
   const prices = tiers.map((t) => t.price);
   const pricingMin = prices.length > 0 ? Math.min(...prices) : 0;
   const pricingMax = prices.length > 0 ? Math.max(...prices) : 0;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const images: { url: string; sort_order: number }[] = (dbEvent.event_images ?? []).sort((a: any, b: any) => a.sort_order - b.sort_order);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const venues: { type: string; venue: string | null; address: string | null; latitude: number | null; longitude: number | null; sort_order: number }[] = (dbEvent.event_venues ?? []).sort((a: any, b: any) => a.sort_order - b.sort_order);
+  const primaryVenue = venues.find((v) => v.type !== "tba") ?? venues[0];
 
   return {
     id: dbEvent.id,
@@ -28,13 +32,13 @@ function transformDbEvent(dbEvent: any): Event {
     end: dbEvent.end ?? undefined,
     publishedAt: dbEvent.published_at ?? dbEvent.created_at ?? new Date().toISOString(),
     isOnline: dbEvent.is_online,
-    thumbnail: dbEvent.thumbnail ?? undefined,
+    thumbnail: images[0]?.url ?? undefined,
     category: dbEvent.category ?? undefined,
     location: {
-      venue: dbEvent.event_locations?.venue ?? "TBA",
-      address: dbEvent.event_locations?.address ?? "",
-      latitude: dbEvent.event_locations?.latitude ?? 0,
-      longitude: dbEvent.event_locations?.longitude ?? 0,
+      venue: primaryVenue?.venue ?? "TBA",
+      address: primaryVenue?.address ?? "",
+      latitude: primaryVenue?.latitude ?? 0,
+      longitude: primaryVenue?.longitude ?? 0,
     },
     pricing: { min: pricingMin, max: pricingMax },
     source: dbEvent.source ?? undefined,
@@ -111,9 +115,10 @@ function isPaidEvent(dbEvent: any): boolean {
 
 const EVENT_SELECT = `
   id, name, creator_profile_id, description, start, end,
-  published_at, created_at, is_online, thumbnail, category, source, status,
+  published_at, created_at, is_online, category, source, status,
   event_ticket_tiers (price),
-  event_locations (venue, address, latitude, longitude)
+  event_venues (type, venue, address, latitude, longitude, sort_order),
+  event_images (url, sort_order)
 `;
 
 /**
