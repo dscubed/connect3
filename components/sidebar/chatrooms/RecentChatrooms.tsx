@@ -86,7 +86,7 @@ export default function RecentChatrooms({
           const isRenaming = renamingId === chat.id;
           const isConfirmingDelete = confirmDeleteId === chat.id;
           const isBusy = busyId === chat.id;
-          const href = `/search?chatroom=${chat.id}`;
+          const href = `/chat/${chat.id}`;
           const isActive = chatroomId === chat.id;
 
           // --- Rename inline UI ---

@@ -2,8 +2,6 @@ import { SearchBarUI } from "./SearchBarUI";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { useAuthStore } from "@/stores/authStore";
-import { createChatroom } from "@/lib/chatrooms/chatroomUtils";
 import { universities } from "@/components/profile/details/univeristies";
 
 const ALL_UNIVERSITIES = Object.keys(universities).filter(
@@ -46,7 +44,6 @@ interface SearchBarProps {
 
 export function SearchBar({ containerClassName }: SearchBarProps) {
   const [query, setQuery] = useState("");
-  const [creatingChatroom, setCreatingChatroom] = useState(false);
   const [selectedUniversities, setSelectedUniversities] = useState<string[]>(
     () => [],
   );
@@ -96,39 +93,7 @@ export function SearchBar({ containerClassName }: SearchBarProps) {
       return;
     }
 
-    setCreatingChatroom(true);
-    try {
-      const userId = useAuthStore.getState().user?.id;
-      // Fix: Import and get supabase client instance, then use it for anonymous sign in
-      if (!userId) {
-        toast.info("Creating guest session...");
-        const supabase = useAuthStore.getState().getSupabaseClient();
-        const { error } = await supabase.auth.signInAnonymously();
-        console.log("Guest session created:", error);
-        if (error) {
-          toast.error("Failed to create guest session. Please try again.");
-          setCreatingChatroom(false);
-          return;
-        }
-      }
-
-      const createResponse = await createChatroom(
-        searchQuery,
-        selectedUniversities.length > 0 ? selectedUniversities : undefined,
-      );
-
-      if (!createResponse) {
-        setCreatingChatroom(false);
-        return;
-      }
-      const { chatroomId } = createResponse;
-
-      router.push(`/search?chatroom=${chatroomId}`);
-    } catch (error) {
-      console.error("Error creating chatroom:", error);
-      toast.error("Failed to create chatroom. Please try again.");
-      setCreatingChatroom(false);
-    }
+    router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
   };
 
   return (
@@ -147,7 +112,7 @@ export function SearchBar({ containerClassName }: SearchBarProps) {
       <SearchBarUI
         query={query}
         setQuery={setQuery}
-        disabled={creatingChatroom}
+        disabled={false}
         onSubmit={handleSearch}
         containerClassName={containerClassName}
         selectedUniversities={selectedUniversities}
