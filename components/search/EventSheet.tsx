@@ -1,9 +1,5 @@
 "use client";
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { EventDetailPanel } from "@/components/events/EventDetailPanel";
 import { useEventCache } from "./hooks/useEventCache";
 import { CubeLoader } from "@/components/ui/CubeLoader";
@@ -21,7 +17,11 @@ export function EventSheet({ eventId, isOpen, onClose }: EventSheetProps) {
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent side="right" className="w-full !max-w-3xl sm:!max-w-3xl p-0 overflow-hidden bg-white">
+      <SheetContent
+        showCloseButton={false}
+        side="right"
+        className="w-full !max-w-2xl  p-0 overflow-hidden bg-white"
+      >
         <SheetTitle className="sr-only">Event Details</SheetTitle>
         {isLoading ? (
           <div className="flex items-center justify-center h-full">

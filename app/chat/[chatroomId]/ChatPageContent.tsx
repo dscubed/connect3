@@ -80,9 +80,9 @@ export default function ChatPageContent() {
           chatroomId={chatroomId || undefined}
         />
 
-        <main className="flex-1 min-w-0 min-h-0 md:pt-12 relative flex flex-col items-center">
+        <main className="flex-1 min-w-0 min-h-0 relative flex flex-col items-center">
           <div
-            className="flex-1 overflow-y-auto px-4 pb-36 w-full"
+            className="flex-1 overflow-y-auto px-4 pt-4 md:pt-12 pb-36 w-full"
             style={{ paddingBottom: "140px", scrollbarWidth: "thin" }}
           >
             {messages.length > 0 && (

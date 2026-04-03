@@ -1,31 +1,28 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams, useRouter } from "next/navigation";
 import Sidebar from "@/components/sidebar/Sidebar";
 import { CubeLoader } from "@/components/ui/CubeLoader";
 import { EntityResult, EntityType } from "@/lib/search/types";
-import MatchResults from "@/components/search/MatchResult/MatchResults";
-import { SearchBarUI } from "@/components/home/SearchBarUI";
+import SearchMatchResults from "@/components/search/MatchResult/SearchMatchResults";
+import { SearchInput } from "@/components/search/SearchInput";
 import { createChatroom } from "@/lib/chatrooms/chatroomUtils";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, ChevronLeft, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const ProfileSheet = dynamic(
-  () =>
-    import("@/components/search/ProfileSheet").then((mod) => mod.ProfileSheet),
+  () => import("@/components/search/ProfileSheet").then((m) => m.ProfileSheet),
   { ssr: false },
 );
 const EventSheet = dynamic(
-  () => import("@/components/search/EventSheet").then((mod) => mod.EventSheet),
+  () => import("@/components/search/EventSheet").then((m) => m.EventSheet),
   { ssr: false },
 );
 
-type SheetState = {
-  type: "profile" | "event" | null;
-  id: string | null;
-};
+type SheetState = { type: "profile" | "event" | null; id: string | null };
 
 interface SearchResult {
   id: string;
@@ -34,6 +31,24 @@ interface SearchResult {
   content: string;
 }
 
+type TabType = "all" | "people" | "clubs" | "events";
+
+const TABS: { label: string; value: TabType }[] = [
+  { label: "All", value: "all" },
+  { label: "People", value: "people" },
+  { label: "Clubs", value: "clubs" },
+  { label: "Events", value: "events" },
+];
+
+const TAB_TYPES: Record<TabType, EntityType[]> = {
+  all: ["user", "organisation", "events"],
+  people: ["user"],
+  clubs: ["organisation"],
+  events: ["events"],
+};
+
+const PAGE_SIZE = 10;
+
 export default function SearchPageContent() {
   const [mounted, setMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -41,34 +56,25 @@ export default function SearchPageContent() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
-  const [query, setQuery] = useState("");
   const [startingChat, setStartingChat] = useState(false);
+  const resultsTopRef = useRef<HTMLDivElement>(null);
 
   const router = useRouter();
   const searchParams = useSearchParams();
   const q = mounted ? searchParams?.get("q") || "" : "";
-
-  const handleProfileClick = useCallback((entity: EntityResult) => {
-    setSheet({
-      type: entity.type === "events" ? "event" : "profile",
-      id: entity.id,
-    });
-  }, []);
-
-  const closeSheet = useCallback(() => {
-    setSheet({ type: null, id: null });
-  }, []);
+  const tab = mounted ? (searchParams?.get("type") as TabType) || "all" : "all";
+  const page = mounted
+    ? Math.max(1, Number(searchParams?.get("page") || "1"))
+    : 1;
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Run search when q param changes
+  // Re-fetch whenever q changes
   useEffect(() => {
     if (!q) return;
-    setQuery(q);
-
-    const runSearch = async () => {
+    const run = async () => {
       setLoading(true);
       setSearched(false);
       try {
@@ -83,17 +89,65 @@ export default function SearchPageContent() {
         setSearched(true);
       }
     };
-
-    runSearch();
+    run();
   }, [q]);
+
+  // Build URL helper — keeps all current params, overrides specified ones
+  const buildUrl = useCallback(
+    (overrides: Record<string, string | null>) => {
+      const params = new URLSearchParams();
+      if (q) params.set("q", q);
+      if (tab !== "all") params.set("type", tab);
+      if (page !== 1) params.set("page", String(page));
+      for (const [k, v] of Object.entries(overrides)) {
+        if (v === null) params.delete(k);
+        else params.set(k, v);
+      }
+      return `/search?${params.toString()}`;
+    },
+    [q, tab, page],
+  );
 
   const handleNewSearch = useCallback(
     (searchQuery: string) => {
       if (!searchQuery.trim()) return;
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      const params = new URLSearchParams({ q: searchQuery.trim() });
+      if (tab !== "all") params.set("type", tab);
+      router.push(`/search?${params.toString()}`);
     },
-    [router],
+    [router, tab],
   );
+
+  const handleTabChange = useCallback(
+    (value: TabType) => {
+      // Reset to page 1 when switching tabs
+      const params = new URLSearchParams({ q });
+      if (value !== "all") params.set("type", value);
+      router.push(`/search?${params.toString()}`, { scroll: false } as never);
+    },
+    [router, q],
+  );
+
+  const handlePageChange = useCallback(
+    (next: number) => {
+      router.push(buildUrl({ page: next === 1 ? null : String(next) }), {
+        scroll: false,
+      } as never);
+      resultsTopRef.current?.scrollIntoView({ behavior: "smooth" });
+    },
+    [router, buildUrl],
+  );
+
+  const handleProfileClick = useCallback((entity: EntityResult) => {
+    setSheet({
+      type: entity.type === "events" ? "event" : "profile",
+      id: entity.id,
+    });
+  }, []);
+
+  const closeSheet = useCallback(() => {
+    setSheet({ type: null, id: null });
+  }, []);
 
   const handleStartChat = useCallback(async () => {
     if (!q.trim()) return;
@@ -109,15 +163,13 @@ export default function SearchPageContent() {
           return;
         }
       }
-
-      const createResponse = await createChatroom(q);
-      if (!createResponse) {
+      const res = await createChatroom(q);
+      if (!res) {
         setStartingChat(false);
         return;
       }
-      router.push(`/chat/${createResponse.chatroomId}`);
-    } catch (err) {
-      console.error("Error creating chatroom:", err);
+      router.push(`/chat/${res.chatroomId}`);
+    } catch {
       toast.error("Failed to start chat.");
       setStartingChat(false);
     }
@@ -131,16 +183,24 @@ export default function SearchPageContent() {
     );
   }
 
-  const entityResults: EntityResult[] = results.map((r) => ({
-    type: r.type as EntityType,
-    id: r.id,
-  }));
+  // Filter by tab, then paginate
+  const allowedTypes = TAB_TYPES[tab];
+  const filteredResults: EntityResult[] = results
+    .filter((r) => allowedTypes.includes(r.type as EntityType))
+    .map((r) => ({ type: r.type as EntityType, id: r.id }));
+
+  const totalPages = Math.max(1, Math.ceil(filteredResults.length / PAGE_SIZE));
+  const clampedPage = Math.min(page, totalPages);
+  const pageResults = filteredResults.slice(
+    (clampedPage - 1) * PAGE_SIZE,
+    clampedPage * PAGE_SIZE,
+  );
 
   const chatBanner = (
     <button
       onClick={handleStartChat}
       disabled={startingChat}
-      className="w-full rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 flex items-center gap-3 text-left hover:bg-blue-100 transition-colors disabled:opacity-50"
+      className="w-full rounded-xl max-w-3xl border border-blue-200 bg-blue-50 px-4 py-3 flex items-center gap-3 text-left hover:bg-blue-100 transition-colors disabled:opacity-50"
     >
       <MessageSquare className="w-5 h-5 text-blue-600 flex-shrink-0" />
       <span className="text-sm text-blue-800">
@@ -155,39 +215,55 @@ export default function SearchPageContent() {
       <div className="flex flex-col md:flex-row relative z-10 w-full h-[100dvh]">
         <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
 
-        <main className="flex-1 min-w-0 min-h-0 md:pt-12 relative flex flex-col items-center">
+        <main className="flex-1 min-w-0 min-h-0 flex flex-col">
+          {/* Top header: */}
+          <div className="px-4 pt-4 md:pt-8 pb-2">
+            <SearchInput defaultValue={q} onSubmit={handleNewSearch} />
+          </div>
+
+          {/* Results */}
           <div
-            className="flex-1 overflow-y-auto px-4 pb-36 w-full"
+            className="flex-1 overflow-y-auto px-4 pb-6"
             style={{ scrollbarWidth: "thin" }}
           >
-            <div className="max-w-3xl mx-auto pt-6 space-y-6">
-              {q && (
-                <h1 className="text-xl font-semibold text-secondary-foreground">
-                  Results for &ldquo;{q}&rdquo;
-                </h1>
-              )}
-
+            <div className="flex gap-6 mb-3 px-4 border-b border-muted/20">
+              {TABS.map((t) => (
+                <button
+                  key={t.value}
+                  onClick={() => handleTabChange(t.value)}
+                  className={cn(
+                    "py-1.5 text-sm transition-colors",
+                    tab === t.value
+                      ? "text-secondary-foreground border-b-2 border-secondary-foreground"
+                      : "text-muted-foreground hover:text-secondary-foreground",
+                  )}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+            <div ref={resultsTopRef} className="space-y-6 pb-6">
               {loading && (
                 <div className="flex items-center justify-center py-12">
                   <CubeLoader size={40} />
                 </div>
               )}
 
-              {searched && !loading && results.length === 0 && (
+              {searched && !loading && filteredResults.length === 0 && (
                 <>
+                  {chatBanner}
                   <p className="text-muted-foreground py-8 text-center">
                     No results found. Try a different search or start a chat.
                   </p>
-                  {chatBanner}
                 </>
               )}
 
-              {!loading && results.length > 0 && (
+              {!loading && pageResults.length > 0 && (
                 <>
                   {chatBanner}
-                  <div className="flex flex-wrap gap-4">
-                    {entityResults.map((entity, i) => (
-                      <MatchResults
+                  <div className="space-y-3 max-w-xl">
+                    {pageResults.map((entity, i) => (
+                      <SearchMatchResults
                         key={`${entity.type}-${entity.id}`}
                         match={entity}
                         userIndex={i}
@@ -198,18 +274,54 @@ export default function SearchPageContent() {
                 </>
               )}
             </div>
-          </div>
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between pt-2 px-8 border-t border-muted/20">
+                {/* Page indicator */}
+                <span className="text-xs text-muted-foreground">
+                  Page {clampedPage} of {totalPages}
+                </span>
 
-          {/* Fixed search bar at bottom */}
-          <div className="w-full px-4 absolute bottom-0">
-            <div className="bg-white h-full pb-4">
-              <SearchBarUI
-                query={query}
-                setQuery={setQuery}
-                onSubmit={handleNewSearch}
-                containerClassName="rounded-3xl border border-gray-200 p-2.5 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.08)]"
-              />
-            </div>
+                {/* Page navigation */}
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => handlePageChange(clampedPage - 1)}
+                    disabled={clampedPage === 1}
+                    className="p-1.5 rounded-md hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    aria-label="Previous page"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (p) => (
+                      <button
+                        key={p}
+                        onClick={() => handlePageChange(p)}
+                        className={cn(
+                          "w-7 h-7 text-xs rounded-md transition-colors",
+                          p === clampedPage
+                            ? "bg-gray-900 text-white"
+                            : "hover:bg-gray-100 text-muted-foreground",
+                        )}
+                      >
+                        {p}
+                      </button>
+                    ),
+                  )}
+                  <button
+                    onClick={() => handlePageChange(clampedPage + 1)}
+                    disabled={clampedPage === totalPages}
+                    className="p-1.5 rounded-md hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    aria-label="Next page"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Ghost div for spacing */}
+                <div />
+              </div>
+            )}
           </div>
         </main>
       </div>

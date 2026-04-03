@@ -31,9 +31,9 @@ export async function GET(req: NextRequest) {
       try {
         const results = await openai.vectorStores.search(store.id, {
           query: q,
-          max_num_results: 5,
+          max_num_results: 20,
           rewrite_query: true,
-          ranking_options: { score_threshold: 0.1 },
+          ranking_options: { score_threshold: 0.35 },
         });
 
         return results.data
@@ -59,9 +59,8 @@ export async function GET(req: NextRequest) {
 
     // Sort by score descending and take top 10
     allResults.sort((a, b) => b.score - a.score);
-    const top = allResults.slice(0, 10);
 
-    return NextResponse.json({ results: top });
+    return NextResponse.json({ results: allResults });
   } catch (err) {
     console.error("[search] Unexpected error:", err);
     return NextResponse.json(
