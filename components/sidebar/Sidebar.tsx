@@ -1,7 +1,15 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Calendar, UsersRound, Home, SidebarIcon } from "lucide-react";
+import {
+  Menu,
+  X,
+  Calendar,
+  UsersRound,
+  Home,
+  SidebarIcon,
+  Tag,
+} from "lucide-react";
 import { SidebarLink } from "./SidebarLink";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -20,6 +28,10 @@ const sidebarLinks = [
   { icon: Home, href: "/" },
   { icon: Calendar, href: "/events" },
   { icon: UsersRound, href: "/clubs" },
+];
+
+const connect3Links = [
+  { icon: Tag, href: process.env.NEXT_PUBLIC_TICKETING_URL },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -180,6 +192,17 @@ const Sidebar: React.FC<SidebarProps> = ({
                   icon={link.icon}
                   href={link.href}
                   pathName={pathName}
+                />
+              ))}
+              <span className="w-full border-t border-neutral-200" />
+
+              {connect3Links.map((link) => (
+                <SidebarLink
+                  key={link.href}
+                  icon={link.icon}
+                  href={link.href}
+                  pathName={pathName}
+                  isNew
                 />
               ))}
             </nav>

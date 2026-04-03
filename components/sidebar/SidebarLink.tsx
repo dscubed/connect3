@@ -7,6 +7,7 @@ interface SidebarLinkProps {
   label?: string;
   href?: string;
   pathName?: string;
+  isNew?: boolean;
 }
 
 export const SidebarLink: React.FC<SidebarLinkProps> = ({
@@ -14,9 +15,15 @@ export const SidebarLink: React.FC<SidebarLinkProps> = ({
   label,
   href,
   pathName,
+  isNew,
 }: SidebarLinkProps) => {
   const content = (
-    <SidebarButton Icon={Icon} label={label} active={href === pathName} />
+    <SidebarButton
+      Icon={Icon}
+      label={label}
+      active={href === pathName}
+      isNew={isNew}
+    />
   );
 
   if (href) {
