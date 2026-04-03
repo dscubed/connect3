@@ -234,8 +234,8 @@ export default function SearchPageContent() {
                   className={cn(
                     "py-1.5 text-sm transition-colors",
                     tab === t.value
-                      ? "text-secondary-foreground border-b-2 border-secondary-foreground"
-                      : "text-muted-foreground hover:text-secondary-foreground",
+                      ? "text-foreground border-b-2 border-foreground"
+                      : "text-muted-foreground hover:text-foreground",
                   )}
                 >
                   {t.label}
@@ -287,7 +287,7 @@ export default function SearchPageContent() {
                   <button
                     onClick={() => handlePageChange(clampedPage - 1)}
                     disabled={clampedPage === 1}
-                    className="p-1.5 rounded-md hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    className="p-1 rounded-md hover:bg-secondary-foreground/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                     aria-label="Previous page"
                   >
                     <ChevronLeft className="w-4 h-4" />
@@ -300,8 +300,8 @@ export default function SearchPageContent() {
                         className={cn(
                           "w-7 h-7 text-xs rounded-md transition-colors",
                           p === clampedPage
-                            ? "bg-gray-900 text-white"
-                            : "hover:bg-gray-100 text-muted-foreground",
+                            ? "text-foreground"
+                            : "hover:text-secondary-foreground/60 text-secondary-foreground",
                         )}
                       >
                         {p}
@@ -311,7 +311,7 @@ export default function SearchPageContent() {
                   <button
                     onClick={() => handlePageChange(clampedPage + 1)}
                     disabled={clampedPage === totalPages}
-                    className="p-1.5 rounded-md hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    className="p-1 rounded-md hover:bg-secondary-foreground/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                     aria-label="Next page"
                   >
                     <ChevronRight className="w-4 h-4" />
