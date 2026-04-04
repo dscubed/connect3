@@ -40,7 +40,10 @@ export function QuizBanner() {
 
   return (
     <div className="flex w-full max-w-3xl items-center justify-between gap-4 rounded-lg bg-purple-100 py-2 pl-3 pr-2 text-purple-600">
-      <Link href="/quiz" className="flex flex-1 cursor-pointer items-center gap-2 font-medium leading-snug">
+      <Link
+        href="/quiz"
+        className="flex flex-1 cursor-pointer items-center gap-2 font-medium leading-snug"
+      >
         <Sparkles className="h-5 w-5 shrink-0" />
         Take the Connect3 quiz to find out your student personality type.
       </Link>

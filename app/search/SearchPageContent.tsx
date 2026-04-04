@@ -223,7 +223,7 @@ export default function SearchPageContent() {
 
           {/* Results */}
           <div
-            className="flex-1 overflow-y-auto px-4 pb-6"
+            className="flex-1 overflow-y-auto px-4 pb-6 py-2"
             style={{ scrollbarWidth: "thin" }}
           >
             <div className="flex gap-6 mb-3 px-4 border-b border-muted/20">
