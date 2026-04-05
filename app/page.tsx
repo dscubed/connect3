@@ -1,10 +1,7 @@
 "use client";
 import Sidebar from "@/components/sidebar/Sidebar";
-import Logo from "@/components/logo/Logo";
-import { HeroPanels } from "@/components/home/HeroPanels";
-import { QuizBanner } from "@/components/home/QuizBanner";
 import React, { useState } from "react";
-import { SearchBar } from "@/components/home/SearchBar";
+import { HomeHero } from "@/components/home/HomeHero";
 
 export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -23,21 +20,7 @@ export default function Home() {
         >
           <div className="flex min-h-[100dvh] flex-col items-center">
             <div className="my-auto mx-auto w-full max-w-7xl">
-              <div className="flex flex-col items-center mb-8 mt-4 sm:mt-8">
-                <QuizBanner />
-                <div className="mb-6 mt-6 flex flex-row gap-2 justify-center items-center">
-                  <Logo className="h-12 w-12 sm:h-14 sm:w-14" />
-                  <h1 className="font-fredoka text-4xl font-semibold tracking-[0.01em] leading-[1.1]">
-                    Connect3
-                  </h1>
-                </div>
-                <div className="w-full">
-                  <SearchBar />
-                </div>
-              </div>
-              <div className="w-full pb-12">
-                <HeroPanels />
-              </div>
+              <HomeHero />
             </div>
           </div>
         </div>
