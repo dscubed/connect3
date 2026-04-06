@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
 import { HomeHeroBackground } from "./HomeHeroBackground";
 import { HomeHeroStickers } from "./HomeHeroStickers";
 import { HomeHeroFloatingCard } from "./HomeHeroFloatingCard";
@@ -37,18 +36,6 @@ function EventBadge() {
 
 
 export function HomeHero() {
-  const searchParams = useSearchParams();
-  const debugOverlay = searchParams?.get("debug") === "overlay";
-  const isDev = process.env.NODE_ENV !== "production";
-  const canShowOverlay = isDev || debugOverlay;
-  const [overlayVisible, setOverlayVisible] = useState(false);
-  const [overlayOpacity, setOverlayOpacity] = useState(0.5);
-  const [differenceMode, setDifferenceMode] = useState(false);
-
-  useEffect(() => {
-    if (debugOverlay) setOverlayVisible(true);
-  }, [debugOverlay]);
-
   return (
     <section className="w-full">
       <div className="relative w-full aspect-[1271/670]">
@@ -67,70 +54,7 @@ export function HomeHero() {
               <HomeSearchBar className="max-w-xl" />
             </div>
           </div>
-          {canShowOverlay && overlayVisible && (
-            <div className="pointer-events-none absolute inset-0 z-30">
-              <Image
-                src="/hero/reference.png"
-                alt=""
-                fill
-                className={cn(
-                  "object-contain",
-                  differenceMode && "mix-blend-difference",
-                )}
-                style={{
-                  opacity: overlayOpacity,
-                  filter: differenceMode
-                    ? "grayscale(1) contrast(1.1)"
-                    : "none",
-                }}
-              />
-            </div>
-          )}
         </div>
-        {canShowOverlay && (
-          <div className="absolute left-4 top-4 z-40 flex flex-col gap-2 rounded-xl border border-white/60 bg-white/80 px-3 py-2 text-xs text-slate-700 shadow-[0_10px_24px_-16px_rgba(40,20,80,0.4)] backdrop-blur">
-            <div className="flex items-center justify-between gap-3">
-              <span className="font-semibold">Overlay</span>
-              <button
-                type="button"
-                onClick={() => setOverlayVisible((prev) => !prev)}
-                className={cn(
-                  "rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors",
-                  overlayVisible
-                    ? "bg-slate-900 text-white"
-                    : "bg-slate-200 text-slate-700",
-                )}
-              >
-                {overlayVisible ? "On" : "Off"}
-              </button>
-            </div>
-            <label className="flex items-center gap-2 text-[11px]">
-              Opacity
-              <input
-                type="range"
-                min={10}
-                max={100}
-                value={Math.round(overlayOpacity * 100)}
-                onChange={(event) =>
-                  setOverlayOpacity(Number(event.target.value) / 100)
-                }
-                className="h-1 w-24 accent-slate-700"
-              />
-            </label>
-            <button
-              type="button"
-              onClick={() => setDifferenceMode((prev) => !prev)}
-              className={cn(
-                "rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors",
-                differenceMode
-                  ? "bg-indigo-600 text-white"
-                  : "bg-slate-200 text-slate-700",
-              )}
-            >
-              Difference tint
-            </button>
-          </div>
-        )}
       </div>
     </section>
   );
