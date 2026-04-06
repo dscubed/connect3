@@ -12,7 +12,7 @@ export function HomeHeroBackground() {
             "radial-gradient(circle at 20% 15%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 45%), radial-gradient(circle at 80% 20%, rgba(196,210,255,0.65) 0%, rgba(196,210,255,0) 45%), radial-gradient(circle at 30% 85%, rgba(233,200,255,0.75) 0%, rgba(233,200,255,0) 55%)",
         }}
       />
-      <div className="absolute left-[62.1%] top-0 w-[clamp(160px,28%,420px)] aspect-[491/197]">
+      <div className="absolute left-[62.1%] top-0 w-[clamp(120px,28%,420px)] aspect-[491/197]">
         <div className="relative h-full w-full">
           <Image
             src="/hero/purple-vector.png"
@@ -31,7 +31,7 @@ export function HomeHeroBackground() {
           </div>
         </div>
       </div>
-      <div className="absolute right-0 bottom-[15%] w-[clamp(100px,15%,300px)] aspect-[521/589]">
+      <div className="absolute right-0 bottom-[15%] w-[clamp(70px,14%,260px)] aspect-[521/589]">
         <div className="relative h-full w-full">
           <Image
             src="/hero/blue-vector.png"
@@ -39,7 +39,7 @@ export function HomeHeroBackground() {
             fill
             className="object-contain rotate-[-9deg]"
           />
-          <div className="absolute left-[-20%] top-[-45%] w-[60%] aspect-square rotate-[8deg] z-30">
+          <div className="absolute left-[-18%] top-[-48%] w-[62%] aspect-square rotate-[8deg] z-30">
             <Image
               src="/characters/purple.png"
               alt=""
@@ -49,7 +49,7 @@ export function HomeHeroBackground() {
           </div>
         </div>
       </div>
-      <div className="absolute left-[43%] bottom-0 w-[clamp(110px,15%,280px)] aspect-[559/371]">
+      <div className="absolute left-[43%] bottom-0 w-[clamp(90px,15%,280px)] aspect-[559/371]">
         <Image
           src="/hero/red-vector.png"
           alt=""
