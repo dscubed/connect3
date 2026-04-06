@@ -12,24 +12,44 @@ export function HomeHeroBackground() {
             "radial-gradient(circle at 20% 15%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 45%), radial-gradient(circle at 80% 20%, rgba(196,210,255,0.65) 0%, rgba(196,210,255,0) 45%), radial-gradient(circle at 30% 85%, rgba(233,200,255,0.75) 0%, rgba(233,200,255,0) 55%)",
         }}
       />
-      <div className="absolute left-[62%] top-[-1%] h-[190px] w-[450px] relative">
-        <Image
-          src="/hero/purple-vector.png"
-          alt=""
-          fill
-          className="object-contain"
-          priority
-        />
+      <div className="absolute left-[62.1%] top-0 w-[clamp(160px,28%,420px)] aspect-[491/197]">
+        <div className="relative h-full w-full">
+          <Image
+            src="/hero/purple-vector.png"
+            alt=""
+            fill
+            className="object-contain"
+            priority
+          />
+          <div className="absolute left-[-5%] top-[50%] w-[30%] aspect-square rotate-[8deg] z-30">
+            <Image
+              src="/characters/purple.png"
+              alt=""
+              fill
+              className="object-contain drop-shadow-[0_12px_16px_rgba(80,40,120,0.25)]"
+            />
+          </div>
+        </div>
       </div>
-      <div className="absolute left-[75%] top-[29%] h-[300px] w-[430px] rotate-[-9deg] relative">
-        <Image
-          src="/hero/blue-vector.png"
-          alt=""
-          fill
-          className="object-contain"
-        />
+      <div className="absolute right-0 bottom-[15%] w-[clamp(100px,15%,300px)] aspect-[521/589]">
+        <div className="relative h-full w-full">
+          <Image
+            src="/hero/blue-vector.png"
+            alt=""
+            fill
+            className="object-contain rotate-[-9deg]"
+          />
+          <div className="absolute left-[-20%] top-[-45%] w-[60%] aspect-square rotate-[8deg] z-30">
+            <Image
+              src="/characters/purple.png"
+              alt=""
+              fill
+              className="object-contain drop-shadow-[0_12px_16px_rgba(80,40,120,0.25)]"
+            />
+          </div>
+        </div>
       </div>
-      <div className="absolute left-[37.7%] top-[30%] h-[180px] w-[300px] rotate-[18deg] relative">
+      <div className="absolute left-[43%] bottom-0 w-[clamp(110px,15%,280px)] aspect-[559/371]">
         <Image
           src="/hero/red-vector.png"
           alt=""

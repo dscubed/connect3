@@ -12,16 +12,14 @@ export default function Home() {
         <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
 
         <div
-          className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden px-4 md:px-6 w-full"
+          className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden w-full"
           style={{
             scrollbarWidth: "thin",
             scrollbarColor: "rgba(255,255,255,0.3) transparent",
           }}
         >
-          <div className="flex min-h-[100dvh] flex-col items-center">
-            <div className="my-auto mx-auto w-full max-w-7xl">
-              <HomeHero />
-            </div>
+          <div className="flex flex-1 flex-col">
+            <HomeHero />
           </div>
         </div>
       </div>
