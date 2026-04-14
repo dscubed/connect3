@@ -7,9 +7,8 @@ export function HomeHeroBackground() {
       <div
         className="absolute inset-0"
         style={{
-          backgroundColor: "#efeaff",
-          backgroundImage:
-            "radial-gradient(circle at 20% 15%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 45%), radial-gradient(circle at 80% 20%, rgba(196,210,255,0.65) 0%, rgba(196,210,255,0) 45%), radial-gradient(circle at 30% 85%, rgba(233,200,255,0.75) 0%, rgba(233,200,255,0) 55%)",
+          background: "linear-gradient(to top right, #864EFF 30%, #BCEAF3 100%)",
+          opacity: 0.4,
         }}
       />
       <div className="absolute left-[62.1%] top-0 w-[clamp(120px,28%,420px)] aspect-[491/197]">
@@ -21,7 +20,7 @@ export function HomeHeroBackground() {
             className="object-contain"
             priority
           />
-          <div className="absolute left-[-5%] top-[50%] w-[30%] aspect-square rotate-[8deg] z-30">
+          <div className="absolute left-[-5%] top-[40%] w-[30%] aspect-square rotate-[8deg] z-30">
             <Image
               src="/characters/purple.png"
               alt=""
@@ -39,7 +38,7 @@ export function HomeHeroBackground() {
             fill
             className="object-contain rotate-[-9deg]"
           />
-          <div className="absolute left-[-18%] top-[-48%] w-[62%] aspect-square rotate-[8deg] z-30">
+          <div className="absolute left-[-30%] top-[-58%] w-[62%] aspect-square rotate-[8deg] z-30">
             <Image
               src="/characters/purple.png"
               alt=""

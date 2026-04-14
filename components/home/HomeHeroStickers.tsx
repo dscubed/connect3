@@ -41,7 +41,7 @@ export function HomeHeroStickers() {
         </div>
       </div>
       <div className="pointer-events-none absolute inset-0 z-30">
-        <div className="absolute left-[51%] bottom-[16%] w-[clamp(65px,13%,200px)] aspect-[450/384] z-[60]">
+        <div className="absolute left-[49%] bottom-[24%] w-[clamp(65px,13%,200px)] aspect-[450/384] z-[60]">
           <Image
             src="/hero/character-gathering.png"
             alt=""
