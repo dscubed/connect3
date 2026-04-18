@@ -1,14 +1,14 @@
-import { SearchBarUI } from "./SearchBarUI";
-import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
 import { universities } from "@/components/profile/details/univeristies";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
+import { SearchBarUI } from "./SearchBarUI";
 
 const ALL_UNIVERSITIES = Object.keys(universities).filter(
-  (key) => key !== "others"
+  (key) => key !== "others",
 );
 const STORAGE_KEY = "uni-preferences";
-import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
 
 const allSuggestions = [
   "Find clubs related to AI and machine learning",
@@ -47,6 +47,7 @@ export function SearchBar({ containerClassName }: SearchBarProps) {
   const [selectedUniversities, setSelectedUniversities] = useState<string[]>(
     () => [],
   );
+  const [suggestions, setSuggestions] = useState<string[]>([]);
 
   useEffect(() => {
     try {
@@ -62,7 +63,6 @@ export function SearchBar({ containerClassName }: SearchBarProps) {
     }
   }, []);
   const router = useRouter();
-  const [suggestions, setSuggestions] = useState<string[]>([]);
 
   useEffect(() => {
     setSuggestions(pickRandom(allSuggestions, 5));
@@ -79,7 +79,7 @@ export function SearchBar({ containerClassName }: SearchBarProps) {
     }
 
     setSelectedUniversities((prev) =>
-      prev.includes(uni) ? prev.filter((u) => u !== uni) : [...prev, uni]
+      prev.includes(uni) ? prev.filter((u) => u !== uni) : [...prev, uni],
     );
   }, []);
 
@@ -101,11 +101,7 @@ export function SearchBar({ containerClassName }: SearchBarProps) {
       {suggestions.length > 0 && (
         <Suggestions className="mx-auto max-w-3xl">
           {suggestions.map((s) => (
-            <Suggestion
-              key={s}
-              suggestion={s}
-              onClick={handleSearch}
-            />
+            <Suggestion key={s} suggestion={s} onClick={handleSearch} />
           ))}
         </Suggestions>
       )}

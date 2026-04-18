@@ -1,11 +1,11 @@
 "use client";
 
-import React from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { HomeHeroBackground } from "./HomeHeroBackground";
 import { HomeHeroStickers } from "./HomeHeroStickers";
 import { HomeHeroFloatingCard } from "./HomeHeroFloatingCard";
-import { HomeSearchBar } from "./HomeSearchBar";
+import { SearchInput } from "../search/SearchInput";
 import { Calendar, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -40,6 +40,12 @@ function EventBadge() {
 
 
 export function HomeHero() {
+  const router = useRouter();
+
+  const handleSearch = (query: string) => {
+    router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+  };
+
   return (
     <section className="w-full">
       <div className="relative w-full aspect-[1271/670]">
@@ -54,7 +60,10 @@ export function HomeHero() {
               <p className="text-[clamp(0.75rem,1.6vw,0.95rem)] text-slate-600">
                 find events, clubs and students all-in-one
               </p>
-              <HomeSearchBar className="w-[clamp(18rem,28vw,36rem)]" />
+              <SearchInput
+                className="w-[clamp(18rem,28vw,36rem)]"
+                onSubmit={handleSearch}
+              />
             </div>
             <div className="relative hidden md:block h-full z-[100]">
               <HomeHeroFloatingCard
