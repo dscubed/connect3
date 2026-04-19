@@ -1,12 +1,14 @@
 import { createCipheriv, createDecipheriv, createHmac } from "crypto";
+import { readFileSync } from "fs";
+import { join } from "path";
 import { PKPass } from "passkit-generator";
 import jwt from "jsonwebtoken";
 
 export const CLUB_CONFIG = {
-  id: "data-science-student-society",
-  displayName: "Data Science Student Society",
+  id: "connect3",
+  displayName: "Connect3",
   googleClassIdSuffix: "club-pass-v1",
-  logoUrl: "https://c3-pass-assets.vercel.app/clubs/dscubed-logo.png",
+  logoUrl: "https://raw.githubusercontent.com/dscubed/connect3/master/public/logo.png",
 };
 
 export interface PassData {
@@ -126,15 +128,11 @@ export async function generateApplePass(data: PassData): Promise<Buffer | null> 
     },
   ];
 
-  if (CLUB_CONFIG.logoUrl) {
-    const logoBuffer = await fetchImageAsBuffer(CLUB_CONFIG.logoUrl);
-    if (logoBuffer) {
-      pass.addBuffer("logo.png", logoBuffer);
-      pass.addBuffer("logo@2x.png", logoBuffer);
-      pass.addBuffer("icon.png", logoBuffer);
-      pass.addBuffer("icon@2x.png", logoBuffer);
-    }
-  }
+  const logoBuffer = readFileSync(join(process.cwd(), "public", "logo.png"));
+  pass.addBuffer("logo.png", logoBuffer);
+  pass.addBuffer("logo@2x.png", logoBuffer);
+  pass.addBuffer("icon.png", logoBuffer);
+  pass.addBuffer("icon@2x.png", logoBuffer);
 
   const footerUrl = "https://c3-pass-assets.vercel.app/google-wallet/footer-v2.png";
   const stripBuffer = await fetchImageAsBuffer(footerUrl);
@@ -172,7 +170,7 @@ export function generateGooglePassUrl(data: PassData): string | null {
           logo: {
             sourceUri: { uri: CLUB_CONFIG.logoUrl },
             contentDescription: {
-              defaultValue: { language: "en-US", value: "Club Logo" },
+              defaultValue: { language: "en-US", value: "Connect3 Logo" },
             },
           },
           cardTitle: {

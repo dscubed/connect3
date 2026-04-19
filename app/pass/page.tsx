@@ -16,8 +16,8 @@ import { useAuthStore } from "@/stores/authStore";
 import { useRouter } from "next/navigation";
 
 const CLUB = {
-  displayName: "Data Science Student Society",
-  logoUrl: "https://c3-pass-assets.vercel.app/clubs/dscubed-logo.png",
+  displayName: "Connect3",
+  logoUrl: "/logo.png",
 };
 
 function PassPageContent() {
