@@ -93,6 +93,7 @@ export async function generateApplePass(data: PassData): Promise<Buffer | null> 
     return null;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const pass: any = new PKPass(
     {},
     { signerCert, signerKey, wwdr },
