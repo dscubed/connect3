@@ -48,7 +48,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [internalOpen, setInternalOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
-  const [sidebarHovered, setSidebarHovered] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const pathName = usePathname();
   const [chatroomsOpen, setChatroomsOpen] = useState(false);
@@ -186,16 +185,13 @@ const Sidebar: React.FC<SidebarProps> = ({
           transition={
             hasMounted ? { duration: 0.3, ease: "easeInOut" } : { duration: 0 }
           }
-          onMouseEnter={() => isDesktop && setSidebarHovered(true)}
-          onMouseLeave={() => setSidebarHovered(false)}
           className={`relative z-50 flex flex-col px-3 gap-2 h-[100dvh] pt-4 pb-4 safe-area-inset-top justify-between transition-all duration-300 ease-in-out
-            ${isDesktop
-              ? chatroomsOpen
-                ? "w-fit relative bg-white backdrop-blur-xl"
-                : `w-fit relative ${sidebarHovered
-                    ? "bg-white/10 backdrop-blur-sm shadow-[0_0_32px_rgba(0,0,0,0.08)]"
-                    : "backdrop-blur-[0px] shadow-none"}`
-              : `w-fit backdrop-blur-xl ${transparent && !showChatrooms ? "bg-white/10" : "bg-white"}`
+            ${
+              isDesktop
+                ? chatroomsOpen
+                  ? "w-fit relative bg-white backdrop-blur-xl"
+                  : "w-fit relative backdrop-blur-[0px] shadow-none"
+                : `w-fit backdrop-blur-xl ${transparent && !showChatrooms ? "bg-white/10" : "bg-white"}`
             }`}
         >
           <div className="flex flex-col gap-4 items-center">
