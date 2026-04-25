@@ -12,7 +12,12 @@ export default function Home() {
     <div className="min-h-[100dvh] relative overflow-hidden">
       <HomeHeroBackground />
       <div className="flex flex-col md:flex-row relative z-10 h-[100dvh]">
-        <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} transparent mobileNavFixed />
+        <Sidebar
+          open={sidebarOpen}
+          onOpenChange={setSidebarOpen}
+          transparent
+          mobileNavFixed
+        />
 
         <div
           className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden w-full"
@@ -22,7 +27,7 @@ export default function Home() {
           }}
         >
           <div className="flex flex-1 flex-col">
-            <div className="md:hidden">
+            <div className="sm:hidden">
               <MobileHomeHero />
             </div>
             <HomeHero />

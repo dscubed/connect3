@@ -25,7 +25,7 @@ export function HomeHero() {
   };
 
   return (
-    <section className="relative isolate w-full h-full min-h-[360px] overflow-hidden hidden md:block">
+    <section className="relative isolate w-full h-full min-h-[360px] overflow-hidden hidden sm:block">
       <div className="absolute inset-0 overflow-hidden">
         {/* Text content */}
         <div className="relative z-[80] flex h-full flex-col justify-center px-4 md:px-6 lg:px-8 xl:px-12 py-5 md:py-8 lg:py-12 md:max-w-[60%]">
@@ -46,7 +46,7 @@ export function HomeHero() {
             className={cn(
               "absolute flex flex-col pointer-events-none",
               "top-[1%] left-1/2 -translate-x-1/2 w-44",
-              "md:translate-x-0 md:left-[42%] md:top-[2%] md:w-48",
+              "sm:translate-x-0 sm:left-[42%] sm:top-[2%] sm:w-48",
               "lg:left-[56%] lg:top-[3%] lg:w-52 xl:w-56 2xl:w-60",
             )}
           >
@@ -83,7 +83,7 @@ export function HomeHero() {
             className={cn(
               "absolute flex flex-col pointer-events-none",
               "bottom-[3%] right-[2%] w-44",
-              "md:bottom-auto md:top-[28%] md:right-[3%] md:w-48",
+              "sm:bottom-auto sm:top-[28%] sm:right-[3%] sm:w-48",
               "lg:top-[35%] lg:right-[8%] lg:w-52 xl:w-56 2xl:w-60",
             )}
           >
@@ -123,7 +123,7 @@ export function HomeHero() {
             className={cn(
               "absolute flex flex-col pointer-events-none",
               "bottom-[3%] left-[2%] w-44",
-              "md:left-[33%] md:bottom-[6%] md:w-48",
+              "sm:left-[33%] sm:bottom-[6%] sm:w-48",
               "lg:left-[44%] lg:bottom-[8%] lg:w-52 xl:w-56 2xl:w-64",
             )}
           >
