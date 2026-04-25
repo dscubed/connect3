@@ -2,14 +2,17 @@
 import Sidebar from "@/components/sidebar/Sidebar";
 import React, { useState } from "react";
 import { HomeHero } from "@/components/home/hero/HomeHero";
+import { MobileHomeHero } from "@/components/home/hero/MobileHomeHero";
+import { HomeHeroBackground } from "@/components/home/hero/HomeHeroBackground";
 
 export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-[100dvh] relative overflow-hidden bg-white">
+    <div className="min-h-[100dvh] relative overflow-hidden">
+      <HomeHeroBackground />
       <div className="flex flex-col md:flex-row relative z-10 h-[100dvh]">
-        <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
+        <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} transparent mobileNavFixed />
 
         <div
           className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden w-full"
@@ -19,6 +22,9 @@ export default function Home() {
           }}
         >
           <div className="flex flex-1 flex-col">
+            <div className="md:hidden">
+              <MobileHomeHero />
+            </div>
             <HomeHero />
           </div>
         </div>

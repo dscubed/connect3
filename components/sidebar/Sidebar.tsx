@@ -23,6 +23,8 @@ interface SidebarProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   chatroomId?: string;
+  transparent?: boolean;
+  mobileNavFixed?: boolean;
 }
 
 const sidebarLinks = [
@@ -40,10 +42,13 @@ const Sidebar: React.FC<SidebarProps> = ({
   open,
   onOpenChange,
   chatroomId,
+  transparent = false,
+  mobileNavFixed = false,
 }) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
+  const [sidebarHovered, setSidebarHovered] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const pathName = usePathname();
   const [chatroomsOpen, setChatroomsOpen] = useState(false);
@@ -105,7 +110,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       {/* Mobile sticky navbar - logo left, collapse button right */}
       <nav
         data-menu-button
-        className="sticky top-0 z-40 w-full md:hidden flex items-center justify-between px-4 py-3 safe-area-inset-top bg-white border-b border-neutral-200 shrink-0"
+        className={`${mobileNavFixed ? "fixed" : "sticky"} top-0 z-40 w-full md:hidden flex items-center justify-between px-4 py-3 safe-area-inset-top shrink-0 ${transparent ? "bg-white/5 backdrop-blur-sm border-b border-white/20" : "bg-white border-b border-neutral-200"}`}
       >
         <Link href="/" className="flex items-center p-1">
           <LogoAnimated width={20} height={20} onHover={true} />
@@ -181,8 +186,17 @@ const Sidebar: React.FC<SidebarProps> = ({
           transition={
             hasMounted ? { duration: 0.3, ease: "easeInOut" } : { duration: 0 }
           }
-          className={`relative z-50 flex flex-col px-3 gap-2 h-[100dvh] backdrop-blur-xl pt-4 pb-4 safe-area-inset-top justify-between transition-all
-            ${isDesktop ? "w-fit relative" : "w-fit bg-white"} ${isDesktop && chatroomsOpen && "bg-white"}`}
+          onMouseEnter={() => isDesktop && setSidebarHovered(true)}
+          onMouseLeave={() => setSidebarHovered(false)}
+          className={`relative z-50 flex flex-col px-3 gap-2 h-[100dvh] pt-4 pb-4 safe-area-inset-top justify-between transition-all duration-300 ease-in-out
+            ${isDesktop
+              ? chatroomsOpen
+                ? "w-fit relative bg-white backdrop-blur-xl"
+                : `w-fit relative ${sidebarHovered
+                    ? "bg-white/10 backdrop-blur-sm shadow-[0_0_32px_rgba(0,0,0,0.08)]"
+                    : "backdrop-blur-[0px] shadow-none"}`
+              : `w-fit backdrop-blur-xl ${transparent && !showChatrooms ? "bg-white/10" : "bg-white"}`
+            }`}
         >
           <div className="flex flex-col gap-4 items-center">
             <SidebarHeader />
@@ -196,7 +210,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   pathName={pathName}
                 />
               ))}
-              <span className="w-full border-t border-neutral-200" />
+              <span className="w-full border-t border-muted/20" />
 
               {connect3Links.map((link) => (
                 <SidebarLink

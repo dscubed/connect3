@@ -1,4 +1,10 @@
-export function PurplePath({ className }: { className?: string }) {
+export function PurplePath({
+  className,
+  id = "purple-gradient",
+}: {
+  className?: string;
+  id?: string;
+}) {
   return (
     <svg
       viewBox="0 0 563 407"
@@ -9,13 +15,13 @@ export function PurplePath({ className }: { className?: string }) {
     >
       <path
         d="M35.1597 392.926C162.813 54.6109 586.459 -97.5646 517.751 186.305"
-        stroke="url(#purple-gradient)"
+        stroke={`url(#${id})`}
         strokeOpacity="0.8"
         strokeWidth="75.1586"
       />
       <defs>
         <linearGradient
-          id="purple-gradient"
+          id={id}
           x1="360.633"
           y1="100.233"
           x2="114.347"
@@ -31,7 +37,13 @@ export function PurplePath({ className }: { className?: string }) {
   );
 }
 
-export function BluePath({ className }: { className?: string }) {
+export function BluePath({
+  className,
+  id = "blue-gradient",
+}: {
+  className?: string;
+  id?: string;
+}) {
   return (
     <svg
       viewBox="0 0 375 295"
@@ -42,13 +54,13 @@ export function BluePath({ className }: { className?: string }) {
     >
       <path
         d="M44.9006 7.09961C19.3765 159.379 258.401 281.176 360.269 244.736"
-        stroke="url(#blue-gradient)"
+        stroke={`url(#${id})`}
         strokeOpacity="0.8"
         strokeWidth="85.8955"
       />
       <defs>
         <linearGradient
-          id="blue-gradient"
+          id={id}
           x1="304.132"
           y1="213.664"
           x2="89.3288"
@@ -64,7 +76,13 @@ export function BluePath({ className }: { className?: string }) {
   );
 }
 
-export function RedPath({ className }: { className?: string }) {
+export function RedPath({
+  className,
+  id = "red-gradient",
+}: {
+  className?: string;
+  id?: string;
+}) {
   return (
     <svg
       viewBox="0 0 280 186"
@@ -75,13 +93,13 @@ export function RedPath({ className }: { className?: string }) {
     >
       <path
         d="M233.847 5.61658C261.505 215.292 42.3966 308.315 42.9489 362.485"
-        stroke="url(#red-gradient)"
+        stroke={`url(#${id})`}
         strokeOpacity="0.8"
         strokeWidth="85.8956"
       />
       <defs>
         <linearGradient
-          id="red-gradient"
+          id={id}
           x1="142.717"
           y1="244.824"
           x2="257.459"
