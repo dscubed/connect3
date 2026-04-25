@@ -20,8 +20,6 @@ const VARIANT_STYLES: Record<
 };
 
 export function HomeHeroFloatingCard({
-  title,
-  description,
   meta,
   badge,
   variant = "white",
@@ -37,12 +35,13 @@ export function HomeHeroFloatingCard({
     >
       <div className="flex items-center gap-2">
         {badge}
-        <div className="text-sm font-semibold leading-tight">{title}</div>
+        <div className="h-3 w-20 rounded bg-slate-200" />
       </div>
       {meta && <div className="mt-1 text-[11px] text-slate-400">{meta}</div>}
-      <p className="mt-1 text-xs leading-snug text-slate-500">
-        {description}
-      </p>
+      <div className="mt-2 flex flex-col gap-1">
+        <div className="h-2 w-full rounded bg-slate-200" />
+        <div className="h-2 w-3/4 rounded bg-slate-200" />
+      </div>
     </div>
   );
 }

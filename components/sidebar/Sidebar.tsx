@@ -1,7 +1,16 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Calendar, UsersRound, Home, SidebarIcon, Wallet, Tag } from "lucide-react";
+import {
+  Menu,
+  X,
+  Calendar,
+  UsersRound,
+  Home,
+  SidebarIcon,
+  Wallet,
+  Tag,
+} from "lucide-react";
 import { SidebarLink } from "./SidebarLink";
 import { usePathname } from "next/navigation";
 import Link from "next/link";

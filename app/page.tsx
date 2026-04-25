@@ -1,7 +1,7 @@
 "use client";
 import Sidebar from "@/components/sidebar/Sidebar";
 import React, { useState } from "react";
-import { HomeHero } from "@/components/home/HomeHero";
+import { HomeHero } from "@/components/home/hero/HomeHero";
 
 export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
