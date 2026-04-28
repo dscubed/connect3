@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { X } from 'lucide-react';
 import Image from 'next/image';
-import personalities, { Personality } from '@/data/personalities';
+import personalities, { Personality } from '@/lib/data/personalities';
 
 const characterImageMapping: Record<string, string> = {
   "Purple C3": "/quiz/characters/purple/single.png",

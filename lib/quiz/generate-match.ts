@@ -5,7 +5,7 @@
  * No checkTokenBudget or debitTokens — ensures O Week users can always complete the quiz.
  */
 import OpenAI from "openai";
-import personalities from "@/data/personalities";
+import personalities from "@/lib/data/personalities";
 import { Question } from "@/components/quiz/QuestionPage";
 
 const openai = new OpenAI({
