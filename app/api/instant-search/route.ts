@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export interface InstantSearchResult {
   id: string;
-  result_type: "user" | "organisation" | "event";
+  result_type: "user" | "organisation" | "event" | "instagram_post";
   name: string;
   snippet: string;
   avatar_url: string | null;

@@ -60,6 +60,25 @@ LANGUAGE sql STABLE SECURITY DEFINER AS $$
     ORDER BY e.start DESC
     LIMIT result_limit
   )
+  UNION ALL
+  -- Instagram posts
+  (
+    SELECT
+      ip.id::text,
+      'instagram_post'                                                AS result_type,
+      COALESCE(p.first_name, ip.posted_by)                           AS name,
+      LEFT(COALESCE(ip.caption, ''), 120)                            AS snippet,
+      p.avatar_url,
+      TO_CHAR(to_timestamp(ip.timestamp), 'Mon DD, YYYY')            AS sub_label
+    FROM instagram_posts ip
+    LEFT JOIN instagram_club_fetches icf ON icf.instagram_slug = ip.posted_by
+    LEFT JOIN profiles p ON p.id = icf.profile_id
+    WHERE
+      to_tsvector('english', COALESCE(ip.caption, ''))
+      @@ websearch_to_tsquery('english', query_text)
+    ORDER BY ip.timestamp DESC
+    LIMIT result_limit
+  )
 $$;
 
 -- Grant execute to both anon and authenticated roles

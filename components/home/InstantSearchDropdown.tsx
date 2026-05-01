@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, Sparkles } from "lucide-react";
+import { Calendar, Instagram, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
 import { createChatroom } from "@/lib/chatrooms/chatroomUtils";
@@ -30,7 +30,11 @@ export function InstantSearchDropdown({
     (r) => r.result_type === "user" || r.result_type === "organisation",
   );
   const events = results.filter((r) => r.result_type === "event");
-  const hasResults = profiles.length > 0 || events.length > 0;
+  const instagramPosts = results.filter(
+    (r) => r.result_type === "instagram_post",
+  );
+  const hasResults =
+    profiles.length > 0 || events.length > 0 || instagramPosts.length > 0;
 
   if (!isLoading && !hasResults) return null;
 
@@ -98,6 +102,21 @@ export function InstantSearchDropdown({
           </p>
           {events.map((result) => (
             <EventRow
+              key={result.id}
+              result={result}
+              onClick={() => handleResultClick(result)}
+            />
+          ))}
+        </section>
+      )}
+
+      {instagramPosts.length > 0 && (
+        <section>
+          <p className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+            Instagram Posts
+          </p>
+          {instagramPosts.map((result) => (
+            <InstagramPostRow
               key={result.id}
               result={result}
               onClick={() => handleResultClick(result)}
@@ -193,6 +212,44 @@ function EventRow({
     >
       <div className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center flex-shrink-0">
         <Calendar className="w-4 h-4 text-rose-400" aria-hidden="true" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-medium text-foreground truncate">
+            {result.name}
+          </p>
+          {result.sub_label && (
+            <span className="text-[10px] text-muted-foreground flex-shrink-0">
+              {result.sub_label}
+            </span>
+          )}
+        </div>
+        {result.snippet && (
+          <p className="text-xs text-muted-foreground truncate">
+            {result.snippet}
+          </p>
+        )}
+      </div>
+    </button>
+  );
+}
+
+/* ── Instagram post row ──────────────────────────────────────────────────── */
+
+function InstagramPostRow({
+  result,
+  onClick,
+}: {
+  result: InstantSearchResult;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors text-left"
+    >
+      <div className="w-8 h-8 rounded-lg bg-pink-50 flex items-center justify-center flex-shrink-0">
+        <Instagram className="w-4 h-4 text-pink-400" aria-hidden="true" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
