@@ -3,14 +3,17 @@
 import { useState, useRef, useEffect, useCallback, Suspense } from "react";
 import Sidebar from "@/components/sidebar/Sidebar";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import QRCode from "react-qr-code";
 import { toPng } from "html-to-image";
 import { useAuthStore } from "@/stores/authStore";
 import { useRouter } from "next/navigation";
-import MembershipsSection from "@/components/pass/MembershipsSection";
+import MembershipsSection, {
+  MembershipsSectionHandle,
+} from "@/components/pass/MembershipsSection";
 import MembershipSetup from "@/components/pass/MembershipSetup";
+
+import { HelpCircle, Upload, Download } from "lucide-react";
 
 const CLUB = {
   displayName: "Connect3",
@@ -19,6 +22,7 @@ const CLUB = {
 
 function PassPageContent() {
   const router = useRouter();
+  const membershipsRef = useRef<MembershipsSectionHandle>(null);
   const { user, profile, loading, profileLoading } = useAuthStore();
   const [generating, setGenerating] = useState(false);
   const [generatedMemberId, setGeneratedMemberId] = useState("");
@@ -149,14 +153,15 @@ function PassPageContent() {
     return (
       <div className="min-h-[100dvh] bg-white">
         <div className="flex flex-col md:flex-row h-[100dvh]">
-          <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
+          <Sidebar />
           <div className="flex-1 overflow-y-auto">
             <div className="max-w-2xl mx-auto px-4 md:px-6 py-8">
               <h1 className="text-2xl font-semibold text-foreground mb-2">
                 Membership Verification Setup
               </h1>
               <p className="text-sm text-muted-foreground mb-6">
-                Configure how member receipts are verified for your organisation.
+                Configure how member receipts are verified for your
+                organisation.
               </p>
               <MembershipSetup />
             </div>
@@ -172,10 +177,6 @@ function PassPageContent() {
         <Sidebar />
         <div className="flex-1 overflow-y-auto md:ml-[68px]">
           <div className="max-w-5xl mx-auto px-4 md:px-6 py-8">
-            <h1 className="text-2xl font-semibold text-foreground mb-6">
-              Your Membership Pass
-            </h1>
-
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
               {/* Card Preview */}
               <div className="flex flex-col items-center gap-4">
@@ -273,89 +274,123 @@ function PassPageContent() {
                     </div>
                   )}
                 </div>
-
-                {generatedMemberId && (
-                  <div className="flex flex-col items-center gap-3 mt-2">
-                    <Button variant="link" onClick={handleDownloadImage}>
-                      Download Card as Image
-                    </Button>
-                  </div>
-                )}
               </div>
 
-              {/* Info card + memberships */}
-              <div className="flex flex-col gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-foreground">
-                      {CLUB.displayName}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="space-y-1">
-                        <p className="text-sm text-muted-foreground">Name</p>
-                        <p className="font-medium">
-                          {firstName} {lastName}
-                        </p>
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-sm text-muted-foreground">Email</p>
-                        <p className="font-medium">{email}</p>
-                      </div>
-                      {generating && (
-                        <p className="text-sm text-muted-foreground">
-                          Generating your pass...
-                        </p>
-                      )}
-                      {generatedMemberId && (
-                        <div className="flex gap-3 pt-2">
-                          {applePassData && (
-                            <button
-                              onClick={() => {
-                                const blob = new Blob(
-                                  [new Uint8Array(applePassData.data)],
-                                  { type: "application/vnd.apple.pkpass" },
-                                );
-                                const url = window.URL.createObjectURL(blob);
-                                const a = document.createElement("a");
-                                a.href = url;
-                                a.download = "membership.pkpass";
-                                a.click();
-                                window.URL.revokeObjectURL(url);
-                              }}
-                              className="inline-flex items-center justify-center hover:opacity-80 transition-opacity"
-                            >
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img
-                                src="/apple-wallet-button.svg"
-                                alt="Add to Apple Wallet"
-                                className="h-10 w-auto"
-                              />
-                            </button>
-                          )}
-                          {googlePassUrl && (
-                            <a
-                              href={googlePassUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center justify-center hover:opacity-80 transition-opacity"
-                            >
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img
-                                src="/google-wallet-button.svg"
-                                alt="Add to Google Wallet"
-                                className="h-10 w-auto"
-                              />
-                            </a>
-                          )}
-                        </div>
-                      )}
+              {/* Info sections */}
+              <div className="flex flex-col gap-10">
+                {/* Connect3 Pass section */}
+                <div className="flex flex-col gap-4">
+                  <h2 className="text-xs font-semibold tracking-widest uppercase text-gray-400">
+                    Pass Details
+                  </h2>
+                  <div className="flex flex-col gap-3">
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-0.5">
+                        Name
+                      </p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {firstName || lastName
+                          ? `${firstName} ${lastName}`.trim()
+                          : "—"}
+                      </p>
                     </div>
-                  </CardContent>
-                </Card>
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-0.5">
+                        Email
+                      </p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {email || "—"}
+                      </p>
+                    </div>
+                  </div>
 
-                <MembershipsSection />
+                  {generating && (
+                    <p className="text-xs text-muted-foreground">
+                      Generating your pass…
+                    </p>
+                  )}
+
+                  {generatedMemberId && (
+                    <div className="flex flex-wrap gap-3 pt-1">
+                      {applePassData && (
+                        <button
+                          onClick={() => {
+                            const blob = new Blob(
+                              [new Uint8Array(applePassData.data)],
+                              { type: "application/vnd.apple.pkpass" },
+                            );
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement("a");
+                            a.href = url;
+                            a.download = "membership.pkpass";
+                            a.click();
+                            window.URL.revokeObjectURL(url);
+                          }}
+                          className="inline-flex items-center justify-center hover:opacity-80 transition-opacity"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src="/apple-wallet-button.svg"
+                            alt="Add to Apple Wallet"
+                            className="h-10 w-auto"
+                          />
+                        </button>
+                      )}
+                      {googlePassUrl && (
+                        <a
+                          href={googlePassUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center hover:opacity-80 transition-opacity"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src="/google-wallet-button.svg"
+                            alt="Add to Google Wallet"
+                            className="h-10 w-auto"
+                          />
+                        </a>
+                      )}
+                      <button
+                        onClick={handleDownloadImage}
+                        className="inline-flex items-center gap-2 h-10 px-4 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <Download className="h-4 w-4" />
+                        Download
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Club Memberships section */}
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xs font-semibold tracking-widest uppercase text-gray-400">
+                      Club Memberships
+                    </h2>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => membershipsRef.current?.openHowTo()}
+                        className="flex items-center gap-1.5 text-xs text-muted-foreground h-7 px-2"
+                      >
+                        <HelpCircle className="h-3.5 w-3.5" />
+                        How to
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => membershipsRef.current?.openUpload()}
+                        className="flex items-center gap-1.5 text-xs h-7 px-2 text-muted-foreground"
+                      >
+                        <Upload className="h-3.5 w-3.5" />
+                        Upload Receipt
+                      </Button>
+                    </div>
+                  </div>
+                  <MembershipsSection ref={membershipsRef} />
+                </div>
               </div>
             </div>
           </div>
