@@ -16,6 +16,7 @@ export interface ParsedReceiptContent {
   subject: string | null;
   sentAt: string | null;
   itemNames: string[];
+  referenceNumber: string | null;
   textBody: string;
 }
 
@@ -53,6 +54,7 @@ export interface ClubMembershipUpsertRow {
   club_id: string;
   user_id: string;
   verified_email: string;
+  receipt_reference_number: string;
   matched_product_name: string;
   matched_receipt_item_name: string;
   dkim_domain: string;
@@ -61,6 +63,17 @@ export interface ClubMembershipUpsertRow {
   receipt_subject: string | null;
   receipt_sent_at: string | null;
   verified_at: string;
+}
+
+export interface ExistingClubMembership {
+  club_id: string;
+  user_id: string;
+}
+
+export interface MembershipReceiptReference {
+  reference_number: string;
+  user_id: string;
+  first_used_at: string;
 }
 
 export interface VerifiedClubResult {

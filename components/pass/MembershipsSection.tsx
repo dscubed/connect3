@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -87,6 +88,15 @@ const HOW_TO_STEPS: Record<
   ],
 };
 
+const HOW_TO_IMAGES: Partial<Record<"gmail" | "outlook", string[]>> = {
+  gmail: [
+    "/memberships/gmail_how_to/1-searching.png",
+    "/memberships/gmail_how_to/2-opening.png",
+    "/memberships/gmail_how_to/3-download.png",
+    "/memberships/gmail_how_to/4-upload.png",
+  ],
+};
+
 function GmailIcon() {
   return (
     <svg
@@ -137,6 +147,7 @@ export default function MembershipsSection() {
   const [uploading, setUploading] = useState(false);
 
   const steps = emailClient ? HOW_TO_STEPS[emailClient] : [];
+  const stepImages = emailClient ? HOW_TO_IMAGES[emailClient] ?? [] : [];
 
   const loadMemberships = useCallback(async () => {
     setLoading(true);
@@ -335,9 +346,21 @@ export default function MembershipsSection() {
           ) : (
             /* Steps */
             <div className="space-y-4 py-2">
-              <div className="w-full h-48 rounded-lg bg-muted flex items-center justify-center text-muted-foreground text-sm border border-border">
-                Screenshot coming soon
-              </div>
+              {stepImages[howToStep] ? (
+                <div className="relative w-full overflow-hidden rounded-lg border border-border bg-muted">
+                  <Image
+                    src={stepImages[howToStep]}
+                    alt={steps[howToStep].title}
+                    width={1200}
+                    height={900}
+                    className="h-auto w-full"
+                  />
+                </div>
+              ) : (
+                <div className="w-full h-48 rounded-lg bg-muted flex items-center justify-center text-muted-foreground text-sm border border-border">
+                  Screenshot coming soon
+                </div>
+              )}
               <div className="space-y-1">
                 <p className="font-medium text-sm">{steps[howToStep].title}</p>
                 <p className="text-sm text-muted-foreground">

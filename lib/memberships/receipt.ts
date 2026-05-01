@@ -16,6 +16,7 @@ export {
 } from "@/lib/memberships/normalizers";
 export {
   extractReceiptItemNames,
+  extractReceiptReferenceNumber,
   UmsuReceiptParser,
 } from "@/lib/memberships/receipt-parser";
 export { UmsuDkimVerifier } from "@/lib/memberships/dkim-verifier";
