@@ -8,6 +8,7 @@ import { HomeHeroFloatingCard } from "./HomeHeroFloatingCard";
 import { PurplePath, BluePath, RedPath } from "./illustrations/HeroPaths";
 import { SearchInput } from "../../search/SearchInput";
 import { cn } from "@/lib/utils";
+import { HomeHeroBackground } from "./HomeHeroBackground";
 import {
   LogoBadge,
   EventBadge,
@@ -25,10 +26,11 @@ export function HomeHero() {
   };
 
   return (
-    <section className="relative isolate w-full h-full min-h-[360px] overflow-hidden hidden sm:block">
+    <section className="relative isolate w-full h-full min-h-[360px] overflow-hidden hidden sm:block rounded-b-[4rem] shadow-lg">
+      <HomeHeroBackground />
       <div className="absolute inset-0 overflow-hidden">
         {/* Text content */}
-        <div className="relative z-[80] flex h-full flex-col justify-center px-4 md:px-6 lg:px-8 xl:px-12 py-5 md:py-8 lg:py-12 md:max-w-[60%]">
+        <div className="relative z-[80] flex h-full flex-col justify-center px-4 md:px-6 lg:px-8 xl:px-12 py-5 md:py-8 lg:py-12 md:max-w-[48%]">
           <div className="flex flex-col gap-2 md:gap-3 lg:gap-4 text-center sm:text-start items-center sm:items-start">
             <HeroHeading />
             <SearchInput
@@ -123,8 +125,8 @@ export function HomeHero() {
             className={cn(
               "absolute flex flex-col pointer-events-none",
               "bottom-[3%] left-[2%] w-44",
-              "sm:left-[33%] sm:bottom-[6%] sm:w-48",
-              "lg:left-[44%] lg:bottom-[8%] lg:w-52 xl:w-56 2xl:w-64",
+              "sm:left-[33%] sm:bottom-[4%] sm:w-48",
+              "lg:left-[44%] lg:bottom-[4%] lg:w-52 xl:w-56 2xl:w-64",
             )}
           >
             <motion.div

@@ -5,6 +5,7 @@ import { ThemeProvider } from "next-themes";
 import { AuthInitializer } from "@/components/auth/AuthInitializer";
 import { FingerprintInitializer } from "@/components/auth/FingerprintInitializer";
 import { Toaster } from "@/components/ui/sonner";
+import { AppShell } from "@/components/layout/AppShell";
 import "./globals.css";
 
 const fredoka = Fredoka({
@@ -46,7 +47,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <AppShell>{children}</AppShell>
           <Toaster />
         </ThemeProvider>
         <GoogleAnalytics gaId="G-CW6YV4C99C" />

@@ -40,10 +40,20 @@ export async function updateSession(request: NextRequest) {
   // with the Supabase client, your users may be randomly logged out.
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
+  const isAuthenticatedUser = user && user.is_anonymous !== true;
+  const { pathname } = request.nextUrl;
+
+  // Unauthenticated on "/" → "/start"; authenticated on "/start" → "/"
+  if (pathname === "/" && !isAuthenticatedUser) {
+    return NextResponse.redirect(new URL("/start", request.url));
+  }
+  if (pathname === "/start" && isAuthenticatedUser) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
 
   const protectedRoutes = ["/dashboard", "/profile", "/settings"];
   const isProtectedRoute = protectedRoutes.some((route) =>
-    request.nextUrl.pathname.startsWith(route),
+    pathname.startsWith(route),
   );
 
   if (!user && isProtectedRoute) {
@@ -52,11 +62,8 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  const isAuthenticatedUser = user && user.is_anonymous !== true;
   const authRoutes = ["/auth/login", "/auth/sign-up", "/auth/org/sign-up"];
-  const isAuthRoute = authRoutes.some(
-    (route) => request.nextUrl.pathname === route,
-  );
+  const isAuthRoute = authRoutes.some((route) => pathname === route);
   if (isAuthenticatedUser && isAuthRoute) {
     const redirectTo = request.nextUrl.searchParams.get("redirect_to");
     if (redirectTo && isAllowedRedirect(redirectTo)) {

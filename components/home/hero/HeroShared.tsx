@@ -34,7 +34,7 @@ export function EventBadge() {
 export function HeroHeading() {
   return (
     <>
-      <h1 className="font-fredoka text-4xl md:text-5xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-semibold leading-[1.05] text-slate-800">
+      <h1 className="font-fredoka text-4xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-semibold leading-[1.05] text-slate-800">
         IT TAKES <span className="home-hero-scribble">THREE</span> <br />
         TO CONNECT
       </h1>
@@ -71,7 +71,7 @@ export const FLOAT_ABC = {
   },
   transition: {
     duration: 12,
-    times: [0, 0.12, 0.18, 0.36, 0.43, 0.60, 0.67, 1],
+    times: [0, 0.12, 0.18, 0.36, 0.43, 0.6, 0.67, 1],
     ease: "easeInOut" as const,
     repeat: Infinity,
     delay: 0,
@@ -85,7 +85,7 @@ export const FLOAT_ALPHA = {
   },
   transition: {
     duration: 10,
-    times: [0, 0.15, 0.22, 0.42, 0.50, 0.67, 0.75, 1],
+    times: [0, 0.15, 0.22, 0.42, 0.5, 0.67, 0.75, 1],
     ease: "easeInOut" as const,
     repeat: Infinity,
     delay: 1.5,
@@ -99,7 +99,7 @@ export const FLOAT_BAR_NIGHT = {
   },
   transition: {
     duration: 14,
-    times: [0, 0.13, 0.20, 0.39, 0.52, 0.70, 0.78, 1],
+    times: [0, 0.13, 0.2, 0.39, 0.52, 0.7, 0.78, 1],
     ease: "easeInOut" as const,
     repeat: Infinity,
     delay: 0.6,

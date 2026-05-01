@@ -23,7 +23,6 @@ const CLUB = {
 function PassPageContent() {
   const router = useRouter();
   const { user, profile, loading, profileLoading } = useAuthStore();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [generatedMemberId, setGeneratedMemberId] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -147,8 +146,8 @@ function PassPageContent() {
   return (
     <div className="min-h-[100dvh] bg-white">
       <div className="flex flex-col md:flex-row h-[100dvh]">
-        <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
-        <div className="flex-1 overflow-y-auto">
+        <Sidebar />
+        <div className="flex-1 overflow-y-auto md:ml-[68px]">
           <div className="max-w-5xl mx-auto px-4 md:px-6 py-8">
             <h1 className="text-2xl font-semibold text-foreground mb-6">
               Your Membership Pass

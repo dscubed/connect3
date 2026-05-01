@@ -13,7 +13,6 @@ export default function EventDetailPage() {
   const router = useRouter();
   const [event, setEvent] = useState<Event | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     async function fetchEvent() {
@@ -41,9 +40,9 @@ export default function EventDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-[100dvh] overflow-hidden">
-        <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
-        <div className="flex-1 flex flex-col justify-center items-center">
+      <div className="flex flex-col md:flex-row h-[100dvh] overflow-hidden">
+        <Sidebar />
+        <div className="flex-1 flex flex-col justify-center items-center md:ml-[68px]">
           <CubeLoader size={32} />
           <p>Loading event...</p>
         </div>
@@ -56,9 +55,9 @@ export default function EventDetailPage() {
   }
 
   return (
-    <div className="flex h-[100dvh] overflow-hidden">
-      <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
-      <div className="flex-1 overflow-y-auto p-6 lg:p-10 scrollbar-hide">
+    <div className="flex flex-col md:flex-row h-[100dvh] overflow-hidden">
+      <Sidebar />
+      <div className="flex-1 overflow-y-auto p-6 lg:p-10 scrollbar-hide md:ml-[68px]">
         <div className="max-w-4xl mx-auto">
           <EventDetailPanel
             event={event}

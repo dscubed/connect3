@@ -1,38 +1,18 @@
 "use client";
 import Sidebar from "@/components/sidebar/Sidebar";
-import React, { useState } from "react";
-import { HomeHero } from "@/components/home/hero/HomeHero";
-import { MobileHomeHero } from "@/components/home/hero/MobileHomeHero";
-import { HomeHeroBackground } from "@/components/home/hero/HomeHeroBackground";
+import { HomeGreeting } from "@/components/home/HomeGreeting";
+import { RecommendedEvents } from "@/components/home/RecommendedEvents";
 
 export default function Home() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
   return (
-    <div className="min-h-[100dvh] relative overflow-hidden">
-      <HomeHeroBackground />
-      <div className="flex flex-col md:flex-row relative z-10 h-[100dvh]">
-        <Sidebar
-          open={sidebarOpen}
-          onOpenChange={setSidebarOpen}
-          transparent
-          mobileNavFixed
-        />
-
-        <div
-          className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden w-full"
-          style={{
-            scrollbarWidth: "thin",
-            scrollbarColor: "rgba(255,255,255,0.3) transparent",
-          }}
-        >
-          <div className="flex flex-1 flex-col">
-            <div className="sm:hidden">
-              <MobileHomeHero />
-            </div>
-            <HomeHero />
-          </div>
-        </div>
+    <div className="flex flex-col md:flex-row h-[100dvh] overflow-hidden bg-white">
+      <Sidebar />
+      <div
+        className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden w-full md:ml-[68px] [&::-webkit-scrollbar]:hidden"
+        style={{ scrollbarWidth: "none" }}
+      >
+        <HomeGreeting />
+        <RecommendedEvents />
       </div>
     </div>
   );

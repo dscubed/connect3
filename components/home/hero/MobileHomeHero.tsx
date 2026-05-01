@@ -7,6 +7,7 @@ import { HomeHeroStickers } from "./HomeHeroStickers";
 import { HomeHeroFloatingCard } from "./HomeHeroFloatingCard";
 import { PurplePath, BluePath, RedPath } from "./illustrations/HeroPaths";
 import { SearchInput } from "../../search/SearchInput";
+import { HomeHeroBackground } from "./HomeHeroBackground";
 import {
   LogoBadge,
   EventBadge,
@@ -24,10 +25,11 @@ export function MobileHomeHero() {
   };
 
   return (
-    <section className="relative isolate w-full h-[100dvh] overflow-hidden">
+    <section className="relative isolate w-full h-[calc(100dvh-3.5rem)] overflow-hidden sm:h-full rounded-b-[4rem]">
+      <HomeHeroBackground />
       <HomeHeroStickers />
 
-      <div className="relative z-[100] flex flex-col items-center h-full px-4 pt-16 pb-4 justify-between">
+      <div className="relative z-[100] flex flex-col items-center h-full px-4 pt-8 pb-4 justify-between">
         {/* ABC Club — trail static, illustration + card float together */}
         <div className="flex flex-col w-40 pointer-events-none">
           <div className="relative self-center w-24 h-24 -mb-2">

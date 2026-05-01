@@ -51,7 +51,6 @@ const PAGE_SIZE = 10;
 
 export default function SearchPageContent() {
   const [mounted, setMounted] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sheet, setSheet] = useState<SheetState>({ type: null, id: null });
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -213,9 +212,9 @@ export default function SearchPageContent() {
   return (
     <div className="min-h-[100dvh] w-full relative overflow-hidden">
       <div className="flex flex-col md:flex-row relative z-10 w-full h-[100dvh]">
-        <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
+        <Sidebar />
 
-        <main className="flex-1 min-w-0 min-h-0 flex flex-col">
+        <main className="flex-1 min-w-0 min-h-0 flex flex-col md:ml-[68px]">
           {/* Top header: */}
           <div className="px-4 pt-4 md:pt-8 pb-2">
             <SearchInput defaultValue={q} onSubmit={handleNewSearch} />

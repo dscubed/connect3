@@ -25,7 +25,6 @@ function ClubsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedClub, setSelectedClub] = useState<Club | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -219,11 +218,11 @@ function ClubsPageContent() {
 
   return (
     <div className="flex flex-col md:flex-row h-[100dvh] overflow-hidden">
-      <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
+      <Sidebar />
 
       {isDesktop ? (
         // Desktop: Side by side layout
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden md:ml-[68px]">
           {/* Left Panel - Club List */}
           <div className="w-80 xl:w-96 border-r border-white/10 backdrop-blur-sm overflow-hidden flex flex-col">
             <ClubsHeader clubCount={clubs.length} isLoading={isValidating} />
@@ -266,7 +265,7 @@ function ClubsPageContent() {
         </div>
       ) : (
         // Mobile: Show either list or details
-        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden md:ml-[68px]">
           <AnimatePresence mode="wait">
             {!showDetails ? (
               <motion.div
