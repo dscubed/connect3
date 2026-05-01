@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { MapPin, Globe, Camera, Ticket } from "lucide-react";
+import { SearchInput } from "@/components/search/SearchInput";
 import Image from "next/image";
 
 interface UpcomingEvent {
@@ -60,7 +61,8 @@ function fmtDate(iso: string | null) {
 
 function greeting(name: string | null) {
   const h = new Date().getHours();
-  const time = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+  const time =
+    h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
   return name ? `${time}, ${name}` : time;
 }
 
@@ -74,7 +76,13 @@ function UpcomingEventCard({ event }: { event: UpcomingEvent }) {
       {/* Thumbnail */}
       <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center shrink-0">
         {event.thumbnail ? (
-          <Image src={event.thumbnail} alt={event.name} fill className="object-cover" unoptimized />
+          <Image
+            src={event.thumbnail}
+            alt={event.name}
+            fill
+            className="object-cover"
+            unoptimized
+          />
         ) : (
           <Camera className="h-5 w-5 text-purple-300" />
         )}
@@ -87,7 +95,11 @@ function UpcomingEventCard({ event }: { event: UpcomingEvent }) {
         </p>
         <p className="text-xs text-muted-foreground">{fmtDate(event.start)}</p>
         <p className="flex items-center gap-1 text-xs text-gray-400 truncate mt-0.5">
-          {event.isOnline ? <Globe className="h-3 w-3 shrink-0" /> : <MapPin className="h-3 w-3 shrink-0" />}
+          {event.isOnline ? (
+            <Globe className="h-3 w-3 shrink-0" />
+          ) : (
+            <MapPin className="h-3 w-3 shrink-0" />
+          )}
           {event.isOnline ? "Online" : (event.location ?? "TBA")}
         </p>
       </div>
@@ -103,6 +115,11 @@ function UpcomingEventCard({ event }: { event: UpcomingEvent }) {
 
 export function HomeGreeting() {
   const { profile } = useAuthStore();
+  const router = useRouter();
+
+  const handleSearch = (query: string) => {
+    router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+  };
 
   return (
     <div className="px-4 md:px-6 lg:px-8 xl:px-12 pt-10 pb-2 space-y-8">
@@ -114,6 +131,14 @@ export function HomeGreeting() {
         <p className="text-sm text-muted-foreground mt-0.5">
           Here&apos;s what&apos;s coming up for you.
         </p>
+      </div>
+
+      {/* Search */}
+      <div className="rounded-3xl bg-gradient-to-br from-[#ede4ff] to-[#d9c9ff] px-6 py-8 flex flex-col items-center gap-4">
+        <h2 className="font-fredoka text-2xl md:text-3xl font-semibold text-[#5c2fa0] tracking-[0.01em] text-center">
+          Discover more on campus
+        </h2>
+        <SearchInput className="w-full max-w-xl" onSubmit={handleSearch} />
       </div>
 
       {/* Upcoming events */}
