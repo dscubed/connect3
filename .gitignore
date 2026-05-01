@@ -43,3 +43,8 @@ next-env.d.ts
 
 /scripts/kb_scrapes
 .claude
+.codex
+.codex/
+
+# local database migrations/state are applied manually per environment
+/supabase/migrations/

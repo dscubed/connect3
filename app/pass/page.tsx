@@ -3,17 +3,14 @@
 import { useState, useRef, useEffect, useCallback, Suspense } from "react";
 import Sidebar from "@/components/sidebar/Sidebar";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import QRCode from "react-qr-code";
 import { toPng } from "html-to-image";
 import { useAuthStore } from "@/stores/authStore";
 import { useRouter } from "next/navigation";
+import MembershipsSection from "@/components/pass/MembershipsSection";
+import MembershipSetup from "@/components/pass/MembershipSetup";
 
 const CLUB = {
   displayName: "Connect3",
@@ -27,7 +24,10 @@ function PassPageContent() {
   const [generatedMemberId, setGeneratedMemberId] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [googlePassUrl, setGooglePassUrl] = useState<string | null>(null);
-  const [applePassData, setApplePassData] = useState<{ type: string; data: number[] } | null>(null);
+  const [applePassData, setApplePassData] = useState<{
+    type: string;
+    data: number[];
+  } | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const hasGenerated = useRef(false);
 
@@ -141,6 +141,29 @@ function PassPageContent() {
 
   if (loading || (!user && !loading)) {
     return null;
+  }
+
+  const isOrg = profile?.account_type === "organisation";
+
+  if (isOrg) {
+    return (
+      <div className="min-h-[100dvh] bg-white">
+        <div className="flex flex-col md:flex-row h-[100dvh]">
+          <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
+          <div className="flex-1 overflow-y-auto">
+            <div className="max-w-2xl mx-auto px-4 md:px-6 py-8">
+              <h1 className="text-2xl font-semibold text-foreground mb-2">
+                Membership Verification Setup
+              </h1>
+              <p className="text-sm text-muted-foreground mb-6">
+                Configure how member receipts are verified for your organisation.
+              </p>
+              <MembershipSetup />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -260,76 +283,80 @@ function PassPageContent() {
                 )}
               </div>
 
-              {/* Info card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-foreground">
-                    {CLUB.displayName}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">Name</p>
-                      <p className="font-medium">
-                        {firstName} {lastName}
-                      </p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">Email</p>
-                      <p className="font-medium">{email}</p>
-                    </div>
-                    {generating && (
-                      <p className="text-sm text-muted-foreground">
-                        Generating your pass...
-                      </p>
-                    )}
-                    {generatedMemberId && (
-                      <div className="flex gap-3 pt-2">
-                        {applePassData && (
-                          <button
-                            onClick={() => {
-                              const blob = new Blob(
-                                [new Uint8Array(applePassData.data)],
-                                { type: "application/vnd.apple.pkpass" },
-                              );
-                              const url = window.URL.createObjectURL(blob);
-                              const a = document.createElement("a");
-                              a.href = url;
-                              a.download = "membership.pkpass";
-                              a.click();
-                              window.URL.revokeObjectURL(url);
-                            }}
-                            className="inline-flex items-center justify-center hover:opacity-80 transition-opacity"
-                          >
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src="/apple-wallet-button.svg"
-                              alt="Add to Apple Wallet"
-                              className="h-10 w-auto"
-                            />
-                          </button>
-                        )}
-                        {googlePassUrl && (
-                          <a
-                            href={googlePassUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center justify-center hover:opacity-80 transition-opacity"
-                          >
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src="/google-wallet-button.svg"
-                              alt="Add to Google Wallet"
-                              className="h-10 w-auto"
-                            />
-                          </a>
-                        )}
+              {/* Info card + memberships */}
+              <div className="flex flex-col gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-foreground">
+                      {CLUB.displayName}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="space-y-1">
+                        <p className="text-sm text-muted-foreground">Name</p>
+                        <p className="font-medium">
+                          {firstName} {lastName}
+                        </p>
                       </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+                      <div className="space-y-1">
+                        <p className="text-sm text-muted-foreground">Email</p>
+                        <p className="font-medium">{email}</p>
+                      </div>
+                      {generating && (
+                        <p className="text-sm text-muted-foreground">
+                          Generating your pass...
+                        </p>
+                      )}
+                      {generatedMemberId && (
+                        <div className="flex gap-3 pt-2">
+                          {applePassData && (
+                            <button
+                              onClick={() => {
+                                const blob = new Blob(
+                                  [new Uint8Array(applePassData.data)],
+                                  { type: "application/vnd.apple.pkpass" },
+                                );
+                                const url = window.URL.createObjectURL(blob);
+                                const a = document.createElement("a");
+                                a.href = url;
+                                a.download = "membership.pkpass";
+                                a.click();
+                                window.URL.revokeObjectURL(url);
+                              }}
+                              className="inline-flex items-center justify-center hover:opacity-80 transition-opacity"
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src="/apple-wallet-button.svg"
+                                alt="Add to Apple Wallet"
+                                className="h-10 w-auto"
+                              />
+                            </button>
+                          )}
+                          {googlePassUrl && (
+                            <a
+                              href={googlePassUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center justify-center hover:opacity-80 transition-opacity"
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src="/google-wallet-button.svg"
+                                alt="Add to Google Wallet"
+                                className="h-10 w-auto"
+                              />
+                            </a>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <MembershipsSection />
+              </div>
             </div>
           </div>
         </div>

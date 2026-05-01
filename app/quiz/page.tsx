@@ -1,7 +1,7 @@
 'use client';
 
 import QuestionPage from '@/components/quiz/QuestionPage';
-import { getQuestions } from '@/data/quiz-questions';
+import { getQuestions } from '@/lib/data/quiz-questions';
 import Image from 'next/image';
 import Link from 'next/link';
 import WhiteLogo from '@/public/white-logo.png';
