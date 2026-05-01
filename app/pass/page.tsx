@@ -11,7 +11,6 @@ import { useRouter } from "next/navigation";
 import MembershipsSection, {
   MembershipsSectionHandle,
 } from "@/components/pass/MembershipsSection";
-import MembershipSetup from "@/components/pass/MembershipSetup";
 
 import { HelpCircle, Upload, Download } from "lucide-react";
 
@@ -150,25 +149,10 @@ function PassPageContent() {
   const isOrg = profile?.account_type === "organisation";
 
   if (isOrg) {
-    return (
-      <div className="min-h-[100dvh] bg-white">
-        <div className="flex flex-col md:flex-row h-[100dvh]">
-          <Sidebar />
-          <div className="flex-1 overflow-y-auto">
-            <div className="max-w-2xl mx-auto px-4 md:px-6 py-8">
-              <h1 className="text-2xl font-semibold text-foreground mb-2">
-                Membership Verification Setup
-              </h1>
-              <p className="text-sm text-muted-foreground mb-6">
-                Configure how member receipts are verified for your
-                organisation.
-              </p>
-              <MembershipSetup />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    const adminUrl =
+      process.env.NEXT_PUBLIC_ADMIN_URL ?? "http://localhost:3002";
+    window.location.replace(`${adminUrl}/dashboard/members`);
+    return null;
   }
 
   return (
