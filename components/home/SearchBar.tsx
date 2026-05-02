@@ -95,7 +95,9 @@ export function SearchBar({ containerClassName }: SearchBarProps) {
   const { results, isLoading } = useInstantSearch(rawQuery);
 
   const showDropdown =
-    dropdownOpen && rawQuery.trim().length >= 2 && (isLoading || results.length > 0);
+    dropdownOpen &&
+    rawQuery.trim().length >= 2 &&
+    (isLoading || results.length > 0);
 
   const handleUniversityChange = useCallback((uni: string) => {
     if (uni == "all") {

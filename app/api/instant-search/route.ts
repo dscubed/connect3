@@ -8,19 +8,28 @@ export interface InstantSearchResult {
   snippet: string;
   avatar_url: string | null;
   sub_label: string | null;
+  score: number;
 }
+
+const DEFAULT_LIMIT = 5;
+const MAX_LIMIT = 20;
 
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get("q")?.trim();
+  const limitParam = parseInt(req.nextUrl.searchParams.get("limit") ?? "", 10);
+  const limit = isNaN(limitParam)
+    ? DEFAULT_LIMIT
+    : Math.min(limitParam, MAX_LIMIT);
+
   if (!q || q.length < 2) {
     return NextResponse.json({ results: [] });
   }
 
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase.rpc("instant_search", {
+    const { data, error } = await supabase.rpc("instant_search_bm25", {
       query_text: q,
-      result_limit: 4,
+      result_limit: limit,
     });
 
     if (error) {

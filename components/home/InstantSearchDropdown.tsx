@@ -26,15 +26,7 @@ export function InstantSearchDropdown({
   const router = useRouter();
   const [isStartingChat, setIsStartingChat] = useState(false);
 
-  const profiles = results.filter(
-    (r) => r.result_type === "user" || r.result_type === "organisation",
-  );
-  const events = results.filter((r) => r.result_type === "event");
-  const instagramPosts = results.filter(
-    (r) => r.result_type === "instagram_post",
-  );
-  const hasResults =
-    profiles.length > 0 || events.length > 0 || instagramPosts.length > 0;
+  const hasResults = results.length > 0;
 
   if (!isLoading && !hasResults) return null;
 
@@ -80,50 +72,20 @@ export function InstantSearchDropdown({
         </div>
       )}
 
-      {profiles.length > 0 && (
-        <section>
-          <p className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
-            People &amp; Clubs
-          </p>
-          {profiles.map((result) => (
-            <ProfileRow
-              key={result.id}
-              result={result}
-              onClick={() => handleResultClick(result)}
-            />
-          ))}
-        </section>
-      )}
-
-      {events.length > 0 && (
-        <section>
-          <p className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
-            Events
-          </p>
-          {events.map((result) => (
-            <EventRow
-              key={result.id}
-              result={result}
-              onClick={() => handleResultClick(result)}
-            />
-          ))}
-        </section>
-      )}
-
-      {instagramPosts.length > 0 && (
-        <section>
-          <p className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
-            Instagram Posts
-          </p>
-          {instagramPosts.map((result) => (
+      {results.map((result) => {
+        const onClick = () => handleResultClick(result);
+        if (result.result_type === "event")
+          return <EventRow key={result.id} result={result} onClick={onClick} />;
+        if (result.result_type === "instagram_post")
+          return (
             <InstagramPostRow
               key={result.id}
               result={result}
-              onClick={() => handleResultClick(result)}
+              onClick={onClick}
             />
-          ))}
-        </section>
-      )}
+          );
+        return <ProfileRow key={result.id} result={result} onClick={onClick} />;
+      })}
 
       <div className="flex items-center justify-between gap-2 px-3 py-2.5 border-t border-gray-50 mt-1">
         <button
@@ -131,7 +93,9 @@ export function InstantSearchDropdown({
           className="flex-1 text-left text-xs text-muted-foreground hover:text-foreground transition-colors truncate"
         >
           Search for{" "}
-          <span className="font-medium text-foreground">&quot;{query}&quot;</span>{" "}
+          <span className="font-medium text-foreground">
+            &quot;{query}&quot;
+          </span>{" "}
           →
         </button>
         <button
@@ -210,8 +174,16 @@ function EventRow({
       onClick={onClick}
       className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors text-left"
     >
-      <div className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center flex-shrink-0">
-        <Calendar className="w-4 h-4 text-rose-400" aria-hidden="true" />
+      <div className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center flex-shrink-0 overflow-hidden">
+        {result.avatar_url ? (
+          <img
+            src={result.avatar_url}
+            alt=""
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <Calendar className="w-4 h-4 text-rose-400" aria-hidden="true" />
+        )}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
@@ -248,11 +220,23 @@ function InstagramPostRow({
       onClick={onClick}
       className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors text-left"
     >
-      <div className="w-8 h-8 rounded-lg bg-pink-50 flex items-center justify-center flex-shrink-0">
-        <Instagram className="w-4 h-4 text-pink-400" aria-hidden="true" />
+      <div className="w-8 h-8 rounded-lg bg-pink-50 flex items-center justify-center flex-shrink-0 overflow-hidden">
+        {result.avatar_url ? (
+          <img
+            src={result.avatar_url}
+            alt=""
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <Instagram className="w-4 h-4 text-pink-400" aria-hidden="true" />
+        )}
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          <Instagram
+            className="w-3 h-3 text-pink-400 flex-shrink-0"
+            aria-hidden="true"
+          />
           <p className="text-sm font-medium text-foreground truncate">
             {result.name}
           </p>
