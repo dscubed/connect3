@@ -21,8 +21,15 @@ const EventSheet = dynamic(
   () => import("@/components/search/EventSheet").then((m) => m.EventSheet),
   { ssr: false },
 );
+const InstagramPostSheet = dynamic(
+  () =>
+    import("@/components/search/InstagramPostSheet").then(
+      (m) => m.InstagramPostSheet,
+    ),
+  { ssr: false },
+);
 
-type SheetState = { type: "profile" | "event" | null; id: string | null };
+type SheetState = { type: "profile" | "event" | "instagram" | null; id: string | null };
 
 interface SearchResult {
   id: string;
@@ -31,20 +38,22 @@ interface SearchResult {
   content: string;
 }
 
-type TabType = "all" | "people" | "clubs" | "events";
+type TabType = "all" | "people" | "clubs" | "events" | "instagram";
 
 const TABS: { label: string; value: TabType }[] = [
   { label: "All", value: "all" },
   { label: "People", value: "people" },
   { label: "Clubs", value: "clubs" },
   { label: "Events", value: "events" },
+  { label: "Instagram", value: "instagram" },
 ];
 
 const TAB_TYPES: Record<TabType, EntityType[]> = {
-  all: ["user", "organisation", "events"],
+  all: ["user", "organisation", "events", "instagram_post"],
   people: ["user"],
   clubs: ["organisation"],
   events: ["events"],
+  instagram: ["instagram_post"],
 };
 
 const PAGE_SIZE = 10;
@@ -138,6 +147,10 @@ export default function SearchPageContent() {
   );
 
   const handleProfileClick = useCallback((entity: EntityResult) => {
+    if (entity.type === "instagram_post") {
+      setSheet({ type: "instagram", id: entity.id });
+      return;
+    }
     setSheet({
       type: entity.type === "events" ? "event" : "profile",
       id: entity.id,
@@ -188,12 +201,26 @@ export default function SearchPageContent() {
     .filter((r) => allowedTypes.includes(r.type as EntityType))
     .map((r) => ({ type: r.type as EntityType, id: r.id }));
 
-  const totalPages = Math.max(1, Math.ceil(filteredResults.length / PAGE_SIZE));
+  // "All" tab: show top 3 per type so no single type dominates the page.
+  // Individual tabs: standard flat pagination.
+  const ALL_TAB_CAP = 3;
+  const pageResults: EntityResult[] =
+    tab === "all"
+      ? (
+          ["user", "organisation", "events", "instagram_post"] as EntityType[]
+        ).flatMap((type) =>
+          filteredResults.filter((r) => r.type === type).slice(0, ALL_TAB_CAP),
+        )
+      : filteredResults.slice(
+          (page - 1) * PAGE_SIZE,
+          page * PAGE_SIZE,
+        );
+
+  const totalPages =
+    tab === "all"
+      ? 1
+      : Math.max(1, Math.ceil(filteredResults.length / PAGE_SIZE));
   const clampedPage = Math.min(page, totalPages);
-  const pageResults = filteredResults.slice(
-    (clampedPage - 1) * PAGE_SIZE,
-    clampedPage * PAGE_SIZE,
-  );
 
   const chatBanner = (
     <button
@@ -260,16 +287,62 @@ export default function SearchPageContent() {
               {!loading && pageResults.length > 0 && (
                 <>
                   {chatBanner}
-                  <div className="space-y-3 max-w-xl">
-                    {pageResults.map((entity, i) => (
-                      <SearchMatchResults
-                        key={`${entity.type}-${entity.id}`}
-                        match={entity}
-                        userIndex={i}
-                        onProfileClick={handleProfileClick}
-                      />
-                    ))}
-                  </div>
+                  {tab === "all" ? (
+                    <div className="space-y-6 max-w-xl">
+                      {(
+                        [
+                          { label: "People",    type: "user",           tabValue: "people"    },
+                          { label: "Clubs",     type: "organisation",   tabValue: "clubs"     },
+                          { label: "Events",    type: "events",         tabValue: "events"    },
+                          { label: "Instagram", type: "instagram_post", tabValue: "instagram" },
+                        ] as const
+                      ).map(({ label, type, tabValue }) => {
+                        const group = pageResults.filter((e) => e.type === type);
+                        if (group.length === 0) return null;
+                        const totalForType = filteredResults.filter((e) => e.type === type).length;
+                        const hasMore = totalForType > ALL_TAB_CAP;
+                        return (
+                          <div key={type}>
+                            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-2 px-1">
+                              {label}
+                            </p>
+                            <div className="space-y-3">
+                              {group.map((entity, i) => (
+                                <SearchMatchResults
+                                  key={`${entity.type}-${entity.id}`}
+                                  match={entity}
+                                  userIndex={i}
+                                  onProfileClick={handleProfileClick}
+                                />
+                              ))}
+                            </div>
+                            {hasMore && (
+                              <button
+                                onClick={() => {
+                                  handleTabChange(tabValue);
+                                  resultsTopRef.current?.scrollIntoView({ behavior: "smooth" });
+                                }}
+                                className="mt-2 px-1 text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                              >
+                                View all {totalForType} {label.toLowerCase()} results →
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="space-y-3 max-w-xl">
+                      {pageResults.map((entity, i) => (
+                        <SearchMatchResults
+                          key={`${entity.type}-${entity.id}`}
+                          match={entity}
+                          userIndex={i}
+                          onProfileClick={handleProfileClick}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </>
               )}
             </div>
@@ -333,6 +406,11 @@ export default function SearchPageContent() {
       <EventSheet
         eventId={sheet.type === "event" ? sheet.id : null}
         isOpen={sheet.type === "event"}
+        onClose={closeSheet}
+      />
+      <InstagramPostSheet
+        postId={sheet.type === "instagram" ? sheet.id : null}
+        isOpen={sheet.type === "instagram"}
         onClose={closeSheet}
       />
     </div>

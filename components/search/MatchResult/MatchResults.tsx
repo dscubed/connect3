@@ -17,6 +17,7 @@ const CARD_COLORS: Record<EntityType, string> = {
   user: "bg-blue-50   border-blue-200   hover:bg-blue-100",
   organisation: "bg-purple-50 border-purple-200 hover:bg-purple-100",
   events: "bg-rose-50   border-rose-200   hover:bg-rose-100",
+  instagram_post: "bg-pink-50  border-pink-200  hover:bg-pink-100",
 };
 
 const CARD_BASE =

@@ -1,9 +1,11 @@
 import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
 import { universities } from "@/components/profile/details/univeristies";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { SearchBarUI } from "./SearchBarUI";
+import { useInstantSearch } from "@/hooks/useInstantSearch";
+import { InstantSearchDropdown } from "./InstantSearchDropdown";
 
 const ALL_UNIVERSITIES = Object.keys(universities).filter(
   (key) => key !== "others",
@@ -44,6 +46,8 @@ interface SearchBarProps {
 
 export function SearchBar({ containerClassName }: SearchBarProps) {
   const [query, setQuery] = useState("");
+  const [rawQuery, setRawQuery] = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [selectedUniversities, setSelectedUniversities] = useState<string[]>(
     () => [],
   );
@@ -62,7 +66,9 @@ export function SearchBar({ containerClassName }: SearchBarProps) {
       setSelectedUniversities(ALL_UNIVERSITIES);
     }
   }, []);
+
   const router = useRouter();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setSuggestions(pickRandom(allSuggestions, 5));
@@ -71,6 +77,25 @@ export function SearchBar({ containerClassName }: SearchBarProps) {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(selectedUniversities));
   }, [selectedUniversities]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const { results, isLoading } = useInstantSearch(rawQuery);
+
+  const showDropdown =
+    dropdownOpen && rawQuery.trim().length >= 2 && (isLoading || results.length > 0);
 
   const handleUniversityChange = useCallback((uni: string) => {
     if (uni == "all") {
@@ -93,8 +118,14 @@ export function SearchBar({ containerClassName }: SearchBarProps) {
       return;
     }
 
+    setDropdownOpen(false);
     router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
   };
+
+  const handleRawQueryChange = useCallback((q: string) => {
+    setRawQuery(q);
+    setDropdownOpen(true);
+  }, []);
 
   return (
     <div className="flex flex-col gap-3 w-full">
@@ -105,16 +136,28 @@ export function SearchBar({ containerClassName }: SearchBarProps) {
           ))}
         </Suggestions>
       )}
-      <SearchBarUI
-        query={query}
-        setQuery={setQuery}
-        disabled={false}
-        onSubmit={handleSearch}
-        containerClassName={containerClassName}
-        selectedUniversities={selectedUniversities}
-        onUniversityChange={handleUniversityChange}
-        onUniversityClear={handleUniversityClear}
-      />
+
+      <div ref={containerRef} className="relative mx-auto w-full max-w-3xl">
+        <SearchBarUI
+          query={query}
+          setQuery={setQuery}
+          disabled={false}
+          onSubmit={handleSearch}
+          containerClassName={containerClassName}
+          selectedUniversities={selectedUniversities}
+          onUniversityChange={handleUniversityChange}
+          onUniversityClear={handleUniversityClear}
+          onRawQueryChange={handleRawQueryChange}
+        />
+        {showDropdown && (
+          <InstantSearchDropdown
+            query={rawQuery}
+            results={results}
+            isLoading={isLoading}
+            onDismiss={() => setDropdownOpen(false)}
+          />
+        )}
+      </div>
     </div>
   );
 }

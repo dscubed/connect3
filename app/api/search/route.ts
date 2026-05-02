@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+import { createServiceClient } from "@/lib/supabase/service";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
@@ -55,12 +56,92 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    const allResults = (await Promise.all(searches)).flat();
+    // Search instagram_posts via Supabase FTS
+    const instagramSearch = async (): Promise<VectorResult[]> => {
+      try {
+        const supabase = createServiceClient();
+        const { data, error } = await supabase
+          .from("instagram_posts")
+          .select("id, caption")
+          .textSearch("caption", q, { type: "websearch", config: "english" })
+          .order("timestamp", { ascending: false })
+          .limit(20);
 
-    // Sort by score descending and take top 10
-    allResults.sort((a, b) => b.score - a.score);
+        if (error || !data) return [];
 
-    return NextResponse.json({ results: allResults });
+        return data.map((post) => ({
+          id: post.id,
+          type: "instagram_post",
+          score: 0.5,
+          content: post.caption ?? "",
+        }));
+      } catch (err) {
+        console.error("[search] Error searching instagram_posts:", err);
+        return [];
+      }
+    };
+
+    // Name-match boost: profiles and events whose names contain the query
+    // get a high score so they always rank above semantic-only matches.
+    const nameMatchSearch = async (): Promise<VectorResult[]> => {
+      try {
+        const supabase = createServiceClient();
+        const term = q.trim().toLowerCase();
+
+        const [{ data: profiles }, { data: events }] = await Promise.all([
+          supabase
+            .from("profiles")
+            .select("id, account_type, first_name")
+            .ilike("first_name", `%${term}%`)
+            .limit(10),
+          supabase
+            .from("events")
+            .select("id, name")
+            .ilike("name", `%${term}%`)
+            .eq("status", "published")
+            .limit(10),
+        ]);
+
+        const profileResults: VectorResult[] = (profiles ?? []).map((p) => ({
+          id: p.id,
+          type: p.account_type === "organisation" ? "organisation" : "user",
+          // Exact prefix match scores higher than a mid-string match
+          score: p.first_name?.toLowerCase().startsWith(term) ? 1.0 : 0.92,
+          content: p.first_name ?? "",
+        }));
+
+        const eventResults: VectorResult[] = (events ?? []).map((e) => ({
+          id: e.id,
+          type: "events",
+          score: e.name?.toLowerCase().startsWith(term) ? 1.0 : 0.92,
+          content: e.name ?? "",
+        }));
+
+        return [...profileResults, ...eventResults];
+      } catch (err) {
+        console.error("[search] Error in name-match search:", err);
+        return [];
+      }
+    };
+
+    const allResults = (
+      await Promise.all([...searches, instagramSearch(), nameMatchSearch()])
+    ).flat();
+
+    // Deduplicate by id — keep whichever occurrence has the highest score
+    const deduped = new Map<string, VectorResult>();
+    for (const r of allResults) {
+      const existing = deduped.get(r.id);
+      if (!existing || r.score > existing.score) {
+        deduped.set(r.id, r);
+      }
+    }
+
+    const finalResults = [...deduped.values()].sort(
+      (a, b) => b.score - a.score,
+    );
+
+    return NextResponse.json({ results: finalResults });
   } catch (err) {
     console.error("[search] Unexpected error:", err);
     return NextResponse.json(

@@ -1,6 +1,6 @@
 // import { SearchProgress } from "@/components/search/types";
 
-export type EntityType = "user" | "organisation" | "events";
+export type EntityType = "user" | "organisation" | "events" | "instagram_post";
 
 // Planner Node
 

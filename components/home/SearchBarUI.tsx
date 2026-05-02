@@ -14,6 +14,7 @@ interface SearchBarUIProps {
   selectedUniversities?: string[];
   onUniversityChange?: (uni: string) => void;
   onUniversityClear?: () => void;
+  onRawQueryChange?: (q: string) => void;
 }
 
 const DEFAULT_CONTAINER_CLASSNAME =
@@ -29,6 +30,7 @@ const SearchBarUIComponent: React.FC<SearchBarUIProps> = ({
   selectedUniversities = [],
   onUniversityChange = () => {},
   onUniversityClear = () => {},
+  onRawQueryChange,
 }) => {
   const {
     query: localQuery,
@@ -63,7 +65,10 @@ const SearchBarUIComponent: React.FC<SearchBarUIProps> = ({
             )}
             placeholder="Ask me anything..."
             value={localQuery}
-            onChange={(e) => handleChange(e.target.value)}
+            onChange={(e) => {
+                handleChange(e.target.value);
+                onRawQueryChange?.(e.target.value);
+              }}
             disabled={disabled || isLoading}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
