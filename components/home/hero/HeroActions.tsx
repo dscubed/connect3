@@ -18,7 +18,7 @@ export function HeroActions({ className }: HeroActionsProps) {
       <div className={className}>
         <button
           onClick={() => router.push("/auth/sign-up")}
-          className="px-6 py-2.5 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold rounded-2xl shadow-md shadow-violet-200/60 transition-colors"
+          className="px-6 py-2.5 bg-foreground/80 hover:bg-foreground text-white text-sm font-semibold rounded-2xl shadow-md shadow-violet-200/60 transition-colors"
         >
           Sign Up
         </button>
@@ -26,7 +26,7 @@ export function HeroActions({ className }: HeroActionsProps) {
           onClick={() => setSearchOpen(true)}
           className="flex items-center gap-2 px-6 py-2.5 bg-white/80 hover:bg-white border border-white/60 text-sm font-semibold text-secondary-foreground rounded-2xl shadow-md backdrop-blur-sm transition-colors"
         >
-          <Search className="w-4 h-4 text-violet-500" />
+          <Search className="w-4 h-4 text-foreground/80" />
           Search
         </button>
       </div>
