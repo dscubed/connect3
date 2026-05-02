@@ -96,8 +96,7 @@ export function SearchBar({ containerClassName }: SearchBarProps) {
 
   const showDropdown =
     dropdownOpen &&
-    rawQuery.trim().length >= 2 &&
-    (isLoading || results.length > 0);
+    rawQuery.trim().length >= 2;
 
   const handleUniversityChange = useCallback((uni: string) => {
     if (uni == "all") {
