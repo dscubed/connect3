@@ -134,7 +134,7 @@ export function HomeGreeting() {
       </div>
 
       {/* Search */}
-      <div className="rounded-3xl bg-gradient-to-br from-[#ede4ff] to-[#d9c9ff] px-6 py-8 flex flex-col items-center gap-4">
+      <div className="rounded-3xl bg-gradient-to-br from-[#ede4ff] to-[#d9c9ff] px-6 py-16 flex flex-col items-center gap-4">
         <h2 className="font-fredoka text-2xl md:text-3xl font-semibold text-[#5c2fa0] tracking-[0.01em] text-center">
           Discover more on campus
         </h2>
