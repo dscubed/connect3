@@ -1,12 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { HomeHeroStickers } from "./HomeHeroStickers";
 import { HomeHeroFloatingCard } from "./HomeHeroFloatingCard";
 import { PurplePath, BluePath, RedPath } from "./illustrations/HeroPaths";
-import { SearchInput } from "../../search/SearchInput";
+import { HeroActions } from "./HeroActions";
 import { cn } from "@/lib/utils";
 import { HomeHeroBackground } from "./HomeHeroBackground";
 import {
@@ -20,26 +19,11 @@ import {
 } from "./HeroShared";
 
 export function HomeHero() {
-  const router = useRouter();
-  const handleSearch = (query: string) => {
-    router.push(`/search?q=${encodeURIComponent(query.trim())}`);
-  };
-
   return (
-    <section className="relative isolate w-full h-full min-h-[360px] overflow-hidden hidden sm:block rounded-b-[4rem] shadow-lg">
-      <HomeHeroBackground />
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Text content */}
-        <div className="relative z-[80] flex h-full flex-col justify-center px-4 md:px-6 lg:px-8 xl:px-12 py-5 md:py-8 lg:py-12 md:max-w-[48%]">
-          <div className="flex flex-col gap-2 md:gap-3 lg:gap-4 text-center sm:text-start items-center sm:items-start">
-            <HeroHeading />
-            <SearchInput
-              className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg"
-              onSubmit={handleSearch}
-            />
-          </div>
-        </div>
-
+    <section className="relative isolate w-full h-full min-h-[360px] hidden sm:block rounded-b-[4rem] shadow-lg">
+      {/* Clipped decorative layer — keeps bg + stickers within the hero bounds */}
+      <div className="absolute inset-0 overflow-hidden rounded-b-[4rem]">
+        <HomeHeroBackground />
         <div className="absolute inset-0 z-[100] pointer-events-none">
           <HomeHeroStickers />
 
@@ -158,6 +142,14 @@ export function HomeHero() {
               </motion.div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Text content */}
+      <div className="relative z-[110] flex h-full flex-col justify-center px-4 md:px-6 lg:px-8 xl:px-12 py-5 md:py-8 lg:py-12 md:max-w-[48%]">
+        <div className="flex flex-col gap-2 md:gap-3 lg:gap-4 text-center sm:text-start items-center sm:items-start">
+          <HeroHeading />
+          <HeroActions className="flex flex-wrap gap-3 mt-1" />
         </div>
       </div>
     </section>

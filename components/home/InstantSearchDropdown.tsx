@@ -30,7 +30,7 @@ export function InstantSearchDropdown({
 
   if (!isLoading && !hasResults) {
     return (
-      <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-white rounded-2xl border border-gray-100 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.15)] overflow-hidden">
+      <div className="absolute top-full left-0 right-0 z-[200] bg-white rounded-2xl border border-gray-100 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.15)] overflow-hidden">
         <div className="px-4 py-5 text-center text-sm text-muted-foreground">
           No results for{" "}
           <span className="font-medium text-foreground">
@@ -107,7 +107,7 @@ export function InstantSearchDropdown({
   };
 
   return (
-    <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-white rounded-2xl border border-gray-100 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.15)] overflow-hidden">
+    <div className="absolute top-full left-0 right-0 z-[200] bg-white rounded-2xl border border-gray-100 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.15)] overflow-hidden">
       {isLoading && !hasResults && (
         <div className="px-4 py-5 text-center text-sm text-muted-foreground">
           Searching…

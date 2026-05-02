@@ -1,12 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { HomeHeroStickers } from "./HomeHeroStickers";
 import { HomeHeroFloatingCard } from "./HomeHeroFloatingCard";
 import { PurplePath, BluePath, RedPath } from "./illustrations/HeroPaths";
-import { SearchInput } from "../../search/SearchInput";
+import { HeroActions } from "./HeroActions";
 import { HomeHeroBackground } from "./HomeHeroBackground";
 import {
   LogoBadge,
@@ -19,11 +18,6 @@ import {
 } from "./HeroShared";
 
 export function MobileHomeHero() {
-  const router = useRouter();
-  const handleSearch = (query: string) => {
-    router.push(`/search?q=${encodeURIComponent(query.trim())}`);
-  };
-
   return (
     <section className="relative isolate w-full h-[calc(100dvh-3.5rem)] overflow-hidden sm:h-full rounded-b-[4rem]">
       <HomeHeroBackground />
@@ -60,10 +54,10 @@ export function MobileHomeHero() {
           </motion.div>
         </div>
 
-        {/* Heading + search */}
+        {/* Heading + actions */}
         <div className="flex flex-col gap-2 items-center text-center">
           <HeroHeading />
-          <SearchInput className="w-full max-w-xs" onSubmit={handleSearch} />
+          <HeroActions className="flex flex-wrap gap-3 mt-1 justify-center" />
         </div>
 
         {/* Bottom cards row */}
