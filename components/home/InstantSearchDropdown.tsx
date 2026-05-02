@@ -32,24 +32,49 @@ export function InstantSearchDropdown({
     return (
       <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-white rounded-2xl border border-gray-100 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.15)] overflow-hidden">
         <div className="px-4 py-5 text-center text-sm text-muted-foreground">
-          No results for <span className="font-medium text-foreground">&quot;{query}&quot;</span>
+          No results for{" "}
+          <span className="font-medium text-foreground">
+            &quot;{query}&quot;
+          </span>
         </div>
         <div className="flex items-center justify-between gap-2 px-3 py-2.5 border-t border-gray-50">
           <button
-            onClick={() => { onDismiss(); router.push(`/search?q=${encodeURIComponent(query.trim())}`); }}
+            onClick={() => {
+              onDismiss();
+              router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+            }}
             className="flex-1 text-left text-xs text-muted-foreground hover:text-foreground transition-colors truncate"
           >
             Search for{" "}
-            <span className="font-medium text-foreground">&quot;{query}&quot;</span>{" "}→
+            <span className="font-medium text-foreground">
+              &quot;{query}&quot;
+            </span>{" "}
+            →
           </button>
         </div>
       </div>
     );
   }
 
+  const TICKETING_URL =
+    process.env.NEXT_PUBLIC_TICKETING_URL ?? "https://tix.connect3.app";
+
   const handleResultClick = (result: InstantSearchResult) => {
     onDismiss();
-    router.push(`/search?q=${encodeURIComponent(result.name)}`);
+    if (result.result_type === "event") {
+      window.open(
+        `${TICKETING_URL}/events/${result.id}`,
+        "_blank",
+        "noopener,noreferrer",
+      );
+    } else if (
+      result.result_type === "user" ||
+      result.result_type === "organisation"
+    ) {
+      router.push(`/profile/${result.id}`);
+    } else if (result.result_type === "instagram_post") {
+      router.push(`/search?q=${encodeURIComponent(result.name)}`);
+    }
   };
 
   const handleSearchAll = () => {
